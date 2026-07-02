@@ -1136,7 +1136,7 @@ wheels = [
 
 [[package]]
 name = "vmware-aria"
-version = "1.6.1"
+version = "1.7.1"
 source = { editable = "." }
 dependencies = [
     { name = "httpx" },
