@@ -116,7 +116,10 @@ def list_resources(
     # Hard ceiling on rows fetched: the explicit limit if given, otherwise the
     # safety cap. name_filter is applied client-side, so we keep paging until
     # the unfiltered totalCount is exhausted rather than stopping at `limit`
-    # filtered matches.
+    # filtered matches. NOTE: GET /resources exposes a server-side `name` regex
+    # param, but we keep the client-side case-insensitive substring match for
+    # predictable semantics; this is correct, just walks the full unfiltered
+    # collection (bounded by the safety cap) rather than pushing the filter down.
     fetch_cap = _RESOURCES_MAX_TOTAL if limit is None else min(limit, _RESOURCES_MAX_TOTAL)
     filter_lc = name_filter.lower() if name_filter else None
 
@@ -292,6 +295,72 @@ def get_resource_metrics(
 
 
 # ---------------------------------------------------------------------------
+# latest_stats_bulk  (shared: replaces per-resource stats/latest N+1 loops)
+# ---------------------------------------------------------------------------
+
+
+def latest_stats_bulk(
+    client: AriaClient,
+    resource_ids: list[str],
+    stat_keys: list[str],
+) -> dict[str, dict[str, float | None]]:
+    """Fetch the latest value of each statKey for many resources in ONE request.
+
+    Replaces the per-resource ``GET /resources/{id}/stats/latest`` loop (an N+1
+    that fired one HTTP round-trip per VM — up to ~100 for a listing) with a
+    single bulk ``POST /resources/stats/query`` taking a ``resourceId`` array.
+    ``rollUpType=LATEST`` over a short trailing window preserves the "latest
+    value" semantics of the per-resource endpoint it replaces.
+
+    Args:
+        client: Authenticated Aria Operations API client.
+        resource_ids: Resource UUIDs to query (empty entries are dropped).
+        stat_keys: Metric wire keys to fetch, e.g. ["System Attributes|total_alarms"].
+
+    Returns:
+        Dict of resource_id -> {stat_key: latest value}. The value is None when a
+        metric has no data for that resource; resources absent from the response
+        are omitted (callers default missing entries themselves).
+    """
+    ids = [rid for rid in resource_ids if rid]
+    if not ids or not stat_keys:
+        return {}
+
+    import time as _time
+
+    end_ms = int(_time.time() * 1000)
+    # Same StatQuery shape as get_resource_metrics (statKey string array +
+    # intervalQuantifier), but with a resourceId ARRAY for the bulk endpoint.
+    payload: dict[str, Any] = {
+        "resourceId": ids,
+        "statKey": list(stat_keys),
+        "begin": end_ms - 3_600_000,  # 1 hour trailing window
+        "end": end_ms,
+        "rollUpType": "LATEST",
+        "intervalType": "MINUTES",
+        "intervalQuantifier": 5,
+    }
+
+    # Pure query endpoint — idempotent, safe to retry transient gateway errors.
+    data = client.post("/resources/stats/query", json_data=payload, retries=1)
+
+    result: dict[str, dict[str, float | None]] = {}
+    # Response nests per-resource stats under values[].{resourceId, stat-list.stat[]}
+    # (hyphenated wire key; some renderings show statList — parse both).
+    for value_entry in data.get("values", []):
+        rid = value_entry.get("resourceId", "")
+        stat_container = value_entry.get("stat-list") or value_entry.get("statList") or {}
+        per_resource = result.setdefault(rid, {})
+        for stat in stat_container.get("stat", []):
+            key = stat.get("statKey", {}).get("key", "")
+            if not key:
+                continue
+            points = stat.get("data", [])
+            per_resource[key] = points[-1] if points else None
+    return result
+
+
+# ---------------------------------------------------------------------------
 # get_resource_health
 # ---------------------------------------------------------------------------
 
@@ -359,25 +428,25 @@ def get_top_consumers(
     # POST /resources/query/topn does not exist in the suite-api (2026-06-08
     # user report). The real endpoint is GET /resources/stats/topn, which has
     # no resourceKind parameter — resolve candidate resource IDs first, then
-    # rank them.
-    listing = client.get(
-        "/resources", params={"resourceKind": resource_kind, "pageSize": 200}
-    )
-    candidates = listing.get("resourceList", [])
+    # rank them. The candidate collection is walked across ALL pages via
+    # list_resources: the old single pageSize=200 page silently dropped every
+    # candidate beyond the first 200, so in a large environment the true top
+    # consumer could fall outside the ranked set entirely.
+    candidates = list_resources(client, resource_kind=resource_kind)
     if not candidates:
         return []
     if len(candidates) > _TOPN_MAX_RESOURCE_IDS:
         _log.warning(
-            "Truncating topn candidate list from %d to %d resources "
-            "(URL length limit — HTTP 414 risk)",
+            "topn candidate set has %d resources but GET /resources/stats/topn "
+            "can rank at most %d resourceIds per call (URL length — HTTP 414 "
+            "risk); ranking the first %d only. Narrow with a more specific "
+            "resource_kind to rank the full set.",
             len(candidates),
+            _TOPN_MAX_RESOURCE_IDS,
             _TOPN_MAX_RESOURCE_IDS,
         )
         candidates = candidates[:_TOPN_MAX_RESOURCE_IDS]
-    names = {
-        r.get("identifier", ""): sanitize(r.get("resourceKey", {}).get("name", ""))
-        for r in candidates
-    }
+    names = {c["id"]: c["name"] for c in candidates if c["id"]}
 
     import time as _time
 

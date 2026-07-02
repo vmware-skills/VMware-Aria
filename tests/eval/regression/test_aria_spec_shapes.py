@@ -427,14 +427,17 @@ def test_rightsizing_keys_have_no_demand_segment() -> None:
     from vmware_aria.ops.capacity import list_rightsizing_recommendations
 
     client = _client()
-    client.get.return_value = {"values": []}
+    # Rightsizing now uses the bulk POST /resources/stats/query (was a per-VM
+    # GET /resources/{id}/stats/latest N+1); the statKey array is unchanged.
+    client.post.return_value = {"values": []}
     list_rightsizing_recommendations(client, resource_id="vm-1")
 
-    keys = client.get.call_args.kwargs["params"]["statKey"]
-    assert keys == [
+    body = client.post.call_args.kwargs["json_data"]
+    assert body["statKey"] == [
         "OnlineCapacityAnalytics|cpu|recommendedSize",
         "OnlineCapacityAnalytics|mem|recommendedSize",
     ]
+    assert body["resourceId"] == ["vm-1"]
 
 
 # ── H9: anomaly metric wire key is total_alarms ────────────────────────
@@ -444,12 +447,14 @@ def test_anomaly_stat_key_is_total_alarms() -> None:
     from vmware_aria.ops.anomaly import list_anomalies
 
     client = _client()
-    client.get.return_value = {"values": []}
+    # list_anomalies now uses the bulk POST /resources/stats/query (was a
+    # per-VM GET /resources/{id}/stats/latest N+1); the statKey is unchanged.
+    client.post.return_value = {"values": []}
     results = list_anomalies(client, resource_id="res-1")
 
-    assert client.get.call_args.kwargs["params"]["statKey"] == (
+    assert client.post.call_args.kwargs["json_data"]["statKey"] == [
         "System Attributes|total_alarms"
-    ), "'System Attributes|anomaly' does not exist — wire key is total_alarms"
+    ], "'System Attributes|anomaly' does not exist — wire key is total_alarms"
     assert results[0]["metric_key"] == "System Attributes|total_alarms"
 
 

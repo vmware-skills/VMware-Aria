@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING, Any
 
 from vmware_policy import sanitize
 
+from vmware_aria.ops._paging import iter_collection
+
 if TYPE_CHECKING:
     from vmware_aria.connection import AriaClient
     from vmware_aria.notify.audit import AuditLogger
@@ -333,11 +335,11 @@ def list_alert_definitions(
         List of alert definition summary dicts.
     """
     limit = max(1, min(limit, 500))
-    data = client.get("/alertdefinitions", params={"pageSize": limit})
-    items = data.get("alertDefinitions", [])
 
+    # Walk every page so a name_filter match beyond the first page is not
+    # invisible; stop once `limit` results have been collected.
     results = []
-    for d in items:
+    for d in iter_collection(client, "/alertdefinitions", "alertDefinitions"):
         name = sanitize(d.get("name", ""), max_len=300)
         if name_filter and name_filter.lower() not in name.lower():
             continue
@@ -364,6 +366,8 @@ def list_alert_definitions(
                 "sub_type": sanitize(d.get("subType", "")),
             }
         )
+        if len(results) >= limit:
+            break
     return results
 
 
@@ -578,16 +582,17 @@ def list_symptom_definitions(
         threshold_type, and criticality.
     """
     limit = max(1, min(limit, 500))
-    params: dict = {"pageSize": limit}
+    extra_params: dict = {}
     if resource_kind:
         # Query param is `resourceKind`, NOT `resourceKindKey` (spec audit).
-        params["resourceKind"] = resource_kind
+        extra_params["resourceKind"] = resource_kind
 
-    data = client.get("/symptomdefinitions", params=params)
-    items = data.get("symptomDefinitions", [])
-
+    # Walk every page so a name_filter match beyond the first page is not
+    # invisible; stop once `limit` results have been collected.
     results = []
-    for s in items:
+    for s in iter_collection(
+        client, "/symptomdefinitions", "symptomDefinitions", extra_params=extra_params
+    ):
         name = sanitize(s.get("name", ""), max_len=300)
         if name_filter and name_filter.lower() not in name.lower():
             continue
@@ -601,4 +606,6 @@ def list_symptom_definitions(
             "threshold_type": sanitize(condition.get("thresholdType", ""), max_len=100),
             "criticality": sanitize(s.get("state", {}).get("severity", ""), max_len=50),
         })
+        if len(results) >= limit:
+            break
     return results

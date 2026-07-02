@@ -12,9 +12,11 @@ All API responses pass through sanitize() to strip control characters.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from vmware_policy import sanitize
+
+from vmware_aria.ops._paging import iter_collection
 
 if TYPE_CHECKING:
     from vmware_aria.connection import AriaClient
@@ -44,11 +46,11 @@ def list_report_definitions(
         List of report definition dicts with id, name, description, subject_type.
     """
     limit = max(1, min(limit, 500))
-    data = client.get("/reportdefinitions", params={"pageSize": limit})
-    items = data.get("reportDefinitions", [])
 
+    # Walk every page so a name_filter match beyond the first page is not
+    # invisible; stop once `limit` results have been collected.
     results = []
-    for d in items:
+    for d in iter_collection(client, "/reportdefinitions", "reportDefinitions"):
         name = sanitize(d.get("name", ""), max_len=300)
         if name_filter and name_filter.lower() not in name.lower():
             continue
@@ -61,6 +63,8 @@ def list_report_definitions(
             "subject_type": sanitize(", ".join(d.get("subject") or []), max_len=200),
             "owner": sanitize(d.get("owner", ""), max_len=200),
         })
+        if len(results) >= limit:
+            break
     return results
 
 
@@ -148,6 +152,8 @@ def list_reports(
     client: AriaClient,
     definition_id: str | None = None,
     limit: int = 50,
+    status: str | None = None,
+    name_filter: str | None = None,
 ) -> list[dict]:
     """List generated reports, optionally filtered by report definition.
 
@@ -155,18 +161,38 @@ def list_reports(
         client: Authenticated Aria Operations API client.
         definition_id: Optional report definition UUID to filter results.
         limit: Maximum number of reports to return (1–200).
+        status: Optional server-side status filter (e.g. COMPLETED, RUNNING).
+        name_filter: Optional server-side report name filter.
 
     Returns:
         List of report summary dicts with id, name, status, completion_time_ms.
     """
     limit = max(1, min(limit, 200))
-    # GET /reports supports name/resourceId/status/subject only — there is no
-    # reportDefinitionId or pageSize query param (2026-06-08 user report +
-    # spec audit); filter and limit client-side instead.
-    data = client.get("/reports")
+    # GET /reports supports server-side name/resourceId/status/subject filters
+    # but has NO reportDefinitionId or pageSize query param (2026-06-08 user
+    # report + spec audit) — push status/name down where available, then filter
+    # definition_id and apply the limit client-side.
+    params: dict[str, Any] = {}
+    if status:
+        params["status"] = status
+    if name_filter:
+        params["name"] = name_filter
+    data = client.get("/reports", params=params) if params else client.get("/reports")
     items = data.get("reports", [])
     if definition_id:
         items = [r for r in items if r.get("reportDefinitionId") == definition_id]
+    total = len(items)
+    if total > limit:
+        # Honest truncation: GET /reports can't page server-side, so a large
+        # instance can return more matches than `limit`. Tell the caller how
+        # many were dropped rather than silently returning a partial slice.
+        _log.warning(
+            "list_reports returning %d of %d matching reports (limit=%d); raise "
+            "limit or narrow with status/name/definition_id to see the rest.",
+            limit,
+            total,
+            limit,
+        )
     items = items[:limit]
 
     # The wire field is `completionTime` — generationTime/finishTime

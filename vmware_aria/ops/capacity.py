@@ -17,6 +17,8 @@ from typing import TYPE_CHECKING
 
 from vmware_policy import sanitize
 
+from vmware_aria.ops.resources import latest_stats_bulk
+
 if TYPE_CHECKING:
     from vmware_aria.connection import AriaClient
 
@@ -231,17 +233,22 @@ def list_rightsizing_recommendations(
         "OnlineCapacityAnalytics|mem|recommendedSize",
     ]
 
+    # One bulk POST /resources/stats/query for every target — replaces the old
+    # per-VM GET /resources/{id}/stats/latest loop (an N+1 firing up to one
+    # round-trip per VM, ~101 for a full listing).
+    stats_by_resource = latest_stats_bulk(client, list(targets), stat_keys)
+
     results = []
     for rid, name in targets.items():
         if not rid:
             continue
-        values = _latest_stats(client, rid, stat_keys)
+        values = stats_by_resource.get(rid, {})
         results.append(
             {
                 "id": sanitize(rid),
                 "name": name,
-                "recommended_cpu": values["OnlineCapacityAnalytics|cpu|recommendedSize"],
-                "recommended_memory": values["OnlineCapacityAnalytics|mem|recommendedSize"],
+                "recommended_cpu": values.get("OnlineCapacityAnalytics|cpu|recommendedSize"),
+                "recommended_memory": values.get("OnlineCapacityAnalytics|mem|recommendedSize"),
             }
         )
     return results

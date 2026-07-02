@@ -285,7 +285,7 @@ def test_capacity_uses_stats_latest_not_invented_endpoints() -> None:
             assert key.startswith("OnlineCapacityAnalytics|")
 
 
-def test_anomaly_uses_stats_latest_not_invented_endpoints() -> None:
+def test_anomaly_uses_bulk_stats_query_not_invented_endpoints() -> None:
     from vmware_aria.ops.anomaly import get_resource_riskbadge, list_anomalies
 
     client = _client()
@@ -296,10 +296,16 @@ def test_anomaly_uses_stats_latest_not_invented_endpoints() -> None:
     assert client.get.call_args.args[0] == "/resources/res-1"  # no /badge/risk
     assert result["risk_score"] == 25
 
-    client.get.reset_mock()
-    client.get.return_value = {"values": []}
+    # list_anomalies now issues ONE bulk POST /resources/stats/query with a
+    # resourceId array (was a per-VM GET /resources/{id}/stats/latest N+1).
+    client.post.reset_mock()
+    client.post.return_value = {"values": []}
     list_anomalies(client, resource_id="res-1")
-    assert client.get.call_args.args[0] == "/resources/res-1/stats/latest"
+    path, = client.post.call_args.args
+    assert path == "/resources/stats/query"
+    body = client.post.call_args.kwargs["json_data"]
+    assert body["resourceId"] == ["res-1"]
+    assert body["statKey"] == ["System Attributes|total_alarms"]
 
 
 # ── #6 follow-up: raw HTTP errors become teaching AriaApiError, not tracebacks

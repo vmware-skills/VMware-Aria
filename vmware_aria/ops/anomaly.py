@@ -18,6 +18,8 @@ from typing import TYPE_CHECKING
 
 from vmware_policy import sanitize
 
+from vmware_aria.ops.resources import latest_stats_bulk
+
 if TYPE_CHECKING:
     from vmware_aria.connection import AriaClient
 
@@ -71,20 +73,16 @@ def list_anomalies(
             for r in listing.get("resourceList", [])
         }
 
+    # One bulk POST /resources/stats/query for every target — replaces the old
+    # per-VM GET /resources/{id}/stats/latest loop (an N+1 firing up to one
+    # round-trip per VM, ~101 for a full listing).
+    stats_by_resource = latest_stats_bulk(client, list(targets), [_TOTAL_ANOMALIES_STAT_KEY])
+
     results = []
     for rid, name in targets.items():
         if not rid:
             continue
-        data = client.get(
-            f"/resources/{rid}/stats/latest", params={"statKey": _TOTAL_ANOMALIES_STAT_KEY}
-        )
-        count = None
-        for value_entry in data.get("values", []):
-            stat_container = value_entry.get("stat-list") or value_entry.get("statList") or {}
-            for stat in stat_container.get("stat", []):
-                points = stat.get("data", [])
-                if points:
-                    count = points[-1]
+        count = stats_by_resource.get(rid, {}).get(_TOTAL_ANOMALIES_STAT_KEY)
         results.append(
             {
                 "resource_id": sanitize(rid),

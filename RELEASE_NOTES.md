@@ -1,3 +1,15 @@
+## v1.7.2 (2026-07-02) — anomaly/rightsizing N+1 + complete pagination
+
+### Fixed
+- **Per-resource stats N+1.** `list_anomalies` and `list_rightsizing_recommendations`
+  issued one `GET /resources/{id}/stats/latest` per VM (up to ~101 sequential
+  round-trips). Both now use a single bulk `POST /resources/stats/query`.
+- **Silent first-page truncation.** `get_top_consumers` ranked only a single page
+  of candidates (so the true top consumer could be missed), and alert/symptom/
+  report definition listings applied name filters after one capped page. These now
+  paginate the candidate set. Output shape unchanged; the top-N HTTP-414 guard
+  (100 ids) is retained with a clear warning to narrow the query.
+
 ## v1.7.1 (2026-07-02) — family version alignment
 
 No code changes. Version bump to stay aligned with the v1.7.1 family release
