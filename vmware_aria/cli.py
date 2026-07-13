@@ -15,7 +15,6 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from vmware_aria.config import CONFIG_DIR
 from vmware_aria.notify.audit import AuditLogger
 
 _audit = AuditLogger()
