@@ -9,9 +9,9 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
-from vmware_policy import sanitize
+from vmware_policy import paginated, sanitize
 
-from vmware_aria.ops._paging import iter_collection
+from vmware_aria.ops._paging import CollectionTotal, iter_collection
 
 if TYPE_CHECKING:
     from vmware_aria.connection import AriaClient
@@ -55,7 +55,7 @@ def list_alerts(
     criticality: str | None = None,
     resource_id: str | None = None,
     limit: int = 100,
-) -> list[dict]:
+) -> dict:
     """List alerts from Aria Operations.
 
     Args:
@@ -66,7 +66,9 @@ def list_alerts(
         limit: Maximum number of alerts to return (1–500).
 
     Returns:
-        List of alert summary dicts.
+        Result envelope with alert summary dicts under ``items``. POST
+        /alerts/query reports no collection size, so ``total`` is None and a
+        full page is flagged truncated.
     """
     if criticality and criticality.upper() not in _VALID_CRITICALITIES:
         raise ValueError(
@@ -95,7 +97,7 @@ def list_alerts(
     # the display name is `alertDefinitionName`. There is no alertName,
     # criticality, resourceName, or info field — resolve the resource name
     # via get_resource(resourceId) when needed.
-    return [
+    rows = [
         {
             "id": sanitize(a.get("alertId", "")),
             "name": sanitize(a.get("alertDefinitionName", ""), max_len=300),
@@ -111,6 +113,7 @@ def list_alerts(
         }
         for a in items
     ]
+    return paginated(rows, limit=limit)
 
 
 # ---------------------------------------------------------------------------
@@ -323,7 +326,7 @@ def list_alert_definitions(
     client: AriaClient,
     name_filter: str | None = None,
     limit: int = 100,
-) -> list[dict]:
+) -> dict:
     """List alert definitions (templates that generate alerts).
 
     Args:
@@ -332,14 +335,20 @@ def list_alert_definitions(
         limit: Maximum number of definitions to return (1–500).
 
     Returns:
-        List of alert definition summary dicts.
+        Result envelope with alert definition summary dicts under ``items``.
+        ``total`` carries the collection's ``pageInfo.totalCount``, except under
+        a name_filter — that filter is applied client-side, so the server's
+        count describes the unfiltered collection, not this result.
     """
     limit = max(1, min(limit, 500))
 
     # Walk every page so a name_filter match beyond the first page is not
     # invisible; stop once `limit` results have been collected.
+    collection_total = CollectionTotal()
     results = []
-    for d in iter_collection(client, "/alertdefinitions", "alertDefinitions"):
+    for d in iter_collection(
+        client, "/alertdefinitions", "alertDefinitions", total_sink=collection_total
+    ):
         name = sanitize(d.get("name", ""), max_len=300)
         if name_filter and name_filter.lower() not in name.lower():
             continue
@@ -368,7 +377,9 @@ def list_alert_definitions(
         )
         if len(results) >= limit:
             break
-    return results
+    return paginated(
+        results, limit=limit, total=None if name_filter else collection_total.value
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -568,7 +579,7 @@ def list_symptom_definitions(
     name_filter: str | None = None,
     resource_kind: str | None = None,
     limit: int = 100,
-) -> list[dict]:
+) -> dict:
     """List symptom definitions — use these IDs when creating alert definitions.
 
     Args:
@@ -578,8 +589,11 @@ def list_symptom_definitions(
         limit: Maximum number of symptom definitions to return (1–500).
 
     Returns:
-        List of symptom definition dicts with id, name, resource_kind, metric_key,
-        threshold_type, and criticality.
+        Result envelope with symptom definition dicts under ``items``, each with
+        id, name, resource_kind, metric_key, threshold_type, and criticality.
+        ``total`` carries ``pageInfo.totalCount`` (which already reflects the
+        server-side resource_kind filter), except under a client-side
+        name_filter.
     """
     limit = max(1, min(limit, 500))
     extra_params: dict = {}
@@ -589,9 +603,14 @@ def list_symptom_definitions(
 
     # Walk every page so a name_filter match beyond the first page is not
     # invisible; stop once `limit` results have been collected.
+    collection_total = CollectionTotal()
     results = []
     for s in iter_collection(
-        client, "/symptomdefinitions", "symptomDefinitions", extra_params=extra_params
+        client,
+        "/symptomdefinitions",
+        "symptomDefinitions",
+        extra_params=extra_params,
+        total_sink=collection_total,
     ):
         name = sanitize(s.get("name", ""), max_len=300)
         if name_filter and name_filter.lower() not in name.lower():
@@ -608,4 +627,6 @@ def list_symptom_definitions(
         })
         if len(results) >= limit:
             break
-    return results
+    return paginated(
+        results, limit=limit, total=None if name_filter else collection_total.value
+    )

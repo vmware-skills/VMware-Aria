@@ -94,7 +94,7 @@ def test_top_consumers_uses_get_stats_topn() -> None:
             ]
         },
     ]
-    results = get_top_consumers(client, metric_key="cpu|usage_average", top_n=5)
+    results = get_top_consumers(client, metric_key="cpu|usage_average", top_n=5)["items"]
 
     topn_call = client.get.call_args_list[1]
     assert topn_call.args[0] == "/resources/stats/topn"
@@ -215,7 +215,7 @@ def test_list_reports_filters_definition_client_side() -> None:
             {"id": "r2", "reportDefinitionId": "other"},
         ]
     }
-    results = list_reports(client, definition_id="want")
+    results = list_reports(client, definition_id="want")["items"]
 
     params = client.get.call_args.kwargs.get("params") or {}
     assert "reportDefinitionId" not in params  # not a valid API param

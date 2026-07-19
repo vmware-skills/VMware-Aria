@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
-from vmware_policy import sanitize
+from vmware_policy import paginated, sanitize
 
 if TYPE_CHECKING:
     from vmware_aria.connection import AriaClient
@@ -87,7 +87,7 @@ def list_resources(
     resource_kind: str = "VirtualMachine",
     limit: int | None = None,
     name_filter: str | None = None,
-) -> list[dict]:
+) -> dict:
     """List resources of a given kind from Aria Operations, following pagination.
 
     GET /resources caps a single response at ~1000 resources (the suite-api
@@ -108,7 +108,11 @@ def list_resources(
         name_filter: Optional substring filter on resource name (case-insensitive).
 
     Returns:
-        List of resource summary dicts with id, name, kind, and health badge.
+        Result envelope with resource summary dicts under ``items``, each with
+        id, name, kind, and health badge. ``total`` carries the kind's
+        ``pageInfo.totalCount``, except under a name_filter — that filter is
+        applied client-side, so the server's count describes the unfiltered
+        collection, not this result.
     """
     if resource_kind not in _VALID_RESOURCE_KINDS:
         _log.warning("Unknown resource_kind '%s', proceeding anyway", resource_kind)
@@ -126,6 +130,7 @@ def list_resources(
     results: list[dict] = []
     fetched = 0
     page = 0
+    total_count: int | None = None
     while True:
         params: dict[str, Any] = {
             "resourceKind": resource_kind,
@@ -134,6 +139,9 @@ def list_resources(
         }
         data = client.get("/resources", params=params)
         items = data.get("resourceList", []) or []
+        # Read the count before consuming the page: an explicit `limit` returns
+        # from inside the item loop below, and the envelope still needs it.
+        total_count = (data.get("pageInfo") or {}).get("totalCount", total_count)
         if not items:
             break
 
@@ -144,10 +152,10 @@ def list_resources(
                 continue
             results.append(summary)
             if limit is not None and len(results) >= limit:
-                return results
+                return paginated(
+                    results, limit=limit, total=None if filter_lc else total_count
+                )
 
-        page_info = data.get("pageInfo") or {}
-        total_count = page_info.get("totalCount")
         # Termination: a short page (fewer than a full pageSize) means the last
         # page; an exhausted totalCount means we've seen everything. Either
         # without the other is enough — guard both for servers that omit pageInfo.
@@ -167,7 +175,7 @@ def list_resources(
             break
         page += 1
 
-    return results
+    return paginated(results, limit=limit, total=None if filter_lc else total_count)
 
 
 # ---------------------------------------------------------------------------
@@ -411,7 +419,7 @@ def get_top_consumers(
     metric_key: str = "cpu|usage_average",
     resource_kind: str = "VirtualMachine",
     top_n: int = 10,
-) -> list[dict]:
+) -> dict:
     """Query the resources with highest consumption of a given metric.
 
     Args:
@@ -421,7 +429,10 @@ def get_top_consumers(
         top_n: Number of top consumers to return (max 50).
 
     Returns:
-        List of dicts with resource id, name, and latest metric value, sorted descending.
+        Result envelope with dicts under ``items`` carrying resource id, name,
+        and latest metric value, sorted descending. A ranking is a top-N slice
+        of an unbounded set, so ``total`` is None and a full page is flagged
+        truncated.
     """
     top_n = max(1, min(top_n, 50))
 
@@ -432,9 +443,9 @@ def get_top_consumers(
     # list_resources: the old single pageSize=200 page silently dropped every
     # candidate beyond the first 200, so in a large environment the true top
     # consumer could fall outside the ranked set entirely.
-    candidates = list_resources(client, resource_kind=resource_kind)
+    candidates = list_resources(client, resource_kind=resource_kind)["items"]
     if not candidates:
-        return []
+        return paginated([], limit=top_n)
     if len(candidates) > _TOPN_MAX_RESOURCE_IDS:
         _log.warning(
             "topn candidate set has %d resources but GET /resources/stats/topn "
@@ -483,4 +494,4 @@ def get_top_consumers(
                 "value": latest_value,
             }
         )
-    return results[:top_n]
+    return paginated(results[:top_n], limit=top_n)

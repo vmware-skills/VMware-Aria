@@ -16,7 +16,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from vmware_policy import sanitize
+from vmware_policy import paginated, sanitize
 
 from vmware_aria.ops.resources import latest_stats_bulk
 
@@ -40,7 +40,7 @@ def list_anomalies(
     client: AriaClient,
     resource_id: str | None = None,
     limit: int = 50,
-) -> list[dict]:
+) -> dict:
     """Report per-resource anomaly counts from the System Attributes metric.
 
     The public suite-api does not expose the UI's anomalous-metrics list;
@@ -57,17 +57,24 @@ def list_anomalies(
         limit: Maximum number of resources to scan when listing (1–100).
 
     Returns:
-        List of dicts with resource id, name, and anomaly_count (latest value;
-        None when the metric has no data for the resource).
+        Result envelope with dicts under ``items`` carrying resource id, name,
+        and anomaly_count (latest value; None when the metric has no data for
+        the resource), plus ``scanned`` — how many VMs were examined. Because
+        only flagged VMs are returned, a short result does not by itself mean
+        the scan was complete; ``total`` therefore carries the environment's VM
+        ``pageInfo.totalCount`` when the scan stopped short of it, so a capped
+        scan reads as truncated rather than as the whole picture.
     """
     limit = max(1, min(limit, 100))
 
+    vm_total: int | None = None
     if resource_id:
         targets = {resource_id: ""}
     else:
         listing = client.get(
             "/resources", params={"resourceKind": "VirtualMachine", "pageSize": limit}
         )
+        vm_total = (listing.get("pageInfo") or {}).get("totalCount")
         targets = {
             r.get("identifier", ""): sanitize(r.get("resourceKey", {}).get("name", ""))
             for r in listing.get("resourceList", [])
@@ -92,11 +99,22 @@ def list_anomalies(
             }
         )
 
+    scanned = len(targets)
     if resource_id:
-        return results
+        return paginated(results, scanned=scanned)
     flagged = [r for r in results if r["anomaly_count"]]
     flagged.sort(key=lambda r: r["anomaly_count"] or 0, reverse=True)
-    return flagged
+    # A VM count larger than the scan means unexamined VMs remain, and any of
+    # them could be anomalous — report it so the result is not read as final.
+    # When the scan covered every VM there is nothing left behind, so no total
+    # is claimed and the (possibly short) flagged list stands as complete.
+    unscanned_remain = vm_total is not None and vm_total > scanned
+    return paginated(
+        flagged,
+        limit=limit,
+        total=vm_total if unscanned_remain else None,
+        scanned=scanned,
+    )
 
 
 # ---------------------------------------------------------------------------

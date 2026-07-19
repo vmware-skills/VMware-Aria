@@ -195,7 +195,7 @@ def resource_list(
     from vmware_aria.ops.resources import list_resources
 
     client, _ = _get_connection(target, config)
-    items = list_resources(client, resource_kind=kind, limit=limit, name_filter=name_filter)
+    items = list_resources(client, resource_kind=kind, limit=limit, name_filter=name_filter)["items"]
 
     table = Table(title=f"Resources ({kind})", show_lines=False)
     table.add_column("Name", style="bold")
@@ -277,7 +277,7 @@ def resource_top(
     from vmware_aria.ops.resources import get_top_consumers
 
     client, _ = _get_connection(target, config)
-    items = get_top_consumers(client, metric_key=metric, resource_kind=kind, top_n=top_n)
+    items = get_top_consumers(client, metric_key=metric, resource_kind=kind, top_n=top_n)["items"]
 
     table = Table(title=f"Top {top_n} by {metric}", show_lines=False)
     table.add_column("Rank", justify="right")
@@ -309,7 +309,7 @@ def alert_list(
     from vmware_aria.ops.alerts import list_alerts
 
     client, _ = _get_connection(target, config)
-    items = list_alerts(client, active_only=active_only, criticality=criticality, limit=limit)
+    items = list_alerts(client, active_only=active_only, criticality=criticality, limit=limit)["items"]
 
     table = Table(title="Aria Operations Alerts", show_lines=False)
     table.add_column("ID")
@@ -392,7 +392,7 @@ def alert_definitions(
     from vmware_aria.ops.alerts import list_alert_definitions
 
     client, _ = _get_connection(target, config)
-    items = list_alert_definitions(client, name_filter=name_filter, limit=limit)
+    items = list_alert_definitions(client, name_filter=name_filter, limit=limit)["items"]
 
     table = Table(title="Alert Definitions", show_lines=False)
     table.add_column("Name", style="bold")
@@ -467,7 +467,7 @@ def capacity_rightsizing(
     from vmware_aria.ops.capacity import list_rightsizing_recommendations
 
     client, _ = _get_connection(target, config)
-    items = list_rightsizing_recommendations(client, resource_id=resource_id, limit=limit)
+    items = list_rightsizing_recommendations(client, resource_id=resource_id, limit=limit)["items"]
 
     table = Table(title="Rightsizing (OnlineCapacityAnalytics recommendedSize)", show_lines=False)
     table.add_column("VM Name", style="bold")
@@ -501,7 +501,7 @@ def anomaly_list(
     from vmware_aria.ops.anomaly import list_anomalies
 
     client, _ = _get_connection(target, config)
-    items = list_anomalies(client, resource_id=resource_id, limit=limit)
+    items = list_anomalies(client, resource_id=resource_id, limit=limit)["items"]
 
     table = Table(title="Anomaly Counts (System Attributes|total_alarms)", show_lines=False)
     table.add_column("Resource", style="bold")
@@ -563,7 +563,7 @@ def health_collectors(
     from vmware_aria.ops.health import list_collector_groups
 
     client, _ = _get_connection(target, config)
-    groups = list_collector_groups(client)
+    groups = list_collector_groups(client)["items"]
 
     # Collector model has no collectorType/hostname; state is UP/DOWN and
     # `local` marks the built-in collector on the Aria node.
@@ -597,7 +597,7 @@ def report_definitions(
     from vmware_aria.ops.reports import list_report_definitions
 
     client, _ = _get_connection(target, config)
-    items = list_report_definitions(client, name_filter=name_filter, limit=limit)
+    items = list_report_definitions(client, name_filter=name_filter, limit=limit)["items"]
 
     table = Table(title="Report Definitions", show_lines=False)
     table.add_column("Name", style="bold")
@@ -644,7 +644,7 @@ def report_list(
     from vmware_aria.ops.reports import list_reports
 
     client, _ = _get_connection(target, config)
-    items = list_reports(client, definition_id=definition_id, limit=limit)
+    items = list_reports(client, definition_id=definition_id, limit=limit)["items"]
 
     table = Table(title="Generated Reports", show_lines=False)
     table.add_column("ID")

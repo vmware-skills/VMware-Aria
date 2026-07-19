@@ -71,7 +71,7 @@ def test_list_anomalies_issues_one_bulk_stats_query_not_per_vm_loop() -> None:
         resource_ids=[f"vm-{i}" for i in range(50)],
         stat_key_values={_TOTAL_ANOMALIES_STAT_KEY: 3.0},
     )
-    results = list_anomalies(client, limit=50)
+    results = list_anomalies(client, limit=50)["items"]
 
     assert len(client._bulk_stats_posts()) == 1, (
         "list_anomalies must fan out via exactly ONE bulk POST /resources/stats/query"
@@ -97,7 +97,7 @@ def test_list_rightsizing_issues_one_bulk_stats_query_not_per_vm_loop() -> None:
             "OnlineCapacityAnalytics|mem|recommendedSize": 4096.0,
         },
     )
-    results = list_rightsizing_recommendations(client, limit=50)
+    results = list_rightsizing_recommendations(client, limit=50)["items"]
 
     assert len(client._bulk_stats_posts()) == 1, (
         "list_rightsizing_recommendations must fan out via exactly ONE bulk "

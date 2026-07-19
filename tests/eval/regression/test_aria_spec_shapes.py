@@ -38,7 +38,7 @@ def test_list_resources_handles_empty_status_states() -> None:
             }
         ]
     }
-    results = list_resources(client)
+    results = list_resources(client)["items"]
     assert results[0]["status"] == ""
 
 
@@ -62,7 +62,7 @@ def test_list_resources_parses_badges_array() -> None:
             }
         ]
     }
-    results = list_resources(client)
+    results = list_resources(client)["items"]
     assert results[0]["health_color"] == "GREEN"
     assert results[0]["health_score"] == 100.0
 
@@ -102,12 +102,12 @@ def test_report_definition_subject_is_string_array() -> None:
             }
         ]
     }
-    results = list_report_definitions(client)
+    results = list_report_definitions(client)["items"]
     assert results[0]["subject_type"] == "VirtualMachine, HostSystem"
 
     # subject absent / null must not blow up either
     client.get.return_value = {"reportDefinitions": [{"id": "rd-2", "name": "X", "subject": None}]}
-    assert list_report_definitions(client)[0]["subject_type"] == ""
+    assert list_report_definitions(client)["items"][0]["subject_type"] == ""
 
 
 # ── C3: Authorization header literal is vRealizeOpsToken ───────────────
@@ -192,7 +192,7 @@ def test_top_consumers_data_nests_under_stat() -> None:
             ]
         },
     ]
-    results = get_top_consumers(client, metric_key="cpu|usage_average", top_n=5)
+    results = get_top_consumers(client, metric_key="cpu|usage_average", top_n=5)["items"]
     assert results[0]["value"] == 42.0, (
         "resourceStats[] elements are {resourceId, stat: {statKey, timestamps, "
         "data}} — data nests under stat"
@@ -241,7 +241,7 @@ def test_list_alerts_uses_alert_level_and_definition_name() -> None:
 
     client = _client()
     client.post.return_value = {"alerts": [dict(_ALERT_WIRE)]}
-    results = list_alerts(client)
+    results = list_alerts(client)["items"]
     a = results[0]
     assert a["criticality"] == "CRITICAL", "criticality comes from alertLevel"
     assert a["name"] == "VM CPU contention", "name comes from alertDefinitionName"
@@ -328,7 +328,7 @@ def test_alert_definitions_criticality_from_states() -> None:
             }
         ]
     }
-    results = list_alert_definitions(client)
+    results = list_alert_definitions(client)["items"]
     d = results[0]
     assert d["criticality"] == "CRITICAL", "criticality = max severity across states[]"
     assert "enabled" not in d, "AlertDefinition has no top-level active field"
@@ -349,7 +349,7 @@ def test_alert_definitions_top_level_impact_also_read() -> None:
             }
         ]
     }
-    assert list_alert_definitions(client)[0]["impact"] == "HEALTH"
+    assert list_alert_definitions(client)["items"][0]["impact"] == "HEALTH"
 
 
 # ── M1 + H5: create_alert_definition body and response shape ───────────
@@ -450,7 +450,7 @@ def test_anomaly_stat_key_is_total_alarms() -> None:
     # list_anomalies now uses the bulk POST /resources/stats/query (was a
     # per-VM GET /resources/{id}/stats/latest N+1); the statKey is unchanged.
     client.post.return_value = {"values": []}
-    results = list_anomalies(client, resource_id="res-1")
+    results = list_anomalies(client, resource_id="res-1")["items"]
 
     assert client.post.call_args.kwargs["json_data"]["statKey"] == [
         "System Attributes|total_alarms"
@@ -489,7 +489,7 @@ def test_collector_groups_parse_collector_id_array() -> None:
         raise AssertionError(f"unexpected GET {path}")
 
     client.get.side_effect = get_side
-    groups = list_collector_groups(client)
+    groups = list_collector_groups(client)["items"]
 
     g = groups[0]
     assert g["collector_count"] == 2, "collector_count = len(collectorId)"
@@ -516,7 +516,7 @@ def test_collector_groups_survive_collectors_failure() -> None:
         raise ConnectionError("boom")
 
     client.get.side_effect = get_side
-    groups = list_collector_groups(client)
+    groups = list_collector_groups(client)["items"]
     assert groups[0]["collector_count"] == 1
     assert groups[0]["collectors"][0]["id"] == "7"
 
@@ -531,7 +531,7 @@ def test_reports_expose_completion_time() -> None:
     client.get.return_value = {
         "reports": [{"id": "r1", "name": "n", "status": "COMPLETED", "completionTime": 1234}]
     }
-    r = list_reports(client)[0]
+    r = list_reports(client)["items"][0]
     assert r["completion_time_ms"] == 1234
     assert "generation_time_ms" not in r and "finish_time_ms" not in r
 
@@ -549,7 +549,7 @@ def test_list_reports_no_page_size_param_and_client_side_limit() -> None:
     client.get.return_value = {
         "reports": [{"id": f"r{i}", "reportDefinitionId": "want"} for i in range(5)]
     }
-    results = list_reports(client, definition_id="want", limit=2)
+    results = list_reports(client, definition_id="want", limit=2)["items"]
 
     params = client.get.call_args.kwargs.get("params") or {}
     assert "pageSize" not in params, "GET /reports has no pageSize param"
@@ -629,7 +629,7 @@ def test_list_resources_follows_pagination_across_pages() -> None:
         {"resourceList": page1, "pageInfo": {"totalCount": 1300, "page": 1, "pageSize": 1000}},
     ]
 
-    results = list_resources(client)
+    results = list_resources(client)["items"]
 
     assert len(results) == 1300, "all pages must be accumulated, not just the first"
     # Successive pages requested with an incrementing 0-based `page` param.
@@ -649,7 +649,7 @@ def test_list_resources_terminates_on_totalcount_even_with_full_last_page() -> N
         {"resourceList": page1, "pageInfo": {"totalCount": 2000, "page": 1, "pageSize": 1000}},
     ]
 
-    results = list_resources(client)
+    results = list_resources(client)["items"]
 
     assert len(results) == 2000
     assert client.get.call_count == 2, "must not request a 3rd page past totalCount"
@@ -665,7 +665,7 @@ def test_list_resources_explicit_limit_stops_early() -> None:
         "pageInfo": {"totalCount": 5000, "page": 0, "pageSize": 1000},
     }
 
-    results = list_resources(client, limit=50)
+    results = list_resources(client, limit=50)["items"]
 
     assert len(results) == 50
     assert client.get.call_count == 1, "limit satisfied on page 0 — no second fetch"

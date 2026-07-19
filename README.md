@@ -14,19 +14,21 @@ AI-assisted monitoring and capacity planning for VMware Aria Operations (vRealiz
 
 ## Overview
 
-`vmware-aria` exposes 27 MCP tools for interacting with Aria Operations through natural language AI agents (Claude Code, Cursor, Goose, etc.):
+`vmware-aria` exposes 28 MCP tools for interacting with Aria Operations through natural language AI agents (Claude Code, Cursor, Goose, etc.):
 
 | Category | Tools | Type |
 |----------|-------|------|
 | **Resources** | list, get, metrics, health badge, top consumers | Read-only (5) |
-| **Alerts** | list, get, acknowledge, cancel, definitions | Read + 2 Write (5) |
+| **Alerts** | list, get, investigate (alert→resource), acknowledge, cancel, definitions | Read + 2 Write (6) |
 | **Alert Definitions** | symptom definitions, create, enable/disable, delete | Read + 3 Write (4) |
 | **Capacity** | overview, remaining, time-remaining, rightsizing | Read-only (4) |
 | **Reports** | definitions, generate, list, get, delete | Read + 2 Write (5) |
 | **Anomaly** | list anomalies, risk badge | Read-only (2) |
 | **Health** | platform health, collector groups | Read-only (2) |
 
-**Total**: 27 tools — 20 read-only, 7 write
+**Total**: 28 tools — 21 read-only, 7 write
+
+- **Read-only mode** — one env var strips every write tool from the MCP registry; ideal for audits, PoCs, and untrusted/local models — see [Read-Only Mode](#read-only-mode)
 
 ## Quick Start
 
@@ -54,6 +56,31 @@ chmod 600 ~/.vmware-aria/.env
 # Verify setup
 vmware-aria doctor
 ```
+
+## Read-Only Mode
+
+A prompt instruction is advisory — a model can ignore it. Read-only mode is structural: set `VMWARE_READ_ONLY=true` and all 7 write tools (alert acknowledge/cancel, alert definition create/enable-disable/delete, report generate/delete) are removed from the MCP registry at startup. `list_tools()` never offers them, so the model cannot call what it cannot see. Off by default, and fail-closed: if the mode is requested but cannot be guaranteed, the server refuses to start.
+
+Three ways to enable:
+
+```json
+{
+  "mcpServers": {
+    "vmware-aria": {
+      "command": "vmware-aria",
+      "args": ["mcp"],
+      "env": { "VMWARE_READ_ONLY": "true" }
+    }
+  }
+}
+```
+
+- Per-skill override: `VMWARE_ARIA_READ_ONLY=true` (takes precedence over the family-wide `VMWARE_READ_ONLY`)
+- Config alternative: `read_only: true` in `~/.vmware-aria/config.yaml`
+
+Precedence: per-skill env → family env → config → off. Startup logs list exactly which tools were withheld.
+
+Running with local or small models? See [`skills/vmware-aria/references/agent-guardrails.md`](skills/vmware-aria/references/agent-guardrails.md).
 
 ## CLI Examples
 
@@ -145,12 +172,14 @@ VMs / Hosts / Clusters / Alerts / Capacity
 
 | Skill | Scope | Tools | Install |
 |-------|-------|:-----:|---------|
-| **[vmware-aiops](https://github.com/zw008/VMware-AIops)** ⭐ entry point | VM lifecycle, deployment, guest ops, clusters | 31 | `uv tool install vmware-aiops` |
-| **[vmware-monitor](https://github.com/zw008/VMware-Monitor)** | Read-only monitoring, alarms, events, VM info | 8 | `uv tool install vmware-monitor` |
-| **[vmware-nsx](https://github.com/zw008/VMware-NSX)** | NSX networking: segments, gateways, NAT, IPAM | 31 | `uv tool install vmware-nsx-mgmt` |
-| **[vmware-nsx-security](https://github.com/zw008/VMware-NSX-Security)** | DFW microsegmentation, security groups, Traceflow | 20 | `uv tool install vmware-nsx-security` |
+| **[vmware-aiops](https://github.com/zw008/VMware-AIops)** ⭐ entry point | VM lifecycle, deployment, guest ops, clusters | 49 | `uv tool install vmware-aiops` |
+| **[vmware-monitor](https://github.com/zw008/VMware-Monitor)** | Read-only monitoring, alarms, events, VM info | 27 | `uv tool install vmware-monitor` |
+| **[vmware-nsx](https://github.com/zw008/VMware-NSX)** | NSX networking: segments, gateways, NAT, IPAM | 33 | `uv tool install vmware-nsx-mgmt` |
+| **[vmware-nsx-security](https://github.com/zw008/VMware-NSX-Security)** | DFW microsegmentation, security groups, Traceflow | 21 | `uv tool install vmware-nsx-security` |
+| **[vmware-avi](https://github.com/zw008/VMware-AVI)** | AVI / NSX ALB load balancing, AKO K8s operations | 28 | `uv tool install vmware-avi` |
 | **[vmware-storage](https://github.com/zw008/VMware-Storage)** | Datastores, iSCSI, vSAN | 11 | `uv tool install vmware-storage` |
 | **[vmware-vks](https://github.com/zw008/VMware-VKS)** | Tanzu Namespaces, TKC cluster lifecycle | 20 | `uv tool install vmware-vks` |
+| **[vmware-harden](https://github.com/zw008/VMware-Harden)** | Compliance baselines, drift detection | 6 | `uv tool install vmware-harden` |
 
 ## Security
 

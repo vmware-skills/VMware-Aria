@@ -24,8 +24,13 @@ def list_resources(
     limit: int = 100,
     name_filter: Optional[str] = None,
     target: Optional[str] = None,
-) -> list[dict]:
+) -> dict:
     """[READ] List resources in Aria Operations filtered by kind.
+
+    Returns a result envelope: the rows under `items`, plus `returned`,
+    `limit`, `total` (null when the API reports no collection size),
+    `truncated` and `hint`. Check `truncated` before describing this as the
+    complete set — when it is true, more rows exist beyond this page.
 
     Args:
         resource_kind: Resource kind to list. Common values: VirtualMachine,
@@ -42,7 +47,7 @@ def list_resources(
 
         return _list(server._get_connection(target), resource_kind=resource_kind, limit=limit, name_filter=name_filter)
     except Exception as e:
-        return [{"error": server._safe_error(e, "list_resources"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}]
+        return {"error": server._safe_error(e, "list_resources"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -128,8 +133,13 @@ def get_top_consumers(
     resource_kind: str = "VirtualMachine",
     top_n: int = 10,
     target: Optional[str] = None,
-) -> list[dict]:
+) -> dict:
     """[READ] Query resources with highest consumption of a given metric.
+
+    Returns a result envelope: the rows under `items`, plus `returned`,
+    `limit`, `total` (null when the API reports no collection size),
+    `truncated` and `hint`. Check `truncated` before describing this as the
+    complete set — when it is true, more rows exist beyond this page.
 
     Args:
         metric_key: The metric to rank by. Common values: cpu|usage_average,
@@ -145,4 +155,4 @@ def get_top_consumers(
 
         return _get_top(server._get_connection(target), metric_key=metric_key, resource_kind=resource_kind, top_n=top_n)
     except Exception as e:
-        return [{"error": server._safe_error(e, "get_top_consumers"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}]
+        return {"error": server._safe_error(e, "get_top_consumers"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}

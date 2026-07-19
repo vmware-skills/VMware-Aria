@@ -16,7 +16,7 @@ def list_anomalies(
     resource_id: Optional[str] = None,
     limit: int = 50,
     target: Optional[str] = None,
-) -> list[dict]:
+) -> dict:
     """[READ] Report per-resource anomaly counts (System Attributes|total_alarms metric).
 
     The public suite-api does not expose the UI's anomalous-metrics list; this
@@ -26,6 +26,11 @@ def list_anomalies(
     returns those with non-zero counts, sorted descending. For root cause,
     follow up with list_alerts(resource_id=...). One stats call per VM when
     listing — keep limit modest.
+
+    Returns a result envelope: the flagged rows under `items`, plus
+    `returned`, `limit`, `total`, `truncated`, `hint`, and `scanned` (how
+    many VMs were examined). A short list is not proof the environment is
+    clean — check `truncated`, which is true whenever VMs went unscanned.
 
     Args:
         resource_id: Optional resource UUID to scope to a single resource.
@@ -39,7 +44,7 @@ def list_anomalies(
 
         return _list(server._get_connection(target), resource_id=resource_id, limit=limit)
     except Exception as e:
-        return [{"error": server._safe_error(e, "list_anomalies"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}]
+        return {"error": server._safe_error(e, "list_anomalies"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})

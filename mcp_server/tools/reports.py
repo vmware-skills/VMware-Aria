@@ -20,8 +20,13 @@ def list_report_definitions(
     name_filter: Optional[str] = None,
     limit: int = 100,
     target: Optional[str] = None,
-) -> list[dict]:
+) -> dict:
     """[READ] List available report definition templates in Aria Operations.
+
+    Returns a result envelope: the rows under `items`, plus `returned`,
+    `limit`, `total` (null when the API reports no collection size),
+    `truncated` and `hint`. Check `truncated` before describing this as the
+    complete set — when it is true, more rows exist beyond this page.
 
     Args:
         name_filter: Optional substring to filter by report name (case-insensitive).
@@ -35,7 +40,7 @@ def list_report_definitions(
 
         return _list(server._get_connection(target), name_filter=name_filter, limit=limit)
     except Exception as e:
-        return [{"error": server._safe_error(e, "list_report_definitions"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}]
+        return {"error": server._safe_error(e, "list_report_definitions"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
 
 
 @mcp.tool(annotations={"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": True})
@@ -80,8 +85,13 @@ def list_reports(
     definition_id: Optional[str] = None,
     limit: int = 50,
     target: Optional[str] = None,
-) -> list[dict]:
+) -> dict:
     """[READ] List generated reports, optionally filtered by report definition.
+
+    Returns a result envelope: the rows under `items`, plus `returned`,
+    `limit`, `total` (null when the API reports no collection size),
+    `truncated` and `hint`. Check `truncated` before describing this as the
+    complete set — when it is true, more rows exist beyond this page.
 
     Args:
         definition_id: Optional report definition UUID to filter results.
@@ -95,7 +105,7 @@ def list_reports(
 
         return _list(server._get_connection(target), definition_id=definition_id, limit=limit)
     except Exception as e:
-        return [{"error": server._safe_error(e, "list_reports"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}]
+        return {"error": server._safe_error(e, "list_reports"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})

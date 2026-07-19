@@ -8,19 +8,21 @@
 
 ## 概述
 
-`vmware-aria` 提供 27 个 MCP 工具，支持通过自然语言 AI Agent（Claude Code、Cursor、Goose 等）与 Aria Operations 交互：
+`vmware-aria` 提供 28 个 MCP 工具，支持通过自然语言 AI Agent（Claude Code、Cursor、Goose 等）与 Aria Operations 交互：
 
 | 类别 | 工具 | 类型 |
 |------|------|------|
 | **资源** | 列表、详情、指标、健康评分、高消耗排名 | 只读 (5) |
-| **告警** | 列表、详情、确认、取消、告警定义 | 读+2写 (5) |
+| **告警** | 列表、详情、溯源（告警→资源）、确认、取消、告警定义 | 读+2写 (6) |
 | **告警定义** | 症状定义、创建、启用/禁用、删除 | 读+3写 (4) |
 | **容量** | 概览、剩余容量、时间预测、虚拟机调整 | 只读 (4) |
 | **报表** | 模板、生成、列表、状态、删除 | 读+2写 (5) |
 | **异常** | 异常列表、风险评分 | 只读 (2) |
 | **健康** | 平台健康、采集器状态 | 只读 (2) |
 
-**共 27 个工具** — 20 只读、7 写操作
+**共 28 个工具** — 21 只读、7 写操作
+
+- **只读模式** —— 一个环境变量即可从 MCP 注册表移除全部写工具，适合审计、PoC 与本地小模型场景，详见[只读模式](#只读模式)
 
 ## 快速开始
 
@@ -48,6 +50,31 @@ chmod 600 ~/.vmware-aria/.env
 # 验证配置
 vmware-aria doctor
 ```
+
+## 只读模式
+
+提示词约束只是建议——模型可以无视它。只读模式是结构性的：设置 `VMWARE_READ_ONLY=true`，全部 7 个写工具（告警确认/取消、告警定义创建/启用禁用/删除、报表生成/删除）会在启动时从 MCP 注册表中移除。`list_tools()` 根本不会列出它们——模型看不见的工具就无法调用。默认关闭；且为 fail-closed 设计：请求了只读模式但无法保证时，服务器直接拒绝启动。
+
+三种启用方式：
+
+```json
+{
+  "mcpServers": {
+    "vmware-aria": {
+      "command": "vmware-aria",
+      "args": ["mcp"],
+      "env": { "VMWARE_READ_ONLY": "true" }
+    }
+  }
+}
+```
+
+- 按 skill 覆盖：`VMWARE_ARIA_READ_ONLY=true`（优先于家族级 `VMWARE_READ_ONLY`）
+- 配置文件方式：在 `~/.vmware-aria/config.yaml` 中设置 `read_only: true`
+
+优先级：按 skill 环境变量 → 家族环境变量 → 配置文件 → 默认关闭。启动日志会列出被移除工具的完整清单。
+
+使用本地/小模型运行？参见 [`skills/vmware-aria/references/agent-guardrails.md`](skills/vmware-aria/references/agent-guardrails.md)。
 
 ## 常用 CLI 示例
 
@@ -133,12 +160,14 @@ Token 为 6 小时滑动有效期（每次调用自动延长，官方规范行�
 
 | Skill | 功能范围 | 工具数 | 安装 |
 |-------|---------|:-----:|------|
-| **[vmware-aiops](https://github.com/zw008/VMware-AIops)** ⭐ 入口 | VM 生命周期、部署、Guest 操作、集群管理 | 31 | `uv tool install vmware-aiops` |
-| **[vmware-monitor](https://github.com/zw008/VMware-Monitor)** | 只读监控：告警、事件、VM 信息 | 8 | `uv tool install vmware-monitor` |
-| **[vmware-nsx](https://github.com/zw008/VMware-NSX)** | NSX 网络：Segment、网关、NAT、IPAM | 31 | `uv tool install vmware-nsx-mgmt` |
-| **[vmware-nsx-security](https://github.com/zw008/VMware-NSX-Security)** | DFW 微分段、安全组、Traceflow | 20 | `uv tool install vmware-nsx-security` |
+| **[vmware-aiops](https://github.com/zw008/VMware-AIops)** ⭐ 入口 | VM 生命周期、部署、Guest 操作、集群管理 | 49 | `uv tool install vmware-aiops` |
+| **[vmware-monitor](https://github.com/zw008/VMware-Monitor)** | 只读监控：告警、事件、VM 信息 | 27 | `uv tool install vmware-monitor` |
+| **[vmware-nsx](https://github.com/zw008/VMware-NSX)** | NSX 网络：Segment、网关、NAT、IPAM | 33 | `uv tool install vmware-nsx-mgmt` |
+| **[vmware-nsx-security](https://github.com/zw008/VMware-NSX-Security)** | DFW 微分段、安全组、Traceflow | 21 | `uv tool install vmware-nsx-security` |
+| **[vmware-avi](https://github.com/zw008/VMware-AVI)** | AVI / NSX ALB 负载均衡、AKO K8s 运维 | 28 | `uv tool install vmware-avi` |
 | **[vmware-storage](https://github.com/zw008/VMware-Storage)** | 数据存储、iSCSI、vSAN | 11 | `uv tool install vmware-storage` |
 | **[vmware-vks](https://github.com/zw008/VMware-VKS)** | Tanzu 命名空间、TKC 集群生命周期 | 20 | `uv tool install vmware-vks` |
+| **[vmware-harden](https://github.com/zw008/VMware-Harden)** | 合规基线、Drift 检测 | 6 | `uv tool install vmware-harden` |
 
 ## 安全性
 

@@ -14,9 +14,9 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
-from vmware_policy import sanitize
+from vmware_policy import paginated, sanitize
 
-from vmware_aria.ops._paging import iter_collection
+from vmware_aria.ops._paging import CollectionTotal, iter_collection
 
 if TYPE_CHECKING:
     from vmware_aria.connection import AriaClient
@@ -34,7 +34,7 @@ def list_report_definitions(
     client: AriaClient,
     name_filter: str | None = None,
     limit: int = 100,
-) -> list[dict]:
+) -> dict:
     """List available report definition templates.
 
     Args:
@@ -43,14 +43,21 @@ def list_report_definitions(
         limit: Maximum number of definitions to return (1–500).
 
     Returns:
-        List of report definition dicts with id, name, description, subject_type.
+        Result envelope with report definition dicts under ``items``, each with
+        id, name, description, subject_type. ``total`` carries the collection's
+        ``pageInfo.totalCount``, except under a name_filter — that filter is
+        applied client-side, so the server's count describes the unfiltered
+        collection, not this result.
     """
     limit = max(1, min(limit, 500))
 
     # Walk every page so a name_filter match beyond the first page is not
     # invisible; stop once `limit` results have been collected.
+    collection_total = CollectionTotal()
     results = []
-    for d in iter_collection(client, "/reportdefinitions", "reportDefinitions"):
+    for d in iter_collection(
+        client, "/reportdefinitions", "reportDefinitions", total_sink=collection_total
+    ):
         name = sanitize(d.get("name", ""), max_len=300)
         if name_filter and name_filter.lower() not in name.lower():
             continue
@@ -65,7 +72,9 @@ def list_report_definitions(
         })
         if len(results) >= limit:
             break
-    return results
+    return paginated(
+        results, limit=limit, total=None if name_filter else collection_total.value
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -154,7 +163,7 @@ def list_reports(
     limit: int = 50,
     status: str | None = None,
     name_filter: str | None = None,
-) -> list[dict]:
+) -> dict:
     """List generated reports, optionally filtered by report definition.
 
     Args:
@@ -165,7 +174,9 @@ def list_reports(
         name_filter: Optional server-side report name filter.
 
     Returns:
-        List of report summary dicts with id, name, status, completion_time_ms.
+        Result envelope with report summary dicts under ``items``, each with
+        id, name, status, completion_time_ms. GET /reports is unpaged, so the
+        whole matching set is in hand and ``total`` states it exactly.
     """
     limit = max(1, min(limit, 200))
     # GET /reports supports server-side name/resourceId/status/subject filters
@@ -197,7 +208,7 @@ def list_reports(
 
     # The wire field is `completionTime` — generationTime/finishTime
     # don't exist (2026-06-08 spec audit).
-    return [
+    rows = [
         {
             "id": sanitize(r.get("id", "")),
             "name": sanitize(r.get("name", ""), max_len=300),
@@ -208,6 +219,7 @@ def list_reports(
         }
         for r in items
     ]
+    return paginated(rows, limit=limit, total=total)
 
 
 # ---------------------------------------------------------------------------

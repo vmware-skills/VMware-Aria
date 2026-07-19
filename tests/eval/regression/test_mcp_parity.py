@@ -5,7 +5,7 @@ Two past incidents pinned here:
 * 踩坑 #34 — the MCP tool surface drifted from the documented tool table
   (CLI had clone/migrate/snapshot, MCP silently didn't). The parity tests
   assert the registered tool count and read/write split match SKILL.md's
-  declaration ("MCP Tools (27 — 20 read, 7 write)").
+  declaration ("MCP Tools (28 — 21 read, 7 write)").
 
 * v1.5.34 follow-up — the connection layer's teaching errors (AriaApiError:
   "404 → list the parent collection first", "503 → platform booting") were
@@ -18,8 +18,8 @@ import asyncio
 
 import pytest
 
-EXPECTED_TOOL_COUNT = 27
-EXPECTED_READ_COUNT = 20
+EXPECTED_TOOL_COUNT = 28
+EXPECTED_READ_COUNT = 21
 EXPECTED_WRITE_COUNT = 7
 
 

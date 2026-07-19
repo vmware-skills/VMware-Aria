@@ -76,7 +76,7 @@ def list_rightsizing_recommendations(
     resource_id: Optional[str] = None,
     limit: int = 50,
     target: Optional[str] = None,
-) -> list[dict]:
+) -> dict:
     """[READ] List VM rightsizing data — recommended CPU/memory size per VM.
 
     Reads the OnlineCapacityAnalytics recommendedSize metrics (the public
@@ -84,6 +84,11 @@ def list_rightsizing_recommendations(
     Compare against the VM's provisioned size to find over/under-provisioning.
     Values are None while capacity analytics warm up. One stats call per VM —
     keep limit modest.
+
+    Returns a result envelope: the rows under `items`, plus `returned`,
+    `limit`, `total` (null when the API reports no collection size),
+    `truncated` and `hint`. Check `truncated` before describing this as the
+    complete set — when it is true, more rows exist beyond this page.
 
     Args:
         resource_id: Optional VM resource UUID to scope to a single VM.
@@ -97,4 +102,4 @@ def list_rightsizing_recommendations(
 
         return _list(server._get_connection(target), resource_id=resource_id, limit=limit)
     except Exception as e:
-        return [{"error": server._safe_error(e, "list_rightsizing_recommendations"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}]
+        return {"error": server._safe_error(e, "list_rightsizing_recommendations"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}

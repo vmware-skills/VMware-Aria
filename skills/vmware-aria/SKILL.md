@@ -12,11 +12,11 @@ installer:
   package: vmware-aria
 allowed-tools:
   - Bash
-metadata: {"openclaw":{"requires":{"env":["VMWARE_ARIA_CONFIG"],"bins":["vmware-aria"],"config":["~/.vmware-aria/config.yaml","~/.vmware-aria/.env"]},"optional":{"env":["VMWARE_<TARGET>_PASSWORD"],"bins":["vmware-policy"]},"primaryEnv":"VMWARE_ARIA_CONFIG","homepage":"https://github.com/zw008/VMware-Aria","emoji":"📊","os":["macos","linux"]}}
+metadata: {"openclaw":{"requires":{"env":["VMWARE_ARIA_CONFIG"],"bins":["vmware-aria"],"config":["~/.vmware-aria/config.yaml","~/.vmware-aria/.env"]},"optional":{"env":["VMWARE_<TARGET>_PASSWORD","VMWARE_READ_ONLY","VMWARE_ARIA_READ_ONLY","VMWARE_AUDIT_APPROVED_BY"],"bins":["vmware-policy"]},"primaryEnv":"VMWARE_ARIA_CONFIG","homepage":"https://github.com/zw008/VMware-Aria","emoji":"📊","os":["macos","linux"]}}
 compatibility: >
   vmware-policy auto-installed as Python dependency (provides @vmware_tool decorator and audit logging). All write operations audited to ~/.vmware/audit.db.
   Credentials: Each Aria Operations target requires a per-target password env var in ~/.vmware-aria/.env following the pattern VMWARE_<TARGET_NAME_UPPER>_PASSWORD. Passwords are never logged or echoed.
-  Read-heavy: 20 of 27 tools are read-only. Write operations limited to alert acknowledge/cancel, alert definition management, and report management.
+  Read-heavy: 21 of 28 tools are read-only. Write operations limited to alert acknowledge/cancel, alert definition management, and report management.
   No webhooks, no outbound network calls, no guest operations. Local only: stdio MCP + Aria Operations REST API (HTTPS 443).
   Transitive dependencies: Only vmware-policy (audit/policy). No post-install scripts or background services.
 ---
@@ -25,7 +25,7 @@ compatibility: >
 
 > **Disclaimer**: This is a community-maintained open-source project and is **not affiliated with, endorsed by, or sponsored by VMware, Inc. or Broadcom Inc.** "VMware" and "Aria" are trademarks of Broadcom. Source code is publicly auditable at [github.com/zw008/VMware-Aria](https://github.com/zw008/VMware-Aria) under the MIT license.
 
-VMware Aria Operations (vRealize Operations) AI-assisted monitoring — 27 MCP tools for resources, alerts, alert definitions, capacity planning, anomaly detection, report automation, and platform health.
+VMware Aria Operations (vRealize Operations) AI-assisted monitoring — 28 MCP tools for resources, alerts, alert definitions, capacity planning, anomaly detection, report automation, and platform health.
 
 > Domain-focused monitoring skill for Aria Operations 8.x / vRealize Operations 8.x.
 > **Companion skills**: [vmware-nsx](https://github.com/zw008/VMware-NSX) (networking), [vmware-aiops](https://github.com/zw008/VMware-AIops) (VM lifecycle), [vmware-monitor](https://github.com/zw008/VMware-Monitor) (read-only vSphere), [vmware-avi](https://github.com/zw008/VMware-AVI) (AVI/ALB/AKO), [vmware-harden](https://github.com/zw008/VMware-Harden) (compliance baselines).
@@ -36,14 +36,14 @@ VMware Aria Operations (vRealize Operations) AI-assisted monitoring — 27 MCP t
 | Category | Tools | Count |
 |----------|-------|:-----:|
 | **Resources** | list, get details, metrics, health badge, top consumers | 5 |
-| **Alerts** | list, get details, acknowledge, cancel, list definitions | 5 |
+| **Alerts** | list, get details, investigate (alert→resource), acknowledge, cancel, list definitions | 6 |
 | **Alert Definitions** | list symptoms, create definition, enable/disable, delete | 4 |
 | **Capacity** | cluster overview, remaining capacity, time remaining, rightsizing | 4 |
 | **Reports** | list templates, generate, list, get status+download URL, delete | 5 |
 | **Anomaly** | list anomalies, risk badge | 2 |
 | **Health** | Aria platform health, collector group status | 2 |
 
-**Total**: 27 tools (20 read-only + 7 write)
+**Total**: 28 tools (21 read-only + 7 write)
 
 ## Quick Install
 
@@ -167,7 +167,7 @@ vmware-aria resource top --target lab
 | Cloud models (Claude, GPT-4o) | Either | MCP gives structured JSON I/O |
 | Automated pipelines | **MCP** | Type-safe parameters, structured output |
 
-## MCP Tools (27 — 20 read, 7 write)
+## MCP Tools (28 — 21 read, 7 write)
 
 All MCP tools accept an optional `target` parameter to select which Aria Operations instance to connect to.
 
@@ -180,6 +180,7 @@ All MCP tools accept an optional `target` parameter to select which Aria Operati
 | | `get_top_consumers` | Read | Rank resources by CPU, memory, disk, or network usage |
 | Alerts | `list_alerts` | Read | List active alerts with criticality and resource ID (resolve names via `get_resource`) |
 | | `get_alert` | Read | Get alert details with contributing symptoms (recommendations live on the alert definition) |
+| | `investigate_alert` | Read | Resolve an alert to its confirmed affected resource in one call — returns both UUIDs explicitly labelled plus the vmware-monitor handoff |
 | | `acknowledge_alert` | **Write** | Mark an alert as acknowledged (does not close it) |
 | | `cancel_alert` | **Write** | Cancel (dismiss) an active alert |
 | | `list_alert_definitions` | Read | List alert templates configured in Aria Ops |
@@ -201,7 +202,30 @@ All MCP tools accept an optional `target` parameter to select which Aria Operati
 | Health | `get_aria_health` | Read | Aria platform node status (ONLINE/OFFLINE) |
 | | `list_collector_groups` | Read | Collector agents status and connectivity |
 
-**Read/write split**: 20 read-only, 7 write. All write operations are audit-logged to `~/.vmware/audit.db` (via vmware-policy).
+**Read/write split**: 21 read-only, 7 write. All write operations are audit-logged to `~/.vmware/audit.db` (via vmware-policy).
+
+### List results are envelopes — read `truncated` before you summarise
+
+Every list-returning tool above (`list_resources`, `get_top_consumers`, `list_alerts`, `list_alert_definitions`, `list_symptom_definitions`, `list_rightsizing_recommendations`, `list_report_definitions`, `list_reports`, `list_anomalies`, `list_collector_groups`) returns an object, not a bare array:
+
+```json
+{
+  "items":     [ ... ],
+  "returned":  50,
+  "limit":     50,
+  "total":     213,
+  "truncated": true,
+  "hint":      "Showing 50 of 213. Raise limit or narrow the query with a filter to see the rest."
+}
+```
+
+Rules:
+
+- **Rows live under `items`.** An empty `items` with `returned: 0` means the query genuinely matched nothing — report that, do not report a tool failure.
+- **`truncated: true` means more rows exist.** Never describe such a result as the complete set; either say it is a partial view or re-query with a higher `limit` or a narrower filter, as `hint` instructs.
+- **`truncated: false` means the answer is complete** — safe to summarise as the whole picture.
+- **`total: null` means the API reported no collection size**, so a page filled exactly to the limit is flagged truncated conservatively. It may in fact be complete; a follow-up query with a larger limit settles it.
+- **`list_anomalies` also carries `scanned`** — how many VMs were examined. It returns only VMs with a non-zero anomaly count, so a short list is not evidence that the environment is clean; check `truncated`.
 
 ## CLI Quick Reference
 
@@ -295,7 +319,7 @@ Variable names follow the pattern `VMWARE_ARIA_<TARGET_NAME_UPPER>_PASSWORD` whe
 
 ## Safety
 
-- **Read-heavy**: 20 of 27 tools are read-only
+- **Read-heavy**: 21 of 28 tools are read-only
 - **Audit logging**: Write operations logged to `~/.vmware/audit.db` (SQLite WAL, via vmware-policy) with timestamp, user, target, operation, and result
 - **Token expiry handling**: vRealizeOpsToken re-acquired automatically 60 seconds before expiry (6-hour sliding validity, extended on each call)
 - **Prompt injection defense**: API text values sanitized via `_sanitize()` — strips control characters, truncates to 500 chars

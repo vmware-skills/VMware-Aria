@@ -8,6 +8,13 @@ targets:
     port: 443
     verify_ssl: true
     auth_source: LOCAL   # LOCAL | LDAP | AD
+    # Policy scopes its rules by this value, so an unlabelled target matches
+    # none of them. Today a write against an undeclared target still runs and
+    # logs a warning; the next major release refuses it — declaring it now
+    # makes that upgrade a no-op. Once labelled production, irreversible work
+    # needs a named approver (VMWARE_AUDIT_APPROVED_BY). Read-only operations
+    # are never affected. Run 'vmware-audit policy' to see the rules in force.
+    environment: production
   lab:
     host: 10.0.0.100
     username: admin
@@ -16,6 +23,17 @@ targets:
     auth_source: LOCAL
 
 default_target: prod
+
+# Withhold every write tool (alert acknowledge/cancel, alert definition
+# create/enable-disable/delete, report generate/delete) from the MCP registry at
+# startup, so a model cannot call what it cannot see. Off by default, and
+# fail-closed: if the mode is requested but cannot be guaranteed, the MCP server
+# refuses to start rather than silently exposing writes. Read-only operations
+# are never affected. Environment variables win over this file — precedence is
+# VMWARE_ARIA_READ_ONLY, then the family-wide VMWARE_READ_ONLY, then this
+# setting, then off — so an operator can lock a deployment down from the MCP
+# client's env block without editing any config file.
+read_only: false
 
 # Passwords are loaded from environment variables:
 # VMWARE_ARIA_PROD_PASSWORD=xxx

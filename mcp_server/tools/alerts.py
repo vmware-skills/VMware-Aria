@@ -24,13 +24,18 @@ def list_alerts(
     resource_id: Optional[str] = None,
     limit: int = 100,
     target: Optional[str] = None,
-) -> list[dict]:
+) -> dict:
     """[READ] List alerts from Aria Operations.
 
     Returns alert summaries: name (from alertDefinitionName), criticality
     (from alertLevel), status, impact, resource_id, timestamps, and control
     state. The Alert model has no resource name field — resolve it via
     get_resource(resource_id).
+
+    Returns a result envelope: the rows under `items`, plus `returned`,
+    `limit`, `total` (null when the API reports no collection size),
+    `truncated` and `hint`. Check `truncated` before describing this as the
+    complete set — when it is true, more rows exist beyond this page.
 
     Args:
         active_only: Return only active (non-cancelled) alerts. Default True.
@@ -46,7 +51,7 @@ def list_alerts(
 
         return _list(server._get_connection(target), active_only=active_only, criticality=criticality, resource_id=resource_id, limit=limit)
     except Exception as e:
-        return [{"error": server._safe_error(e, "list_alerts"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}]
+        return {"error": server._safe_error(e, "list_alerts"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -74,11 +79,16 @@ def list_alert_definitions(
     name_filter: Optional[str] = None,
     limit: int = 100,
     target: Optional[str] = None,
-) -> list[dict]:
+) -> dict:
     """[READ] List alert definitions (templates that generate alerts when triggered).
 
     criticality is the max severity across the definition's states[] (the
     AlertDefinition model has no top-level criticality or enabled field).
+
+    Returns a result envelope: the rows under `items`, plus `returned`,
+    `limit`, `total` (null when the API reports no collection size),
+    `truncated` and `hint`. Check `truncated` before describing this as the
+    complete set — when it is true, more rows exist beyond this page.
 
     Args:
         name_filter: Optional substring to filter by definition name (case-insensitive).
@@ -92,7 +102,7 @@ def list_alert_definitions(
 
         return _list(server._get_connection(target), name_filter=name_filter, limit=limit)
     except Exception as e:
-        return [{"error": server._safe_error(e, "list_alert_definitions"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}]
+        return {"error": server._safe_error(e, "list_alert_definitions"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -102,8 +112,13 @@ def list_symptom_definitions(
     resource_kind: Optional[str] = None,
     limit: int = 100,
     target: Optional[str] = None,
-) -> list[dict]:
+) -> dict:
     """[READ] List symptom definitions — use the returned IDs when calling create_alert_definition.
+
+    Returns a result envelope: the rows under `items`, plus `returned`,
+    `limit`, `total` (null when the API reports no collection size),
+    `truncated` and `hint`. Check `truncated` before describing this as the
+    complete set — when it is true, more rows exist beyond this page.
 
     Args:
         name_filter: Optional substring to filter by symptom name (case-insensitive).
@@ -118,4 +133,40 @@ def list_symptom_definitions(
 
         return _list(server._get_connection(target), name_filter=name_filter, resource_kind=resource_kind, limit=limit)
     except Exception as e:
-        return [{"error": server._safe_error(e, "list_symptom_definitions"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}]
+        return {"error": server._safe_error(e, "list_symptom_definitions"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+
+
+@mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
+@vmware_tool(risk_level="low")
+def investigate_alert(alert_id: str, target: Optional[str] = None) -> dict:
+    """[READ] Resolve one alert to its affected resource in a single call — use this instead of chaining get_alert then get_resource by hand.
+
+    Does the whole alert-to-object correlation server-side: fetches the alert,
+    reads its resourceId, fetches that resource, and confirms the resource name
+    and kind before suggesting anything downstream.
+
+    Returns five always-present keys: alert (Aria's own criticality/status/
+    impact/control-state values, verbatim), resource (or null), correlation
+    (both UUIDs explicitly labelled, plus the confirmed name, kind, and a
+    confirmed flag), next_step (which vmware-monitor tool to call next and with
+    what argument, or null), and warnings (empty on success).
+
+    Gotchas: alert_id is the alert UUID from list_alerts, NOT the resource UUID
+    — they are different objects and mixing them up is the most common error
+    here; the correlation block labels each so you never have to infer which is
+    which. An unresolvable resource degrades to a warning plus explicit nulls
+    rather than an error, so the alert itself is never lost. Never match the
+    resource against vCenter inventory unless correlation.confirmed is true.
+
+    Args:
+        alert_id: The alert UUID from list_alerts (not the resource UUID).
+        target: Optional Aria Operations target name from config. Uses default if omitted.
+    """
+    from mcp_server import server
+
+    try:
+        from vmware_aria.ops.investigate import investigate_alert as _investigate
+
+        return _investigate(server._get_connection(target), alert_id)
+    except Exception as e:
+        return {"error": server._safe_error(e, "investigate_alert"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}

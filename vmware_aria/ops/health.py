@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from vmware_policy import sanitize
+from vmware_policy import paginated, sanitize
 
 from vmware_aria.connection import AriaApiError
 
@@ -101,7 +101,7 @@ def _collectors_by_id(client: AriaClient) -> dict[str, dict]:
     return {str(c.get("id", "")): c for c in items if isinstance(c, dict)}
 
 
-def list_collector_groups(client: AriaClient) -> list[dict]:
+def list_collector_groups(client: AriaClient) -> dict:
     """List collector groups and their member collector status.
 
     CollectorGroup = {id, name, description, collectorId: [ints],
@@ -113,9 +113,10 @@ def list_collector_groups(client: AriaClient) -> list[dict]:
         client: Authenticated Aria Operations API client.
 
     Returns:
-        List of collector group dicts with id, name, description,
-        system_defined, collector_count, and member collectors
-        (id, name, state, local).
+        Result envelope with collector group dicts under ``items``, each with
+        id, name, description, system_defined, collector_count, and member
+        collectors (id, name, state, local). GET /collectorgroups is unpaged,
+        so the result is always complete: ``truncated`` is False.
     """
     data = client.get("/collectorgroups")
     groups = data.get("collectorGroups", [])
@@ -145,4 +146,4 @@ def list_collector_groups(client: AriaClient) -> list[dict]:
                 "collectors": members,
             }
         )
-    return results
+    return paginated(results)

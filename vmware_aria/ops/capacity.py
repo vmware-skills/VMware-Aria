@@ -15,7 +15,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from vmware_policy import sanitize
+from vmware_policy import paginated, sanitize
 
 from vmware_aria.ops.resources import latest_stats_bulk
 
@@ -196,7 +196,7 @@ def list_rightsizing_recommendations(
     client: AriaClient,
     resource_id: str | None = None,
     limit: int = 50,
-) -> list[dict]:
+) -> dict:
     """List VM rightsizing data (recommended vs provisioned size).
 
     The suite-api exposes rightsizing exclusively as per-VM metrics
@@ -210,17 +210,22 @@ def list_rightsizing_recommendations(
         limit: Maximum number of VMs to evaluate when listing (1–100).
 
     Returns:
-        List of dicts with VM id, name, and recommended cpu/mem sizes.
-        Values are None for VMs where capacity analytics have no data.
+        Result envelope with dicts under ``items`` carrying VM id, name, and
+        recommended cpu/mem sizes; values are None for VMs where capacity
+        analytics have no data. One row is returned per VM evaluated, so
+        ``total`` carries the environment's VM ``pageInfo.totalCount`` — a run
+        that evaluated every VM reads as complete, a capped one as truncated.
     """
     limit = max(1, min(limit, 100))
 
+    vm_total: int | None = None
     if resource_id:
         targets = {resource_id: ""}
     else:
         listing = client.get(
             "/resources", params={"resourceKind": "VirtualMachine", "pageSize": limit}
         )
+        vm_total = (listing.get("pageInfo") or {}).get("totalCount")
         targets = {
             r.get("identifier", ""): sanitize(r.get("resourceKey", {}).get("name", ""))
             for r in listing.get("resourceList", [])
@@ -251,4 +256,6 @@ def list_rightsizing_recommendations(
                 "recommended_memory": values.get("OnlineCapacityAnalytics|mem|recommendedSize"),
             }
         )
-    return results
+    if resource_id:
+        return paginated(results)
+    return paginated(results, limit=limit, total=vm_total)

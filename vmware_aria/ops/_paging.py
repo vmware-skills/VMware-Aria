@@ -27,6 +27,23 @@ _PAGE_SIZE = 500
 _MAX_TOTAL = 20000
 
 
+class CollectionTotal:
+    """Sink for a collection's server-reported ``pageInfo.totalCount``.
+
+    ``iter_collection`` stops as soon as its caller has enough rows, so the
+    caller never sees the raw pages and cannot read the count itself. Passing
+    a sink lets the count reach the result envelope, where a known total is
+    what distinguishes a complete page from a possibly-truncated one.
+
+    ``value`` stays ``None`` when the server omits ``pageInfo``.
+    """
+
+    __slots__ = ("value",)
+
+    def __init__(self) -> None:
+        self.value: int | None = None
+
+
 def iter_collection(
     client: AriaClient,
     path: str,
@@ -35,6 +52,7 @@ def iter_collection(
     extra_params: dict[str, Any] | None = None,
     page_size: int = _PAGE_SIZE,
     max_total: int = _MAX_TOTAL,
+    total_sink: CollectionTotal | None = None,
 ) -> Iterator[dict]:
     """Yield every item from a paginated suite-api collection endpoint.
 
@@ -50,6 +68,9 @@ def iter_collection(
             and ``pageSize`` are added per request.
         page_size: Server-side page size to request.
         max_total: Safety cap on total items walked.
+        total_sink: Optional sink receiving ``pageInfo.totalCount`` as soon as a
+            page reports one, so the caller can state the collection size even
+            when it stops iterating early.
 
     Yields:
         Each raw item dict from every page, in order.
@@ -62,12 +83,17 @@ def iter_collection(
         params["pageSize"] = page_size
         data = client.get(path, params=params)
         items = data.get(container_key, []) or []
+        total = (data.get("pageInfo") or {}).get("totalCount")
+        # Fill the sink before yielding: a caller that has enough rows abandons
+        # the generator mid-page and never resumes it, so anything recorded
+        # after the yield loop would never reach the caller.
+        if total is not None and total_sink is not None:
+            total_sink.value = total
         if not items:
             break
         for item in items:
             yield item
             fetched += 1
-        total = (data.get("pageInfo") or {}).get("totalCount")
         # Termination: a short page (fewer than a full pageSize) is the last one;
         # an exhausted totalCount means we've seen everything. Guard both for
         # servers that omit pageInfo, plus the safety cap.
