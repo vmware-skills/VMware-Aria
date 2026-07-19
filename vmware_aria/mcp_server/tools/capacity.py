@@ -8,7 +8,7 @@ from typing import Optional
 
 from vmware_policy import vmware_tool
 
-from mcp_server._shared import mcp
+from vmware_aria.mcp_server._shared import mcp
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -20,7 +20,7 @@ def get_capacity_overview(cluster_id: str, target: Optional[str] = None) -> dict
         cluster_id: The cluster resource UUID (ClusterComputeResource, from list_resources).
         target: Optional Aria Operations target name from config. Uses default if omitted.
     """
-    from mcp_server import server
+    from vmware_aria.mcp_server import server
 
     try:
         from vmware_aria.ops.capacity import get_capacity_overview as _get
@@ -39,7 +39,7 @@ def get_remaining_capacity(resource_id: str, target: Optional[str] = None) -> di
         resource_id: The resource UUID — a ClusterComputeResource or HostSystem (from list_resources).
         target: Optional Aria Operations target name from config. Uses default if omitted.
     """
-    from mcp_server import server
+    from vmware_aria.mcp_server import server
 
     try:
         from vmware_aria.ops.capacity import get_remaining_capacity as _get
@@ -60,7 +60,7 @@ def get_time_remaining(resource_id: str, target: Optional[str] = None) -> dict:
         resource_id: The resource UUID (typically ClusterComputeResource).
         target: Optional Aria Operations target name from config. Uses default if omitted.
     """
-    from mcp_server import server
+    from vmware_aria.mcp_server import server
 
     try:
         from vmware_aria.ops.capacity import get_time_remaining as _get
@@ -95,7 +95,7 @@ def list_rightsizing_recommendations(
         limit: Maximum VMs to evaluate when listing (1–100). Default 50.
         target: Optional Aria Operations target name from config. Uses default if omitted.
     """
-    from mcp_server import server
+    from vmware_aria.mcp_server import server
 
     try:
         from vmware_aria.ops.capacity import list_rightsizing_recommendations as _list

@@ -4,7 +4,7 @@ list_resources, get_resource, get_resource_metrics, get_resource_health,
 get_top_consumers.
 
 Each tool registers on the shared ``mcp`` instance and resolves the
-connection/error helpers through ``mcp_server.server`` at call time, so the
+connection/error helpers through ``vmware_aria.mcp_server.server`` at call time, so the
 single patch surface ``server._get_connection`` / ``server._safe_error``
 (re-exported from ``_shared``) governs every tool exactly as the former
 monolithic ``server.py`` did.
@@ -14,7 +14,7 @@ from typing import Optional
 
 from vmware_policy import vmware_tool
 
-from mcp_server._shared import mcp
+from vmware_aria.mcp_server._shared import mcp
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -40,7 +40,7 @@ def list_resources(
         name_filter: Optional substring to filter by resource name (case-insensitive).
         target: Optional Aria Operations target name from config. Uses default if omitted.
     """
-    from mcp_server import server
+    from vmware_aria.mcp_server import server
 
     try:
         from vmware_aria.ops.resources import list_resources as _list
@@ -59,7 +59,7 @@ def get_resource(resource_id: str, target: Optional[str] = None) -> dict:
         resource_id: The resource UUID (from list_resources).
         target: Optional Aria Operations target name from config. Uses default if omitted.
     """
-    from mcp_server import server
+    from vmware_aria.mcp_server import server
 
     try:
         from vmware_aria.ops.resources import get_resource as _get
@@ -89,7 +89,7 @@ def get_resource_metrics(
         rollup_type: Aggregation type: AVG, MAX, MIN, SUM, COUNT, LATEST. Default AVG.
         target: Optional Aria Operations target name from config. Uses default if omitted.
     """
-    from mcp_server import server
+    from vmware_aria.mcp_server import server
 
     try:
         import time as _time
@@ -116,7 +116,7 @@ def get_resource_health(resource_id: str, target: Optional[str] = None) -> dict:
         resource_id: The resource UUID.
         target: Optional Aria Operations target name from config. Uses default if omitted.
     """
-    from mcp_server import server
+    from vmware_aria.mcp_server import server
 
     try:
         from vmware_aria.ops.resources import get_resource_health as _get_health
@@ -148,7 +148,7 @@ def get_top_consumers(
         top_n: Number of top consumers to return (max 50). Default 10.
         target: Optional Aria Operations target name from config. Uses default if omitted.
     """
-    from mcp_server import server
+    from vmware_aria.mcp_server import server
 
     try:
         from vmware_aria.ops.resources import get_top_consumers as _get_top

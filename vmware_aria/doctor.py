@@ -17,7 +17,7 @@ console = Console()
 def _config_read_only() -> bool | None:
     """Best-effort read of ``read_only`` from the config file.
 
-    Deliberately a copy of the helper in ``mcp_server.server`` rather than an
+    Deliberately a copy of the helper in ``vmware_aria.mcp_server.server`` rather than an
     import of it: importing that module registers every tool and applies the
     gate as a side effect, which would tie this check's result to whether the
     MCP server imports cleanly — something the doctor already checks separately.
@@ -177,9 +177,9 @@ def run_doctor(
 
     # ── 8. MCP server import check ───────────────────────────────────────────
     try:
-        import mcp_server.server  # noqa: F401
+        import vmware_aria.mcp_server.server  # noqa: F401
 
-        checks.append(("MCP server import", True, "mcp_server.server importable"))
+        checks.append(("MCP server import", True, "vmware_aria.mcp_server.server importable"))
     except ImportError as e:
         checks.append(("MCP server import", False, f"Import failed: {e}"))
     except Exception as e:

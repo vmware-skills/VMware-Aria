@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "vmware-aria"
-version = "1.8.1"
+version = "1.8.2"
 description = "VMware Aria Operations (vRealize Operations) monitoring, alerting, and capacity planning"
 readme = "README.md"
 license = "MIT"
@@ -29,10 +29,10 @@ dependencies = [
 
 [project.scripts]
 vmware-aria = "vmware_aria.cli:app"
-vmware-aria-mcp = "mcp_server.server:main"
+vmware-aria-mcp = "vmware_aria.mcp_server.server:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["vmware_aria", "mcp_server"]
+packages = ["vmware_aria"]
 
 [dependency-groups]
 dev = [

@@ -4,7 +4,7 @@ list_alerts, get_alert, list_alert_definitions, list_symptom_definitions.
 
 The write/destructive alert tools (acknowledge_alert, cancel_alert,
 create_alert_definition, set_alert_definition_state, delete_alert_definition)
-keep their definitions in ``mcp_server/server.py`` because their confirmed-gate
+keep their definitions in ``vmware_aria/mcp_server/server.py`` because their confirmed-gate
 preview contract is asserted there by AST inspection in
 ``tests/test_no_destructive_ops.py``.
 """
@@ -13,7 +13,7 @@ from typing import Optional
 
 from vmware_policy import vmware_tool
 
-from mcp_server._shared import mcp
+from vmware_aria.mcp_server._shared import mcp
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -44,7 +44,7 @@ def list_alerts(
         limit: Maximum number of alerts to return (1–500). Default 100.
         target: Optional Aria Operations target name from config. Uses default if omitted.
     """
-    from mcp_server import server
+    from vmware_aria.mcp_server import server
 
     try:
         from vmware_aria.ops.alerts import list_alerts as _list
@@ -63,7 +63,7 @@ def get_alert(alert_id: str, target: Optional[str] = None) -> dict:
         alert_id: The alert UUID (from list_alerts).
         target: Optional Aria Operations target name from config. Uses default if omitted.
     """
-    from mcp_server import server
+    from vmware_aria.mcp_server import server
 
     try:
         from vmware_aria.ops.alerts import get_alert as _get
@@ -95,7 +95,7 @@ def list_alert_definitions(
         limit: Maximum number of definitions to return (1–500). Default 100.
         target: Optional Aria Operations target name from config. Uses default if omitted.
     """
-    from mcp_server import server
+    from vmware_aria.mcp_server import server
 
     try:
         from vmware_aria.ops.alerts import list_alert_definitions as _list
@@ -126,7 +126,7 @@ def list_symptom_definitions(
         limit: Maximum number of symptom definitions to return (1–500). Default 100.
         target: Optional Aria Operations target name from config. Uses default if omitted.
     """
-    from mcp_server import server
+    from vmware_aria.mcp_server import server
 
     try:
         from vmware_aria.ops.alerts import list_symptom_definitions as _list
@@ -162,7 +162,7 @@ def investigate_alert(alert_id: str, target: Optional[str] = None) -> dict:
         alert_id: The alert UUID from list_alerts (not the resource UUID).
         target: Optional Aria Operations target name from config. Uses default if omitted.
     """
-    from mcp_server import server
+    from vmware_aria.mcp_server import server
 
     try:
         from vmware_aria.ops.investigate import investigate_alert as _investigate

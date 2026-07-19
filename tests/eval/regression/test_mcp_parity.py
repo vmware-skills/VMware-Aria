@@ -24,7 +24,7 @@ EXPECTED_WRITE_COUNT = 7
 
 
 def _list_tools():
-    from mcp_server.server import mcp
+    from vmware_aria.mcp_server.server import mcp
 
     return asyncio.run(mcp.list_tools())
 
@@ -46,7 +46,7 @@ def test_mcp_read_write_split_matches_skill_md_declaration() -> None:
 
 
 def test_safe_error_passes_aria_api_error_hint_through() -> None:
-    from mcp_server.server import _safe_error
+    from vmware_aria.mcp_server.server import _safe_error
     from vmware_aria.connection import AriaApiError, _hint_for_status
 
     exc = AriaApiError(
@@ -67,7 +67,7 @@ def test_safe_error_passes_aria_api_error_hint_through() -> None:
 def test_mcp_tool_error_path_contains_404_hint(monkeypatch) -> None:
     # End-to-end through a registered tool: the dict an agent receives must
     # carry the teaching hint, not an opaque failure line.
-    import mcp_server.server as server
+    import vmware_aria.mcp_server.server as server
     from vmware_aria.connection import AriaApiError, _hint_for_status
 
     def boom(target=None):
@@ -90,7 +90,7 @@ def test_mcp_tool_error_path_contains_404_hint(monkeypatch) -> None:
 def test_safe_error_passes_connection_error_through() -> None:
     # issue #10: a dropped connection must surface its teaching hint through
     # MCP instead of being masked as a generic "operation failed".
-    from mcp_server.server import _safe_error
+    from vmware_aria.mcp_server.server import _safe_error
 
     hint = "Connection to aria-prod dropped. Run 'vmware-aria doctor'."
     message = _safe_error(ConnectionError(hint), "get_resource")
@@ -99,7 +99,7 @@ def test_safe_error_passes_connection_error_through() -> None:
 
 
 def test_safe_error_still_masks_unexpected_exceptions() -> None:
-    from mcp_server.server import _safe_error
+    from vmware_aria.mcp_server.server import _safe_error
 
     message = _safe_error(RuntimeError("internal /etc/path host:443 detail"), "get_resource")
     assert "internal" not in message

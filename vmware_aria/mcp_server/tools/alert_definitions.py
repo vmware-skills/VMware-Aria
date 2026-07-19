@@ -2,18 +2,18 @@
 
 create_alert_definition, set_alert_definition_state.
 
-delete_alert_definition keeps its definition in ``mcp_server/server.py``
+delete_alert_definition keeps its definition in ``vmware_aria/mcp_server/server.py``
 because its confirmed-gate preview contract is asserted there by AST
 inspection in ``tests/test_no_destructive_ops.py``. The read-only
 list_alert_definitions / list_symptom_definitions live in
-``mcp_server/tools/alerts.py``.
+``vmware_aria/mcp_server/tools/alerts.py``.
 """
 
 from typing import Optional
 
 from vmware_policy import vmware_tool
 
-from mcp_server._shared import mcp
+from vmware_aria.mcp_server._shared import mcp
 
 
 @mcp.tool(annotations={"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": True})
@@ -42,7 +42,7 @@ def create_alert_definition(
         adapter_kind: Adapter kind key. Default VMWARE (vSphere adapter).
         target: Optional Aria Operations target name from config. Uses default if omitted.
     """
-    from mcp_server import server
+    from vmware_aria.mcp_server import server
 
     try:
         from vmware_aria.ops.alerts import create_alert_definition as _create
@@ -76,7 +76,7 @@ def set_alert_definition_state(
         enabled: True to enable the definition, False to disable it.
         target: Optional Aria Operations target name from config. Uses default if omitted.
     """
-    from mcp_server import server
+    from vmware_aria.mcp_server import server
 
     try:
         from vmware_aria.ops.alerts import set_alert_definition_state as _set_state

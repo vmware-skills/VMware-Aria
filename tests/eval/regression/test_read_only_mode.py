@@ -31,15 +31,15 @@ WRITE_TOOLS = {
 
 
 def _load_server(monkeypatch, read_only: str | None):
-    """Import mcp_server.server fresh under the given read-only env."""
+    """Import vmware_aria.mcp_server.server fresh under the given read-only env."""
     monkeypatch.delenv("VMWARE_READ_ONLY", raising=False)
     monkeypatch.delenv("VMWARE_ARIA_READ_ONLY", raising=False)
     if read_only is not None:
         monkeypatch.setenv("VMWARE_READ_ONLY", read_only)
 
-    for name in [m for m in sys.modules if m.startswith("mcp_server")]:
+    for name in [m for m in sys.modules if m.startswith("vmware_aria.mcp_server")]:
         del sys.modules[name]
-    return importlib.import_module("mcp_server.server")
+    return importlib.import_module("vmware_aria.mcp_server.server")
 
 
 def _tool_names(server) -> set[str]:
@@ -51,13 +51,13 @@ def _restore_modules():
     """Restore the original module objects, do not just purge them.
 
     Deleting the entries would leave sibling test files importing a *fresh*
-    mcp_server while their own monkeypatches still point at the old module
+    vmware_aria.mcp_server while their own monkeypatches still point at the old module
     object — the patches silently stop applying. Saving and re-inserting keeps
     module identity stable across this file's reimports.
     """
-    saved = {n: m for n, m in sys.modules.items() if n.startswith("mcp_server")}
+    saved = {n: m for n, m in sys.modules.items() if n.startswith("vmware_aria.mcp_server")}
     yield
-    for name in [n for n in sys.modules if n.startswith("mcp_server")]:
+    for name in [n for n in sys.modules if n.startswith("vmware_aria.mcp_server")]:
         del sys.modules[name]
     sys.modules.update(saved)
 
@@ -100,9 +100,9 @@ def test_every_surviving_tool_is_marked_read(monkeypatch):
 def test_skill_env_var_also_works(monkeypatch):
     monkeypatch.delenv("VMWARE_READ_ONLY", raising=False)
     monkeypatch.setenv("VMWARE_ARIA_READ_ONLY", "true")
-    for name in [m for m in sys.modules if m.startswith("mcp_server")]:
+    for name in [m for m in sys.modules if m.startswith("vmware_aria.mcp_server")]:
         del sys.modules[name]
-    server = importlib.import_module("mcp_server.server")
+    server = importlib.import_module("vmware_aria.mcp_server.server")
     assert not (WRITE_TOOLS & _tool_names(server))
 
 

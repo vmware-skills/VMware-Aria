@@ -229,7 +229,7 @@ Rules:
 
 ## Read-Only Mode
 
-If a write tool listed above is absent from `list_tools()`, this deployment is in read-only mode: `VMWARE_READ_ONLY=true` (or `VMWARE_ARIA_READ_ONLY`, or `read_only: true` in config.yaml) withholds all 7 write tools at start-up. That is a deliberate lockdown, not a fault — do not retry, and do not look for another tool that achieves the same change. Name the operation that is blocked and say an operator must clear the switch and restart the server. Read tools are unaffected.
+If a write tool listed above is absent from `list_tools()`, this deployment is in read-only mode: `VMWARE_READ_ONLY=true` (or `VMWARE_ARIA_READ_ONLY`, or `read_only: true` in config.yaml) withholds all 7 write tools at start-up. That is a deliberate lockdown, not a fault — do not retry, and do not look for another tool that achieves the same change. Name the operation that is blocked and say an operator must clear the switch and restart the server. Read tools are unaffected. Running with local or small models? See [`references/agent-guardrails.md`](references/agent-guardrails.md).
 
 ## CLI Quick Reference
 

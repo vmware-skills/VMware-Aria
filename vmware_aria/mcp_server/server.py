@@ -2,13 +2,13 @@
 
 This module exposes VMware Aria Operations management tools via the Model
 Context Protocol (MCP) using stdio transport.  The 27 tools are split by
-domain across ``mcp_server/tools/*.py``; each module registers its tools onto
-the shared ``mcp`` instance defined in ``mcp_server/_shared.py``.  Importing
+domain across ``vmware_aria/mcp_server/tools/*.py``; each module registers its tools onto
+the shared ``mcp`` instance defined in ``vmware_aria/mcp_server/_shared.py``.  Importing
 those modules below is what performs the registration.
 
 This file stays the thin entrypoint: it imports the tool modules (so the
 ``@mcp.tool`` decorators run), re-exports the shared plumbing and every tool
-function so the historical paths ``from mcp_server.server import _safe_error,
+function so the historical paths ``from vmware_aria.mcp_server.server import _safe_error,
 mcp, <tool fns>`` keep resolving, and exposes ``main()`` (踩坑 #17).  The four
 confirmed-gate destructive tools (acknowledge_alert, cancel_alert,
 delete_alert_definition, delete_report) are defined here because their
@@ -19,7 +19,7 @@ Tool categories
 ---------------
 * **Resource** (5 tools, read-only): list_resources, get_resource,
   get_resource_metrics, get_resource_health, get_top_consumers
-  — ``mcp_server/tools/resources.py``
+  — ``vmware_aria/mcp_server/tools/resources.py``
 
 * **Alerts** (5 tools, 3 read + 2 write): list_alerts, get_alert,
   list_alert_definitions (read, ``tools/alerts.py``); acknowledge_alert,
@@ -66,9 +66,9 @@ from vmware_policy import apply_read_only_gate, mtime_cached_loader, set_environ
 
 from vmware_aria.config import CONFIG_FILE, load_config
 
-# Shared plumbing — re-exported so `from mcp_server.server import _safe_error,
+# Shared plumbing — re-exported so `from vmware_aria.mcp_server.server import _safe_error,
 # mcp, _get_connection, ...` (and monkeypatch targets) keep resolving.
-from mcp_server._shared import (  # noqa: F401  (logger re-exported for the historical mcp_server.server.logger path)
+from vmware_aria.mcp_server._shared import (  # noqa: F401  (logger re-exported for the historical vmware_aria.mcp_server.server.logger path)
     _audit,
     _get_connection,
     _safe_error,
@@ -79,7 +79,7 @@ from mcp_server._shared import (  # noqa: F401  (logger re-exported for the hist
 
 # Importing the tool modules runs their @mcp.tool decorators, registering the
 # read/non-confirmed-write tools onto the shared `mcp` instance.
-from mcp_server.tools import (  # noqa: F401  (imported for registration side-effect)
+from vmware_aria.mcp_server.tools import (  # noqa: F401  (imported for registration side-effect)
     alert_definitions,
     alerts,
     anomaly,
@@ -89,40 +89,40 @@ from mcp_server.tools import (  # noqa: F401  (imported for registration side-ef
     resources,
 )
 
-# Re-export every tool function so `mcp_server.server.<tool>` resolves (tests
+# Re-export every tool function so `vmware_aria.mcp_server.server.<tool>` resolves (tests
 # call e.g. `server.get_resource(...)` and patch `server._get_connection`).
-from mcp_server.tools.alert_definitions import (  # noqa: F401
+from vmware_aria.mcp_server.tools.alert_definitions import (  # noqa: F401
     create_alert_definition,
     set_alert_definition_state,
 )
-from mcp_server.tools.alerts import (  # noqa: F401
+from vmware_aria.mcp_server.tools.alerts import (  # noqa: F401
     get_alert,
     investigate_alert,
     list_alert_definitions,
     list_alerts,
     list_symptom_definitions,
 )
-from mcp_server.tools.anomaly import (  # noqa: F401
+from vmware_aria.mcp_server.tools.anomaly import (  # noqa: F401
     get_resource_riskbadge,
     list_anomalies,
 )
-from mcp_server.tools.capacity import (  # noqa: F401
+from vmware_aria.mcp_server.tools.capacity import (  # noqa: F401
     get_capacity_overview,
     get_remaining_capacity,
     get_time_remaining,
     list_rightsizing_recommendations,
 )
-from mcp_server.tools.health import (  # noqa: F401
+from vmware_aria.mcp_server.tools.health import (  # noqa: F401
     get_aria_health,
     list_collector_groups,
 )
-from mcp_server.tools.reports import (  # noqa: F401
+from vmware_aria.mcp_server.tools.reports import (  # noqa: F401
     generate_report,
     get_report,
     list_report_definitions,
     list_reports,
 )
-from mcp_server.tools.resources import (  # noqa: F401
+from vmware_aria.mcp_server.tools.resources import (  # noqa: F401
     get_resource,
     get_resource_health,
     get_resource_metrics,

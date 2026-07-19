@@ -378,7 +378,7 @@ def test_mcp_list_tools_declare_object_results_not_arrays() -> None:
     """The annotation drives the schema an agent is handed."""
     import inspect
 
-    from mcp_server.tools import alerts, anomaly, capacity, health, reports, resources
+    from vmware_aria.mcp_server.tools import alerts, anomaly, capacity, health, reports, resources
 
     modules = (alerts, anomaly, capacity, health, reports, resources)
     checked = []

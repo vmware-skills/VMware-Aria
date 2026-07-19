@@ -1,6 +1,6 @@
 """Shared MCP plumbing for the vmware-aria tool modules.
 
-The tool functions live in ``mcp_server/tools/*.py`` grouped by domain
+The tool functions live in ``vmware_aria/mcp_server/tools/*.py`` grouped by domain
 (resources, alerts, alert_definitions, capacity, anomaly, health, reports).
 Each module registers its tools onto the single ``mcp`` instance defined here,
 so this module must stay free of any import from the tool packages to avoid a
@@ -15,8 +15,8 @@ What lives here:
 * ``_target_name`` — audit display-name helper.
 * ``_audit`` — the shared :class:`AuditLogger` for write tools.
 
-``mcp_server/server.py`` re-exports these (and every tool function) so the
-historical import paths ``from mcp_server.server import _safe_error, mcp, <fn>``
+``vmware_aria/mcp_server/server.py`` re-exports these (and every tool function) so the
+historical import paths ``from vmware_aria.mcp_server.server import _safe_error, mcp, <fn>``
 keep resolving.
 """
 
@@ -33,7 +33,7 @@ from vmware_aria.config import load_config
 from vmware_aria.connection import AriaApiError, ConnectionManager
 from vmware_aria.notify.audit import AuditLogger
 
-logger = logging.getLogger("mcp_server")
+logger = logging.getLogger("vmware_aria.mcp_server")
 
 
 def _safe_error(exc: Exception, tool: str) -> str:

@@ -27,7 +27,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parent.parent
 OPS_DIR = REPO_ROOT / "vmware_aria" / "ops"
 CLI_PATH = REPO_ROOT / "vmware_aria" / "cli.py"
-MCP_PATH = REPO_ROOT / "mcp_server" / "server.py"
+MCP_PATH = REPO_ROOT / "vmware_aria" / "mcp_server" / "server.py"
 
 # ops write functions: must accept audit_logger AND call .log on it.
 OPS_WRITE_FUNCTIONS: list[tuple[str, str]] = [

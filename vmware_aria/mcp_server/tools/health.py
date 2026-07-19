@@ -7,7 +7,7 @@ from typing import Optional
 
 from vmware_policy import vmware_tool
 
-from mcp_server._shared import mcp
+from vmware_aria.mcp_server._shared import mcp
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -24,7 +24,7 @@ def get_aria_health(target: Optional[str] = None) -> dict:
     Args:
         target: Optional Aria Operations target name from config. Uses default if omitted.
     """
-    from mcp_server import server
+    from vmware_aria.mcp_server import server
 
     try:
         from vmware_aria.ops.health import get_aria_health as _get
@@ -52,7 +52,7 @@ def list_collector_groups(target: Optional[str] = None) -> dict:
     Args:
         target: Optional Aria Operations target name from config. Uses default if omitted.
     """
-    from mcp_server import server
+    from vmware_aria.mcp_server import server
 
     try:
         from vmware_aria.ops.health import list_collector_groups as _list

@@ -2,7 +2,7 @@
 
 list_report_definitions, generate_report, list_reports, get_report.
 
-delete_report keeps its definition in ``mcp_server/server.py`` because its
+delete_report keeps its definition in ``vmware_aria/mcp_server/server.py`` because its
 confirmed-gate preview contract is asserted there by AST inspection in
 ``tests/test_no_destructive_ops.py``.
 """
@@ -11,7 +11,7 @@ from typing import Optional
 
 from vmware_policy import vmware_tool
 
-from mcp_server._shared import mcp
+from vmware_aria.mcp_server._shared import mcp
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -33,7 +33,7 @@ def list_report_definitions(
         limit: Maximum number of definitions to return (1–500). Default 100.
         target: Optional Aria Operations target name from config. Uses default if omitted.
     """
-    from mcp_server import server
+    from vmware_aria.mcp_server import server
 
     try:
         from vmware_aria.ops.reports import list_report_definitions as _list
@@ -63,7 +63,7 @@ def generate_report(
             list_resources.
         target: Optional Aria Operations target name from config. Uses default if omitted.
     """
-    from mcp_server import server
+    from vmware_aria.mcp_server import server
 
     try:
         from vmware_aria.ops.reports import generate_report as _generate
@@ -98,7 +98,7 @@ def list_reports(
         limit: Maximum number of reports to return (1–200). Default 50.
         target: Optional Aria Operations target name from config. Uses default if omitted.
     """
-    from mcp_server import server
+    from vmware_aria.mcp_server import server
 
     try:
         from vmware_aria.ops.reports import list_reports as _list
@@ -120,7 +120,7 @@ def get_report(
         report_id: The report UUID (from generate_report or list_reports).
         target: Optional Aria Operations target name from config. Uses default if omitted.
     """
-    from mcp_server import server
+    from vmware_aria.mcp_server import server
 
     try:
         from vmware_aria.ops.reports import get_report as _get

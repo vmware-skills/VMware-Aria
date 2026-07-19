@@ -12,7 +12,7 @@ config.yaml::
         host: aria-ops.corp.local
         environment: production   # <- declares which rules apply
 
-vmware-policy cannot read this skill's config itself, so ``mcp_server/server.py``
+vmware-policy cannot read this skill's config itself, so ``vmware_aria/mcp_server/server.py``
 registers a resolver at import. That registration is the whole control: without
 it every target reads as undeclared and no environment-scoped rule can ever
 fire. These tests pin both halves — the resolver is wired up, and what it
@@ -33,7 +33,7 @@ from vmware_policy.policy import reset_policy_engine
 
 from vmware_aria.config import AppConfig, TargetConfig
 
-import mcp_server.server as server
+import vmware_aria.mcp_server.server as server
 
 
 @pytest.fixture(autouse=True)

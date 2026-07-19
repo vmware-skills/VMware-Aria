@@ -65,7 +65,7 @@ def mcp_cmd() -> None:
         typer.echo(msg, err=True)
         raise typer.Exit(2)
 
-    from mcp_server.server import main as _mcp_main
+    from vmware_aria.mcp_server.server import main as _mcp_main
 
     _mcp_main()
 
