@@ -14,6 +14,49 @@ _log = logging.getLogger("vmware-aria.doctor")
 console = Console()
 
 
+def _config_read_only() -> bool | None:
+    """Best-effort read of ``read_only`` from the config file.
+
+    Deliberately a copy of the helper in ``mcp_server.server`` rather than an
+    import of it: importing that module registers every tool and applies the
+    gate as a side effect, which would tie this check's result to whether the
+    MCP server imports cleanly — something the doctor already checks separately.
+    The two must be kept in step; if the server ever resolves its config
+    differently, change both. Note ``load_config()`` is called with no argument
+    on purpose, so it honours ``VMWARE_ARIA_CONFIG`` exactly as the gate does.
+    """
+    from vmware_aria.config import load_config
+
+    try:
+        return load_config().read_only
+    except Exception:  # noqa: BLE001 — absent/unreadable config is not an error here
+        return None
+
+
+def _check_read_only() -> tuple[bool, str]:
+    """Report the resolved read-only state and where it came from.
+
+    Never fails — read-only being on is a posture, not a fault. It is here
+    because an operator who set the switch had no way to confirm it took: the
+    only signal was a line in the MCP server's start-up log.
+    """
+    from vmware_policy.readonly import read_only_status
+
+    status = read_only_status("vmware-aria", _config_read_only())
+    if not status.recognised:
+        return True, (
+            f"{status.source}={status.raw!r} is not a recognised value. It resolves "
+            f"to ON (fail-closed), so every write tool is withheld — probably not "
+            f"what was intended. Use true or false."
+        )
+    if status.enabled:
+        return True, (
+            f"ON (from {status.source}) — write tools are withheld from the MCP "
+            f"registry. Clear that switch and restart the server to expose them."
+        )
+    return True, f"off (from {status.source}) — write tools are exposed"
+
+
 def run_doctor(
     config_path: Path | None = None,
     skip_auth: bool = False,
@@ -65,6 +108,12 @@ def run_doctor(
         checks.append(("Config parse", True, f"{target_count} target(s) configured"))
     except Exception as e:
         checks.append(("Config parse", False, str(e)))
+
+    # ── 3b. Read-only mode ───────────────────────────────────────────────────
+    # Reported before the early return below: the env-var switches work with no
+    # config at all, so an operator with a broken config still needs to see
+    # whether the deployment is locked down.
+    checks.append(("Read-only mode", *_check_read_only()))
 
     if config is None:
         _print_table(checks)

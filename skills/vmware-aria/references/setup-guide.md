@@ -219,6 +219,54 @@ whitespace are handled correctly).
 > Secrets Manager, or a Kubernetes Secret) into the `*_PASSWORD` environment
 > variable at process start. The code reads the env var either way.
 
+## Read-Only Mode
+
+Read-only mode removes all 7 write tools (alert acknowledge/cancel, alert
+definition create/enable-disable/delete, report generate/delete) from the MCP
+registry at start-up, so `list_tools()` never offers them. It is **off by
+default**. Three ways to turn it on, highest precedence first:
+
+| Priority | Switch | Scope |
+|:-:|---|---|
+| 1 | `VMWARE_ARIA_READ_ONLY=true` | this skill only |
+| 2 | `VMWARE_READ_ONLY=true` | every installed VMware skill |
+| 3 | `read_only: true` in `~/.vmware-aria/config.yaml` | this skill only |
+| 4 | *(nothing set)* | off |
+
+A per-skill variable beats the family-wide one, which beats config. Setting the
+family variable in one MCP client `env` block puts the whole estate into an
+audit posture at once — no config file edits.
+
+```json
+{
+  "mcpServers": {
+    "vmware-aria": {
+      "command": "vmware-aria",
+      "args": ["mcp"],
+      "env": { "VMWARE_READ_ONLY": "true" }
+    }
+  }
+}
+```
+
+**Fail-closed.** If the mode is requested but cannot be *proven* — the tool
+registry cannot be enumerated, or a removal does not take effect — the server
+refuses to start rather than serving write tools it promised to withhold. One
+deliberate exception: an unrecognised value (`VMWARE_READ_ONLY=ture`) does not
+abort. It resolves to **on** with a warning, so a typo locks the deployment
+down instead of leaving it open.
+
+**Verifying it took effect:**
+
+- `vmware-aria doctor` reports the resolved state *and which switch it came
+  from* — including a distinct warning when the value was a typo that fell
+  through to on.
+- The server logs `Read-only mode active for vmware-aria — withheld 7 write
+  tool(s): ...` at start-up, naming each one.
+- A blank value (`"VMWARE_READ_ONLY": ""`) counts as *unset*, not as an
+  explicit off: a leftover template placeholder cannot silently override
+  `read_only: true` in config.
+
 ## Security Notes
 
 > **Disclaimer**: This is a community-maintained open-source project and is **not affiliated with, endorsed by, or sponsored by VMware, Inc. or Broadcom Inc.** "VMware" and "Aria" are trademarks of Broadcom.
