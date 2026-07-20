@@ -27,22 +27,20 @@ def list_alerts(
 ) -> dict:
     """[READ] List alerts from Aria Operations.
 
-    Returns alert summaries: name (from alertDefinitionName), criticality
-    (from alertLevel), status, impact, resource_id, timestamps, and control
-    state. The Alert model has no resource name field — resolve it via
-    get_resource(resource_id).
+    Returns alert summaries: name, criticality, status, impact, resource_id,
+    timestamps, and control state. The Alert model does not carry a resource
+    name — resolve it via get_resource(resource_id).
 
-    Returns a result envelope: the rows under `items`, plus `returned`,
-    `limit`, `total` (null when the API reports no collection size),
-    `truncated` and `hint`. Check `truncated` before describing this as the
-    complete set — when it is true, more rows exist beyond this page.
+    Returns a paginated envelope: items, returned, limit, total (null
+    when the API reports no size), truncated, hint. Check truncated
+    before calling this the complete set.
 
     Args:
         active_only: Return only active (non-cancelled) alerts. Default True.
         criticality: Filter by criticality: INFORMATION, WARNING, IMMEDIATE, CRITICAL.
         resource_id: Scope alerts to a specific resource UUID.
-        limit: Maximum number of alerts to return (1–500). Default 100.
-        target: Optional Aria Operations target name from config. Uses default if omitted.
+        limit: Max alerts to return (1–500). Default 100.
+        target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
 
@@ -57,11 +55,11 @@ def list_alerts(
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
 @vmware_tool(risk_level="low")
 def get_alert(alert_id: str, target: Optional[str] = None) -> dict:
-    """[READ] Get full details for one alert by UUID, including its contributing (triggered) symptoms fetched from the alerts/contributingsymptoms endpoint. Use after list_alerts to drill into a single alert; use list_alerts (not this tool) to discover or filter alerts. Returns one alert object: name (from alertDefinitionName), criticality (from alertLevel), status, impact, resource_id, start/update/cancel timestamps, control state, and symptoms. The Alert model carries no resource name — resolve it via get_resource(resource_id). Recommendations hang off the alert definition, not the alert. To act on the alert afterwards, use acknowledge_alert or cancel_alert.
+    """[READ] Get full details for one alert by UUID, including its contributing (triggered) symptoms. Use this after list_alerts to drill into a single alert; use list_alerts to discover or filter them. Returns one alert object: name, criticality, status, impact, resource_id, start/update/cancel timestamps, control state, and symptoms. The Alert model does not carry a resource name — resolve it via get_resource(resource_id), or call investigate_alert to do that correlation in one step. Recommendations hang off the alert definition, not the alert. To act on the alert afterwards, use acknowledge_alert or cancel_alert.
 
     Args:
         alert_id: The alert UUID (from list_alerts).
-        target: Optional Aria Operations target name from config. Uses default if omitted.
+        target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
 
@@ -84,16 +82,16 @@ def list_alert_definitions(
 
     criticality is the max severity across the definition's states[] (the
     AlertDefinition model has no top-level criticality or enabled field).
+    Pass a returned id to set_alert_definition_state to enable or disable it.
 
-    Returns a result envelope: the rows under `items`, plus `returned`,
-    `limit`, `total` (null when the API reports no collection size),
-    `truncated` and `hint`. Check `truncated` before describing this as the
-    complete set — when it is true, more rows exist beyond this page.
+    Returns a paginated envelope: items, returned, limit, total (null
+    when the API reports no size), truncated, hint. Check truncated
+    before calling this the complete set.
 
     Args:
-        name_filter: Optional substring to filter by definition name (case-insensitive).
-        limit: Maximum number of definitions to return (1–500). Default 100.
-        target: Optional Aria Operations target name from config. Uses default if omitted.
+        name_filter: Substring filter on definition name (case-insensitive).
+        limit: Max definitions to return (1–500). Default 100.
+        target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
 
@@ -115,16 +113,15 @@ def list_symptom_definitions(
 ) -> dict:
     """[READ] List symptom definitions — use the returned IDs when calling create_alert_definition.
 
-    Returns a result envelope: the rows under `items`, plus `returned`,
-    `limit`, `total` (null when the API reports no collection size),
-    `truncated` and `hint`. Check `truncated` before describing this as the
-    complete set — when it is true, more rows exist beyond this page.
+    Returns a paginated envelope: items, returned, limit, total (null
+    when the API reports no size), truncated, hint. Check truncated
+    before calling this the complete set.
 
     Args:
-        name_filter: Optional substring to filter by symptom name (case-insensitive).
+        name_filter: Substring filter on symptom name (case-insensitive).
         resource_kind: Optional resource kind filter, e.g. VirtualMachine, HostSystem.
-        limit: Maximum number of symptom definitions to return (1–500). Default 100.
-        target: Optional Aria Operations target name from config. Uses default if omitted.
+        limit: Max symptom definitions to return (1–500). Default 100.
+        target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
 
@@ -145,22 +142,20 @@ def investigate_alert(alert_id: str, target: Optional[str] = None) -> dict:
     reads its resourceId, fetches that resource, and confirms the resource name
     and kind before suggesting anything downstream.
 
-    Returns five always-present keys: alert (Aria's own criticality/status/
-    impact/control-state values, verbatim), resource (or null), correlation
-    (both UUIDs explicitly labelled, plus the confirmed name, kind, and a
-    confirmed flag), next_step (which vmware-monitor tool to call next and with
-    what argument, or null), and warnings (empty on success).
+    Returns five always-present keys: alert (Aria's values verbatim), resource
+    (or null), correlation (both UUIDs labelled, plus confirmed name, kind and
+    a confirmed flag), next_step (which vmware-monitor tool to call next, or
+    null), and warnings (empty on success).
 
-    Gotchas: alert_id is the alert UUID from list_alerts, NOT the resource UUID
-    — they are different objects and mixing them up is the most common error
-    here; the correlation block labels each so you never have to infer which is
-    which. An unresolvable resource degrades to a warning plus explicit nulls
-    rather than an error, so the alert itself is never lost. Never match the
-    resource against vCenter inventory unless correlation.confirmed is true.
+    Gotchas: alert_id is the alert UUID from list_alerts, NOT the resource
+    UUID — mixing them up is the most common error here; the correlation block
+    labels each. An unresolvable resource degrades to a warning plus nulls
+    rather than an error, so the alert is never lost. Never match the resource
+    against vCenter inventory unless correlation.confirmed is true.
 
     Args:
         alert_id: The alert UUID from list_alerts (not the resource UUID).
-        target: Optional Aria Operations target name from config. Uses default if omitted.
+        target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
 

@@ -21,17 +21,16 @@ def list_report_definitions(
     limit: int = 100,
     target: Optional[str] = None,
 ) -> dict:
-    """[READ] List available report definition templates in Aria Operations.
+    """[READ] List available report definition templates in Aria Operations. Pass a returned id to generate_report to run one.
 
-    Returns a result envelope: the rows under `items`, plus `returned`,
-    `limit`, `total` (null when the API reports no collection size),
-    `truncated` and `hint`. Check `truncated` before describing this as the
-    complete set — when it is true, more rows exist beyond this page.
+    Returns a paginated envelope: items, returned, limit, total (null
+    when the API reports no size), truncated, hint. Check truncated
+    before calling this the complete set.
 
     Args:
-        name_filter: Optional substring to filter by report name (case-insensitive).
-        limit: Maximum number of definitions to return (1–500). Default 100.
-        target: Optional Aria Operations target name from config. Uses default if omitted.
+        name_filter: Substring filter on report name (case-insensitive).
+        limit: Max definitions to return (1–500). Default 100.
+        target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
 
@@ -52,8 +51,9 @@ def generate_report(
 ) -> dict:
     """[WRITE] Trigger generation of a report from a report definition template.
 
-    Returns immediately with a report_id and PENDING status.
-    Poll get_report(report_id) until status == COMPLETED, then use download_url.
+    Returns immediately with a report_id and PENDING status; it does not wait
+    for the file. Poll get_report(report_id) until status == COMPLETED, then
+    use download_url.
 
     Args:
         definition_id: Report definition (template) UUID from list_report_definitions.
@@ -61,7 +61,7 @@ def generate_report(
             generates against a single root resource (first ID is used); pass
             a cluster/datacenter UUID to cover its children. Find IDs via
             list_resources.
-        target: Optional Aria Operations target name from config. Uses default if omitted.
+        target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
 
@@ -86,17 +86,16 @@ def list_reports(
     limit: int = 50,
     target: Optional[str] = None,
 ) -> dict:
-    """[READ] List generated reports, optionally filtered by report definition.
+    """[READ] List generated reports, optionally filtered by report definition. Pass a returned id to get_report for its status and download URLs.
 
-    Returns a result envelope: the rows under `items`, plus `returned`,
-    `limit`, `total` (null when the API reports no collection size),
-    `truncated` and `hint`. Check `truncated` before describing this as the
-    complete set — when it is true, more rows exist beyond this page.
+    Returns a paginated envelope: items, returned, limit, total (null
+    when the API reports no size), truncated, hint. Check truncated
+    before calling this the complete set.
 
     Args:
         definition_id: Optional report definition UUID to filter results.
-        limit: Maximum number of reports to return (1–200). Default 50.
-        target: Optional Aria Operations target name from config. Uses default if omitted.
+        limit: Max reports to return (1–200). Default 50.
+        target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
 
@@ -116,9 +115,15 @@ def get_report(
 ) -> dict:
     """[READ] Get status and download URLs for a generated report.
 
+    Returns id, name, status (PENDING, RUNNING, COMPLETED, FAILED),
+    definition_id, completion_time_ms, download_url (PDF) and csv_url. Use
+    this to poll after generate_report. The URLs are always constructed, so a
+    download_url is present even while the report is still PENDING — check
+    status before fetching it.
+
     Args:
         report_id: The report UUID (from generate_report or list_reports).
-        target: Optional Aria Operations target name from config. Uses default if omitted.
+        target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
 

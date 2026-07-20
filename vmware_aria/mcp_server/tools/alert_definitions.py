@@ -29,18 +29,20 @@ def create_alert_definition(
 ) -> dict:
     """[WRITE] Create a new alert definition referencing existing symptom definitions.
 
-    Use list_symptom_definitions() to find symptom_definition_ids.
+    Returns the new definition's id and name. Run list_symptom_definitions
+    first for symptom_definition_ids; to silence an existing definition use
+    set_alert_definition_state rather than creating a variant.
 
     Args:
         name: Alert definition name (must be unique in Aria Operations).
-        description: Human-readable description of when/why this alert fires.
-        resource_kind: Resource kind this alert applies to: VirtualMachine,
-            HostSystem, ClusterComputeResource, Datastore.
-        symptom_definition_ids: List of symptom definition UUIDs. Any one
-            symptom firing triggers (OR across symptom ids).
+        description: When and why this alert fires.
+        resource_kind: VirtualMachine, HostSystem, ClusterComputeResource,
+            or Datastore.
+        symptom_definition_ids: Symptom definition UUIDs; any one firing
+            triggers the alert (OR).
         criticality: Alert severity: INFORMATION, WARNING, IMMEDIATE, CRITICAL.
         adapter_kind: Adapter kind key. Default VMWARE (vSphere adapter).
-        target: Optional Aria Operations target name from config. Uses default if omitted.
+        target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
 
@@ -71,10 +73,14 @@ def set_alert_definition_state(
 ) -> dict:
     """[WRITE] Enable or disable an existing alert definition.
 
+    Returns definition_id, enabled, and the action taken. Use this instead of
+    delete_alert_definition when you only want to silence a definition —
+    disabling is reversible, deleting is not.
+
     Args:
         definition_id: Alert definition UUID (from list_alert_definitions).
         enabled: True to enable the definition, False to disable it.
-        target: Optional Aria Operations target name from config. Uses default if omitted.
+        target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
 

@@ -19,10 +19,13 @@ def get_aria_health(target: Optional[str] = None) -> dict:
     "OFFLINE" — the endpoint itself answers 503 when offline), healthy bool,
     system_time_ms, and details. Use this to verify Aria Operations is
     functioning before investigating monitoring blind spots; per-service
-    breakdown is not exposed by the public API.
+    breakdown is not exposed by the public API. A 503 from the platform is
+    reported as OFFLINE and never raised, so this answers even while Aria is
+    down. When status is ONLINE but data looks stale, check
+    list_collector_groups next.
 
     Args:
-        target: Optional Aria Operations target name from config. Uses default if omitted.
+        target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
 
@@ -42,15 +45,16 @@ def list_collector_groups(target: Optional[str] = None) -> dict:
     Collectors are remote agents that gather metrics from vSphere and other adapters.
     Check this when resources appear missing from Aria Operations or metrics are stale.
     Groups list member collector IDs; details (name, state UP/DOWN, local) are
-    enriched via one extra collectors call.
+    enriched via one extra collectors call. A DOWN collector means
+    list_resources and the metric tools see stale or missing data for
+    everything behind it.
 
-    Returns a result envelope: the rows under `items`, plus `returned`,
-    `limit`, `total` (null when the API reports no collection size),
-    `truncated` and `hint`. Check `truncated` before describing this as the
-    complete set — when it is true, more rows exist beyond this page.
+    Returns a paginated envelope: items, returned, limit, total (null
+    when the API reports no size), truncated, hint. Check truncated
+    before calling this the complete set.
 
     Args:
-        target: Optional Aria Operations target name from config. Uses default if omitted.
+        target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
 

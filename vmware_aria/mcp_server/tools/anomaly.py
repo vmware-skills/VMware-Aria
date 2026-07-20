@@ -19,23 +19,22 @@ def list_anomalies(
 ) -> dict:
     """[READ] Report per-resource anomaly counts (System Attributes|total_alarms metric).
 
-    The public suite-api does not expose the UI's anomalous-metrics list; this
-    returns the Total Anomalies metric — active anomalies (symptoms, events,
-    DT violations) on the object and its children. With
-    resource_id: that resource's count. Without: scans up to `limit` VMs and
-    returns those with non-zero counts, sorted descending. For root cause,
-    follow up with list_alerts(resource_id=...). One stats call per VM when
-    listing — keep limit modest.
+    The suite-api does not expose the UI's anomalous-metrics list; this is the
+    Total Anomalies metric — active symptoms, events and DT violations on the
+    object and its children. With resource_id: that resource's count. Without:
+    scans up to `limit` VMs and returns those with non-zero counts, sorted
+    descending. For root cause, follow up with list_alerts(resource_id=...).
+    One stats call per VM when listing — keep limit modest.
 
-    Returns a result envelope: the flagged rows under `items`, plus
-    `returned`, `limit`, `total`, `truncated`, `hint`, and `scanned` (how
-    many VMs were examined). A short list is not proof the environment is
-    clean — check `truncated`, which is true whenever VMs went unscanned.
+    Returns a paginated envelope: flagged rows under items, plus returned,
+    limit, total, truncated, hint, and scanned (how many VMs were examined).
+    A short list is not proof the environment is clean — truncated is true
+    whenever VMs went unscanned.
 
     Args:
         resource_id: Optional resource UUID to scope to a single resource.
         limit: Maximum VMs to scan when listing (1–100). Default 50.
-        target: Optional Aria Operations target name from config. Uses default if omitted.
+        target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
 
@@ -52,12 +51,17 @@ def list_anomalies(
 def get_resource_riskbadge(resource_id: str, target: Optional[str] = None) -> dict:
     """[READ] Get the risk badge score for a resource (0–100, higher = more risk of future problems).
 
-    The risk badge predicts likelihood of performance degradation or availability issues
-    based on current trends and workload patterns.
+    The risk badge predicts likelihood of performance degradation or
+    availability issues based on current trends and workload patterns.
+    Returns `risk_score` and `risk_color` for the one resource. Use this when
+    the risk number is all you want; get_resource_health returns health and
+    efficiency alongside it. The score is null when Aria has not computed a
+    risk badge, and the badge does not say what is wrong — use
+    list_alerts(resource_id=...) for the contributing alerts.
 
     Args:
         resource_id: The resource UUID.
-        target: Optional Aria Operations target name from config. Uses default if omitted.
+        target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
 

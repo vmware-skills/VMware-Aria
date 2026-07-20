@@ -25,20 +25,19 @@ def list_resources(
     name_filter: Optional[str] = None,
     target: Optional[str] = None,
 ) -> dict:
-    """[READ] List resources in Aria Operations filtered by kind.
+    """[READ] List resources in Aria Operations filtered by kind. Start here: this turns a name or kind into the UUID other resource tools need. Then call get_resource for detail on one row.
 
-    Returns a result envelope: the rows under `items`, plus `returned`,
-    `limit`, `total` (null when the API reports no collection size),
-    `truncated` and `hint`. Check `truncated` before describing this as the
-    complete set — when it is true, more rows exist beyond this page.
+    Returns a paginated envelope: items, returned, limit, total (null
+    when the API reports no size), truncated, hint. Check truncated
+    before calling this the complete set.
 
     Args:
-        resource_kind: Resource kind to list. Common values: VirtualMachine,
-            HostSystem, ClusterComputeResource, Datastore, Datacenter.
-        limit: Maximum number of results. Default 100. Results are paginated
-            automatically, so a larger limit returns more than one page.
-        name_filter: Optional substring to filter by resource name (case-insensitive).
-        target: Optional Aria Operations target name from config. Uses default if omitted.
+        resource_kind: e.g. VirtualMachine, HostSystem,
+            ClusterComputeResource, Datastore, Datacenter.
+        limit: Maximum number of results. Default 100. Paginated
+            automatically, so a larger limit spans more than one page.
+        name_filter: Substring filter on resource name (case-insensitive).
+        target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
 
@@ -53,11 +52,11 @@ def list_resources(
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
 @vmware_tool(risk_level="low")
 def get_resource(resource_id: str, target: Optional[str] = None) -> dict:
-    """[READ] Get full details for one resource by UUID, including health, risk, and efficiency badges (each a color plus 0-100 score), resource kind, adapter kind, identifiers, and status states. Use after list_resources to inspect a single resource in depth; use list_resources (not this tool) to discover UUIDs by kind or name. For just the health score use get_resource_health; for time-series metrics use get_resource_metrics.
+    """[READ] Returns one resource object: id, name, kind, adapter kind, identifiers, status states, and the health/risk/efficiency badges (each a color plus 0-100 score, null when Aria has not scored that badge). Use this after list_resources to inspect a single UUID in depth — it does not accept a name, so use list_resources to discover UUIDs by kind or name. For just the badge scores use get_resource_health; for time-series metrics use get_resource_metrics.
 
     Args:
         resource_id: The resource UUID (from list_resources).
-        target: Optional Aria Operations target name from config. Uses default if omitted.
+        target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
 
@@ -80,14 +79,19 @@ def get_resource_metrics(
 ) -> dict:
     """[READ] Fetch time-series metric statistics for a resource.
 
+    Returns a dict keyed by metric key, each mapping to a list of
+    {timestamp_ms, value} points — not an envelope. Use this for history; for
+    a single current score use get_resource_health instead. A key the API has
+    no data for does not appear in the result at all, so check which keys came
+    back before reporting a metric as zero.
+
     Args:
         resource_id: The resource UUID.
-        metric_keys: List of metric keys to fetch, e.g. ["cpu|usage_average", "mem|usage_average"].
-            Common keys: cpu|usage_average, mem|usage_average, disk|usage_average,
-            net|usage_average, cpu|demand_average, mem|workload.
+        metric_keys: Metric keys to fetch, e.g. ["cpu|usage_average",
+            "mem|usage_average", "disk|usage_average", "net|usage_average"].
         hours: Number of hours of history to retrieve. Default 1.
         rollup_type: Aggregation type: AVG, MAX, MIN, SUM, COUNT, LATEST. Default AVG.
-        target: Optional Aria Operations target name from config. Uses default if omitted.
+        target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
 
@@ -109,12 +113,15 @@ def get_resource_metrics(
 def get_resource_health(resource_id: str, target: Optional[str] = None) -> dict:
     """[READ] Get the health, risk, and efficiency badge scores for a resource.
 
-    Badges come from the resource's badges[] array. Scores are 0–100
-    (higher = healthier for HEALTH; -1 = unknown) with a color per badge.
+    Returns the three scores and their colors, from the resource's badges[]
+    array. Scores are 0–100 (higher = healthier for HEALTH). Use this when the
+    scores are all you need; use get_resource for the whole object, or
+    list_alerts(resource_id=...) for what drove a low score. A score is null
+    (or -1) when Aria has not computed that badge — that does not mean healthy.
 
     Args:
         resource_id: The resource UUID.
-        target: Optional Aria Operations target name from config. Uses default if omitted.
+        target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
 
@@ -134,19 +141,18 @@ def get_top_consumers(
     top_n: int = 10,
     target: Optional[str] = None,
 ) -> dict:
-    """[READ] Query resources with highest consumption of a given metric.
+    """[READ] Query resources with highest consumption of a given metric. Then call get_resource_metrics on a returned id for its history.
 
-    Returns a result envelope: the rows under `items`, plus `returned`,
-    `limit`, `total` (null when the API reports no collection size),
-    `truncated` and `hint`. Check `truncated` before describing this as the
-    complete set — when it is true, more rows exist beyond this page.
+    Returns a paginated envelope: items, returned, limit, total (null
+    when the API reports no size), truncated, hint. Check truncated
+    before calling this the complete set.
 
     Args:
-        metric_key: The metric to rank by. Common values: cpu|usage_average,
-            mem|usage_average, disk|usage_average, net|usage_average.
+        metric_key: Metric to rank by, e.g. cpu|usage_average,
+            mem|usage_average, disk|usage_average.
         resource_kind: Resource kind to scope the query. Default VirtualMachine.
         top_n: Number of top consumers to return (max 50). Default 10.
-        target: Optional Aria Operations target name from config. Uses default if omitted.
+        target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
 
