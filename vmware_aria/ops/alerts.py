@@ -73,7 +73,9 @@ def list_alerts(
     if criticality and criticality.upper() not in _VALID_CRITICALITIES:
         raise ValueError(
             f"Invalid criticality '{criticality}'. "
-            f"Must be one of: {', '.join(sorted(_VALID_CRITICALITIES))}"
+            f"Must be one of: {', '.join(sorted(_VALID_CRITICALITIES))}. "
+            f"Pass one of those values to --criticality (case-insensitive), or "
+            f"omit it to list alerts at every criticality."
         )
 
     limit = max(1, min(limit, 500))
@@ -181,7 +183,11 @@ def get_alert(client: AriaClient, alert_id: str) -> dict:
         Dict with alert details and contributing symptom list.
     """
     if not alert_id:
-        raise ValueError("alert_id must not be empty")
+        raise ValueError(
+            "alert_id must be a non-empty Aria alert UUID. Run list_alerts to see "
+            "open alerts and copy an exact 'id' — note that the alert UUID is not "
+            "the affected resource UUID."
+        )
 
     data = client.get(f"/alerts/{alert_id}")
     return {
@@ -229,7 +235,11 @@ def acknowledge_alert(
         Dict confirming the operation with alert id and new control_state.
     """
     if not alert_id:
-        raise ValueError("alert_id must not be empty")
+        raise ValueError(
+            "alert_id must be a non-empty Aria alert UUID. Run list_alerts to see "
+            "open alerts and copy an exact 'id' — note that the alert UUID is not "
+            "the affected resource UUID."
+        )
 
     # Capture before state
     before = {}
@@ -284,7 +294,11 @@ def cancel_alert(
         Dict confirming the cancellation.
     """
     if not alert_id:
-        raise ValueError("alert_id must not be empty")
+        raise ValueError(
+            "alert_id must be a non-empty Aria alert UUID. Run list_alerts to see "
+            "open alerts and copy an exact 'id' — note that the alert UUID is not "
+            "the affected resource UUID."
+        )
 
     before = {}
     try:
@@ -421,12 +435,25 @@ def create_alert_definition(
         Dict with new alert definition id and name.
     """
     if not name:
-        raise ValueError("name must not be empty")
+        raise ValueError(
+            "name must be a non-empty alert definition name (e.g. 'High CPU on "
+            "prod cluster'). Specify one; run list_alert_definitions first to see "
+            "existing names and avoid creating a duplicate."
+        )
     if not symptom_definition_ids:
-        raise ValueError("symptom_definition_ids must not be empty")
+        raise ValueError(
+            "symptom_definition_ids must be a non-empty list of symptom "
+            "definition UUIDs — an alert definition fires on symptoms, so at "
+            "least one is required. Run list_symptom_definitions and copy the "
+            "'id' of each symptom to attach."
+        )
     criticality = criticality.upper()
     if criticality not in _VALID_CRITICALITIES_DEF:
-        raise ValueError(f"criticality must be one of: {', '.join(sorted(_VALID_CRITICALITIES_DEF))}")
+        raise ValueError(
+            f"criticality must be one of: "
+            f"{', '.join(sorted(_VALID_CRITICALITIES_DEF))}. "
+            f"Pass one of those values to --criticality (case-insensitive)."
+        )
 
     payload = {
         "name": name,
@@ -499,7 +526,10 @@ def set_alert_definition_state(
         Dict with definition_id, enabled, action.
     """
     if not definition_id:
-        raise ValueError("definition_id must not be empty")
+        raise ValueError(
+            "definition_id must be a non-empty alert definition UUID. Run "
+            "list_alert_definitions and copy an exact 'id' value."
+        )
 
     # PUT, not POST (2026-06-08 user report; endpoints exist in 8.6+).
     if enabled:
@@ -550,7 +580,10 @@ def delete_alert_definition(
         Dict confirming deletion.
     """
     if not definition_id:
-        raise ValueError("definition_id must not be empty")
+        raise ValueError(
+            "definition_id must be a non-empty alert definition UUID. Run "
+            "list_alert_definitions and copy an exact 'id' value."
+        )
 
     client.delete(f"/alertdefinitions/{definition_id}")
 

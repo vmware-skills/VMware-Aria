@@ -194,7 +194,11 @@ def get_resource(client: AriaClient, resource_id: str) -> dict:
         Dict with resource key, identifiers, health badge, and relationships.
     """
     if not resource_id:
-        raise ValueError("resource_id must not be empty")
+        raise ValueError(
+            "resource_id must be a non-empty Aria resource UUID. Run list_resources "
+            "(filter with name= or resource_kind=, e.g. resource_kind='VirtualMachine') "
+            "and copy an exact 'id' value."
+        )
 
     data = client.get(f"/resources/{resource_id}")
     key = data.get("resourceKey", {})
@@ -259,9 +263,18 @@ def get_resource_metrics(
         Dict keyed by metric_key mapping to a list of {timestamp, value} points.
     """
     if not resource_id:
-        raise ValueError("resource_id must not be empty")
+        raise ValueError(
+            "resource_id must be a non-empty Aria resource UUID. Run list_resources "
+            "(filter with name= or resource_kind=, e.g. resource_kind='VirtualMachine') "
+            "and copy an exact 'id' value."
+        )
     if not metric_keys:
-        raise ValueError("metric_keys must not be empty")
+        raise ValueError(
+            "metric_keys must be a non-empty list of Aria statKeys, e.g. "
+            "['cpu|usage_average', 'mem|usage_average']. Specify at least one — "
+            "there is no 'all metrics' mode. At the CLI these are the "
+            "comma-separated values of --metrics/-m."
+        )
 
     import time as _time
 
@@ -384,7 +397,11 @@ def get_resource_health(client: AriaClient, resource_id: str) -> dict:
         Dict with health, risk, and efficiency scores and colors.
     """
     if not resource_id:
-        raise ValueError("resource_id must not be empty")
+        raise ValueError(
+            "resource_id must be a non-empty Aria resource UUID. Run list_resources "
+            "(filter with name= or resource_kind=, e.g. resource_kind='VirtualMachine') "
+            "and copy an exact 'id' value."
+        )
 
     # suite-api has no /resources/{id}/badge/* endpoints — badges come back
     # as the badges[] array on the ResourceDto (2026-06-08 spec audit).

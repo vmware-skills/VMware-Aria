@@ -67,11 +67,16 @@ def _hint_for_status(status_code: int, path: str) -> str:
     if status_code == 404:
         return (
             f"Nothing exists at {path}. Verify the id — list the parent "
-            "collection first (e.g. `resource list`, `alert list`) and copy an "
-            "exact UUID."
+            "collection first (e.g. `vmware-aria resource list`, "
+            "`vmware-aria alert list`, or the list_resources / list_alerts "
+            "tools) and copy an exact UUID."
         )
     if status_code == 400:
-        return "Bad request — check the parameters and payload for this call."
+        return (
+            "Bad request — check the parameters and payload for this call "
+            "against the tool's parameter descriptions; a malformed UUID or an "
+            "out-of-range value is the usual cause."
+        )
     if status_code == 503:
         return (
             "The platform is starting up or one or more services are not "
@@ -166,7 +171,9 @@ class AriaClient:
                 hint = _hint_for_status(status, "/auth/token/acquire")
             raise AriaApiError(
                 f"Aria Operations authentication to {self._target.host} failed: "
-                f"POST /auth/token/acquire returned HTTP {status}. {hint}",
+                f"POST /auth/token/acquire returned HTTP {status}. {hint} "
+                f"Run 'vmware-aria doctor' to re-test this target's credentials "
+                f"and connectivity.",
                 status_code=status,
                 method="POST",
                 path="/auth/token/acquire",
@@ -180,7 +187,9 @@ class AriaClient:
                 else " Check the host/port and network, then retry."
             )
             raise AriaApiError(
-                f"Aria Operations authentication to {self._target.host} could not connect: {exc}.{tail}",
+                f"Aria Operations authentication to {self._target.host} could not "
+                f"connect: {exc}.{tail} Verify 'host' and 'port' for this target in "
+                f"~/.vmware-aria/config.yaml, then run 'vmware-aria doctor'.",
                 method="POST",
                 path="/auth/token/acquire",
             ) from exc
@@ -188,7 +197,13 @@ class AriaClient:
 
         token = data.get("token")
         if not token:
-            raise ConnectionError("Aria Operations token acquisition succeeded but no token returned")
+            raise ConnectionError(
+                f"Aria Operations token acquisition to {self._target.host} "
+                f"succeeded but the response carried no 'token' field — the host "
+                f"is most likely not an Aria Operations suite-api endpoint. "
+                f"Verify 'host' and 'port' for this target in "
+                f"~/.vmware-aria/config.yaml, then run 'vmware-aria doctor'."
+            )
 
         # `validity` is an epoch timestamp in MILLISECONDS (when the token
         # expires), not a duration. Default validity is 6 hours, sliding —
@@ -263,7 +278,9 @@ class AriaClient:
                     else " Check the host/port and network, then retry."
                 )
                 raise AriaApiError(
-                    f"Aria Operations {method} {path} could not connect: {exc}.{tail}",
+                    f"Aria Operations {method} {path} could not connect: {exc}.{tail} "
+                    f"Verify 'host' and 'port' for this target in "
+                    f"~/.vmware-aria/config.yaml, then run 'vmware-aria doctor'.",
                     method=method,
                     path=path,
                 ) from exc
@@ -285,7 +302,8 @@ class AriaClient:
             if resp.status_code >= 400:
                 raise AriaApiError(
                     f"Aria Operations {method} {path} returned HTTP "
-                    f"{resp.status_code}. {_hint_for_status(resp.status_code, path)}",
+                    f"{resp.status_code}. {_hint_for_status(resp.status_code, path)} "
+                    f"Run 'vmware-aria doctor' if every call to this target fails.",
                     status_code=resp.status_code,
                     method=method,
                     path=path,
@@ -398,7 +416,12 @@ class ConnectionManager:
         """Get or create an AriaClient for the specified target."""
         name = target_name or self._config.default_target
         if not name:
-            raise ValueError("No target specified and no default target configured")
+            configured = ", ".join(self._config.targets.keys())
+            raise ValueError(
+                f"No target specified and no default target configured. "
+                f"Configured targets: {configured or '(none)'}. Pass target=<name> "
+                f"explicitly, or set 'default_target' in ~/.vmware-aria/config.yaml."
+            )
 
         if name in self._clients:
             if self._clients[name].is_alive_cached():
@@ -411,7 +434,11 @@ class ConnectionManager:
         target_cfg = self._config.get_target(name)
         if target_cfg is None:
             available = ", ".join(self._config.targets.keys())
-            raise ValueError(f"Target '{name}' not found. Available: {available}")
+            raise ValueError(
+                f"Target '{name}' not found. Available: {available or '(none)'}. "
+                f"Pass --target with one of those names, or add a '{name}' entry "
+                f"under 'targets:' in ~/.vmware-aria/config.yaml and re-run."
+            )
 
         # Resolve both halves of the credential together — a username left
         # behind by a rotation would pair with the new password and fail.

@@ -86,151 +86,22 @@
     },
     "error_actionability": {
       "detail": {
-        "dead_end_count": 24,
-        "dead_end_errors": [
-          {
-            "message": "Aria Operations token acquisition succeeded but no token returned",
-            "missing": [
-              "names_artifact",
-              "names_input",
-              "states_remedy"
-            ],
-            "where": "connection.py:191"
-          },
-          {
-            "message": "No target specified and no default target configured",
-            "missing": [
-              "names_artifact",
-              "names_input",
-              "states_remedy"
-            ],
-            "where": "connection.py:401"
-          },
-          {
-            "message": "Aria Operations authentication to {} failed: POST /auth/token/acquire returned HTTP {}. {}",
-            "missing": [
-              "names_artifact",
-              "states_remedy"
-            ],
-            "where": "connection.py:167"
-          },
-          {
-            "message": "Aria Operations authentication to {} could not connect: {}.{}",
-            "missing": [
-              "names_artifact",
-              "states_remedy"
-            ],
-            "where": "connection.py:182"
-          },
-          {
-            "message": "Aria Operations {} {} returned HTTP {}. {}",
-            "missing": [
-              "names_artifact",
-              "states_remedy"
-            ],
-            "where": "connection.py:286"
-          },
-          {
-            "message": "Aria Operations {} {} could not connect: {}.{}",
-            "missing": [
-              "names_artifact",
-              "states_remedy"
-            ],
-            "where": "connection.py:265"
-          },
-          {
-            "message": "alert_id must not be empty",
-            "missing": [
-              "names_artifact",
-              "names_input",
-              "states_remedy"
-            ],
-            "where": "alerts.py:184"
-          },
-          {
-            "message": "alert_id must not be empty",
-            "missing": [
-              "names_artifact",
-              "names_input",
-              "states_remedy"
-            ],
-            "where": "alerts.py:232"
-          },
-          {
-            "message": "alert_id must not be empty",
-            "missing": [
-              "names_artifact",
-              "names_input",
-              "states_remedy"
-            ],
-            "where": "alerts.py:287"
-          },
-          {
-            "message": "name must not be empty",
-            "missing": [
-              "names_artifact",
-              "names_input",
-              "states_remedy"
-            ],
-            "where": "alerts.py:424"
-          },
-          {
-            "message": "symptom_definition_ids must not be empty",
-            "missing": [
-              "names_artifact",
-              "names_input",
-              "states_remedy"
-            ],
-            "where": "alerts.py:426"
-          },
-          {
-            "message": "definition_id must not be empty",
-            "missing": [
-              "names_artifact",
-              "names_input",
-              "states_remedy"
-            ],
-            "where": "alerts.py:502"
-          },
-          {
-            "message": "definition_id must not be empty",
-            "missing": [
-              "names_artifact",
-              "names_input",
-              "states_remedy"
-            ],
-            "where": "alerts.py:553"
-          },
-          {
-            "message": "resource_id must not be empty",
-            "missing": [
-              "names_artifact",
-              "names_input",
-              "states_remedy"
-            ],
-            "where": "anomaly.py:142"
-          },
-          {
-            "message": "cluster_id must not be empty",
-            "missing": [
-              "names_artifact",
-              "names_input",
-              "states_remedy"
-            ],
-            "where": "capacity.py:81"
-          }
+        "composed_hint_sites": [
+          "connection.py:303"
         ],
+        "dead_end_count": 0,
+        "dead_end_errors": [],
         "per_dimension_pct": {
-          "names_artifact": 12.5,
-          "names_input": 31.2,
-          "states_remedy": 25.0
+          "names_artifact": 100.0,
+          "names_input": 96.9,
+          "states_remedy": 100.0
         },
         "raise_sites": 32
       },
       "maximum": 96,
-      "pct": 22.9,
+      "pct": 99.0,
       "unit": "points",
-      "value": 22
+      "value": 95
     },
     "manifest_context_headroom": {
       "detail": {
@@ -300,12 +171,34 @@
       "unit": "points",
       "value": 28
     },
+    "remedy_survives_truncation": {
+      "detail": {
+        "budget_chars": 300,
+        "over_budget": [],
+        "remedy_after_interpolation": [
+          "config.py:226",
+          "config.py:212",
+          "connection.py:200",
+          "connection.py:420",
+          "connection.py:437",
+          "connection.py:172",
+          "connection.py:189",
+          "connection.py:303",
+          "connection.py:280",
+          "alerts.py:74"
+        ]
+      },
+      "maximum": 32,
+      "pct": 100.0,
+      "unit": "messages",
+      "value": 32
+    },
     "teaching_error_rate": {
       "detail": {},
       "maximum": 32,
-      "pct": 12.5,
+      "pct": 100.0,
       "unit": "messages",
-      "value": 4
+      "value": 32
     },
     "tool_description_quality": {
       "detail": {

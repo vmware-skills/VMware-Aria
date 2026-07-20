@@ -209,7 +209,11 @@ class AppConfig:
         cfg = self.get_target(name)
         if cfg is None:
             available = ", ".join(self.targets.keys())  # type: ignore[union-attr]
-            raise KeyError(f"Target '{name}' not found. Available: {available}")
+            raise KeyError(
+                f"Target '{name}' not found. Available: {available or '(none)'}. "
+                f"Pass --target with one of those names, or add a '{name}' entry "
+                f"under 'targets:' in ~/.vmware-aria/config.yaml and re-run."
+            )
         return cfg
 
 

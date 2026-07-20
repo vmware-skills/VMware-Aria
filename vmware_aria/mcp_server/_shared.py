@@ -41,15 +41,31 @@ def _safe_error(exc: Exception, tool: str) -> str:
 
     Raw exception text can carry API response bodies, internal paths, or
     host:port pairs. Full traceback goes to the server log; the agent sees only
-    a control-char-stripped, length-capped message. Intentional validation
-    errors (ValueError/FileNotFoundError/KeyError/PermissionError) and
-    AriaApiError (the connection layer's teaching errors — "404: list the
-    parent collection first", "503: platform booting") pass through.
-    ConnectionError also passes through so a dropped connection surfaces its
-    teaching hint instead of being masked as a generic "operation failed".
+    a control-char-stripped, length-capped message.
+
+    The rule is a property, not a list: every exception this skill raises on
+    purpose passes through, and only genuinely unplanned ones are reduced. That
+    covers the builtin validation errors, ``AriaApiError`` (the connection
+    layer's teaching errors — "404: list the parent collection first", "503:
+    platform booting"), and ``ConnectionError``, which ``connection.py`` raises
+    when a host answers but is not an Aria suite-api endpoint.
+
+    ``OSError`` is allowed because ``config.py`` raises exactly one — the
+    missing-password error, this family's most common first-run failure, whose
+    entire remedy is the env var name it carries. Its subclasses
+    ``FileNotFoundError``, ``PermissionError`` and ``ConnectionError`` were
+    already allowed, so admitting the base class widens exposure only to the
+    remaining OS-level subtypes.
+
+    Anything else is reduced to its type — an unplanned exception's text was
+    written for a developer reading a traceback, not for an agent choosing what
+    to do next, and it is the one that can carry credentials.
     """
     logger.error("Tool %s failed", tool, exc_info=True)
-    if isinstance(exc, (AriaApiError, ValueError, FileNotFoundError, KeyError, PermissionError, ConnectionError)):
+    if isinstance(
+        exc,
+        (AriaApiError, ValueError, FileNotFoundError, KeyError, PermissionError, ConnectionError, OSError),
+    ):
         return sanitize(str(exc), 300)
     return f"{type(exc).__name__}: operation failed."
 

@@ -139,7 +139,10 @@ def get_resource_riskbadge(client: AriaClient, resource_id: str) -> dict:
         resource's active alerts via list_alerts(resource_id=...).
     """
     if not resource_id:
-        raise ValueError("resource_id must not be empty")
+        raise ValueError(
+            "resource_id must be a non-empty Aria resource UUID. Run list_resources "
+            "(filter with name= or resource_kind=) and copy an exact 'id' value."
+        )
 
     data = client.get(f"/resources/{resource_id}")
     risk = next(

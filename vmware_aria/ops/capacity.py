@@ -78,7 +78,11 @@ def get_capacity_overview(client: AriaClient, cluster_id: str) -> dict:
         Values are None when capacity analytics have no data yet.
     """
     if not cluster_id:
-        raise ValueError("cluster_id must not be empty")
+        raise ValueError(
+            "cluster_id must be a non-empty Aria resource UUID for a cluster. Run "
+            "list_resources with resource_kind='ClusterComputeResource' and copy an "
+            "exact 'id' value."
+        )
 
     stat_keys = [_GROUP_REMAINING_PCT_KEY] + [
         f"OnlineCapacityAnalytics|{dim}|demand|{metric}"
@@ -126,7 +130,10 @@ def get_remaining_capacity(client: AriaClient, resource_id: str) -> dict:
         Values are None when capacity analytics have no data yet.
     """
     if not resource_id:
-        raise ValueError("resource_id must not be empty")
+        raise ValueError(
+            "resource_id must be a non-empty Aria resource UUID. Run list_resources "
+            "(filter with name= or resource_kind=) and copy an exact 'id' value."
+        )
 
     stat_keys = [_GROUP_REMAINING_PCT_KEY] + [
         f"OnlineCapacityAnalytics|{dim}|demand|capacityRemaining"
@@ -167,7 +174,10 @@ def get_time_remaining(client: AriaClient, resource_id: str) -> dict:
         Values are None when capacity analytics have no data yet.
     """
     if not resource_id:
-        raise ValueError("resource_id must not be empty")
+        raise ValueError(
+            "resource_id must be a non-empty Aria resource UUID. Run list_resources "
+            "(filter with name= or resource_kind=) and copy an exact 'id' value."
+        )
 
     stat_keys = [
         f"OnlineCapacityAnalytics|{dim}|demand|timeRemaining"

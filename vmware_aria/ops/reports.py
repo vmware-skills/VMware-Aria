@@ -105,12 +105,15 @@ def generate_report(
         Dict with report_id, status, and definition_id.
     """
     if not definition_id:
-        raise ValueError("definition_id must not be empty")
+        raise ValueError(
+            "definition_id must be a non-empty report definition UUID. Run "
+            "list_report_definitions and copy an exact 'id' value."
+        )
     if not resource_ids:
         raise ValueError(
             "resource_ids must contain at least one resource UUID — the Report "
-            "creation API requires a root resourceId. Use list_resources() to "
-            "find one (e.g. the target cluster or datacenter)."
+            "creation API requires a root resourceId. Run list_resources to find "
+            "one (e.g. the target cluster or datacenter) and copy its 'id'."
         )
     if len(resource_ids) > 1:
         _log.warning(
@@ -242,7 +245,11 @@ def get_report(
         status values: PENDING, RUNNING, COMPLETED, FAILED.
     """
     if not report_id:
-        raise ValueError("report_id must not be empty")
+        raise ValueError(
+            "report_id must be a non-empty generated-report UUID. Run list_reports "
+            "and copy an exact 'id' — this is the id of a report *run*, not the "
+            "report definition id from list_report_definitions."
+        )
 
     data = client.get(f"/reports/{report_id}")
     base_url = client._base_url  # e.g. https://aria-host:443/suite-api/api
@@ -287,7 +294,11 @@ def delete_report(
         Dict confirming deletion.
     """
     if not report_id:
-        raise ValueError("report_id must not be empty")
+        raise ValueError(
+            "report_id must be a non-empty generated-report UUID. Run list_reports "
+            "and copy an exact 'id' — this is the id of a report *run*, not the "
+            "report definition id from list_report_definitions."
+        )
 
     client.delete(f"/reports/{report_id}")
 

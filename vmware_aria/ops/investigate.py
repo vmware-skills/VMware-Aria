@@ -102,8 +102,9 @@ def investigate_alert(client: Any, alert_id: str) -> dict[str, Any]:
     """
     if not alert_id:
         raise ValueError(
-            "alert_id must not be empty. Run list_alerts to get alert UUIDs — "
-            "note that the alert UUID is not the affected resource UUID."
+            "alert_id must be a non-empty Aria alert UUID. Run list_alerts to see "
+            "open alerts and copy an exact 'id' — note that the alert UUID is not "
+            "the affected resource UUID."
         )
 
     alert = get_alert(client, alert_id)
