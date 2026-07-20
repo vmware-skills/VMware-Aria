@@ -22,7 +22,7 @@ Do **not** open a public GitHub issue for security vulnerabilities.
 - Passwords are stored exclusively in `~/.vmware-aria/.env` (never in `config.yaml`, never in code)
 - `.env` file permissions are verified at startup (`chmod 600` required)
 - No credentials are logged, echoed, or included in audit entries
-- Each Aria Operations target uses a separate environment variable: `VMWARE_<TARGET_NAME_UPPER>_PASSWORD`
+- Each Aria Operations target uses a separate environment variable: `VMWARE_ARIA_<TARGET_NAME_UPPER>_PASSWORD`
 
 ### Read-Heavy Design
 

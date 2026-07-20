@@ -708,7 +708,7 @@ def test_stale_client_closed_before_replacement(monkeypatch) -> None:
 
     fresh = MagicMock(name="fresh-client")
     monkeypatch.setenv("VMWARE_ARIA_T1_PASSWORD", "pw")
-    monkeypatch.setattr("vmware_aria.connection.AriaClient", lambda t, p: fresh)
+    monkeypatch.setattr("vmware_aria.connection.AriaClient", lambda t, p, u=None: fresh)
 
     result = mgr.connect("t1")
 

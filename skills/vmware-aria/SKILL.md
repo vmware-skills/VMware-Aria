@@ -12,10 +12,10 @@ installer:
   package: vmware-aria
 allowed-tools:
   - Bash
-metadata: {"openclaw":{"requires":{"env":["VMWARE_ARIA_CONFIG"],"bins":["vmware-aria"],"config":["~/.vmware-aria/config.yaml","~/.vmware-aria/.env"]},"optional":{"env":["VMWARE_<TARGET>_PASSWORD","VMWARE_READ_ONLY","VMWARE_ARIA_READ_ONLY","VMWARE_AUDIT_APPROVED_BY"],"bins":["vmware-policy"]},"primaryEnv":"VMWARE_ARIA_CONFIG","homepage":"https://github.com/zw008/VMware-Aria","emoji":"📊","os":["macos","linux"]}}
+metadata: {"openclaw":{"requires":{"env":["VMWARE_ARIA_CONFIG"],"bins":["vmware-aria"],"config":["~/.vmware-aria/config.yaml","~/.vmware-aria/.env"]},"optional":{"env":["VMWARE_ARIA_<TARGET>_PASSWORD","VMWARE_ARIA_<TARGET>_USERNAME","VMWARE_READ_ONLY","VMWARE_ARIA_READ_ONLY","VMWARE_AUDIT_APPROVED_BY"],"bins":["vmware-policy"]},"primaryEnv":"VMWARE_ARIA_CONFIG","homepage":"https://github.com/zw008/VMware-Aria","emoji":"📊","os":["macos","linux"]}}
 compatibility: >
   vmware-policy auto-installed as Python dependency (provides @vmware_tool decorator and audit logging). All write operations audited to ~/.vmware/audit.db.
-  Credentials: Each Aria Operations target requires a per-target password env var in ~/.vmware-aria/.env following the pattern VMWARE_<TARGET_NAME_UPPER>_PASSWORD. Passwords are never logged or echoed.
+  Credentials: Each Aria Operations target requires a per-target password env var in ~/.vmware-aria/.env following the pattern VMWARE_ARIA_<TARGET_NAME_UPPER>_PASSWORD. Passwords are never logged or echoed.
   Read-heavy: 21 of 28 tools are read-only. Write operations limited to alert acknowledge/cancel, alert definition management, and report management.
   No webhooks, no outbound network calls, no guest operations. Local only: stdio MCP + Aria Operations REST API (HTTPS 443).
   Transitive dependencies: Only vmware-policy (audit/policy). No post-install scripts or background services.

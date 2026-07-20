@@ -100,10 +100,16 @@ def _is_tls_verify_error(exc: Exception) -> bool:
 class AriaClient:
     """REST client for a single Aria Operations instance."""
 
-    def __init__(self, target: TargetConfig, password: str) -> None:
+    def __init__(
+        self, target: TargetConfig, password: str, username: str | None = None
+    ) -> None:
         self._target = target
         self._base_url = f"https://{target.host}:{target.port}/suite-api/api"
         self._password = password
+        # Resolved by the caller (ConnectionManager) alongside the password so
+        # both halves of the credential come from the same read; falls back to
+        # the configured username for direct construction.
+        self._username = username or target.username
         self._token: str | None = None
         # Epoch seconds when the token expires
         self._token_expires_at: float = 0.0
@@ -141,7 +147,7 @@ class AriaClient:
         """
         url = f"{self._base_url}/auth/token/acquire"
         payload = {
-            "username": self._target.username,
+            "username": self._username,
             "password": self._password,
             "authSource": self._target.auth_source,
         }
@@ -407,8 +413,11 @@ class ConnectionManager:
             available = ", ".join(self._config.targets.keys())
             raise ValueError(f"Target '{name}' not found. Available: {available}")
 
+        # Resolve both halves of the credential together — a username left
+        # behind by a rotation would pair with the new password and fail.
         password = target_cfg.get_password(name)
-        client = AriaClient(target_cfg, password)
+        username = target_cfg.get_username(name)
+        client = AriaClient(target_cfg, password, username)
         self._clients[name] = client
         return client
 

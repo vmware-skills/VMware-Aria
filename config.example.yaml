@@ -39,3 +39,14 @@ read_only: false
 # VMWARE_ARIA_PROD_PASSWORD=xxx
 # VMWARE_ARIA_LAB_PASSWORD=xxx
 # Or from ~/.vmware-aria/.env file
+
+# The 'username:' above can be overridden per target the same way, so a
+# deployment that injects credentials from a secret store can externalise both
+# halves of the pair instead of just the password:
+# VMWARE_ARIA_PROD_USERNAME=svc-aria
+# VMWARE_ARIA_LAB_USERNAME=svc-aria
+# Unset (or empty) falls back to the 'username:' in this file. Both halves are
+# re-read on every connect, so rotating an account takes effect together — a
+# username left behind by a rotation would pair with the new password and fail.
+# 'auth_source' is not overridable: it selects the authentication realm rather
+# than the account, so it does not rotate with the credential.
