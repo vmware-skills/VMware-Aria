@@ -1,0 +1,384 @@
+{
+  "_comment": "Capability eval scores. Regenerate with: pytest -m capability. These are tracked trends, not pass/fail gates \u2014 see _scoring.py.",
+  "scores": {
+    "entity_reachability_full": {
+      "detail": {
+        "broken_chains": [
+          {
+            "companion_skill_named": [],
+            "entity": "metric",
+            "param": "metric_keys",
+            "producer_on_surface": [],
+            "routed_in_description": [],
+            "tool": "get_resource_metrics"
+          }
+        ],
+        "entry_points": [
+          "create_alert_definition",
+          "list_alerts",
+          "list_alert_definitions",
+          "list_symptom_definitions",
+          "list_anomalies",
+          "list_rightsizing_recommendations",
+          "get_aria_health",
+          "list_collector_groups",
+          "list_report_definitions",
+          "list_reports",
+          "list_resources",
+          "get_top_consumers"
+        ],
+        "reachable_on_surface": 15,
+        "reachable_only_via_description": 1,
+        "required_entity_params": 17,
+        "required_params_classified": "17/22",
+        "tool_count": 28
+      },
+      "maximum": 17,
+      "pct": 94.1,
+      "unit": "required entity params",
+      "value": 16
+    },
+    "entity_reachability_read_only": {
+      "detail": {
+        "broken_chains": [
+          {
+            "companion_skill_named": [],
+            "entity": "metric",
+            "param": "metric_keys",
+            "producer_on_surface": [],
+            "routed_in_description": [],
+            "tool": "get_resource_metrics"
+          }
+        ],
+        "entry_points": [
+          "list_alerts",
+          "list_alert_definitions",
+          "list_symptom_definitions",
+          "list_anomalies",
+          "list_rightsizing_recommendations",
+          "get_aria_health",
+          "list_collector_groups",
+          "list_report_definitions",
+          "list_reports",
+          "list_resources",
+          "get_top_consumers"
+        ],
+        "reachable_on_surface": 9,
+        "reachable_only_via_description": 1,
+        "required_entity_params": 11,
+        "required_params_classified": "11/11",
+        "tool_count": 21
+      },
+      "maximum": 11,
+      "pct": 90.9,
+      "unit": "required entity params",
+      "value": 10
+    },
+    "entry_point_availability": {
+      "detail": {
+        "full_entry_points": 12,
+        "read_only_entry_points": 11
+      },
+      "maximum": 21,
+      "pct": 52.4,
+      "unit": "entry points",
+      "value": 11
+    },
+    "error_actionability": {
+      "detail": {
+        "dead_end_count": 24,
+        "dead_end_errors": [
+          {
+            "message": "Aria Operations token acquisition succeeded but no token returned",
+            "missing": [
+              "names_artifact",
+              "names_input",
+              "states_remedy"
+            ],
+            "where": "connection.py:191"
+          },
+          {
+            "message": "No target specified and no default target configured",
+            "missing": [
+              "names_artifact",
+              "names_input",
+              "states_remedy"
+            ],
+            "where": "connection.py:401"
+          },
+          {
+            "message": "Aria Operations authentication to {} failed: POST /auth/token/acquire returned HTTP {}. {}",
+            "missing": [
+              "names_artifact",
+              "states_remedy"
+            ],
+            "where": "connection.py:167"
+          },
+          {
+            "message": "Aria Operations authentication to {} could not connect: {}.{}",
+            "missing": [
+              "names_artifact",
+              "states_remedy"
+            ],
+            "where": "connection.py:182"
+          },
+          {
+            "message": "Aria Operations {} {} returned HTTP {}. {}",
+            "missing": [
+              "names_artifact",
+              "states_remedy"
+            ],
+            "where": "connection.py:286"
+          },
+          {
+            "message": "Aria Operations {} {} could not connect: {}.{}",
+            "missing": [
+              "names_artifact",
+              "states_remedy"
+            ],
+            "where": "connection.py:265"
+          },
+          {
+            "message": "alert_id must not be empty",
+            "missing": [
+              "names_artifact",
+              "names_input",
+              "states_remedy"
+            ],
+            "where": "alerts.py:184"
+          },
+          {
+            "message": "alert_id must not be empty",
+            "missing": [
+              "names_artifact",
+              "names_input",
+              "states_remedy"
+            ],
+            "where": "alerts.py:232"
+          },
+          {
+            "message": "alert_id must not be empty",
+            "missing": [
+              "names_artifact",
+              "names_input",
+              "states_remedy"
+            ],
+            "where": "alerts.py:287"
+          },
+          {
+            "message": "name must not be empty",
+            "missing": [
+              "names_artifact",
+              "names_input",
+              "states_remedy"
+            ],
+            "where": "alerts.py:424"
+          },
+          {
+            "message": "symptom_definition_ids must not be empty",
+            "missing": [
+              "names_artifact",
+              "names_input",
+              "states_remedy"
+            ],
+            "where": "alerts.py:426"
+          },
+          {
+            "message": "definition_id must not be empty",
+            "missing": [
+              "names_artifact",
+              "names_input",
+              "states_remedy"
+            ],
+            "where": "alerts.py:502"
+          },
+          {
+            "message": "definition_id must not be empty",
+            "missing": [
+              "names_artifact",
+              "names_input",
+              "states_remedy"
+            ],
+            "where": "alerts.py:553"
+          },
+          {
+            "message": "resource_id must not be empty",
+            "missing": [
+              "names_artifact",
+              "names_input",
+              "states_remedy"
+            ],
+            "where": "anomaly.py:142"
+          },
+          {
+            "message": "cluster_id must not be empty",
+            "missing": [
+              "names_artifact",
+              "names_input",
+              "states_remedy"
+            ],
+            "where": "capacity.py:81"
+          }
+        ],
+        "per_dimension_pct": {
+          "names_artifact": 12.5,
+          "names_input": 31.2,
+          "states_remedy": 25.0
+        },
+        "raise_sites": 32
+      },
+      "maximum": 96,
+      "pct": 22.9,
+      "unit": "points",
+      "value": 22
+    },
+    "manifest_context_headroom": {
+      "detail": {
+        "heaviest_tools": {
+          "create_alert_definition": 288,
+          "investigate_alert": 268,
+          "list_alerts": 309,
+          "list_anomalies": 282,
+          "list_symptom_definitions": 253
+        },
+        "manifest_tokens": 5519,
+        "mean_tokens_per_tool": 197.1,
+        "reference_context": 16384,
+        "tool_count": 28
+      },
+      "maximum": 16384,
+      "pct": 66.3,
+      "unit": "tokens",
+      "value": 10865
+    },
+    "parameter_documentation_coverage": {
+      "detail": {
+        "undocumented_by_tool": {}
+      },
+      "maximum": 82,
+      "pct": 100.0,
+      "unit": "parameters",
+      "value": 82
+    },
+    "per_tool_token_discipline": {
+      "detail": {
+        "ceiling": 350,
+        "over_ceiling": {}
+      },
+      "maximum": 28,
+      "pct": 100.0,
+      "unit": "tools",
+      "value": 28
+    },
+    "read_only_manifest_saving": {
+      "detail": {
+        "full_manifest_tokens": 5519,
+        "full_tool_count": 28,
+        "gated_manifest_tokens": 4185,
+        "gated_tool_count": 21,
+        "withheld_tools": [
+          "acknowledge_alert",
+          "cancel_alert",
+          "create_alert_definition",
+          "delete_alert_definition",
+          "delete_report",
+          "generate_report",
+          "set_alert_definition_state"
+        ]
+      },
+      "maximum": 5519,
+      "pct": 24.2,
+      "unit": "tokens",
+      "value": 1334
+    },
+    "read_write_marker_coverage": {
+      "detail": {
+        "unmarked": []
+      },
+      "maximum": 28,
+      "pct": 100.0,
+      "unit": "points",
+      "value": 28
+    },
+    "teaching_error_rate": {
+      "detail": {},
+      "maximum": 32,
+      "pct": 12.5,
+      "unit": "messages",
+      "value": 4
+    },
+    "tool_description_quality": {
+      "detail": {
+        "per_dimension_pct": {
+          "args": 100.0,
+          "gotcha": 64.3,
+          "marker": 100.0,
+          "next_hop": 50.0,
+          "what": 75.0,
+          "when": 60.7
+        },
+        "tools_graded": 28,
+        "weakest_tools": {
+          "acknowledge_alert": [
+            "next_hop",
+            "when"
+          ],
+          "create_alert_definition": [
+            "what",
+            "when"
+          ],
+          "get_resource": [
+            "gotcha",
+            "what",
+            "when"
+          ],
+          "get_resource_health": [
+            "gotcha",
+            "next_hop",
+            "what",
+            "when"
+          ],
+          "get_resource_metrics": [
+            "gotcha",
+            "next_hop",
+            "what",
+            "when"
+          ],
+          "get_resource_riskbadge": [
+            "gotcha",
+            "next_hop",
+            "what",
+            "when"
+          ],
+          "get_time_remaining": [
+            "gotcha",
+            "next_hop",
+            "when"
+          ],
+          "set_alert_definition_state": [
+            "gotcha",
+            "what",
+            "when"
+          ]
+        }
+      },
+      "maximum": 168,
+      "pct": 75.0,
+      "unit": "points",
+      "value": 126
+    },
+    "tool_failure_payload_quality": {
+      "detail": {
+        "bare_string_error_lines": [],
+        "carries_hint": 28,
+        "dict_shaped": 28,
+        "error_return_sites": 28,
+        "hint_names_artifact": 28
+      },
+      "maximum": 84,
+      "pct": 100.0,
+      "unit": "checks",
+      "value": 84
+    }
+  }
+}
