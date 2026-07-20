@@ -1,5 +1,5 @@
 {
-  "_comment": "Capability eval scores. Regenerate with: pytest -m capability. These are tracked trends, not pass/fail gates \u2014 see _scoring.py.",
+  "_comment": "Capability eval scores. Regenerate with: pytest -m capability. These are tracked trends, not pass/fail gates \u2014 see _scoring.py. Entries marked stale=true were carried over from an earlier run because this run did not measure them.",
   "scores": {
     "entity_reachability_full": {
       "detail": {
@@ -69,7 +69,9 @@
     "error_actionability": {
       "detail": {
         "composed_hint_sites": [
-          "connection.py:303"
+          "connection.py:210",
+          "connection.py:318",
+          "connection.py:294"
         ],
         "dead_end_count": 0,
         "dead_end_errors": [],
@@ -158,16 +160,13 @@
         "budget_chars": 300,
         "over_budget": [],
         "remedy_after_interpolation": [
-          "config.py:226",
-          "config.py:212",
-          "connection.py:200",
-          "connection.py:420",
-          "connection.py:437",
-          "connection.py:172",
-          "connection.py:189",
-          "connection.py:303",
-          "connection.py:280",
-          "alerts.py:74"
+          "config.py:236",
+          "config.py:222",
+          "connection.py:221",
+          "connection.py:436",
+          "connection.py:453",
+          "alerts.py:74",
+          "alerts.py:452"
         ]
       },
       "maximum": 32,

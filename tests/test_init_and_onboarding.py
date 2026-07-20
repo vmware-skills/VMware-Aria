@@ -102,7 +102,7 @@ def test_doctor_init_reference_is_backed_by_real_command():
 def test_auth_hint_names_env_and_config_files():
     from vmware_aria.connection import _hint_for_status
 
-    hint = _hint_for_status(401, "/resources")
+    hint = _hint_for_status(401)
     assert ".vmware-aria/.env" in hint
     assert ".vmware-aria/config.yaml" in hint
     assert "VMWARE_ARIA_<TARGET>_PASSWORD" in hint

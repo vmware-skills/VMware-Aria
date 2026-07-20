@@ -611,6 +611,47 @@ def test_auth_transport_error_becomes_aria_api_error(monkeypatch) -> None:
     assert "could not connect" in str(exc_info.value).lower()
 
 
+def test_transport_error_teaches_without_quoting_the_certificate(monkeypatch) -> None:
+    """A TLS failure must name the fix, not the certificate.
+
+    ``_safe_error`` passes ``AriaApiError`` through verbatim, so anything the
+    connection layer interpolates reaches the agent. Interpolating the transport
+    exception put the certificate subject and the hostname it was checked
+    against into that message — text ssl wrote, not text this package authored —
+    and pushed the ``verify_ssl: false`` remedy, the entire point of the
+    message, past the 300-char cap so it was never delivered.
+    """
+    import httpx
+    import pytest
+
+    from vmware_aria.config import TargetConfig
+    from vmware_aria.connection import AriaApiError, AriaClient
+    from vmware_aria.mcp_server._shared import _safe_error
+
+    subject = "CN=aria-prod.corp.example.com,O=Corp,C=US"
+
+    def fake_post(self, url, **k):
+        raise httpx.ConnectError(
+            "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: "
+            f"self-signed certificate in certificate chain, subject '{subject}' "
+            "(_ssl.c:1006)"
+        )
+
+    monkeypatch.setattr("httpx.Client.post", fake_post)
+
+    with pytest.raises(AriaApiError) as exc_info:
+        AriaClient(TargetConfig(host="aria-prod.corp.example.com", username="u"), "pw")
+
+    delivered = _safe_error(exc_info.value, "get_resource")
+
+    assert subject not in delivered, "the certificate subject reached the agent"
+    assert "_ssl.c" not in delivered, "raw ssl error text reached the agent"
+    # The remedy is what the message exists to deliver, so it must survive the cap.
+    assert "verify_ssl: false" in delivered
+    assert "config.yaml" in delivered
+    assert len(delivered) <= 300
+
+
 def test_token_refresh_failure_mid_request_is_translated(monkeypatch) -> None:
     import httpx
     import pytest
@@ -730,7 +771,7 @@ def test_cli_aria_api_error_is_one_red_line_not_traceback(monkeypatch) -> None:
     def boom(target, config_path=None):
         raise AriaApiError(
             "Aria Operations GET /resources/bad-uuid returned HTTP 404. "
-            + _hint_for_status(404, "/resources/bad-uuid"),
+            + _hint_for_status(404),
             status_code=404,
             method="GET",
             path="/resources/bad-uuid",

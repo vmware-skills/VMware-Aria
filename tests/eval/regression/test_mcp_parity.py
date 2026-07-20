@@ -51,7 +51,7 @@ def test_safe_error_passes_aria_api_error_hint_through() -> None:
 
     exc = AriaApiError(
         "Aria Operations GET /resources/bad-uuid returned HTTP 404. "
-        + _hint_for_status(404, "/resources/bad-uuid"),
+        + _hint_for_status(404),
         status_code=404,
         method="GET",
         path="/resources/bad-uuid",
@@ -73,7 +73,7 @@ def test_mcp_tool_error_path_contains_404_hint(monkeypatch) -> None:
     def boom(target=None):
         raise AriaApiError(
             "Aria Operations GET /resources/bad-uuid returned HTTP 404. "
-            + _hint_for_status(404, "/resources/bad-uuid"),
+            + _hint_for_status(404),
             status_code=404,
             method="GET",
             path="/resources/bad-uuid",
@@ -85,6 +85,50 @@ def test_mcp_tool_error_path_contains_404_hint(monkeypatch) -> None:
     assert "error" in result
     assert "404" in result["error"]
     assert "list the parent" in result["error"]
+
+
+def test_a_returned_error_is_audited_as_a_failure(monkeypatch) -> None:
+    """A tool that catches and returns must still be recorded as having failed.
+
+    ``@vmware_tool`` marks a call failed when an exception reaches it, or when
+    the payload it returns is the family's error envelope — a dict carrying a
+    truthy ``error``. Every tool in this skill catches and returns exactly that
+    envelope, so no explicit ``report_tool_failure`` call is needed here.
+
+    That is a property of this surface, not a guarantee, which is why it is
+    pinned: a tool rewritten to hand back an error *string* would look identical
+    to a success, and the audit row would say ``ok`` for an operation that
+    failed, an undo token would be written for a change that never happened, and
+    the circuit breaker would be told the call succeeded.
+    """
+    import vmware_aria.mcp_server.server as server
+    from vmware_aria.connection import AriaApiError
+
+    assert getattr(server.get_resource, "_is_vmware_tool", False), (
+        "get_resource is not wrapped by @vmware_tool — this test would pass "
+        "without exercising the audit path it exists to check"
+    )
+
+    rows: list[dict] = []
+
+    class _Recorder:
+        def log(self, **kw):
+            rows.append(kw)
+
+    monkeypatch.setattr("vmware_policy.decorators.get_engine", lambda: _Recorder())
+
+    def boom(target=None):
+        raise AriaApiError("Aria Operations returned HTTP 404.", status_code=404)
+
+    monkeypatch.setattr(server, "_get_connection", boom)
+    result = server.get_resource("bad-uuid")
+
+    assert result.get("error"), "the tool did not return the error envelope"
+    assert rows, "the wrapper recorded no audit row at all"
+    assert rows[0]["status"] == "error", (
+        f"a failed call was audited as {rows[0]['status']!r} — the audit log, "
+        "the undo store and the circuit breaker all read this field"
+    )
 
 
 def test_safe_error_passes_connection_error_through() -> None:

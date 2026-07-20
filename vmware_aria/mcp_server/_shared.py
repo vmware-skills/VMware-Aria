@@ -23,13 +23,14 @@ keep resolving.
 
 import logging
 import os
+import ssl
 from pathlib import Path
 from typing import Any, Optional
 
 from mcp.server.fastmcp import FastMCP
 from vmware_policy import sanitize
 
-from vmware_aria.config import load_config
+from vmware_aria.config import ConfigError, load_config
 from vmware_aria.connection import AriaApiError, ConnectionManager
 from vmware_aria.notify.audit import AuditLogger
 
@@ -47,24 +48,45 @@ def _safe_error(exc: Exception, tool: str) -> str:
     purpose passes through, and only genuinely unplanned ones are reduced. That
     covers the builtin validation errors, ``AriaApiError`` (the connection
     layer's teaching errors — "404: list the parent collection first", "503:
-    platform booting"), and ``ConnectionError``, which ``connection.py`` raises
-    when a host answers but is not an Aria suite-api endpoint.
+    platform booting"), ``ConnectionError``, which ``connection.py`` raises when
+    a host answers but is not an Aria suite-api endpoint, and ``ConfigError``,
+    the missing-password error whose entire remedy is the env var name it
+    carries.
 
-    ``OSError`` is allowed because ``config.py`` raises exactly one — the
-    missing-password error, this family's most common first-run failure, whose
-    entire remedy is the env var name it carries. Its subclasses
-    ``FileNotFoundError``, ``PermissionError`` and ``ConnectionError`` were
-    already allowed, so admitting the base class widens exposure only to the
-    remaining OS-level subtypes.
+    ``ConfigError`` is deliberately narrower than the ``OSError`` it subclasses.
+    Allowing the base class through admitted every other OS-level failure with
+    it, and ``sanitize()`` strips control characters and truncates — it redacts
+    nothing. ``socket.gaierror`` quotes the name that failed to resolve; this
+    package authored none of that text, and it reached the agent verbatim for as
+    long as the base class was listed.
+
+    Swapping the entry is necessary but not sufficient, which is why the
+    ``ssl.SSLError`` reduction sits *ahead* of the allowlist rather than in it:
+    ``ssl.SSLCertVerificationError`` inherits from ``ValueError`` as well as
+    ``OSError``, and ``ValueError`` predates all of this. An allowlist cannot
+    express "not this one", so the exclusion has to be checked first. Only
+    ``ssl.SSLError`` — ``socket.gaierror`` and ``ConnectionRefusedError`` have
+    ``OSError`` as their only base and are already reduced, so naming them here
+    would make this guard sound broader than it is.
+
+    Measured reach, so nobody has to guess: on this skill's own transport it
+    never fires. httpx maps a certificate failure to ``httpx.ConnectError``,
+    which is not an ``ssl.SSLError`` and not on the allowlist either, and
+    ``connection.py`` translates it into an authored ``AriaApiError`` before it
+    gets here. The guard covers a raw TLS error arriving by some other route;
+    the leak that actually happened was ``connection.py`` interpolating that
+    exception's text into a message the allowlist passes through.
 
     Anything else is reduced to its type — an unplanned exception's text was
     written for a developer reading a traceback, not for an agent choosing what
     to do next, and it is the one that can carry credentials.
     """
     logger.error("Tool %s failed", tool, exc_info=True)
+    if isinstance(exc, ssl.SSLError):
+        return f"{type(exc).__name__}: operation failed."
     if isinstance(
         exc,
-        (AriaApiError, ValueError, FileNotFoundError, KeyError, PermissionError, ConnectionError, OSError),
+        (AriaApiError, ValueError, FileNotFoundError, KeyError, PermissionError, ConnectionError, ConfigError),
     ):
         return sanitize(str(exc), 300)
     return f"{type(exc).__name__}: operation failed."

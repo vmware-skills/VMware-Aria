@@ -15,26 +15,88 @@ site rather than what survives the wrapper.
 
 So the rule is the inverse of an enumeration: every exception this skill raises
 on purpose passes through, and only genuinely unplanned ones are reduced.
+
+The first repair overshot. Admitting bare ``OSError`` admitted every OS-level
+failure with it, and ``sanitize()`` only strips control characters and
+truncates — it redacts nothing. ``socket.gaierror`` carries the hostname that
+failed to resolve; neither it nor the TLS errors beside it were authored by this
+package. So the passthrough is now the narrow ``ConfigError``, which is what
+``config.py`` actually raises.
 """
 
 from __future__ import annotations
 
+import socket
+import ssl
+
 import pytest
 
+from vmware_aria.config import ConfigError, TargetConfig
 from vmware_aria.connection import AriaApiError
 from vmware_aria.mcp_server._shared import _safe_error
 
 TEACHING = "Resource 'vm-99' not found. List the parent collection first to get a valid UUID."
 
 ENV_KEY = "VMWARE_ARIA_PROD_PASSWORD"
-MISSING_PASSWORD = f"Password not found. Set environment variable: {ENV_KEY}"
+HOSTNAME = "aria-prod.corp.example.com"
 
 
-def test_missing_password_keeps_the_env_var_name():
-    """The single OSError config.py raises — and the whole point of it is the name."""
-    out = _safe_error(OSError(MISSING_PASSWORD), "list_resources")
+def test_missing_password_keeps_the_env_var_name(monkeypatch):
+    """The one error config.py raises — and the whole point of it is the name.
+
+    Raised through ``get_password`` rather than fabricated, so the test pins the
+    exception the package actually produces. Fabricating it was how the previous
+    version kept passing while the real type changed.
+    """
+    monkeypatch.delenv(ENV_KEY, raising=False)
+    with pytest.raises(ConfigError) as exc_info:
+        TargetConfig(host="h", username="u").get_password("prod")
+
+    out = _safe_error(exc_info.value, "list_resources")
     assert ENV_KEY in out
     assert "operation failed" not in out
+
+
+def test_os_level_failures_no_longer_carry_the_hostname():
+    """The reason the passthrough is ``ConfigError`` and not its base class.
+
+    A DNS failure names the host it could not resolve. That text is the
+    resolver's, not this package's, and it reaches the agent unredacted for as
+    long as ``OSError`` is on the allowlist — which is what mutating this test
+    demonstrates: put ``OSError`` back and this is the assertion that goes red.
+    """
+    out = _safe_error(socket.gaierror(8, f"nodename nor servname provided: {HOSTNAME}"), "t")
+    assert out == "gaierror: operation failed."
+    assert HOSTNAME not in out
+
+
+def test_tls_errors_are_reduced_despite_inheriting_valueerror():
+    """The reduction has to run *before* the allowlist, not inside it.
+
+    ``ssl.SSLCertVerificationError`` inherits from ``ValueError`` as well as
+    ``OSError``, and ``ValueError`` has been on the allowlist throughout — so
+    removing ``OSError`` on its own changes nothing here. Its message quotes the
+    certificate subject and the hostname it was checked against.
+    """
+    exc = ssl.SSLCertVerificationError(
+        1,
+        "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed "
+        f"certificate in certificate chain, subject 'CN={HOSTNAME},O=Corp' (_ssl.c:1006)",
+    )
+    assert isinstance(exc, ValueError), "the co-inheritance this guard exists for is gone"
+
+    out = _safe_error(exc, "list_resources")
+    assert out == "SSLCertVerificationError: operation failed."
+    assert HOSTNAME not in out
+
+
+def test_config_error_is_still_an_oserror():
+    """The CLI paths that predate the narrow type catch ``OSError``.
+
+    Narrowing the MCP passthrough must not change what the CLI catches, or the
+    same missing password that now teaches an agent would crash a terminal.
+    """
+    assert issubclass(ConfigError, OSError)
 
 
 def test_aria_api_error_keeps_its_message():

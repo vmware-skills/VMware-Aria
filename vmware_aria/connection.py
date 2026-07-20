@@ -62,13 +62,18 @@ class AriaApiError(Exception):
         self.path = path
 
 
-def _hint_for_status(status_code: int, path: str) -> str:
-    """Return a short, actionable remediation hint for an HTTP error status."""
+def _hint_for_status(status_code: int) -> str:
+    """Return a short, actionable remediation hint for an HTTP error status.
+
+    Deliberately free of the request path. The callers already name the failing
+    call, and naming it here too put it in the message twice — 118 of the 416
+    characters a 404 rendered, which pushed the closing remedy past
+    ``sanitize()``'s 300-char cap so the agent never received it.
+    """
     if status_code == 404:
         return (
-            f"Nothing exists at {path}. Verify the id — list the parent "
-            "collection first (e.g. `vmware-aria resource list`, "
-            "`vmware-aria alert list`, or the list_resources / list_alerts "
+            "Verify the id — list the parent collection first (e.g. "
+            "`vmware-aria resource list`, or the list_resources / list_alerts "
             "tools) and copy an exact UUID."
         )
     if status_code == 400:
@@ -100,6 +105,29 @@ def _is_tls_verify_error(exc: Exception) -> bool:
     """True if a transport error looks like a TLS certificate verification failure."""
     text = str(exc).lower()
     return "certificate" in text or "ssl" in text or "verify" in text
+
+
+def _transport_hint(exc: Exception) -> str:
+    """Return the remedy for a connection/timeout failure, authored not quoted.
+
+    The exception is read to choose the branch but never interpolated. Its text
+    is whatever ssl/socket produced — for a TLS failure that is the certificate
+    subject and the hostname it was checked against, for a DNS failure the name
+    that failed to resolve. ``_safe_error`` passes ``AriaApiError`` through
+    verbatim, so quoting the exception would hand all of that to the agent while
+    telling the operator nothing they can act on. The full text still reaches
+    the server log through ``exc_info``.
+    """
+    if _is_tls_verify_error(exc):
+        return (
+            "The certificate could not be verified — for a self-signed lab cert "
+            "set `verify_ssl: false` for this target in "
+            "~/.vmware-aria/config.yaml."
+        )
+    return (
+        "Check 'host' and 'port' for this target in ~/.vmware-aria/config.yaml "
+        "and that the appliance is reachable from this machine."
+    )
 
 
 class AriaClient:
@@ -168,28 +196,21 @@ class AriaClient:
                     "~/.vmware-aria/.env."
                 )
             else:
-                hint = _hint_for_status(status, "/auth/token/acquire")
+                hint = _hint_for_status(status)
             raise AriaApiError(
-                f"Aria Operations authentication to {self._target.host} failed: "
-                f"POST /auth/token/acquire returned HTTP {status}. {hint} "
-                f"Run 'vmware-aria doctor' to re-test this target's credentials "
-                f"and connectivity.",
+                f"Aria Operations authentication failed: POST "
+                f"/auth/token/acquire returned HTTP {status}. {hint} "
+                f"Then run 'vmware-aria doctor'. "
+                f"Configured host: {self._target.host}",
                 status_code=status,
                 method="POST",
                 path="/auth/token/acquire",
             ) from exc
         except (httpx.TimeoutException, httpx.TransportError) as exc:
-            tail = (
-                " The certificate could not be verified — for a self-signed lab "
-                "cert set `verify_ssl: false` for this target in "
-                "~/.vmware-aria/config.yaml."
-                if _is_tls_verify_error(exc)
-                else " Check the host/port and network, then retry."
-            )
             raise AriaApiError(
-                f"Aria Operations authentication to {self._target.host} could not "
-                f"connect: {exc}.{tail} Verify 'host' and 'port' for this target in "
-                f"~/.vmware-aria/config.yaml, then run 'vmware-aria doctor'.",
+                f"Aria Operations authentication could not connect. "
+                f"{_transport_hint(exc)} Then run 'vmware-aria doctor'. "
+                f"Configured host: {self._target.host}",
                 method="POST",
                 path="/auth/token/acquire",
             ) from exc
@@ -270,17 +291,11 @@ class AriaClient:
                     attempt += 1
                     time.sleep(_RETRY_DELAY_SEC)
                     continue
-                tail = (
-                    " The certificate could not be verified — for a self-signed "
-                    "lab cert set `verify_ssl: false` for this target in "
-                    "~/.vmware-aria/config.yaml."
-                    if _is_tls_verify_error(exc)
-                    else " Check the host/port and network, then retry."
-                )
                 raise AriaApiError(
-                    f"Aria Operations {method} {path} could not connect: {exc}.{tail} "
-                    f"Verify 'host' and 'port' for this target in "
-                    f"~/.vmware-aria/config.yaml, then run 'vmware-aria doctor'.",
+                    f"Aria Operations request could not connect. "
+                    f"{_transport_hint(exc)} Then run 'vmware-aria doctor'. "
+                    f"Configured host: {self._target.host}. "
+                    f"Failing call: {method} {path}",
                     method=method,
                     path=path,
                 ) from exc
@@ -301,9 +316,10 @@ class AriaClient:
 
             if resp.status_code >= 400:
                 raise AriaApiError(
-                    f"Aria Operations {method} {path} returned HTTP "
-                    f"{resp.status_code}. {_hint_for_status(resp.status_code, path)} "
-                    f"Run 'vmware-aria doctor' if every call to this target fails.",
+                    f"Aria Operations returned HTTP {resp.status_code}. "
+                    f"{_hint_for_status(resp.status_code)} "
+                    f"Run 'vmware-aria doctor' if every call to this target "
+                    f"fails. Failing call: {method} {path}",
                     status_code=resp.status_code,
                     method=method,
                     path=path,
