@@ -12,10 +12,6 @@ Each operation is classified by autonomy level per the Enterprise Harness Engine
 | **L4** | Multi-step plan / apply workflow | *N/A currently* | — *(no multi-step orchestration; Aria is observe/analyze, not configure)* |
 | **L5** | Auto-remediation from learned pattern | Pattern library only; requires `risk:low` + `reversible:true` + `repeatable:true` | *(roadmap — candidates: auto-acknowledge known-noisy alerts, auto-cancel resolved-by-event alerts)* |
 
-> **Read-only mode**: with `VMWARE_READ_ONLY=true` the 7 L3 write tools above do
-> not appear in `list_tools()` at all. Classification comes from each tool's
-> `[READ]`/`[WRITE]` docstring marker, not from this table — see the README.
-
 **Notes**:
 - L1/L2 tools are always safe for agents to call without confirmation.
 - L3 alert-state writes pass through the `@vmware_tool` decorator: connection check → policy check → audit log. Cancel is irreversible by Aria API design and treated as a destructive operation.

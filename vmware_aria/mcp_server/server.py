@@ -62,7 +62,7 @@ For NSX networking use vmware-nsx.
 import logging
 from typing import Optional
 
-from vmware_policy import apply_read_only_gate, mtime_cached_loader, set_environment_resolver, vmware_tool
+from vmware_policy import mtime_cached_loader, set_environment_resolver, vmware_tool
 
 from vmware_aria.config import CONFIG_FILE, load_config
 
@@ -320,35 +320,6 @@ def delete_report(
         )
     except Exception as e:
         return {"error": _safe_error(e, "delete_report"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
-
-
-# ---------------------------------------------------------------------------
-# Read-only gate
-# ---------------------------------------------------------------------------
-
-
-def _config_read_only() -> Optional[bool]:
-    """Best-effort read of ``read_only`` from the config file.
-
-    Runs at import time, when no config file need exist yet (tests, ``--help``,
-    smoke checks), so every failure degrades to "not configured" and lets the
-    env vars decide. None and False are equivalent here — config is the last
-    link in the precedence chain — but None keeps 'not configured'
-    distinguishable from 'configured off' in logs and debugging.
-    """
-    try:
-        return load_config().read_only
-    except Exception:  # noqa: BLE001 — absent/unreadable config is not an error here
-        return None
-
-
-# Applied once, after every tool module above has registered. In read-only mode
-# the write tools are removed from the registry, so list_tools() never offers
-# them — the guarantee is structural rather than a prompt instruction the model
-# may ignore (VMware-AIops issue #31).
-WITHHELD_WRITE_TOOLS: list[str] = apply_read_only_gate(
-    mcp, "vmware-aria", config_flag=_config_read_only()
-)
 
 
 # ---------------------------------------------------------------------------

@@ -5,10 +5,10 @@ locally-hosted models — Llama 3.3 70B, Qwen, Mistral, and similar, served
 through Goose, Ollama, or OpenShift AI — need explicit operating rules to call
 tools reliably.
 
-This page covers the two things that go wrong most often with vmware-aria
-specifically: **write tools being reachable at all**, and **alert-to-resource
-correlation**. For the full cross-skill guardrail set, the complete system
-prompt, and the small-model failure-mode checklist, see the canonical guide in
+This page covers what goes wrong most often with vmware-aria specifically:
+**alert-to-resource correlation**. For the full cross-skill guardrail set, the
+complete system prompt, and the small-model failure-mode checklist, see the
+canonical guide in
 [vmware-monitor's references](https://github.com/zw008/VMware-Monitor/blob/main/skills/vmware-monitor/references/agent-guardrails.md).
 
 These guardrails are adapted, with thanks, from the working configuration
@@ -22,41 +22,7 @@ and vmware-monitor against a production vSphere estate
 
 ---
 
-## 1. Read-only mode
-
-vmware-aria has 7 write tools: `acknowledge_alert`, `cancel_alert`,
-`create_alert_definition`, `set_alert_definition_state`,
-`delete_alert_definition`, `generate_report`, `delete_report`. A prompt
-instruction not to use them is advisory, and a small model can ignore it.
-
-Set `VMWARE_READ_ONLY=true` and all seven are removed from the tool registry at
-startup. `list_tools()` returns only the 21 read tools, so the model cannot
-call what it cannot see:
-
-```json
-{
-  "mcpServers": {
-    "vmware-aria": {
-      "command": "vmware-aria",
-      "args": ["mcp"],
-      "env": { "VMWARE_READ_ONLY": "true" }
-    }
-  }
-}
-```
-
-`VMWARE_READ_ONLY` covers the whole skill family. To lock down only this skill,
-use `VMWARE_ARIA_READ_ONLY=true`; to keep this one writable while the rest are
-locked, set `VMWARE_ARIA_READ_ONLY=false` alongside the family variable. The
-config file equivalent is `read_only: true` in `~/.vmware-aria/config.yaml`.
-
-Precedence is per-skill env → family env → config file → off. The startup log
-names every withheld tool. If read-only mode is requested but cannot be
-guaranteed, the server refuses to start rather than running open.
-
----
-
-## 2. Alert-to-resource correlation
+## 1. Alert-to-resource correlation
 
 This is the sequence small models get wrong most reliably. An Aria alert does
 not carry the affected object's name — only a `resourceId`. Correlating an
@@ -92,7 +58,7 @@ If you must drive the steps manually, state these rules explicitly:
 
 ---
 
-## 3. Aria-specific data fidelity
+## 2. Aria-specific data fidelity
 
 Aria's enum values carry operational meaning and must survive the model
 untouched:

@@ -28,8 +28,6 @@ AI-assisted monitoring and capacity planning for VMware Aria Operations (vRealiz
 
 **Total**: 28 tools — 21 read-only, 7 write
 
-- **Read-only mode** — one env var strips every write tool from the MCP registry; ideal for audits, PoCs, and untrusted/local models — see [Read-Only Mode](#read-only-mode)
-
 ## Quick Start
 
 ```bash
@@ -57,30 +55,33 @@ chmod 600 ~/.vmware-aria/.env
 vmware-aria doctor
 ```
 
-## Read-Only Mode
+### Offline / Air-Gapped Install (from source)
 
-A prompt instruction is advisory — a model can ignore it. Read-only mode is structural: set `VMWARE_READ_ONLY=true` and all 7 write tools (alert acknowledge/cancel, alert definition create/enable-disable/delete, report generate/delete) are removed from the MCP registry at startup. `list_tools()` never offers them, so the model cannot call what it cannot see. Off by default, and fail-closed: if the mode is requested but cannot be guaranteed, the server refuses to start.
+This project uses the modern PEP 517 build system (hatchling), so there is **no
+`setup.py`** by design — that is expected, not a missing file. If you cloned the
+source and hit `ERROR: File "setup.py" or "setup.cfg" not found ... editable mode
+currently requires a setuptools-based build`, your `pip` is older than 21.3 and
+cannot do an *editable* (`-e`) install with a non-setuptools backend. Editable
+mode is a developer convenience, not needed to run the tool — do one of:
 
-Three ways to enable:
+```bash
+# From the source tree — a normal (non-editable) install builds a wheel:
+pip install .              # NOT  pip install -e .
 
-```json
-{
-  "mcpServers": {
-    "vmware-aria": {
-      "command": "vmware-aria",
-      "args": ["mcp"],
-      "env": { "VMWARE_READ_ONLY": "true" }
-    }
-  }
-}
+# ...or upgrade pip first, and editable works too:
+pip install --upgrade pip && pip install -e .
 ```
 
-- Per-skill override: `VMWARE_ARIA_READ_ONLY=true` (takes precedence over the family-wide `VMWARE_READ_ONLY`)
-- Config alternative: `read_only: true` in `~/.vmware-aria/config.yaml`
+For a **truly air-gapped host**, build the wheels on a connected machine and copy
+them over — the target then needs no network:
 
-Precedence: per-skill env → family env → config → off. Startup logs list exactly which tools were withheld.
+```bash
+# On a connected machine, collect this package + its dependencies as wheels:
+pip wheel . -w dist        # → dist/*.whl   (or: uv build, for just this package)
 
-Running with local or small models? See [`skills/vmware-aria/references/agent-guardrails.md`](skills/vmware-aria/references/agent-guardrails.md).
+# Copy dist/ to the air-gapped host, then install offline:
+pip install --no-index --find-links dist vmware-aria
+```
 
 ## CLI Examples
 

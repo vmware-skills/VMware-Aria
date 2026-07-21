@@ -22,8 +22,6 @@
 
 **共 28 个工具** — 21 只读、7 写操作
 
-- **只读模式** —— 一个环境变量即可从 MCP 注册表移除全部写工具，适合审计、PoC 与本地小模型场景，详见[只读模式](#只读模式)
-
 ## 快速开始
 
 ```bash
@@ -51,30 +49,31 @@ chmod 600 ~/.vmware-aria/.env
 vmware-aria doctor
 ```
 
-## 只读模式
+### 离线 / 气隙环境安装（从源码）
 
-提示词约束只是建议——模型可以无视它。只读模式是结构性的：设置 `VMWARE_READ_ONLY=true`，全部 7 个写工具（告警确认/取消、告警定义创建/启用禁用/删除、报表生成/删除）会在启动时从 MCP 注册表中移除。`list_tools()` 根本不会列出它们——模型看不见的工具就无法调用。默认关闭；且为 fail-closed 设计：请求了只读模式但无法保证时，服务器直接拒绝启动。
+本项目采用现代 PEP 517 构建系统（hatchling），因此**没有 `setup.py`**——这是
+有意为之，不是缺失文件。如果你克隆源码后遇到 `ERROR: File "setup.py" or
+"setup.cfg" not found ... editable mode currently requires a setuptools-based
+build`，说明你的 `pip` 早于 21.3，无法对非 setuptools 后端做*可编辑*（`-e`）
+安装。可编辑模式只是开发便利，运行本工具并不需要——任选其一：
 
-三种启用方式：
+```bash
+# 从源码树安装——普通（非可编辑）安装会构建 wheel：
+pip install .              # 不是  pip install -e .
 
-```json
-{
-  "mcpServers": {
-    "vmware-aria": {
-      "command": "vmware-aria",
-      "args": ["mcp"],
-      "env": { "VMWARE_READ_ONLY": "true" }
-    }
-  }
-}
+# ……或先升级 pip，之后可编辑安装也能用：
+pip install --upgrade pip && pip install -e .
 ```
 
-- 按 skill 覆盖：`VMWARE_ARIA_READ_ONLY=true`（优先于家族级 `VMWARE_READ_ONLY`）
-- 配置文件方式：在 `~/.vmware-aria/config.yaml` 中设置 `read_only: true`
+对于**真正的气隙主机**，在联网机器上构建 wheel 再拷贝过去——目标主机无需联网：
 
-优先级：按 skill 环境变量 → 家族环境变量 → 配置文件 → 默认关闭。启动日志会列出被移除工具的完整清单。
+```bash
+# 在联网机器上，把本包及其依赖收集为 wheel：
+pip wheel . -w dist        # → dist/*.whl   （或：uv build，仅构建本包）
 
-使用本地/小模型运行？参见 [`skills/vmware-aria/references/agent-guardrails.md`](skills/vmware-aria/references/agent-guardrails.md)。
+# 把 dist/ 拷到气隙主机，然后离线安装：
+pip install --no-index --find-links dist vmware-aria
+```
 
 ## 常用 CLI 示例
 

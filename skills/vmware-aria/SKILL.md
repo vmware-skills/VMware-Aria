@@ -12,7 +12,7 @@ installer:
   package: vmware-aria
 allowed-tools:
   - Bash
-metadata: {"openclaw":{"requires":{"env":["VMWARE_ARIA_CONFIG"],"bins":["vmware-aria"],"config":["~/.vmware-aria/config.yaml","~/.vmware-aria/.env"]},"optional":{"env":["VMWARE_ARIA_<TARGET>_PASSWORD","VMWARE_ARIA_<TARGET>_USERNAME","VMWARE_READ_ONLY","VMWARE_ARIA_READ_ONLY","VMWARE_AUDIT_APPROVED_BY"],"bins":["vmware-policy"]},"primaryEnv":"VMWARE_ARIA_CONFIG","homepage":"https://github.com/zw008/VMware-Aria","emoji":"📊","os":["macos","linux"]}}
+metadata: {"openclaw":{"requires":{"env":["VMWARE_ARIA_CONFIG"],"bins":["vmware-aria"],"config":["~/.vmware-aria/config.yaml","~/.vmware-aria/.env"]},"optional":{"env":["VMWARE_ARIA_<TARGET>_PASSWORD","VMWARE_ARIA_<TARGET>_USERNAME","VMWARE_AUDIT_APPROVED_BY"],"bins":["vmware-policy"]},"primaryEnv":"VMWARE_ARIA_CONFIG","homepage":"https://github.com/zw008/VMware-Aria","emoji":"📊","os":["macos","linux"]}}
 compatibility: >
   vmware-policy auto-installed as Python dependency (provides @vmware_tool decorator and audit logging). All write operations audited to ~/.vmware/audit.db.
   Credentials: Each Aria Operations target requires a per-target password env var in ~/.vmware-aria/.env following the pattern VMWARE_ARIA_<TARGET_NAME_UPPER>_PASSWORD. Passwords are never logged or echoed.
@@ -167,6 +167,8 @@ vmware-aria resource top --target lab
 | Cloud models (Claude, GPT-4o) | Either | MCP gives structured JSON I/O |
 | Automated pipelines | **MCP** | Type-safe parameters, structured output |
 
+Running vmware-aria with a local or small model? See [`references/agent-guardrails.md`](references/agent-guardrails.md) for tool-calling guardrails (alert-to-resource correlation and Aria data fidelity).
+
 ## MCP Tools (28 — 21 read, 7 write)
 
 All MCP tools accept an optional `target` parameter to select which Aria Operations instance to connect to.
@@ -226,10 +228,6 @@ Rules:
 - **`truncated: false` means the answer is complete** — safe to summarise as the whole picture.
 - **`total: null` means the API reported no collection size**, so a page filled exactly to the limit is flagged truncated conservatively. It may in fact be complete; a follow-up query with a larger limit settles it.
 - **`list_anomalies` also carries `scanned`** — how many VMs were examined. It returns only VMs with a non-zero anomaly count, so a short list is not evidence that the environment is clean; check `truncated`.
-
-## Read-Only Mode
-
-If a write tool listed above is absent from `list_tools()`, this deployment is in read-only mode: `VMWARE_READ_ONLY=true` (or `VMWARE_ARIA_READ_ONLY`, or `read_only: true` in config.yaml) withholds all 7 write tools at start-up. That is a deliberate lockdown, not a fault — do not retry, and do not look for another tool that achieves the same change. Name the operation that is blocked and say an operator must clear the switch and restart the server. Read tools are unaffected. Running with local or small models? See [`references/agent-guardrails.md`](references/agent-guardrails.md).
 
 ## CLI Quick Reference
 
