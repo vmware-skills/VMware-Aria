@@ -14,6 +14,7 @@ from typing import Annotated
 import typer
 from rich.console import Console
 from rich.table import Table
+from vmware_policy import PolicyDenied, guarded
 
 from vmware_aria.notify.audit import AuditLogger
 
@@ -93,6 +94,13 @@ def _friendly_errors(fn):
 
         try:
             return fn(*args, **kwargs)
+        except PolicyDenied as exc:
+            # A deny rule or closed maintenance window refused this write —
+            # @guarded ran guard() before the body and already wrote the
+            # status="denied" audit row. Teach which rule fired, not a traceback.
+            rule = f" [dim](rule: {exc.result.rule})[/]" if exc.result.rule else ""
+            console.print(f"[red]Denied by policy: {exc.result.reason}[/]{rule}")
+            raise typer.Exit(1) from exc
         except (AriaApiError, FileNotFoundError, KeyError, OSError) as exc:
             console.print(f"[red]Error: {exc}[/red]")
             raise typer.Exit(1) from exc
@@ -342,6 +350,7 @@ def alert_get(
 
 @alert_app.command("acknowledge")
 @_friendly_errors
+@guarded(risk_level='medium')
 def alert_acknowledge(
     alert_id: str,
     target: TargetOption = None,
@@ -362,6 +371,7 @@ def alert_acknowledge(
 
 @alert_app.command("cancel")
 @_friendly_errors
+@guarded(risk_level='medium')
 def alert_cancel(
     alert_id: str,
     target: TargetOption = None,
@@ -613,6 +623,7 @@ def report_definitions(
 
 @report_app.command("generate")
 @_friendly_errors
+@guarded(risk_level='medium')
 def report_generate(
     definition_id: str,
     resource_ids: Annotated[str | None, typer.Option("--resources", help="Comma-separated resource UUIDs")] = None,
@@ -680,6 +691,7 @@ def report_get(
 
 @report_app.command("delete")
 @_friendly_errors
+@guarded(risk_level='medium')
 def report_delete(
     report_id: str,
     target: TargetOption = None,

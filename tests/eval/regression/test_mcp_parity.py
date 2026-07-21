@@ -115,7 +115,7 @@ def test_a_returned_error_is_audited_as_a_failure(monkeypatch) -> None:
         def log(self, **kw):
             rows.append(kw)
 
-    monkeypatch.setattr("vmware_policy.decorators.get_engine", lambda: _Recorder())
+    monkeypatch.setattr("vmware_policy.guard.get_engine", lambda: _Recorder())
 
     def boom(target=None):
         raise AriaApiError("Aria Operations returned HTTP 404.", status_code=404)
