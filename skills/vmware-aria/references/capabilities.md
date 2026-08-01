@@ -15,7 +15,7 @@ Each operation is classified by autonomy level per the Enterprise Harness Engine
 **Notes**:
 - L1/L2 tools are always safe for agents to call without confirmation.
 - L3 alert-state writes pass through the `@vmware_tool` decorator: connection check → policy check → audit log. Cancel is irreversible by Aria API design and treated as a destructive operation.
-- For VM/host operations see [vmware-aiops](https://github.com/zw008/VMware-AIops); Aria recommendations are advisory, not actuating.
+- For VM/host operations see [vmware-aiops](https://github.com/vmware-skills/VMware-AIops); Aria recommendations are advisory, not actuating.
 
 ## What vmware-aria Can Do
 

@@ -133,8 +133,8 @@ Missing:
 A complete investigation often chains across skills:
 
 - **vmware-aria** (this skill): metrics, alerts, anomaly detection — primary L1/L2 data source
-- [vmware-monitor](https://github.com/zw008/VMware-Monitor): inventory, alarms, events — additional read-only data source, code-level safe
-- [vmware-aiops](https://github.com/zw008/VMware-AIops): VM/host state, deployment history; can also remediate at L3+
-- [vmware-pilot](https://github.com/zw008/VMware-Pilot): orchestrate the investigation itself as a multi-step Dispatcher → Subagent workflow
+- [vmware-monitor](https://github.com/vmware-skills/VMware-Monitor): inventory, alarms, events — additional read-only data source, code-level safe
+- [vmware-aiops](https://github.com/vmware-skills/VMware-AIops): VM/host state, deployment history; can also remediate at L3+
+- [vmware-pilot](https://github.com/vmware-skills/VMware-Pilot): orchestrate the investigation itself as a multi-step Dispatcher → Subagent workflow
 
 The agent should treat investigation as **read-heavy first**: gather across skills, reason centrally, only invoke L3+ write tools after the four criteria are satisfied AND the user has approved a remediation plan.

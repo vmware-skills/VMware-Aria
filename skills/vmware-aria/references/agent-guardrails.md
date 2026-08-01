@@ -9,12 +9,12 @@ This page covers what goes wrong most often with vmware-aria specifically:
 **alert-to-resource correlation**. For the full cross-skill guardrail set, the
 complete system prompt, and the small-model failure-mode checklist, see the
 canonical guide in
-[vmware-monitor's references](https://github.com/zw008/VMware-Monitor/blob/main/skills/vmware-monitor/references/agent-guardrails.md).
+[vmware-monitor's references](https://github.com/vmware-skills/VMware-Monitor/blob/main/skills/vmware-monitor/references/agent-guardrails.md).
 
 These guardrails are adapted, with thanks, from the working configuration
 [@juanpf-ha](https://github.com/juanpf-ha) developed while running vmware-aria
 and vmware-monitor against a production vSphere estate
-([VMware-AIops#31](https://github.com/zw008/VMware-AIops/issues/31)).
+([VMware-AIops#31](https://github.com/vmware-skills/VMware-AIops/issues/31)).
 
 > **Disclaimer**: This is a community-maintained open-source project and is
 > **not affiliated with, endorsed by, or sponsored by VMware, Inc. or Broadcom
@@ -81,4 +81,4 @@ untouched:
 Local-model compatibility is an explicit design constraint for this family, and
 the evidence base is small. If you evaluate a model against this skill, a
 report of what worked and what did not is genuinely useful:
-[github.com/zw008/VMware-Aria/issues](https://github.com/zw008/VMware-Aria/issues).
+[github.com/vmware-skills/VMware-Aria/issues](https://github.com/vmware-skills/VMware-Aria/issues).

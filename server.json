@@ -4,7 +4,7 @@
   "title": "VMware Aria Operations",
   "description": "VMware Aria Operations: metrics, alerts, capacity, anomaly detection \u2014 18 MCP tools.",
   "repository": {
-    "url": "https://github.com/zw008/VMware-Aria",
+    "url": "https://github.com/vmware-skills/VMware-Aria",
     "source": "github"
   },
   "version": "1.8.8",

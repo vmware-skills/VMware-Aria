@@ -210,7 +210,7 @@ the live MCP registry and the live command tree, not against documentation.
 
 ### Added — the per-target username can come from the environment
 
-Adapted from [VMware-AIops#33](https://github.com/zw008/VMware-AIops/pull/33) by
+Adapted from [VMware-AIops#33](https://github.com/vmware-skills/VMware-AIops/pull/33) by
 @wright-bench, with thanks. The password already resolved from an env var; the
 username did not, so a deployment injecting credentials from a secret store
 (systemd `EnvironmentFile`, container secrets, a vault sidecar) could externalise
@@ -317,7 +317,7 @@ worse than no doctor. Requires `vmware-policy>=1.8.1`.
 
 ## v1.8.0 (2026-07-18) — read-only mode, working policy defaults, declared environments
 
-Family release driven by [VMware-AIops#31](https://github.com/zw008/VMware-AIops/issues/31),
+Family release driven by [VMware-AIops#31](https://github.com/vmware-skills/VMware-AIops/issues/31),
 where an operator running Llama 3.3 70B (Goose / OpenShift AI, on-prem H100) had to
 hand-write 17 prompt guardrails to make tool calling reliable. A prompt is advisory — a
 model can ignore it. Every guardrail that could move into the harness has.
@@ -545,7 +545,7 @@ get`, capacity/anomaly lookups, alert acknowledge/cancel/delete) raised a raw
   surfaces it as a structured `OFFLINE` result with a remediation hint
   ("platform is starting up … retry") instead of crashing — a health check
   must work precisely when the platform is unhealthy. External user report
-  ([#6](https://github.com/zw008/VMware-Aria/issues/6)). Non-503 errors still
+  ([#6](https://github.com/vmware-skills/VMware-Aria/issues/6)). Non-503 errors still
   propagate.
 
 ### Tests
