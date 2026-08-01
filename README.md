@@ -1,4 +1,4 @@
-<!-- mcp-name: io.github.zw008/vmware-aria -->
+<!-- mcp-name: io.github.vmware-skills/vmware-aria -->
 # VMware Aria Operations MCP Skill
 
 > **Note**: In VCF 9.0 and later, **VMware Aria Operations** has been rebranded as **VCF Operations**. This skill works against both names — the `/suite-api/` REST endpoints are unchanged.
