@@ -14,7 +14,7 @@ AI-assisted monitoring and capacity planning for VMware Aria Operations (vRealiz
 
 ## Overview
 
-`vmware-aria` exposes 28 MCP tools for interacting with Aria Operations through natural language AI agents (Claude Code, Cursor, Goose, etc.):
+`vmware-aria` exposes 33 MCP tools for interacting with Aria Operations through natural language AI agents (Claude Code, Cursor, Goose, etc.):
 
 | Category | Tools | Type |
 |----------|-------|------|

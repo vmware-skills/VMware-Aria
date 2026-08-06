@@ -360,6 +360,72 @@ class AriaClient:
         resp = self._request("PUT", path, json_data=json_data)
         return resp.json() if resp.content else {}
 
+    @property
+    def base_url(self) -> str:
+        """The suite-api base URL, e.g. ``https://host:443/suite-api/api``.
+
+        Exposed so a sibling service on the same appliance but a different base
+        path (the VODAP real-time metrics service at ``/data-query-service``)
+        can be reached by substituting the path prefix while keeping the host.
+        """
+        return self._base_url
+
+    def raw_request(
+        self,
+        method: str,
+        url: str,
+        *,
+        headers: dict[str, str] | None = None,
+        params: dict[str, Any] | None = None,
+        json_data: dict[str, Any] | None = None,
+    ) -> dict:
+        """Issue one request to an absolute URL with caller-supplied headers.
+
+        Unlike :meth:`get`/:meth:`post`, this does NOT attach the suite-api
+        ``vRealizeOpsToken`` Authorization header and does NOT prepend the
+        suite-api base path — the caller passes a full URL and its own auth
+        header. It reuses this client's TLS/verify settings and connection pool.
+
+        Used by the PromQL/VODAP path, which lives on a different service base
+        (``/data-query-service``) and authenticates with an exchanged Bearer
+        JWT rather than the OpsToken. Transport/timeout and transient gateway
+        statuses are retried once; any error status is translated into an
+        ``AriaApiError`` with a teaching hint, the same as the suite-api path.
+        """
+        attempt = 0
+        while True:
+            try:
+                resp = self._client.request(method, url, headers=headers, params=params, json=json_data)
+            except (httpx.TimeoutException, httpx.TransportError) as exc:
+                if attempt < 1:
+                    attempt += 1
+                    time.sleep(_RETRY_DELAY_SEC)
+                    continue
+                raise AriaApiError(
+                    f"Aria Operations request could not connect. "
+                    f"{_transport_hint(exc)} Then run 'vmware-aria doctor'. "
+                    f"Configured host: {self._target.host}. "
+                    f"Failing call: {method} {url}",
+                    method=method,
+                    path=url,
+                ) from exc
+
+            if resp.status_code in _TRANSIENT_STATUS and attempt < 1:
+                attempt += 1
+                time.sleep(_RETRY_DELAY_SEC)
+                continue
+
+            if resp.status_code >= 400:
+                raise AriaApiError(
+                    f"Aria Operations returned HTTP {resp.status_code}. "
+                    f"{_hint_for_status(resp.status_code)} "
+                    f"Failing call: {method} {url}",
+                    status_code=resp.status_code,
+                    method=method,
+                    path=url,
+                )
+            return resp.json() if resp.content else {}
+
     def delete(self, path: str) -> None:
         """DELETE request."""
         self._request("DELETE", path)

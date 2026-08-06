@@ -11,6 +11,11 @@
           "list_symptom_definitions",
           "list_anomalies",
           "list_rightsizing_recommendations",
+          "fleet_certificate_list",
+          "fleet_password_account_list",
+          "fleet_domain_list",
+          "findings_list",
+          "promql_query",
           "get_aria_health",
           "list_collector_groups",
           "list_report_definitions",
@@ -21,8 +26,8 @@
         "reachable_on_surface": 15,
         "reachable_only_via_description": 2,
         "required_entity_params": 17,
-        "required_params_classified": "17/22",
-        "tool_count": 28
+        "required_params_classified": "17/24",
+        "tool_count": 33
       },
       "maximum": 17,
       "pct": 100.0,
@@ -53,77 +58,79 @@
       },
       "maximum": 11,
       "pct": 100.0,
+      "stale": true,
       "unit": "required entity params",
       "value": 11
     },
     "entry_point_availability": {
       "detail": {
-        "full_entry_points": 12,
-        "read_only_entry_points": 11
+        "full_entry_points": 17
       },
-      "maximum": 21,
-      "pct": 52.4,
+      "maximum": 33,
+      "pct": 51.5,
       "unit": "entry points",
-      "value": 11
+      "value": 17
     },
     "error_actionability": {
       "detail": {
         "composed_hint_sites": [
           "connection.py:210",
           "connection.py:318",
-          "connection.py:294"
+          "connection.py:419",
+          "connection.py:294",
+          "connection.py:404"
         ],
         "dead_end_count": 0,
         "dead_end_errors": [],
         "per_dimension_pct": {
-          "names_artifact": 100.0,
-          "names_input": 96.9,
-          "states_remedy": 100.0
+          "names_artifact": 97.3,
+          "names_input": 89.2,
+          "states_remedy": 97.3
         },
-        "raise_sites": 32
+        "raise_sites": 37
       },
-      "maximum": 96,
-      "pct": 99.0,
+      "maximum": 111,
+      "pct": 94.6,
       "unit": "points",
-      "value": 95
+      "value": 105
     },
     "manifest_context_headroom": {
       "detail": {
         "heaviest_tools": {
           "create_alert_definition": 291,
+          "findings_list": 304,
           "get_resource_metrics": 280,
-          "investigate_alert": 240,
           "list_alerts": 276,
-          "list_anomalies": 261
+          "promql_query": 333
         },
-        "manifest_tokens": 5527,
-        "mean_tokens_per_tool": 197.4,
+        "manifest_tokens": 6745,
+        "mean_tokens_per_tool": 204.4,
         "reference_context": 16384,
-        "tool_count": 28
+        "tool_count": 33
       },
       "maximum": 16384,
-      "pct": 66.3,
+      "pct": 58.8,
       "unit": "tokens",
-      "value": 10857
+      "value": 9639
     },
     "parameter_documentation_coverage": {
       "detail": {
         "undocumented_by_tool": {}
       },
-      "maximum": 82,
+      "maximum": 99,
       "pct": 100.0,
       "unit": "parameters",
-      "value": 82
+      "value": 99
     },
     "per_tool_token_discipline": {
       "detail": {
         "ceiling": 350,
         "over_ceiling": {}
       },
-      "maximum": 28,
+      "maximum": 33,
       "pct": 100.0,
       "unit": "tools",
-      "value": 28
+      "value": 33
     },
     "read_only_manifest_saving": {
       "detail": {
@@ -143,6 +150,7 @@
       },
       "maximum": 5527,
       "pct": 24.8,
+      "stale": true,
       "unit": "tokens",
       "value": 1372
     },
@@ -150,36 +158,36 @@
       "detail": {
         "unmarked": []
       },
-      "maximum": 28,
+      "maximum": 33,
       "pct": 100.0,
       "unit": "points",
-      "value": 28
+      "value": 33
     },
     "remedy_survives_truncation": {
       "detail": {
         "budget_chars": 300,
         "over_budget": [],
         "remedy_after_interpolation": [
-          "config.py:236",
-          "config.py:222",
+          "config.py:229",
+          "config.py:215",
           "connection.py:221",
-          "connection.py:436",
-          "connection.py:453",
+          "connection.py:502",
+          "connection.py:519",
           "alerts.py:74",
           "alerts.py:452"
         ]
       },
-      "maximum": 32,
+      "maximum": 37,
       "pct": 100.0,
       "unit": "messages",
-      "value": 32
+      "value": 37
     },
     "teaching_error_rate": {
       "detail": {},
-      "maximum": 32,
-      "pct": 100.0,
+      "maximum": 37,
+      "pct": 94.6,
       "unit": "messages",
-      "value": 32
+      "value": 35
     },
     "tool_description_quality": {
       "detail": {
@@ -187,39 +195,47 @@
           "args": 100.0,
           "gotcha": 100.0,
           "marker": 100.0,
-          "next_hop": 100.0,
+          "next_hop": 87.9,
           "what": 100.0,
           "when": 100.0
         },
-        "tools_graded": 28,
+        "tools_graded": 33,
         "weakest_tools": {
           "acknowledge_alert": [],
           "cancel_alert": [],
           "create_alert_definition": [],
           "delete_alert_definition": [],
-          "delete_report": [],
-          "generate_report": [],
-          "get_alert": [],
-          "get_aria_health": []
+          "findings_list": [
+            "next_hop"
+          ],
+          "fleet_certificate_list": [
+            "next_hop"
+          ],
+          "fleet_domain_list": [
+            "next_hop"
+          ],
+          "fleet_password_account_list": [
+            "next_hop"
+          ]
         }
       },
-      "maximum": 168,
-      "pct": 100.0,
+      "maximum": 198,
+      "pct": 98.0,
       "unit": "points",
-      "value": 168
+      "value": 194
     },
     "tool_failure_payload_quality": {
       "detail": {
         "bare_string_error_lines": [],
-        "carries_hint": 28,
-        "dict_shaped": 28,
-        "error_return_sites": 28,
-        "hint_names_artifact": 28
+        "carries_hint": 33,
+        "dict_shaped": 33,
+        "error_return_sites": 33,
+        "hint_names_artifact": 33
       },
-      "maximum": 84,
+      "maximum": 99,
       "pct": 100.0,
       "unit": "checks",
-      "value": 84
+      "value": 99
     }
   }
 }

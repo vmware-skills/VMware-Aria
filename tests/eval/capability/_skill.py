@@ -57,6 +57,10 @@ NOT_AN_ENTITY = frozenset(
         'description',
         'enabled',
         'resource_kind',
+        # ``integration_id`` (fleet_domain_list) is the VCF-integration UUID the
+        # operator copies from the Operations Integrations page — this skill
+        # exposes no VCF-integration listing tool, so it is operator-supplied.
+        'integration_id',
     }
 )
 

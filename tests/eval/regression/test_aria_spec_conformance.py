@@ -25,7 +25,15 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-SPEC_PATH = REPO_ROOT / "tests" / "eval" / "spec" / "vrops86_operations.json"
+SPEC_DIR = REPO_ROOT / "tests" / "eval" / "spec"
+SPEC_PATH = SPEC_DIR / "vrops86_operations.json"
+# VCF Operations 9.1 suite-api endpoints added for the fleet/findings/PromQL
+# read tools (vmware_aria/ops/fleet.py, promql.py). Merged into the matcher so
+# the whole-tree phantom-endpoint guard recognises them instead of flagging
+# them as invented (踩坑 #36). Only the suite-api-based operations are merged;
+# the data-query-service PromQL call is on a separate base + Bearer JWT and is
+# issued via client.raw_request(), which this AST scan does not collect.
+VCF_SPEC_PATH = SPEC_DIR / "vcf91_fleet_operations.json"
 SCAN_DIRS = [REPO_ROOT / "vmware_aria"]
 
 _HTTP_METHODS = {"get": "GET", "post": "POST", "put": "PUT", "delete": "DELETE"}
@@ -33,9 +41,15 @@ _HTTP_METHODS = {"get": "GET", "post": "POST", "put": "PUT", "delete": "DELETE"}
 
 def _spec_matchers() -> list[tuple[str, re.Pattern]]:
     """Spec operations as (method, compiled path regex with {param} wildcards)."""
-    spec = json.loads(SPEC_PATH.read_text())
+    operations = list(json.loads(SPEC_PATH.read_text())["operations"])
+    # Add the VCF 9.1 suite-api operations (base "/suite-api"). The lone
+    # data-query-service op (base "/data-query-service") is excluded — it is
+    # not reachable by the suite-api-relative calls this scan validates.
+    for op in json.loads(VCF_SPEC_PATH.read_text())["operations"]:
+        if op.get("base", "/suite-api") == "/suite-api":
+            operations.append(op)
     matchers = []
-    for op in spec["operations"]:
+    for op in operations:
         # /api/resources/{id}/stats -> ^/api/resources/[^/]+/stats$
         pattern = re.sub(r"\{[^}]+\}", r"[^/]+", op["path"])
         matchers.append((op["method"], re.compile(f"^{re.escape('')}{pattern}$")))
@@ -109,6 +123,40 @@ def test_auth_endpoints_are_scanned_not_skipped() -> None:
     assert ("POST", "/auth/token/acquire") in paths, (
         "auth token acquire call must be collected by the AST scan "
         f"(got {sorted(p for m, p in paths if 'auth' in p)})"
+    )
+
+
+def test_raw_request_confined_to_connection_and_promql() -> None:
+    """``client.raw_request(...)`` bypasses the (method, path) phantom scanner.
+
+    The AST guard above only collects get/post/put/delete calls, so a NEW call
+    site reaching an unverified URL via ``raw_request`` would ship a 踩坑 #36
+    phantom with every scanner still green. Pin the surface: the name may appear
+    ONLY in connection.py (its definition) and ops/promql.py (the one gated,
+    base_path_confirmed=False call site). Any other file must fail loudly and be
+    added to the phantom-endpoint audit before it ships.
+    """
+    allowed = {"vmware_aria/connection.py", "vmware_aria/ops/promql.py"}
+    offenders: list[str] = []
+    found: set[str] = set()
+    for scan_dir in SCAN_DIRS:
+        for py in sorted(scan_dir.rglob("*.py")):
+            rel = str(py.relative_to(REPO_ROOT))
+            if "raw_request" in py.read_text():
+                found.add(rel)
+                if rel not in allowed:
+                    offenders.append(rel)
+    # 防「空结果读作没问题」(形态 #1): the scan must actually see both known
+    # sites, or a bad glob would pass this test while checking nothing.
+    assert allowed <= found, (
+        "raw_request guard scanned no known sites — glob/paths broken? "
+        f"expected {sorted(allowed)}, found {sorted(found)}"
+    )
+    assert not offenders, (
+        "raw_request() used outside connection.py/ops.promql.py — this bypasses "
+        "the (method, path) phantom-endpoint scanner (踩坑 #36). Add the new "
+        "call site to the spec audit, or route it through get/post/put/delete:\n  "
+        + "\n  ".join(offenders)
     )
 
 

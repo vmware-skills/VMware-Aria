@@ -35,6 +35,7 @@ capacity_app = typer.Typer(help="Capacity planning: overview, remaining, time-re
 anomaly_app = typer.Typer(help="Anomaly detection: list anomalies, risk badge.")
 health_app = typer.Typer(help="Platform health: Aria node status, collector groups.")
 report_app = typer.Typer(help="Report management: list definitions, generate, list, get, delete.")
+fleet_app = typer.Typer(help="VCF 9.1 fleet: certificates, password accounts, domains, findings, PromQL.")
 
 app.add_typer(resource_app, name="resource")
 app.add_typer(alert_app, name="alert")
@@ -42,6 +43,7 @@ app.add_typer(capacity_app, name="capacity")
 app.add_typer(anomaly_app, name="anomaly")
 app.add_typer(health_app, name="health")
 app.add_typer(report_app, name="report")
+app.add_typer(fleet_app, name="fleet")
 
 
 @app.command("mcp")
@@ -708,3 +710,131 @@ def report_delete(
     target_name = target or cfg.default_target or "default"
     result = delete_report(client, report_id=report_id, audit_logger=_audit, target_name=target_name)
     console.print(f"[green]Deleted report {result['report_id']}[/green]")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FLEET commands (VCF Operations 9.1 — all read-only)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+@fleet_app.command("certificates")
+@_friendly_errors
+def fleet_certificates(
+    limit: Annotated[int, typer.Option("--limit", "-n", help="Max rows")] = 50,
+    target: TargetOption = None,
+    config: ConfigOption = None,
+) -> None:
+    """List certificate status/expiry across the VCF fleet."""
+    from vmware_aria.ops.fleet import list_fleet_certificates
+
+    client, _ = _get_connection(target, config)
+    items = list_fleet_certificates(client, limit=limit)["items"]
+
+    table = Table(title="Fleet Certificates", show_lines=False)
+    table.add_column("Subject", style="bold")
+    table.add_column("Status")
+    table.add_column("Valid To")
+    table.add_column("Resource")
+    for r in items:
+        table.add_row(r["subject"], r["status"], r["valid_to"], r["resource"])
+    console.print(table)
+
+
+@fleet_app.command("passwords")
+@_friendly_errors
+def fleet_passwords(
+    limit: Annotated[int, typer.Option("--limit", "-n", help="Max rows")] = 50,
+    target: TargetOption = None,
+    config: ConfigOption = None,
+) -> None:
+    """List managed password-account status across the VCF fleet (read-only)."""
+    from vmware_aria.ops.fleet import list_fleet_password_accounts
+
+    client, _ = _get_connection(target, config)
+    items = list_fleet_password_accounts(client, limit=limit)["items"]
+
+    table = Table(title="Fleet Password Accounts", show_lines=False)
+    table.add_column("Username", style="bold")
+    table.add_column("Resource")
+    table.add_column("Status")
+    table.add_column("Expiry")
+    for r in items:
+        table.add_row(r["username"], r["resource"], r["status"], r["expiry"])
+    console.print(table)
+
+
+@fleet_app.command("domains")
+@_friendly_errors
+def fleet_domains(
+    integration_id: Annotated[str, typer.Argument(help="VCF integration UUID (from Operations Integrations page)")],
+    limit: Annotated[int, typer.Option("--limit", "-n", help="Max rows")] = 50,
+    target: TargetOption = None,
+    config: ConfigOption = None,
+) -> None:
+    """List SDDC/workload domains behind one registered VCF integration."""
+    from vmware_aria.ops.fleet import list_fleet_domains
+
+    client, _ = _get_connection(target, config)
+    items = list_fleet_domains(client, integration_id=integration_id, limit=limit)["items"]
+
+    table = Table(title="VCF Domains", show_lines=False)
+    table.add_column("Name", style="bold")
+    table.add_column("Type")
+    table.add_column("Status")
+    table.add_column("ID")
+    for r in items:
+        table.add_row(r["name"], r["type"], r["status"], r["id"][:36])
+    console.print(table)
+
+
+@fleet_app.command("findings")
+@_friendly_errors
+def fleet_findings(
+    severities: Annotated[str | None, typer.Option("--severities", help="Comma-separated, e.g. CRITICAL,WARNING")] = None,
+    categories: Annotated[str | None, typer.Option("--categories", help="Comma-separated category filter")] = None,
+    finding_types: Annotated[str | None, typer.Option("--types", help="Comma-separated findingType filter")] = None,
+    limit: Annotated[int, typer.Option("--limit", "-n", help="Max rows")] = 50,
+    target: TargetOption = None,
+    config: ConfigOption = None,
+) -> None:
+    """List Operations diagnostic findings (not compliance — use vmware-harden for that)."""
+    from vmware_aria.ops.fleet import list_findings
+
+    def _split(v: str | None) -> list[str] | None:
+        return [s.strip() for s in v.split(",") if s.strip()] if v else None
+
+    client, _ = _get_connection(target, config)
+    items = list_findings(
+        client,
+        severities=_split(severities),
+        categories=_split(categories),
+        finding_types=_split(finding_types),
+        limit=limit,
+    )["items"]
+
+    table = Table(title="Diagnostic Findings", show_lines=False)
+    table.add_column("Severity")
+    table.add_column("Name", style="bold")
+    table.add_column("Category")
+    table.add_column("Affected", justify="right")
+    for r in items:
+        table.add_row(r["severity"], r["name"], r["category"], str(r.get("affected_objects_count", "")))
+    console.print(table)
+
+
+@fleet_app.command("promql")
+@_friendly_errors
+def fleet_promql(
+    query: Annotated[str, typer.Argument(help="PromQL expression, e.g. 'cpu_usage_average{}'")],
+    at_time: Annotated[str | None, typer.Option("--time", help="Evaluation timestamp (RFC3339 or Unix seconds)")] = None,
+    source_id: Annotated[str | None, typer.Option("--source", help="Data-source id to scope the query")] = None,
+    limit: Annotated[int, typer.Option("--limit", "-n", help="Max result series")] = 50,
+    target: TargetOption = None,
+    config: ConfigOption = None,
+) -> None:
+    """Run a real-time PromQL instant query (VCF 9.1 VODAP service; base path INFERRED)."""
+    from vmware_aria.ops.promql import run_promql_query
+
+    client, _ = _get_connection(target, config)
+    result = run_promql_query(client, query=query, time=at_time, source_id=source_id, limit=limit)
+    _json_output(result)

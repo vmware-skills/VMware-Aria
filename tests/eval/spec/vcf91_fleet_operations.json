@@ -1,0 +1,58 @@
+{
+  "source": "github.com/vmware/vcf-api-specs (vcf-operations-openapi.json / realtime-metrics-openapi.json, 9.1.0.0); cross-checked against the family verified-endpoint spec (VCF Operations 9.1, section B).",
+  "spec_version": "9.1.0.0",
+  "retrieved": "2026-08-06",
+  "note": "Seeded to guard vmware-aria's new VCF Operations 9.1 Fleet/Findings/PromQL read tools against 踩坑 #36 (a prior skill shipped hallucinated endpoints, half of which 404'd). Every ops call under vmware_aria/ops/fleet.py and promql.py must resolve to one of these paths. suite-api paths carry base '/suite-api' and are validated by the whole-tree conformance test alongside the vROps 8.6 index; the data-query-service path is on a separate base and Bearer JWT, and its base prefix is INFERRED from the Swagger UI location (verify against a live appliance).",
+  "operation_count": 7,
+  "operations": [
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/certificate-management/certificates/query",
+      "base": "/suite-api",
+      "verification": "VERIFIED",
+      "description": "Query certificate status/expiry across the fleet. Returns certificate records (subject/issuer/validTo/status/thumbprint)."
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/password-management/accounts/query",
+      "base": "/suite-api",
+      "verification": "VERIFIED",
+      "description": "Query managed password-account status across the fleet. Returns accounts (username/resource/status/expiry)."
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/vcf/{integrationId}/domains",
+      "base": "/suite-api",
+      "verification": "VERIFIED",
+      "description": "List the SDDC/workload domains behind one registered VCF integration."
+    },
+    {
+      "method": "POST",
+      "path": "/api/diagnostics/findings/query",
+      "base": "/suite-api",
+      "verification": "VERIFIED",
+      "description": "Query diagnostic findings with filters (severities/categories/findingTypes). Returns findings (ruleUuid/severity/category/affectedObjectsCount)."
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/services",
+      "base": "/suite-api",
+      "verification": "VERIFIED",
+      "description": "List registered integration services. Used to locate the VCF_VODAP service and its serviceKeys for the PromQL token exchange (hop 1 of 2)."
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/token/exchange",
+      "base": "/suite-api",
+      "verification": "VERIFIED",
+      "description": "Exchange the acquired OpsToken for a service-scoped Bearer JWT given a serviceKeys payload (hop 2 of 2 for PromQL/VODAP)."
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/query",
+      "base": "/data-query-service",
+      "verification": "INFERRED",
+      "description": "PromQL instant query against the real-time (VODAP) metrics service. Prometheus-standard response shape. Requires the exchanged Bearer JWT, NOT the OpsToken header. The '/data-query-service' base prefix is INFERRED from the Swagger UI location and must be confirmed against a live appliance."
+    }
+  ]
+}

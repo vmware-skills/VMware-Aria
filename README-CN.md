@@ -8,7 +8,7 @@
 
 ## 概述
 
-`vmware-aria` 提供 28 个 MCP 工具，支持通过自然语言 AI Agent（Claude Code、Cursor、Goose 等）与 Aria Operations 交互：
+`vmware-aria` 提供 33 个 MCP 工具，支持通过自然语言 AI Agent（Claude Code、Cursor、Goose 等）与 Aria Operations 交互：
 
 | 类别 | 工具 | 类型 |
 |------|------|------|

@@ -1,3 +1,69 @@
+## v1.8.10 (2026-08-06) — VCF Operations 9.1 fleet, diagnostics, and real-time PromQL (5 read tools, path-verified but not yet run on a live 9.1 appliance)
+
+Five read-only tools for VCF Operations 9.1 (the VCF 9 rebrand of Aria Operations),
+taking the skill from **28 → 33 MCP tools (26 read + 7 write)**. All five are
+read-only — no rotation, no writes:
+
+| Tool | CLI | What it reads |
+|---|---|---|
+| `fleet_certificate_list` | `vmware-aria fleet certificates` | certificate status/expiry across the VCF fleet |
+| `fleet_password_account_list` | `vmware-aria fleet passwords` | managed password-account status (never rotates/sets) |
+| `fleet_domain_list` | `vmware-aria fleet domains <integration-id>` | SDDC/workload domains behind one registered VCF integration |
+| `findings_list` | `vmware-aria fleet findings` | operational diagnostic findings (NOT compliance — use vmware-harden) |
+| `promql_query` | `vmware-aria fleet promql <expr>` | real-time (~2s) Prometheus instant query via the VODAP service |
+
+### Honest status: paths VERIFIED, live 9.1 appliance NOT yet exercised
+
+This is a beta surface. The endpoint **paths** are verified against the VCF
+Operations 9.1 OpenAPI (`vcf-operations-openapi.json` / `realtime-metrics-openapi.json`,
+9.1.0.0) and seeded into `tests/eval/spec/vcf91_fleet_operations.json`, where the
+whole-tree phantom-endpoint scan (踩坑 #36) now enforces that every HTTP call the new
+ops modules make resolves to a listed path. What that guard does **not** cover, and
+what has **not** been confirmed on a live 9.1 appliance:
+
+- **Response field names** are read defensively (`.get` / degrade-to-empty), so a
+  field absent or renamed on a real appliance yields an empty value rather than a
+  crash — but that also means the exact wire schema is unverified. Every summarizer
+  tries several plausible container/field names.
+- **`promql_query` reaches a sibling service whose base path `/data-query-service`
+  is INFERRED** from the Swagger UI location, not a wire capture. It is marked
+  `INFERRED` in the spec, and every PromQL result envelope carries
+  `base_path_confirmed: False` to surface the caveat to the caller.
+- PromQL is a **2-hop token exchange** — locate the `VCF_VODAP` integration service,
+  then exchange the suite-api OpsToken for a service-scoped Bearer JWT — and requires
+  the real-time metrics (VODAP) integration to be registered; if it is not, the tool
+  returns an actionable teaching error, not historical data.
+
+### Fable5-review fixes applied this release
+
+- **Empty result is no longer read as a confident "none" (踩坑 形态 #1).** Because the
+  9.1 response schemas are not pinned, a drifted shape returning no rows would let an
+  agent report "no expiring certificates" or "no findings" — a dangerous false
+  all-clear. Each fleet/findings tool now distinguishes a *recognised* empty container
+  (genuine "none", no note) from an *unrecognised* non-empty shape it could not parse,
+  and attaches an `note` marking the empty result as **unconfirmed** in the latter case.
+- **PromQL `/integrations/services` in an unrecognised shape no longer claims "VODAP not
+  registered — enable it"** — it may in fact be registered; the error now says the shape
+  could not be determined and asks the operator to verify, instead of a misleading
+  "enable it" instruction.
+- **LOW-1**: a `VCF_VODAP` service registered but exposing no `serviceKeys` now raises an
+  authored teaching error about integration health, instead of posting
+  `{"serviceKeys": null}` and surfacing a generic HTTP 400 that teaches nothing.
+- **LOW-2**: a 401/403 from the data-query service is re-worded to point at the exchanged
+  VODAP Bearer token / integration health — **not** the suite-api
+  `VMWARE_ARIA_<TARGET>_PASSWORD` env var, which the generic connection-layer 401 hint
+  would wrongly name for this path.
+- **Phantom-endpoint guard hardened (踩坑 #36 / #41).** `client.raw_request()` (the new
+  absolute-URL helper the PromQL path uses to reach the sibling service with a Bearer
+  header) bypasses the `(method, path)` AST scanner, so a new `raw_request` call site
+  could ship an unverified URL with every scanner green. A regression now confines the
+  name to `connection.py` (its definition) and `ops/promql.py` (the one gated call site),
+  and asserts it actually *saw* both known sites so a broken glob can't pass while
+  checking nothing.
+
+The `test_mcp_parity.py` expected counts were bumped to 33/26/7 and the capability
+grader's non-entity set now excludes the operator-supplied `integration_id`.
+
 ## v1.8.9 — moved to vmware-skills org + MCP Registry namespace io.github.vmware-skills/vmware-aria
 
 Repo transferred from github.com/zw008 to github.com/vmware-skills (redirects preserve old links).

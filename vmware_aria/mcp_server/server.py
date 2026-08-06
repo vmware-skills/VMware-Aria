@@ -1,7 +1,7 @@
 """MCP server wrapping VMware Aria Operations monitoring and capacity planning.
 
 This module exposes VMware Aria Operations management tools via the Model
-Context Protocol (MCP) using stdio transport.  The 27 tools are split by
+Context Protocol (MCP) using stdio transport.  The 33 tools are split by
 domain across ``vmware_aria/mcp_server/tools/*.py``; each module registers its tools onto
 the shared ``mcp`` instance defined in ``vmware_aria/mcp_server/_shared.py``.  Importing
 those modules below is what performs the registration.
@@ -39,6 +39,10 @@ Tool categories
 
 * **Health** (2 tools, read-only): get_aria_health, list_collector_groups
   — ``tools/health.py``
+
+* **Fleet / PromQL** (5 tools, read-only, VCF Operations 9.1):
+  fleet_certificate_list, fleet_password_account_list, fleet_domain_list,
+  findings_list, promql_query — ``tools/fleet.py``
 
 * **Reports** (5 tools, 4 read + 1 write... ): list_report_definitions,
   generate_report, list_reports, get_report (``tools/reports.py``);
@@ -84,6 +88,7 @@ from vmware_aria.mcp_server.tools import (  # noqa: F401  (imported for registra
     alerts,
     anomaly,
     capacity,
+    fleet,
     health,
     reports,
     resources,
@@ -111,6 +116,13 @@ from vmware_aria.mcp_server.tools.capacity import (  # noqa: F401
     get_remaining_capacity,
     get_time_remaining,
     list_rightsizing_recommendations,
+)
+from vmware_aria.mcp_server.tools.fleet import (  # noqa: F401
+    findings_list,
+    fleet_certificate_list,
+    fleet_domain_list,
+    fleet_password_account_list,
+    promql_query,
 )
 from vmware_aria.mcp_server.tools.health import (  # noqa: F401
     get_aria_health,
@@ -161,6 +173,11 @@ __all__ = [
     "get_resource_riskbadge",
     "get_aria_health",
     "list_collector_groups",
+    "fleet_certificate_list",
+    "fleet_password_account_list",
+    "fleet_domain_list",
+    "findings_list",
+    "promql_query",
     "list_report_definitions",
     "generate_report",
     "list_reports",

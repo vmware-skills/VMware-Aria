@@ -18,8 +18,11 @@ import asyncio
 
 import pytest
 
-EXPECTED_TOOL_COUNT = 28
-EXPECTED_READ_COUNT = 21
+# 28 base tools + 5 read tools added for VCF Operations 9.1 fleet/findings/PromQL
+# (fleet_certificate_list, fleet_password_account_list, fleet_domain_list,
+# findings_list, promql_query) → 33 total, 26 read, 7 write.
+EXPECTED_TOOL_COUNT = 33
+EXPECTED_READ_COUNT = 26
 EXPECTED_WRITE_COUNT = 7
 
 
