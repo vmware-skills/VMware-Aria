@@ -1,0 +1,21 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "vmware-aria",
+  "displayName": "VMware Aria",
+  "version": "1.8.10",
+  "description": "VMware Aria Operations: metrics, alerts, capacity, anomaly detection — 18 MCP tools.",
+  "author": {
+    "name": "Wei Zhou",
+    "email": "zhouwei008@gmail.com",
+    "url": "https://github.com/vmware-skills"
+  },
+  "homepage": "https://github.com/vmware-skills/VMware-Aria",
+  "repository": "https://github.com/vmware-skills/VMware-Aria",
+  "license": "MIT",
+  "keywords": [
+    "aria",
+    "mcp",
+    "vmware",
+    "vsphere"
+  ]
+}

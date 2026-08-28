@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "vmware-aria": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "--from",
+        "vmware-aria==1.8.10",
+        "vmware-aria-mcp"
+      ]
+    }
+  }
+}
