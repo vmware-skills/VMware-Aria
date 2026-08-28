@@ -33,6 +33,7 @@ from vmware_policy import sanitize
 from vmware_aria.config import ConfigError, load_config
 from vmware_aria.connection import AriaApiError, ConnectionManager
 from vmware_aria.notify.audit import AuditLogger
+from vmware_aria import __version__
 
 logger = logging.getLogger("vmware_aria.mcp_server")
 
@@ -104,6 +105,11 @@ mcp = FastMCP(
         "For NSX networking use vmware-nsx."
     ),
 )
+
+# FastMCP takes no version argument and leaves the lowlevel server's at
+# None, which makes `initialize` answer with the MCP SDK's version rather
+# than ours. Set it so a client can tell which release it is talking to.
+mcp._mcp_server.version = __version__
 
 # ---------------------------------------------------------------------------
 # Connection helper
