@@ -3,7 +3,7 @@
   "name": "vmware-aria",
   "displayName": "VMware Aria",
   "version": "1.8.10",
-  "description": "VMware Aria Operations: metrics, alerts, capacity, anomaly detection — 18 MCP tools.",
+  "description": "VMware Aria Operations: metrics, alerts, capacity, anomaly detection — 33 MCP tools.",
   "author": {
     "name": "Wei Zhou",
     "email": "zhouwei008@gmail.com",
