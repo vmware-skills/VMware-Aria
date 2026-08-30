@@ -74,63 +74,68 @@
     "error_actionability": {
       "detail": {
         "composed_hint_sites": [
-          "connection.py:210",
-          "connection.py:318",
-          "connection.py:419",
-          "connection.py:294",
-          "connection.py:404"
+          "connection.py:203",
+          "connection.py:311",
+          "connection.py:412",
+          "connection.py:287",
+          "connection.py:397"
         ],
         "dead_end_count": 0,
         "dead_end_errors": [],
         "per_dimension_pct": {
-          "names_artifact": 97.3,
-          "names_input": 89.2,
-          "states_remedy": 97.3
+          "names_artifact": 90.5,
+          "names_input": 85.7,
+          "states_remedy": 97.6
         },
-        "raise_sites": 37
+        "raise_sites": 42
       },
-      "maximum": 111,
-      "pct": 94.6,
+      "maximum": 126,
+      "pct": 91.3,
       "unit": "points",
-      "value": 105
+      "value": 115
     },
     "manifest_context_headroom": {
       "detail": {
         "heaviest_tools": {
-          "create_alert_definition": 291,
-          "findings_list": 304,
-          "get_resource_metrics": 280,
-          "list_alerts": 276,
-          "promql_query": 333
+          "findings_list": 327,
+          "list_alerts": 402,
+          "list_anomalies": 356,
+          "list_symptom_definitions": 345,
+          "promql_query": 355
         },
-        "manifest_tokens": 6745,
-        "mean_tokens_per_tool": 204.4,
+        "manifest_tokens": 7838,
+        "mean_tokens_per_tool": 237.5,
         "reference_context": 16384,
         "tool_count": 33
       },
       "maximum": 16384,
-      "pct": 58.8,
+      "pct": 52.2,
       "unit": "tokens",
-      "value": 9639
+      "value": 8546
     },
     "parameter_documentation_coverage": {
       "detail": {
-        "undocumented_by_tool": {}
+        "undocumented_by_tool": {},
+        "value_set_candidates": {}
       },
-      "maximum": 99,
+      "maximum": 103,
       "pct": 100.0,
       "unit": "parameters",
-      "value": 99
+      "value": 103
     },
     "per_tool_token_discipline": {
       "detail": {
         "ceiling": 350,
-        "over_ceiling": {}
+        "over_ceiling": {
+          "list_alerts": 402,
+          "list_anomalies": 356,
+          "promql_query": 355
+        }
       },
       "maximum": 33,
-      "pct": 100.0,
+      "pct": 90.9,
       "unit": "tools",
-      "value": 33
+      "value": 30
     },
     "read_only_manifest_saving": {
       "detail": {
@@ -166,34 +171,58 @@
     "remedy_survives_truncation": {
       "detail": {
         "budget_chars": 300,
-        "over_budget": [],
+        "over_budget": [
+          {
+            "budget": 300,
+            "chars": 333,
+            "where": "_paging.py:59"
+          },
+          {
+            "budget": 300,
+            "chars": 318,
+            "where": "promql.py:126"
+          },
+          {
+            "budget": 300,
+            "chars": 436,
+            "where": "promql.py:106"
+          },
+          {
+            "budget": 300,
+            "chars": 357,
+            "where": "promql.py:232"
+          }
+        ],
         "remedy_after_interpolation": [
-          "config.py:229",
+          "config.py:243",
           "config.py:215",
-          "connection.py:221",
-          "connection.py:502",
-          "connection.py:519",
-          "alerts.py:74",
-          "alerts.py:452"
+          "connection.py:214",
+          "connection.py:495",
+          "connection.py:512",
+          "_paging.py:59",
+          "_paging.py:68",
+          "alerts.py:179",
+          "alerts.py:683",
+          "promql.py:232"
         ]
       },
-      "maximum": 37,
-      "pct": 100.0,
+      "maximum": 42,
+      "pct": 90.5,
       "unit": "messages",
-      "value": 37
+      "value": 38
     },
     "teaching_error_rate": {
       "detail": {},
-      "maximum": 37,
-      "pct": 94.6,
+      "maximum": 42,
+      "pct": 88.1,
       "unit": "messages",
-      "value": 35
+      "value": 37
     },
     "tool_description_quality": {
       "detail": {
         "per_dimension_pct": {
           "args": 100.0,
-          "gotcha": 100.0,
+          "gotcha": 97.0,
           "marker": 100.0,
           "next_hop": 87.9,
           "what": 100.0,
@@ -203,7 +232,9 @@
         "weakest_tools": {
           "acknowledge_alert": [],
           "cancel_alert": [],
-          "create_alert_definition": [],
+          "create_alert_definition": [
+            "gotcha"
+          ],
           "delete_alert_definition": [],
           "findings_list": [
             "next_hop"
@@ -220,9 +251,9 @@
         }
       },
       "maximum": 198,
-      "pct": 98.0,
+      "pct": 97.5,
       "unit": "points",
-      "value": 194
+      "value": 193
     },
     "tool_failure_payload_quality": {
       "detail": {
