@@ -1,3 +1,48 @@
+## v1.8.12 — two empty results that read as "nothing is wrong", and a clamp that hid 2,283 alerts
+
+Found against a real VCF Operations 9.1 deployment.
+
+**`fleet_domain_list` reported 0 domains where there was 1.** The response model
+is `VCFDomainSummaries` — an object with three sibling arrays
+(`configuredDomains`, `notConfiguredDomains`, `removedDomains`) — and the code
+looked for a single container the appliance never sends, so the one configured
+domain fell through as an unrecognised shape. Rows now carry
+`configuration_state`, so a removed domain does not read as a live one.
+
+**`get_alert` returned empty symptoms for every alert** — 5 of 5 CRITICAL alerts
+explained nothing, from the tool that exists to explain *why* an alert fired.
+The symptoms are three levels deep under the same repeated key and the parser
+unwrapped one. Fixing the nesting alone would still have produced blank rows:
+the 9.1 leaf carries none of `severity`/`message`/`symptomDefinitionId` —
+severity lives on `alertConditions[].severity`, the ids are the plural
+`symptomDefinitionsIds`, and the triggering condition was not being read at all.
+
+Both now distinguish "there are none" from "nothing matched the shapes I know",
+and the note survives to the surface: `_UNRECOGNIZED_SHAPE_NOTE` existed
+precisely to prevent a dangerous false all-clear, and the CLI was reading only
+`["items"]` and throwing it away.
+
+**The three list tools hard-clamped at 500 with no offset**, so 2,283 alerts
+were unreachable under any combination of parameters — while the hint said
+"Raise limit to see the rest", which cannot work against a ceiling. The clamp is
+a page size now, with `next_offset` to walk it. `list_alerts` walks the
+appliance's own `page`/`pageSize` rather than computing `page = offset //
+pageSize`, because the appliance picks its own page size and the arithmetic
+would land the window somewhere else silently; it also stops on a page adding no
+unseen `alertId`, since this endpoint has a recorded habit of accepting
+parameters and ignoring them.
+
+**`verify_ssl: false` needed a package this skill never declared** — a clean
+install died with `No module named 'urllib3'` against a self-signed target,
+which is the VCF default. The guarded code was already inert: this client is
+httpx, which never used urllib3.
+
+**`doctor` reported PASS on a config file the tools never open.** With
+`VMWARE_ARIA_CONFIG` set it inspected the default path and then passed that path
+explicitly to `load_config`, suppressing the variable there too — internally
+consistent about the wrong file, and green about it. Also: the Dockerfile could
+not build the wheel it installs, and `server.json` never started the MCP server.
+
 ## v1.8.11 — two wrong numbers: the server's own version, and the advertised tool count
 
 Both defects were invisible to the test suites and both were user-facing.
