@@ -387,9 +387,20 @@ def test_promql_unrecognized_services_shape_does_not_claim_vodap_absent() -> Non
         run_promql_query(c, query="up")
     msg = str(ei.value)
     assert "unrecognised shape" in msg
-    assert "may in fact be registered" in msg
+    # The property, not one phrasing of it: the message must leave open that
+    # VODAP *is* registered. Asserting the exact sentence made this test fail on
+    # a reword that preserved the meaning — and the reword was itself required,
+    # because the original ran to 436 characters and `sanitize(str(exc), 300)`
+    # cut the remedy off before the agent saw it.
+    assert any(
+        phrase in msg for phrase in ("may in fact be registered", "it may well be")
+    ), f"message no longer allows that VODAP is registered: {msg}"
     # Must NOT emit the confident "Enable the ... integration" instruction.
     assert "Enable the real-time metrics (VODAP) integration" not in msg
+    # And the remedy has to survive the cap that made the reword necessary.
+    from vmware_policy import sanitize
+
+    assert sanitize(msg, 300) == msg, f"{len(msg)} chars — the remedy is cut"
     c.raw_request.assert_not_called()
 
 

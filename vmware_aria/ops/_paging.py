@@ -57,12 +57,10 @@ def validate_page_args(limit: int, offset: int) -> None:
     """
     if not isinstance(limit, int) or isinstance(limit, bool) or limit < 1 or limit > MAX_LIMIT:
         raise ValueError(
-            f"Invalid limit {limit!r}: it is a page size and must be an "
-            f"integer from 1 to {MAX_LIMIT} (the suite-api page this skill "
-            f"reads). It is not a way to ask for everything — 0 and negatives "
-            f"are rejected rather than quietly turned into 1. To read past "
-            f"{MAX_LIMIT} rows, keep limit within range and pass the "
-            f"response's 'next_offset' back as 'offset' until it is null."
+            f"Invalid limit {limit!r}: pass an integer from 1 to {MAX_LIMIT}. "
+            f"To read more rows, keep limit in range and pass the response's "
+            f"'next_offset' back as 'offset' until it is null. It is a page "
+            f"size, not a way to ask for everything."
         )
     if not isinstance(offset, int) or isinstance(offset, bool) or offset < 0:
         raise ValueError(

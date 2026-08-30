@@ -171,28 +171,7 @@
     "remedy_survives_truncation": {
       "detail": {
         "budget_chars": 300,
-        "over_budget": [
-          {
-            "budget": 300,
-            "chars": 333,
-            "where": "_paging.py:59"
-          },
-          {
-            "budget": 300,
-            "chars": 318,
-            "where": "promql.py:126"
-          },
-          {
-            "budget": 300,
-            "chars": 436,
-            "where": "promql.py:106"
-          },
-          {
-            "budget": 300,
-            "chars": 357,
-            "where": "promql.py:232"
-          }
-        ],
+        "over_budget": [],
         "remedy_after_interpolation": [
           "config.py:243",
           "config.py:215",
@@ -200,16 +179,15 @@
           "connection.py:495",
           "connection.py:512",
           "_paging.py:59",
-          "_paging.py:68",
+          "_paging.py:66",
           "alerts.py:179",
-          "alerts.py:683",
-          "promql.py:232"
+          "alerts.py:683"
         ]
       },
       "maximum": 42,
-      "pct": 90.5,
+      "pct": 100.0,
       "unit": "messages",
-      "value": 38
+      "value": 42
     },
     "teaching_error_rate": {
       "detail": {},

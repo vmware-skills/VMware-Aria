@@ -104,14 +104,12 @@ def _exchange_vodap_token(client: AriaClient) -> str:
             # cannot conclude VODAP is absent. Do NOT tell the operator to
             # "enable it" — it may already be registered (形态 #1).
             raise AriaApiError(
-                "Could not determine whether a VCF_VODAP integration service is "
-                "registered: the /integrations/services response was in an "
-                "unrecognised shape, so real-time PromQL metrics are "
-                "unavailable right now. VODAP may in fact be registered — verify "
-                "the real-time metrics (VODAP) integration in Operations "
-                "(Administration -> Integrations) and confirm the API response "
-                "format, then retry. Historical metrics remain available via "
-                "get_resource_metrics."
+                "Verify the real-time metrics (VODAP) integration in Operations "
+                "(Administration -> Integrations), then retry; historical "
+                "metrics still work via get_resource_metrics. Reason: "
+                "/integrations/services returned an unrecognised shape, so "
+                "whether VODAP is registered could not be determined — it may "
+                "well be."
             )
         raise AriaApiError(
             "No VCF_VODAP integration service is registered on this Operations "
@@ -124,11 +122,11 @@ def _exchange_vodap_token(client: AriaClient) -> str:
         # Posting {"serviceKeys": null} only yields a generic 400 that teaches
         # the operator nothing. Raise the authored VODAP hint instead (LOW-1).
         raise AriaApiError(
-            "The VCF_VODAP integration service is registered but exposes no "
-            "serviceKeys, so the token exchange cannot be scoped to it. Check "
-            "the real-time metrics (VODAP) integration's health and "
-            "configuration in Operations (Administration -> Integrations), then "
-            "retry. Historical metrics remain available via get_resource_metrics."
+            "Check the real-time metrics (VODAP) integration's health in "
+            "Operations (Administration -> Integrations), then retry; historical "
+            "metrics still work via get_resource_metrics. Reason: VCF_VODAP is "
+            "registered but exposes no serviceKeys, so the token exchange cannot "
+            "be scoped to it."
         )
     resp = client.post(
         TOKEN_EXCHANGE_PATH,
@@ -230,13 +228,11 @@ def run_promql_query(
         # / integration health instead (LOW-2).
         if exc.status_code in (401, 403):
             raise AriaApiError(
-                f"The real-time metrics (VODAP) service rejected the exchanged "
-                f"service token (HTTP {exc.status_code}). This is not a "
-                f"suite-api username/password problem — the Bearer JWT obtained "
-                f"for the VCF_VODAP service was refused. Verify the real-time "
-                f"metrics (VODAP) integration is healthy and its service "
-                f"token/keys are valid in Operations (Administration -> "
-                f"Integrations), then retry.",
+                f"Verify the real-time metrics (VODAP) integration is healthy "
+                f"and its service keys valid in Operations (Administration -> "
+                f"Integrations), then retry. VODAP refused the exchanged service "
+                f"token (HTTP {exc.status_code}) — this is not a suite-api "
+                f"password problem.",
                 status_code=exc.status_code,
                 method="GET",
                 path=url,
