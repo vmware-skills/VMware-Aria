@@ -23,6 +23,7 @@ def list_alerts(
     criticality: Optional[str] = None,
     resource_id: Optional[str] = None,
     limit: int = 100,
+    offset: int = 0,
     target: Optional[str] = None,
 ) -> dict:
     """[READ] List alerts from Aria Operations.
@@ -32,14 +33,21 @@ def list_alerts(
     name — resolve it via get_resource(resource_id).
 
     Returns a paginated envelope: items, returned, limit, total (null
-    when the API reports no size), truncated, hint. Check truncated
-    before calling this the complete set.
+    when the API reports no size), truncated, hint, next_offset. Check
+    truncated before calling this the complete set.
+
+    Page it: limit is the page size (1-500; 0, negatives and anything above 500
+    are rejected, not clamped), offset is how many rows to skip, and
+    next_offset is the offset of the next page — pass it back as offset and
+    stop when it is null. Do not loop on truncated: that says this page is not
+    the whole collection, so it stays true on the last page of a walk.
 
     Args:
         active_only: Return only active (non-cancelled) alerts. Default True.
         criticality: Filter by criticality: INFORMATION, WARNING, IMMEDIATE, CRITICAL.
         resource_id: Scope alerts to a specific resource UUID.
-        limit: Max alerts to return (1–500). Default 100.
+        limit: Page size, 1–500 (default 100). Out-of-range is rejected.
+        offset: Alerts to skip; pass the previous response's next_offset.
         target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
@@ -47,7 +55,7 @@ def list_alerts(
     try:
         from vmware_aria.ops.alerts import list_alerts as _list
 
-        return _list(server._get_connection(target), active_only=active_only, criticality=criticality, resource_id=resource_id, limit=limit)
+        return _list(server._get_connection(target), active_only=active_only, criticality=criticality, resource_id=resource_id, limit=limit, offset=offset)
     except Exception as e:
         return {"error": server._safe_error(e, "list_alerts"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
 
@@ -76,6 +84,7 @@ def get_alert(alert_id: str, target: Optional[str] = None) -> dict:
 def list_alert_definitions(
     name_filter: Optional[str] = None,
     limit: int = 100,
+    offset: int = 0,
     target: Optional[str] = None,
 ) -> dict:
     """[READ] List alert definitions (templates that generate alerts when triggered).
@@ -85,12 +94,19 @@ def list_alert_definitions(
     Pass a returned id to set_alert_definition_state to enable or disable it.
 
     Returns a paginated envelope: items, returned, limit, total (null
-    when the API reports no size), truncated, hint. Check truncated
-    before calling this the complete set.
+    when the API reports no size), truncated, hint, next_offset. Check
+    truncated before calling this the complete set.
+
+    Page it: limit is the page size (1-500; 0, negatives and anything above 500
+    are rejected, not clamped), offset is how many rows to skip, and
+    next_offset is the offset of the next page — pass it back as offset and
+    stop when it is null. Do not loop on truncated: that says this page is not
+    the whole collection, so it stays true on the last page of a walk.
 
     Args:
         name_filter: Substring filter on definition name (case-insensitive).
-        limit: Max definitions to return (1–500). Default 100.
+        limit: Page size, 1–500 (default 100). Out-of-range is rejected.
+        offset: Definitions to skip; pass the previous response's next_offset.
         target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
@@ -98,7 +114,7 @@ def list_alert_definitions(
     try:
         from vmware_aria.ops.alerts import list_alert_definitions as _list
 
-        return _list(server._get_connection(target), name_filter=name_filter, limit=limit)
+        return _list(server._get_connection(target), name_filter=name_filter, limit=limit, offset=offset)
     except Exception as e:
         return {"error": server._safe_error(e, "list_alert_definitions"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
 
@@ -109,18 +125,26 @@ def list_symptom_definitions(
     name_filter: Optional[str] = None,
     resource_kind: Optional[str] = None,
     limit: int = 100,
+    offset: int = 0,
     target: Optional[str] = None,
 ) -> dict:
     """[READ] List symptom definitions — use the returned IDs when calling create_alert_definition.
 
     Returns a paginated envelope: items, returned, limit, total (null
-    when the API reports no size), truncated, hint. Check truncated
-    before calling this the complete set.
+    when the API reports no size), truncated, hint, next_offset. Check
+    truncated before calling this the complete set.
+
+    Page it: limit is the page size (1-500; 0, negatives and anything above 500
+    are rejected, not clamped), offset is how many rows to skip, and
+    next_offset is the offset of the next page — pass it back as offset and
+    stop when it is null. Do not loop on truncated: that says this page is not
+    the whole collection, so it stays true on the last page of a walk.
 
     Args:
         name_filter: Substring filter on symptom name (case-insensitive).
         resource_kind: Optional resource kind filter, e.g. VirtualMachine, HostSystem.
-        limit: Max symptom definitions to return (1–500). Default 100.
+        limit: Page size, 1–500 (default 100). Out-of-range is rejected.
+        offset: Definitions to skip; pass the previous response's next_offset.
         target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
@@ -128,7 +152,7 @@ def list_symptom_definitions(
     try:
         from vmware_aria.ops.alerts import list_symptom_definitions as _list
 
-        return _list(server._get_connection(target), name_filter=name_filter, resource_kind=resource_kind, limit=limit)
+        return _list(server._get_connection(target), name_filter=name_filter, resource_kind=resource_kind, limit=limit, offset=offset)
     except Exception as e:
         return {"error": server._safe_error(e, "list_symptom_definitions"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
 

@@ -27,6 +27,24 @@ app = typer.Typer(
 )
 console = Console()
 
+
+def _print_next_page(result: dict) -> None:
+    """Say where the next page starts, or say nothing when there is none.
+
+    A table headed "Aria Operations Alerts" over 50 rows reads as the alert
+    list. On the estate that reported this it was 50 of 2,783, and the CLI
+    took ``["items"]`` and dropped the part of the envelope that said so.
+    """
+    nxt = result.get("next_offset")
+    if nxt is None:
+        return
+    total = result.get("total")
+    of_total = f" of {total}" if total is not None else ""
+    console.print(
+        f"[yellow]Showing rows up to {nxt}{of_total}. "
+        f"Re-run with --offset {nxt} for the next page.[/]"
+    )
+
 # ─── Sub-command groups ──────────────────────────────────────────────────────
 
 resource_app = typer.Typer(help="Resource queries: list, get, metrics, health, top consumers.")
@@ -311,7 +329,8 @@ def resource_top(
 def alert_list(
     active_only: Annotated[bool, typer.Option("--active/--all", help="Active alerts only")] = True,
     criticality: Annotated[str | None, typer.Option("--criticality", help="Filter by criticality")] = None,
-    limit: Annotated[int, typer.Option("--limit", "-n")] = 50,
+    limit: Annotated[int, typer.Option("--limit", "-n", help="Page size, 1-500")] = 50,
+    offset: Annotated[int, typer.Option("--offset", help="Rows to skip; the next-page offset is printed below the table")] = 0,
     target: TargetOption = None,
     config: ConfigOption = None,
 ) -> None:
@@ -319,7 +338,10 @@ def alert_list(
     from vmware_aria.ops.alerts import list_alerts
 
     client, _ = _get_connection(target, config)
-    items = list_alerts(client, active_only=active_only, criticality=criticality, limit=limit)["items"]
+    _result = list_alerts(
+        client, active_only=active_only, criticality=criticality, limit=limit, offset=offset
+    )
+    items = _result["items"]
 
     table = Table(title="Aria Operations Alerts", show_lines=False)
     table.add_column("ID")
@@ -334,6 +356,7 @@ def alert_list(
         table.add_row(a["id"][:36], a["name"][:60], a["criticality"], a["status"], a["resource_id"][:36])
 
     console.print(table)
+    _print_next_page(_result)
 
 
 @alert_app.command("get")
@@ -396,7 +419,8 @@ def alert_cancel(
 @_friendly_errors
 def alert_definitions(
     name_filter: Annotated[str | None, typer.Option("--name", help="Filter by name substring")] = None,
-    limit: Annotated[int, typer.Option("--limit", "-n")] = 50,
+    limit: Annotated[int, typer.Option("--limit", "-n", help="Page size, 1-500")] = 50,
+    offset: Annotated[int, typer.Option("--offset", help="Rows to skip; the next-page offset is printed below the table")] = 0,
     target: TargetOption = None,
     config: ConfigOption = None,
 ) -> None:
@@ -404,7 +428,10 @@ def alert_definitions(
     from vmware_aria.ops.alerts import list_alert_definitions
 
     client, _ = _get_connection(target, config)
-    items = list_alert_definitions(client, name_filter=name_filter, limit=limit)["items"]
+    _result = list_alert_definitions(
+        client, name_filter=name_filter, limit=limit, offset=offset
+    )
+    items = _result["items"]
 
     table = Table(title="Alert Definitions", show_lines=False)
     table.add_column("Name", style="bold")
@@ -418,6 +445,7 @@ def alert_definitions(
         table.add_row(d["name"][:60], d["criticality"], d["resource_kind"], d["impact"])
 
     console.print(table)
+    _print_next_page(_result)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -601,7 +629,8 @@ def health_collectors(
 @_friendly_errors
 def report_definitions(
     name_filter: Annotated[str | None, typer.Option("--name", help="Filter by name substring")] = None,
-    limit: Annotated[int, typer.Option("--limit", "-n")] = 50,
+    limit: Annotated[int, typer.Option("--limit", "-n", help="Page size, 1-500")] = 50,
+    offset: Annotated[int, typer.Option("--offset", help="Rows to skip; the next-page offset is printed below the table")] = 0,
     target: TargetOption = None,
     config: ConfigOption = None,
 ) -> None:
@@ -609,7 +638,10 @@ def report_definitions(
     from vmware_aria.ops.reports import list_report_definitions
 
     client, _ = _get_connection(target, config)
-    items = list_report_definitions(client, name_filter=name_filter, limit=limit)["items"]
+    _result = list_report_definitions(
+        client, name_filter=name_filter, limit=limit, offset=offset
+    )
+    items = _result["items"]
 
     table = Table(title="Report Definitions", show_lines=False)
     table.add_column("Name", style="bold")
@@ -621,6 +653,7 @@ def report_definitions(
         table.add_row(d["name"][:60], d["id"][:36], d["subject_type"], d["owner"])
 
     console.print(table)
+    _print_next_page(_result)
 
 
 @report_app.command("generate")

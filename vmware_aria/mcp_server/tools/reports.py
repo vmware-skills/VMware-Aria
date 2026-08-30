@@ -19,17 +19,25 @@ from vmware_aria.mcp_server._shared import mcp
 def list_report_definitions(
     name_filter: Optional[str] = None,
     limit: int = 100,
+    offset: int = 0,
     target: Optional[str] = None,
 ) -> dict:
     """[READ] List available report definition templates in Aria Operations. Pass a returned id to generate_report to run one.
 
     Returns a paginated envelope: items, returned, limit, total (null
-    when the API reports no size), truncated, hint. Check truncated
-    before calling this the complete set.
+    when the API reports no size), truncated, hint, next_offset. Check
+    truncated before calling this the complete set.
+
+    Page it: limit is the page size (1-500; 0, negatives and anything above 500
+    are rejected, not clamped), offset is how many rows to skip, and
+    next_offset is the offset of the next page — pass it back as offset and
+    stop when it is null. Do not loop on truncated: that says this page is not
+    the whole collection, so it stays true on the last page of a walk.
 
     Args:
         name_filter: Substring filter on report name (case-insensitive).
-        limit: Max definitions to return (1–500). Default 100.
+        limit: Page size, 1–500 (default 100). Out-of-range is rejected.
+        offset: Definitions to skip; pass the previous response's next_offset.
         target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
@@ -37,7 +45,7 @@ def list_report_definitions(
     try:
         from vmware_aria.ops.reports import list_report_definitions as _list
 
-        return _list(server._get_connection(target), name_filter=name_filter, limit=limit)
+        return _list(server._get_connection(target), name_filter=name_filter, limit=limit, offset=offset)
     except Exception as e:
         return {"error": server._safe_error(e, "list_report_definitions"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
 
@@ -90,7 +98,8 @@ def list_reports(
 
     Returns a paginated envelope: items, returned, limit, total (null
     when the API reports no size), truncated, hint. Check truncated
-    before calling this the complete set.
+    before calling this the complete set. This one has no offset — it is
+    bounded by limit alone, so a truncated page cannot be walked past.
 
     Args:
         definition_id: Optional report definition UUID to filter results.

@@ -26,6 +26,84 @@ _PAGE_SIZE = 500
 # unbounded collection into memory.
 _MAX_TOTAL = 20000
 
+#: Largest page a caller may ask for. This was already the number the list ops
+#: enforced; what changed on 2026-08-30 is that it is a page size rather than a
+#: ceiling. It used to be applied as ``max(1, min(limit, 500))``, which quietly
+#: rewrote the caller's argument and left the envelope's hint — "Raise limit
+#: ... to see the rest" — advising the one thing that could not work. On the
+#: reporting estate that put 2,283 alerts out of reach under any parameters.
+MAX_LIMIT = 500
+
+
+def validate_page_args(limit: int, offset: int) -> None:
+    """Reject a page window that cannot mean what it says.
+
+    ``limit`` is a page size: an integer from 1 to :data:`MAX_LIMIT`. It is
+    never a synonym for "unlimited", "none" or "the default" — across this
+    family ``limit=0`` had picked up all four readings, and here the clamp
+    turned both ``0`` and ``-50`` into ``1`` without saying so.
+
+    A *negative* limit is worse than ambiguous elsewhere in the family:
+    ``items[offset:offset + limit]`` is legal Python that quietly returns a
+    shorter page than asked for.
+
+    ``offset`` is a count of rows to skip: an integer from 0 up.
+
+    Raises:
+        ValueError: If either value is outside its range. The message names the
+            range and points at ``offset``, because "limit too large" and "I
+            need more rows" are the same request — and pointing at ``limit``
+            instead is exactly the advice that failed on real hardware.
+    """
+    if not isinstance(limit, int) or isinstance(limit, bool) or limit < 1 or limit > MAX_LIMIT:
+        raise ValueError(
+            f"Invalid limit {limit!r}: it is a page size and must be an "
+            f"integer from 1 to {MAX_LIMIT} (the suite-api page this skill "
+            f"reads). It is not a way to ask for everything — 0 and negatives "
+            f"are rejected rather than quietly turned into 1. To read past "
+            f"{MAX_LIMIT} rows, keep limit within range and pass the "
+            f"response's 'next_offset' back as 'offset' until it is null."
+        )
+    if not isinstance(offset, int) or isinstance(offset, bool) or offset < 0:
+        raise ValueError(
+            f"Invalid offset {offset!r}: it is the number of rows to skip and "
+            f"must be an integer of 0 or more. Start at 0 and pass the "
+            f"response's 'next_offset' back as 'offset' for each following "
+            f"page, stopping when it is null."
+        )
+
+
+def next_offset(returned: int, limit: int, offset: int, total: int | None) -> int | None:
+    """The ``offset`` for the next page, or ``None`` when this page is the last.
+
+    This — not ``truncated`` — is what a paging loop terminates on. The
+    envelope's ``truncated`` answers "is ``items`` the whole collection?", so
+    on the last page of a paged walk it is still true: that page holds three
+    rows of ten. Reading it as "there is more to fetch" is what makes a loop
+    run for ever.
+
+    With a ``total`` the answer is exact. Without one, a page filled exactly to
+    the limit cannot be told apart from a page that was cut short, so it is
+    reported as having a successor: one more call that comes back empty is a
+    cheaper mistake than rows the caller never learns exist.
+
+    Args:
+        returned: Rows in this page.
+        limit: The validated page size that produced it.
+        offset: The validated offset this page started at.
+        total: ``pageInfo.totalCount`` where the appliance reported one, else
+            ``None``.
+
+    Returns:
+        The next offset, or ``None`` if this page ends the collection.
+    """
+    if returned <= 0:
+        return None
+    consumed = offset + returned
+    if total is not None:
+        return consumed if consumed < total else None
+    return consumed if returned >= limit else None
+
 
 class CollectionTotal:
     """Sink for a collection's server-reported ``pageInfo.totalCount``.
@@ -104,3 +182,16 @@ def iter_collection(
         if fetched >= max_total:
             break
         page += 1
+
+
+def paginate(items: list[dict], limit: int, offset: int) -> list[dict]:
+    """Return the ``limit``-sized window of ``items`` starting at ``offset``.
+
+    Callers validate first, so out-of-range values do not reach here. The guard
+    stays anyway: it is the last thing between a negative limit and a page
+    silently missing its final row.
+    """
+    if limit <= 0:
+        return []
+    start = max(offset, 0)
+    return items[start : start + limit]

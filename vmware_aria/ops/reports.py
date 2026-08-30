@@ -16,7 +16,13 @@ from typing import TYPE_CHECKING, Any
 
 from vmware_policy import paginated, sanitize
 
-from vmware_aria.ops._paging import CollectionTotal, iter_collection
+from vmware_aria.ops._paging import (
+    MAX_LIMIT,
+    CollectionTotal,
+    iter_collection,
+    next_offset,
+    validate_page_args,
+)
 
 if TYPE_CHECKING:
     from vmware_aria.connection import AriaClient
@@ -34,13 +40,17 @@ def list_report_definitions(
     client: AriaClient,
     name_filter: str | None = None,
     limit: int = 100,
+    offset: int = 0,
 ) -> dict:
     """List available report definition templates.
 
     Args:
         client: Authenticated Aria Operations API client.
         name_filter: Optional substring to filter by definition name (case-insensitive).
-        limit: Maximum number of definitions to return (1–500).
+        limit: Maximum number of definitions to return (1–500). Page size, not
+            a ceiling: out-of-range values are rejected, not clamped.
+        offset: Rows to skip before collecting this page. 0 or more; pass the
+            previous response's ``next_offset`` to walk the collection.
 
     Returns:
         Result envelope with report definition dicts under ``items``, each with
@@ -48,18 +58,27 @@ def list_report_definitions(
         ``pageInfo.totalCount``, except under a name_filter — that filter is
         applied client-side, so the server's count describes the unfiltered
         collection, not this result.
+
+        The envelope carries ``next_offset``: pass it back as ``offset`` for
+        the next page and stop when it is ``None``. Do not loop on
+        ``truncated`` — that says this page is not the whole collection, which
+        stays true on the last page of a walk.
     """
-    limit = max(1, min(limit, 500))
+    validate_page_args(limit, offset)
 
     # Walk every page so a name_filter match beyond the first page is not
     # invisible; stop once `limit` results have been collected.
     collection_total = CollectionTotal()
     results = []
+    skipped = 0
     for d in iter_collection(
         client, "/reportdefinitions", "reportDefinitions", total_sink=collection_total
     ):
         name = sanitize(d.get("name", ""), max_len=300)
         if name_filter and name_filter.lower() not in name.lower():
+            continue
+        if skipped < offset:
+            skipped += 1
             continue
         results.append({
             "id": sanitize(d.get("id", "")),
@@ -72,8 +91,12 @@ def list_report_definitions(
         })
         if len(results) >= limit:
             break
+    total = None if name_filter else collection_total.value
     return paginated(
-        results, limit=limit, total=None if name_filter else collection_total.value
+        results,
+        limit=limit,
+        total=total,
+        next_offset=next_offset(len(results), limit, offset, total),
     )
 
 

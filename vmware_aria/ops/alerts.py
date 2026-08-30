@@ -11,7 +11,15 @@ from typing import TYPE_CHECKING, Any
 
 from vmware_policy import paginated, sanitize
 
-from vmware_aria.ops._paging import CollectionTotal, iter_collection
+from vmware_aria.ops._paging import (
+    MAX_LIMIT,
+    CollectionTotal,
+    _MAX_TOTAL,
+    iter_collection,
+    next_offset,
+    paginate,
+    validate_page_args,
+)
 
 if TYPE_CHECKING:
     from vmware_aria.connection import AriaClient
@@ -48,6 +56,80 @@ def _max_state_severity(states: list[dict]) -> str:
 # list_alerts
 # ---------------------------------------------------------------------------
 
+#: Server-side page requested from POST /alerts/query. The appliance may return
+#: fewer; nothing here depends on it returning exactly this many.
+_ALERT_PAGE_SIZE = MAX_LIMIT
+
+
+def _walk_alert_pages(
+    client: AriaClient, query: dict[str, Any], wanted: int
+) -> tuple[list[dict], int | None]:
+    """Collect up to ``wanted`` alerts from POST /alerts/query, and the total.
+
+    Walks 0-based ``page``/``pageSize`` from the beginning, which is the same
+    pair every other suite-api collection in this skill pages by, and the pair
+    the alerts endpoints document.
+
+    It stops on any of: enough rows, a short page, an exhausted
+    ``pageInfo.totalCount``, the module's safety cap — or **a page that adds no
+    alert this walk has not already seen**. That last one is not defensive
+    padding. This endpoint has a recorded habit of accepting query parameters
+    and ignoring them: ``status`` and ``criticality`` were silently dropped
+    here until the 2026-06-08 report moved them into the request body. If
+    ``page`` is dropped the same way, every request returns page zero, and a
+    walk that trusted the page number would collect the same alerts for ever.
+    Tracking ids makes that case terminate with a short answer instead — short
+    being visible in ``returned``, where a duplicate-filled one would not be.
+
+    Returns:
+        The alerts collected, and ``pageInfo.totalCount`` if the appliance
+        reported one. ``None`` when it did not: this endpoint is not documented
+        here as carrying ``pageInfo``, and a total inferred from what we
+        happened to fetch would read as fact (踩坑 #36).
+    """
+    collected: list[dict] = []
+    seen: set[str] = set()
+    total_count: int | None = None
+    page = 0
+    while len(collected) < wanted:
+        # Pure query endpoint — idempotent, safe to retry transient gateways.
+        data = client.post(
+            "/alerts/query",
+            json_data=query,
+            params={"page": page, "pageSize": _ALERT_PAGE_SIZE},
+            retries=1,
+        )
+        items = data.get("alerts", []) or []
+        reported = (data.get("pageInfo") or {}).get("totalCount")
+        if isinstance(reported, int):
+            total_count = reported
+
+        fresh: list[dict] = []
+        for alert in items:
+            key = alert.get("alertId")
+            if key is not None:
+                if key in seen:
+                    continue
+                seen.add(str(key))
+            fresh.append(alert)
+        if not fresh:
+            break
+        collected.extend(fresh)
+
+        if len(items) < _ALERT_PAGE_SIZE:
+            break
+        if total_count is not None and len(collected) >= total_count:
+            break
+        if len(collected) >= _MAX_TOTAL:
+            _log.warning(
+                "list_alerts hit the %d-alert safety cap; narrow with "
+                "criticality or resource_id.",
+                _MAX_TOTAL,
+            )
+            break
+        page += 1
+    return collected, total_count
+
 
 def list_alerts(
     client: AriaClient,
@@ -55,6 +137,7 @@ def list_alerts(
     criticality: str | None = None,
     resource_id: str | None = None,
     limit: int = 100,
+    offset: int = 0,
 ) -> dict:
     """List alerts from Aria Operations.
 
@@ -63,12 +146,34 @@ def list_alerts(
         active_only: Return only active (non-cancelled) alerts.
         criticality: Filter by criticality: INFORMATION, WARNING, IMMEDIATE, CRITICAL.
         resource_id: Scope alerts to a specific resource UUID.
-        limit: Maximum number of alerts to return (1–500).
+        limit: Maximum number of alerts to return (1–500). A page size, not a
+            ceiling: out-of-range values are rejected, not clamped.
+        offset: Alerts to skip before collecting this page. 0 or more; pass the
+            previous response's ``next_offset`` to walk the whole set.
 
     Returns:
-        Result envelope with alert summary dicts under ``items``. POST
-        /alerts/query reports no collection size, so ``total`` is None and a
-        full page is flagged truncated.
+        Result envelope with alert summary dicts under ``items``. ``total``
+        carries ``pageInfo.totalCount`` where the appliance reports one and is
+        ``None`` where it does not — an invented total reads as fact.
+
+        The envelope carries ``next_offset``: pass it back as ``offset`` for
+        the next page and stop when it is ``None``. Do not loop on
+        ``truncated`` — that says this page is not the whole set, which stays
+        true on the last page of a walk.
+
+    Until 2026-08-30 this fetched a single page and clamped ``limit`` to 500
+    with ``max(1, min(limit, 500))``, so on an estate with 2,783 alerts the
+    other 2,283 could not be reached under any combination of parameters —
+    while the envelope's hint advised raising the limit, which the clamp
+    silently undid.
+
+    Paging walks server pages from page 0 and skips ``offset`` rows, rather
+    than computing ``page = offset // pageSize``. The appliance chooses its own
+    page size and need not honour the one we ask for, and if it returns 100
+    where we asked 500 then page arithmetic lands the window somewhere else
+    entirely — silently, because every row in it is a real alert. Walking costs
+    one request per 500 rows skipped and cannot be wrong about which rows those
+    are.
     """
     if criticality and criticality.upper() not in _VALID_CRITICALITIES:
         raise ValueError(
@@ -78,7 +183,7 @@ def list_alerts(
             f"omit it to list alerts at every criticality."
         )
 
-    limit = max(1, min(limit, 500))
+    validate_page_args(limit, offset)
 
     # GET /alerts only supports id/resourceId/page/pageSize — status and
     # criticality params were silently ignored (2026-06-08 user report).
@@ -91,9 +196,8 @@ def list_alerts(
     if resource_id:
         query["resource-query"] = {"resourceId": [resource_id]}
 
-    # Pure query endpoint — idempotent, safe to retry transient gateway errors.
-    data = client.post("/alerts/query", json_data=query, params={"pageSize": limit}, retries=1)
-    items = data.get("alerts", [])
+    fetched, total_count = _walk_alert_pages(client, query, offset + limit)
+    items = paginate(fetched, limit, offset)
 
     # Alert model fields (2026-06-08 spec audit): criticality is `alertLevel`,
     # the display name is `alertDefinitionName`. There is no alertName,
@@ -115,7 +219,12 @@ def list_alerts(
         }
         for a in items
     ]
-    return paginated(rows, limit=limit)
+    return paginated(
+        rows,
+        limit=limit,
+        total=total_count,
+        next_offset=next_offset(len(rows), limit, offset, total_count),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -445,31 +554,44 @@ def list_alert_definitions(
     client: AriaClient,
     name_filter: str | None = None,
     limit: int = 100,
+    offset: int = 0,
 ) -> dict:
     """List alert definitions (templates that generate alerts).
 
     Args:
         client: Authenticated Aria Operations API client.
         name_filter: Optional substring filter on definition name (case-insensitive).
-        limit: Maximum number of definitions to return (1–500).
+        limit: Maximum number of definitions to return (1–500). Page size, not a
+            ceiling: out-of-range values are rejected, not clamped.
+        offset: Rows to skip before collecting this page. 0 or more; pass
+            the previous response's ``next_offset`` to walk the collection.
 
     Returns:
         Result envelope with alert definition summary dicts under ``items``.
         ``total`` carries the collection's ``pageInfo.totalCount``, except under
         a name_filter — that filter is applied client-side, so the server's
         count describes the unfiltered collection, not this result.
+
+        The envelope carries ``next_offset``: pass it back as ``offset`` for
+        the next page and stop when it is ``None``. Do not loop on
+        ``truncated`` — that says this page is not the whole collection, which
+        stays true on the last page of a walk.
     """
-    limit = max(1, min(limit, 500))
+    validate_page_args(limit, offset)
 
     # Walk every page so a name_filter match beyond the first page is not
     # invisible; stop once `limit` results have been collected.
     collection_total = CollectionTotal()
     results = []
+    skipped = 0
     for d in iter_collection(
         client, "/alertdefinitions", "alertDefinitions", total_sink=collection_total
     ):
         name = sanitize(d.get("name", ""), max_len=300)
         if name_filter and name_filter.lower() not in name.lower():
+            continue
+        if skipped < offset:
+            skipped += 1
             continue
         states = d.get("states") or []
         # AlertDefinition has no top-level criticality or active fields
@@ -496,8 +618,12 @@ def list_alert_definitions(
         )
         if len(results) >= limit:
             break
+    total = None if name_filter else collection_total.value
     return paginated(
-        results, limit=limit, total=None if name_filter else collection_total.value
+        results,
+        limit=limit,
+        total=total,
+        next_offset=next_offset(len(results), limit, offset, total),
     )
 
 
@@ -717,6 +843,7 @@ def list_symptom_definitions(
     name_filter: str | None = None,
     resource_kind: str | None = None,
     limit: int = 100,
+    offset: int = 0,
 ) -> dict:
     """List symptom definitions — use these IDs when creating alert definitions.
 
@@ -724,7 +851,10 @@ def list_symptom_definitions(
         client: Authenticated Aria Operations API client.
         name_filter: Optional substring filter on symptom name (case-insensitive).
         resource_kind: Optional resource kind to filter (e.g. VirtualMachine).
-        limit: Maximum number of symptom definitions to return (1–500).
+        limit: Maximum number of symptom definitions to return (1–500). Page size, not a
+            ceiling: out-of-range values are rejected, not clamped.
+        offset: Rows to skip before collecting this page. 0 or more; pass
+            the previous response's ``next_offset`` to walk the collection.
 
     Returns:
         Result envelope with symptom definition dicts under ``items``, each with
@@ -732,8 +862,13 @@ def list_symptom_definitions(
         ``total`` carries ``pageInfo.totalCount`` (which already reflects the
         server-side resource_kind filter), except under a client-side
         name_filter.
+
+        The envelope carries ``next_offset``: pass it back as ``offset`` for
+        the next page and stop when it is ``None``. Do not loop on
+        ``truncated`` — that says this page is not the whole collection, which
+        stays true on the last page of a walk.
     """
-    limit = max(1, min(limit, 500))
+    validate_page_args(limit, offset)
     extra_params: dict = {}
     if resource_kind:
         # Query param is `resourceKind`, NOT `resourceKindKey` (spec audit).
@@ -743,6 +878,7 @@ def list_symptom_definitions(
     # invisible; stop once `limit` results have been collected.
     collection_total = CollectionTotal()
     results = []
+    skipped = 0
     for s in iter_collection(
         client,
         "/symptomdefinitions",
@@ -752,6 +888,9 @@ def list_symptom_definitions(
     ):
         name = sanitize(s.get("name", ""), max_len=300)
         if name_filter and name_filter.lower() not in name.lower():
+            continue
+        if skipped < offset:
+            skipped += 1
             continue
         condition = s.get("state", {}).get("condition", {})
         results.append({
@@ -765,6 +904,10 @@ def list_symptom_definitions(
         })
         if len(results) >= limit:
             break
+    total = None if name_filter else collection_total.value
     return paginated(
-        results, limit=limit, total=None if name_filter else collection_total.value
+        results,
+        limit=limit,
+        total=total,
+        next_offset=next_offset(len(results), limit, offset, total),
     )
