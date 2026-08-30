@@ -348,7 +348,13 @@ def test_complete_anomaly_scan_is_not_flagged_truncated() -> None:
     result = list_anomalies(client, limit=50)
 
     assert result["scanned"] == 6
-    assert result["total"] is None, "every VM was scanned — nothing is behind this"
+    assert result["scan_complete"] is True, "every VM was scanned — nothing is behind this"
+    # A complete scan ranks the whole environment, so the size of the answer
+    # set is known and is what `total` reports (0 flagged here). It carried
+    # None until 2026-08-30, when `limit` stopped truncating the scan and the
+    # flagged count stopped being a floor; the claim this test exists for —
+    # a complete scan is not flagged truncated — is unchanged.
+    assert result["total"] == 0
     assert result["truncated"] is False
 
 

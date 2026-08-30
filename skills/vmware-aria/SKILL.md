@@ -233,7 +233,7 @@ Rules:
 - **`truncated: true` means more rows exist.** Never describe such a result as the complete set; either say it is a partial view or re-query with a higher `limit` or a narrower filter, as `hint` instructs.
 - **`truncated: false` means the answer is complete** — safe to summarise as the whole picture.
 - **`total: null` means the API reported no collection size**, so a page filled exactly to the limit is flagged truncated conservatively. It may in fact be complete; a follow-up query with a larger limit settles it.
-- **`list_anomalies` also carries `scanned`** — how many VMs were examined. It returns only VMs with a non-zero anomaly count, so a short list is not evidence that the environment is clean; check `truncated`.
+- **`list_anomalies` also carries `scanned`, `vm_total` and `scan_complete`** — `limit` bounds the answer, not the scan: the environment is ranked in full and the worst `limit` objects are returned. It returns only VMs with a non-zero anomaly count, so a short list is not evidence that the environment is clean; check `truncated`. With `scan_complete: true`, `total` is the number of anomalous objects found. With `scan_complete: false` the scan hit its cap, `total` is the environment's VM count, and a `note` says the ranking is partial.
 
 ## CLI Quick Reference
 

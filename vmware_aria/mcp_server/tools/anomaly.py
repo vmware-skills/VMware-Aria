@@ -22,18 +22,27 @@ def list_anomalies(
     The suite-api does not expose the UI's anomalous-metrics list; this is the
     Total Anomalies metric — active symptoms, events and DT violations on the
     object and its children. With resource_id: that resource's count. Without:
-    scans up to `limit` VMs and returns those with non-zero counts, sorted
-    descending. For root cause, follow up with list_alerts(resource_id=...).
-    One stats call per VM when listing — keep limit modest.
+    ranks every VM in the environment and returns the worst `limit` of them.
+    For root cause, follow up with list_alerts(resource_id=...).
 
-    Returns a paginated envelope: flagged rows under items, plus returned,
-    limit, total, truncated, hint, and scanned (how many VMs were examined).
-    A short list is not proof the environment is clean — truncated is true
-    whenever VMs went unscanned.
+    `limit` bounds the answer, not the scan — raising it does not widen the
+    search, and lowering it does not hide worse objects. The whole inventory is
+    read either way, in bulk pages, because the ranking metric is not a field
+    the appliance can sort on.
+
+    Returns a paginated envelope: flagged rows worst-first under items, plus
+    returned, limit, total, truncated, hint, scanned (objects examined),
+    vm_total and scan_complete. Only flagged VMs are returned, so a short list
+    is not by itself proof the environment is clean. When scan_complete is
+    true, total is the number of anomalous objects found and truncated is
+    exact; when it is false the scan hit its cap, total is the environment's VM
+    count, and a note says the ranking is partial — an unexamined object could
+    outrank every row shown.
 
     Args:
         resource_id: Optional resource UUID to scope to a single resource.
-        limit: Maximum VMs to scan when listing (1–100). Default 50.
+        limit: Maximum ranked rows to return (1–500). Default 50. Rejected, not
+            clamped, when out of range.
         target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server

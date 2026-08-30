@@ -10,10 +10,16 @@ Four read-only queries added for VCF Operations 9.1:
 The four *paths* are VERIFIED against the VCF Operations 9.1 OpenAPI
 (vcf-operations-openapi.json) and seeded into
 ``tests/eval/spec/vcf91_fleet_operations.json`` — the spec-conformance
-regression guards them against 踩坑 #36. The response *field names*, by
-contrast, are read defensively (``.get`` / degrade-to-empty, 踩坑 形态 #1):
-an absent field yields an empty value, never a crash, so a shape that differs
-slightly on a real appliance still returns rows instead of a traceback.
+regression guards them against 踩坑 #36. The response *schemas* are not
+verified, and are therefore read without depending on having guessed a name:
+the row container is located by name where we know one and by *shape* where we
+do not (:func:`_extract_rows`), and individual fields go through ``.get`` so an
+absent one yields an empty value rather than a traceback (踩坑 形态 #1).
+
+Guessing names was not merely fragile, it failed in the field: on a real 9.1
+appliance a fleet holding 32 certificates and 26 managed password accounts
+reported zero of each, because a name-matching parser cannot tell a container
+it did not anticipate from a fleet that owns nothing.
 
 All API text passes through ``sanitize()`` to strip control characters and cap
 length (prompt-injection defence).
@@ -72,29 +78,86 @@ def _domains_path(integration_id: str) -> str:
     return f"/integrations/vcf/{integration_id}/domains"
 
 
+#: Container names used across VCF/suite-api collections irrespective of what
+#: is being listed. Tried after each endpoint's own names, before falling back
+#: to reading the shape.
+_GENERIC_CONTAINER_KEYS = ("items", "values", "elements", "content", "results")
+
+#: Sibling arrays that ride along with a suite-api body and are never the rows:
+#: hypermedia navigation and per-request diagnostics. Excluded before deciding
+#: whether the body holds exactly one list of records, so that a response whose
+#: real container key we did not guess is still readable when a ``links`` array
+#: sits beside it.
+_NON_ROW_KEYS = frozenset({"links", "_links", "errors", "warnings", "messages"})
+
+
+def _dict_rows(rows: list) -> list[dict]:
+    """The dict members of a wire array; anything else is not a record."""
+    return [row for row in rows if isinstance(row, dict)]
+
+
 def _extract_rows(data: Any, *keys: str) -> tuple[list[dict], bool]:
     """Return ``(rows, recognized)`` from a VCF 9.1 query response, defensively.
 
-    VCF 9.1 query responses wrap their rows under a container key whose exact
-    name is not pinned in our spec (only the path is VERIFIED). Trying several
-    plausible container names and degrading to an empty list keeps a slightly
-    different real-appliance shape from crashing the tool (踩坑 形态 #1).
+    Only the *paths* of these endpoints are VERIFIED against the 9.1 spec; the
+    response *schemas* are not (see the module docstring). This used to be a
+    list of guessed container names, and on a real 9.1 appliance the guess
+    missed: a fleet holding 32 certificates and 26 managed accounts answered
+    with zero of each, because a body whose rows arrive under a name nobody
+    guessed is indistinguishable — to a name-matching parser — from a fleet
+    that owns nothing.
+
+    So the name is now the fast path, not the only path. Rows are found by:
+
+    1. a bare array body (the whole response *is* the collection);
+    2. one of the endpoint's own container names, then the generic ones;
+    3. failing both, the *shape*: exactly one key whose value is a list holding
+       records, ignoring the hypermedia and diagnostic siblings that are never
+       rows. One list of records in the body has only one thing it can be.
+
+    Ambiguity is not resolved by preference. Two candidate record lists means
+    picking one would be a guess, so the body is reported unrecognised — the
+    caller then says "unknown" rather than inventing a reading of it.
 
     ``recognized`` distinguishes a *genuine* empty inventory from a *shape we
-    did not understand*: it is ``True`` when a known container key held a list
-    (even an empty one) or when the response was an empty dict, and ``False``
-    when the response was a *non-empty* dict whose keys we do not recognise. A
-    ``False`` empty result must not be reported as "none" — that is the false
-    all-clear this flag exists to prevent.
+    did not understand*: ``True`` when a container was located (even holding an
+    empty list) or the body was empty, ``False`` when the body carried content
+    we could not read as records. A ``False`` empty result must not be reported
+    as "none" — that is the false all-clear this flag exists to prevent.
     """
-    if isinstance(data, dict):
-        for key in keys:
-            val = data.get(key)
-            if isinstance(val, list):
-                return [row for row in val if isinstance(row, dict)], True
-        # Empty dict -> genuinely empty (recognized); a non-empty dict with no
-        # known container key -> unrecognised shape, empty result unconfirmed.
-        return [], not bool(data)
+    # A response that is itself the array: there is no container to name.
+    if isinstance(data, list):
+        return _dict_rows(data), True
+    if not isinstance(data, dict):
+        return [], False
+    # An empty body is a genuine "nothing", not a shape we failed to read.
+    if not data:
+        return [], True
+
+    for key in (*keys, *_GENERIC_CONTAINER_KEYS):
+        val = data.get(key)
+        if isinstance(val, list):
+            return _dict_rows(val), True
+
+    # Name unknown — read the shape instead. Only lists that actually hold
+    # records count; an empty list under an unknown key could be the rows or
+    # could be anything else, and saying which would be the guess this is
+    # replacing.
+    candidates = [
+        (key, val)
+        for key, val in data.items()
+        if key not in _NON_ROW_KEYS and isinstance(val, list) and any(isinstance(r, dict) for r in val)
+    ]
+    if len(candidates) == 1:
+        key, val = candidates[0]
+        _log.info(
+            "VCF fleet response used container key %r, which is not one of the "
+            "names this skill knows (%s); read it by shape. Worth recording in "
+            "tests/eval/spec if it is what this appliance always sends.",
+            key,
+            ", ".join(keys),
+        )
+        return _dict_rows(val), True
     return [], False
 
 
@@ -144,7 +207,7 @@ def list_fleet_certificates(client: AriaClient, limit: int | None = 50) -> dict:
         returned by the query (the endpoint is unpaged at the fleet scale).
     """
     data = client.post(CERT_QUERY_PATH, json_data={}, retries=1)
-    rows, recognized = _extract_rows(data, "certificates", "certificateList", "items", "values")
+    rows, recognized = _extract_rows(data, "certificates", "certificateList")
     total = len(rows)
     if limit and limit > 0:
         rows = rows[:limit]
@@ -192,7 +255,7 @@ def list_fleet_password_accounts(client: AriaClient, limit: int | None = 50) -> 
         Family envelope: account summaries under ``items``.
     """
     data = client.post(PASSWORD_ACCOUNT_QUERY_PATH, json_data={}, retries=1)
-    rows, recognized = _extract_rows(data, "accounts", "passwordAccounts", "items", "values")
+    rows, recognized = _extract_rows(data, "accounts", "passwordAccounts")
     total = len(rows)
     if limit and limit > 0:
         rows = rows[:limit]
@@ -244,7 +307,7 @@ def _extract_domain_rows(data: Any) -> tuple[list[tuple[dict, str]], bool]:
     if matched:
         return tagged, True
 
-    rows, recognized = _extract_rows(data, "domains", "domainList", "items", "values")
+    rows, recognized = _extract_rows(data, "domains", "domainList")
     return [(row, "") for row in rows], recognized
 
 
@@ -291,10 +354,20 @@ def _summarize_finding(row: dict) -> dict:
     Field names (ruleUuid/severity/category/affectedObjectsCount) are the ones
     named in the verified VCF 9.1 Findings spec; everything is still read
     through ``.get`` so a missing field degrades to empty.
+
+    A finding is named by the rule that raised it, and 9.1 spells that
+    ``ruleName`` — the sibling of the ``ruleUuid`` already read here. Reading
+    only ``name``/``title`` is why the findings table came back on a real
+    appliance with every row present and the name column blank, which reads
+    as "these findings have no names" rather than "we looked in the wrong
+    field". Those two stay as fallbacks for older builds.
     """
     return {
         "rule_uuid": sanitize(str(row.get("ruleUuid") or row.get("id") or "")),
-        "name": sanitize(str(row.get("name") or row.get("title") or ""), max_len=300),
+        "name": sanitize(
+            str(row.get("ruleName") or row.get("name") or row.get("title") or ""),
+            max_len=300,
+        ),
         "severity": sanitize(str(row.get("severity") or "")),
         "category": sanitize(str(row.get("category") or "")),
         "finding_type": sanitize(str(row.get("findingType") or row.get("type") or "")),
@@ -334,7 +407,7 @@ def list_findings(
         body["findingTypes"] = [str(t) for t in finding_types]
 
     data = client.post(FINDINGS_QUERY_PATH, json_data=body, retries=1)
-    rows, recognized = _extract_rows(data, "findings", "findingList", "items", "values")
+    rows, recognized = _extract_rows(data, "findings", "findingList")
     total = len(rows)
     if limit and limit > 0:
         rows = rows[:limit]

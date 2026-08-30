@@ -163,11 +163,20 @@ def test_domain_list_empty_buckets_are_a_genuine_none() -> None:
 
 
 def test_domain_list_unknown_shape_is_not_reported_as_none() -> None:
-    """CONTROL: a body we cannot parse must still refuse to claim 'no domains'."""
+    """CONTROL: a body we cannot parse must still refuse to claim 'no domains'.
+
+    The body here carries content but no list of records. It used to be
+    ``{"someFutureContainer": [{"name": "wld-01"}]}``, which the 2026-08-30
+    fleet fix made *parseable* — one list of records in a body has only one
+    thing it can be, and refusing to read it is what made a 32-certificate
+    fleet report zero. That case is now a positive test
+    (test_fleet_rows_survive_the_container_key); the lesson asserted below is
+    unchanged and needs a body that genuinely says nothing readable.
+    """
     from vmware_aria.ops.fleet import list_fleet_domains
 
     c = _client()
-    c.get.return_value = {"someFutureContainer": [{"name": "wld-01"}]}
+    c.get.return_value = {"pageInfo": {"totalCount": 3}, "status": "OK"}
     result = list_fleet_domains(c, integration_id="int-123")
 
     assert result["items"] == []
@@ -186,7 +195,7 @@ def test_domain_list_cli_prints_the_unconfirmed_shape_note(monkeypatch) -> None:
     from vmware_aria.cli import app
 
     c = _client()
-    c.get.return_value = {"someFutureContainer": [{"name": "wld-01"}]}
+    c.get.return_value = {"pageInfo": {"totalCount": 3}, "status": "OK"}
     monkeypatch.setattr("vmware_aria.cli._get_connection", lambda target, config: (c, MagicMock()))
 
     result = CliRunner().invoke(app, ["fleet", "domains", "int-123"])

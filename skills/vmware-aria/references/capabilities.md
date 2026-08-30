@@ -122,7 +122,7 @@ size. It is never inferred:
 | `list_report_definitions` | `pageInfo.totalCount` on `GET /reportdefinitions` | Suppressed under `name_filter` |
 | `list_reports` | Count of matches from the unpaged `GET /reports` | The whole matching set is in hand, so the count is exact |
 | `list_rightsizing_recommendations` | VM `pageInfo.totalCount` from the candidate `GET /resources` | One row per VM evaluated, so the count describes the same collection |
-| `list_anomalies` | VM `pageInfo.totalCount`, only when VMs went unscanned | Also carries `scanned`. Only flagged VMs are returned, so a short list is not evidence of a clean environment |
+| `list_anomalies` | Count of flagged objects on a complete scan; VM `pageInfo.totalCount` when the scan hit its cap | Also carries `scanned`, `vm_total`, `scan_complete`. `limit` bounds the answer, not the scan. Only flagged VMs are returned, so a short list is not evidence of a clean environment |
 | `list_alerts` | — | `POST /alerts/query` reports no count; a full page is conservatively flagged truncated |
 | `get_top_consumers` | — | A top-N ranking is a slice of an unbounded set |
 | `list_collector_groups` | — | `GET /collectorgroups` is unpaged and takes no limit, so `truncated` is always `false` |

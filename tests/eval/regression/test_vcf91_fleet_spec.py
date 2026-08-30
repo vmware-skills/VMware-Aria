@@ -220,11 +220,18 @@ def test_unrecognized_shape_flags_empty_result_as_unconfirmed() -> None:
     schemas. A drifted 9.1 shape returning items:[] with no note would let an
     agent report "no expiring certificates" — a dangerous false all-clear
     (形态 #1). The envelope carries a note when the shape was unrecognised.
+
+    The body was ``{"unexpectedContainer": [{"commonName": "x"}]}`` until
+    2026-08-30, when a real 9.1 fleet of 32 certificates came back empty
+    because an unguessed container name was treated as unreadable. A lone list
+    of records is now read by shape, so demonstrating "unrecognised" needs a
+    body that carries no records at all — the note, and the reason for it, are
+    unchanged.
     """
     from vmware_aria.ops.fleet import list_fleet_certificates
 
     c = _client()
-    c.post.return_value = {"unexpectedContainer": [{"commonName": "x"}]}
+    c.post.return_value = {"queryId": "q-7", "elapsedMs": 12}
     result = list_fleet_certificates(c)
     assert result["items"] == []
     assert result["total"] == 0
