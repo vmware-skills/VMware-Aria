@@ -150,13 +150,6 @@ class AriaClient:
         # liveness probe so a burst of connect() calls doesn't re-probe each time.
         self._liveness_checked_at: float = 0.0
 
-        # Suppress urllib3's InsecureRequestWarning for self-signed certs.
-        # urllib3.disable_warnings is class-targeted and idempotent; it avoids
-        # the process-global side-effects of warnings.filterwarnings().
-        if not target.verify_ssl:
-            import urllib3
-
-            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
         self._client = httpx.Client(
             base_url=self._base_url,
