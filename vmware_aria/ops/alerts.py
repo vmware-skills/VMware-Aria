@@ -123,48 +123,146 @@ def list_alerts(
 # ---------------------------------------------------------------------------
 
 
-def _get_contributing_symptoms(client: AriaClient, alert_id: str) -> list[dict]:
+# Keys that hold a *nested level* of a contributingsymptoms body rather than a
+# symptom itself, and the keys that identify a leaf symptom object. The 9.1
+# body is `{"contributingSymptoms": [ {"alertId": ..., "contributingSymptoms":
+# {"contributingSymptoms": [ <symptom>, ... ]}} ]}` — three levels, and the
+# same key name repeated at each. Unwrapping one level (what this did before)
+# yields the per-alert wrappers, whose every symptom field is absent, so all
+# five CRITICAL alerts on a real 9.1 appliance came back with symptoms that
+# said nothing. Recursing instead of hard-coding three hops keeps the flat
+# `{"symptoms": [...]}` body older appliances send working too.
+_SYMPTOM_CONTAINER_KEYS = ("contributingSymptoms", "symptoms", "symptom", "result")
+_SYMPTOM_LEAF_KEYS = (
+    "symptomId",
+    "symptomSetId",
+    "symptomDefinitionsIds",
+    "symptomDefinitionId",
+    "alertConditions",
+    "id",
+    "name",
+    "message",
+    "severity",
+    "symptomCriticality",
+)
+# Guards against a self-referential body walking forever. The real shape is
+# three deep; anything past this is not a shape we claim to understand.
+_MAX_SYMPTOM_DEPTH = 8
+
+#: Attached to get_alert when the symptoms body could not be walked. Without it
+#: an unparsed body and a genuinely quiet alert are the same answer — `[]` —
+#: and an agent reads "nothing is wrong" off a tool that simply failed to read
+#: the response (形态 #1).
+_UNPARSED_SYMPTOMS_NOTE = (
+    "contributing-symptoms response shape unrecognized — the empty symptom "
+    "list is unconfirmed, not a confirmed 'this alert has no symptoms'. The "
+    "appliance answered in a form this tool did not recognise; treat it as "
+    "unknown and inspect the alert in the Operations UI."
+)
+
+#: Attached when the symptoms call itself failed. Same hazard, different cause:
+#: a 500 or a timeout also lands as an empty list.
+_SYMPTOMS_UNAVAILABLE_NOTE = (
+    "contributing symptoms could not be retrieved — the empty symptom list "
+    "reflects a failed lookup, not an alert without symptoms. Retry, or "
+    "inspect the alert in the Operations UI."
+)
+
+
+def _walk_symptoms(node: Any, depth: int = 0) -> tuple[list[dict], bool]:
+    """Return ``(leaf symptom dicts, recognized)`` for one node of the response.
+
+    ``recognized`` is what separates "walked to the bottom and there were none"
+    from "could not follow this body at all". A response we understood but that
+    held nothing is a confirmed none; anything else must not be reported as one.
+    """
+    if depth > _MAX_SYMPTOM_DEPTH:
+        return [], False
+    if isinstance(node, list):
+        rows: list[dict] = []
+        recognized = True
+        for entry in node:
+            sub, ok = _walk_symptoms(entry, depth + 1)
+            rows.extend(sub)
+            recognized = recognized and ok
+        return rows, recognized
+    if not isinstance(node, dict):
+        return [], False
+
+    containers = [k for k in _SYMPTOM_CONTAINER_KEYS if isinstance(node.get(k), (list, dict))]
+    if containers:
+        rows = []
+        recognized = True
+        for key in containers:
+            sub, ok = _walk_symptoms(node[key], depth + 1)
+            rows.extend(sub)
+            recognized = recognized and ok
+        return rows, recognized
+
+    # No nested level below here. Inside a container, a dict carrying any
+    # symptom field is the symptom itself; a per-alert entry with no symptom
+    # container simply had nothing triggered. The top-level body is never a
+    # leaf — a bare dict with no container key there is a shape we do not know.
+    if depth and any(k in node for k in _SYMPTOM_LEAF_KEYS):
+        return [node], True
+    return [], not node or (depth > 0 and "alertId" in node)
+
+
+def _summarize_symptom(s: dict) -> dict:
+    """Project one triggered symptom onto summary fields.
+
+    Reads both wire vocabularies. The 9.1 leaf carries none of severity /
+    message / symptomDefinitionId: the severity sits on ``alertConditions[]``
+    and the definition ids are the plural ``symptomDefinitionsIds``, so mapping
+    only the older names left every field blank even once the nesting was
+    followed. ``condition`` is the actual reason the symptom fired, which is
+    the whole point of asking for symptoms.
+    """
+    conditions = [c for c in (s.get("alertConditions") or []) if isinstance(c, dict)]
+    definition_ids = s.get("symptomDefinitionsIds") or []
+    first_condition = conditions[0].get("condition") if conditions else None
+    if not isinstance(first_condition, dict):
+        first_condition = {}
+
+    severity = s.get("severity") or s.get("symptomCriticality") or _max_state_severity(conditions)
+    name = s.get("name") or s.get("message") or first_condition.get("key") or ""
+    definition_id = s.get("symptomDefinitionId") or (
+        definition_ids[0] if isinstance(definition_ids, list) and definition_ids else ""
+    )
+    condition = " ".join(
+        str(first_condition.get(k) or "")
+        for k in ("key", "operator", "settingValue")
+    ).strip()
+
+    return {
+        "id": sanitize(str(s.get("id") or s.get("symptomId") or "")),
+        "name": sanitize(str(name), max_len=300),
+        "severity": sanitize(str(severity)),
+        "symptom_definition_id": sanitize(str(definition_id)),
+        "resource_id": sanitize(str(s.get("resourceId") or "")),
+        "condition": sanitize(condition, max_len=300),
+    }
+
+
+def _get_contributing_symptoms(client: AriaClient, alert_id: str) -> tuple[list[dict], str]:
     """Fetch triggered symptoms via GET /alerts/contributingsymptoms?id=<alertId>.
 
-    The Alert model has no alertSymptomList — triggered symptoms come from
-    this separate endpoint (2026-06-08 spec audit). The response container
-    key varies across versions, so parse whichever value is a list and read
-    Symptom fields defensively. Failures degrade to an empty list (logged)
-    so a symptoms hiccup never breaks get_alert.
+    The Alert model has no alertSymptomList — triggered symptoms come from this
+    separate endpoint (2026-06-08 spec audit). Returns ``(symptoms, note)``,
+    where a non-empty note says the empty list is unconfirmed. Failures still
+    degrade to an empty list (logged) so a symptoms hiccup never breaks
+    get_alert, but they no longer pass silently as "no symptoms".
     """
     try:
         data = client.get("/alerts/contributingsymptoms", params={"id": alert_id})
     except Exception as exc:
         _log.warning("Could not fetch contributing symptoms for alert %s: %s", alert_id, exc)
-        return []
+        return [], _SYMPTOMS_UNAVAILABLE_NOTE
 
-    container: list = []
-    for key in ("symptoms", "symptom", "contributingSymptoms", "result"):
-        value = data.get(key)
-        if isinstance(value, list):
-            container = value
-            break
-    else:
-        container = next((v for v in data.values() if isinstance(v, list)), [])
-
-    symptoms = []
-    for s in container:
-        if not isinstance(s, dict):
-            continue
-        symptoms.append(
-            {
-                "id": sanitize(str(s.get("id") or s.get("symptomId") or "")),
-                "name": sanitize(
-                    str(s.get("name") or s.get("message") or ""), max_len=300
-                ),
-                "severity": sanitize(
-                    str(s.get("severity") or s.get("symptomCriticality") or "")
-                ),
-                "symptom_definition_id": sanitize(str(s.get("symptomDefinitionId") or "")),
-                "resource_id": sanitize(str(s.get("resourceId") or "")),
-            }
-        )
-    return symptoms
+    rows, recognized = _walk_symptoms(data)
+    if not recognized:
+        _log.warning("Unrecognized contributing-symptoms shape for alert %s", alert_id)
+    return [_summarize_symptom(s) for s in rows], "" if recognized else _UNPARSED_SYMPTOMS_NOTE
 
 
 def get_alert(client: AriaClient, alert_id: str) -> dict:
@@ -180,7 +278,10 @@ def get_alert(client: AriaClient, alert_id: str) -> dict:
         alert_id: The alert UUID.
 
     Returns:
-        Dict with alert details and contributing symptom list.
+        Dict with alert details and contributing symptom list. A
+        ``symptoms_note`` key is present only when the symptom list is empty
+        for a reason other than the alert having no symptoms — an unrecognised
+        response shape, or a lookup that failed.
     """
     if not alert_id:
         raise ValueError(
@@ -190,7 +291,8 @@ def get_alert(client: AriaClient, alert_id: str) -> dict:
         )
 
     data = client.get(f"/alerts/{alert_id}")
-    return {
+    symptoms, symptoms_note = _get_contributing_symptoms(client, alert_id)
+    result = {
         "id": sanitize(data.get("alertId", "")),
         "name": sanitize(data.get("alertDefinitionName", ""), max_len=300),
         "criticality": sanitize(data.get("alertLevel", "")),
@@ -203,8 +305,11 @@ def get_alert(client: AriaClient, alert_id: str) -> dict:
         "control_state": sanitize(data.get("controlState", "")),
         "alert_definition_id": sanitize(data.get("alertDefinitionId", "")),
         "alert_definition_name": sanitize(data.get("alertDefinitionName", ""), max_len=300),
-        "symptoms": _get_contributing_symptoms(client, alert_id),
+        "symptoms": symptoms,
     }
+    if symptoms_note:
+        result["symptoms_note"] = symptoms_note
+    return result
 
 
 # ---------------------------------------------------------------------------

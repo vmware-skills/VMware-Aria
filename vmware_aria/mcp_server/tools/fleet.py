@@ -79,8 +79,13 @@ def fleet_domain_list(integration_id: str, limit: Optional[int] = 50, target: Op
     Operations. The integration_id is the UUID shown under Administration ->
     Integrations -> VCF in the Operations UI; the operator supplies it (this
     skill does not list VCF integrations). Returns domain summaries (id, name,
-    type, status) in the paginated envelope. A 404 means the integration_id is
-    wrong — copy the exact UUID from the Operations Integrations page.
+    type, status, configuration_state) in the paginated envelope, where
+    configuration_state is configured / not_configured / removed — a removed
+    domain is not a live one. A 404 means the integration_id is wrong — copy
+    the exact UUID from the Operations Integrations page. Gotcha: if the
+    envelope carries a "note", the appliance answered in a shape this tool did
+    not recognise and an empty items list means UNKNOWN, not "no domains" — do
+    not report the fleet as domain-free in that case.
 
     Args:
         integration_id: UUID of the registered VCF integration.

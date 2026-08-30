@@ -51,6 +51,21 @@ CERT_QUERY_PATH = "/fleet-management/certificate-management/certificates/query"
 PASSWORD_ACCOUNT_QUERY_PATH = "/fleet-management/password-management/accounts/query"
 FINDINGS_QUERY_PATH = "/diagnostics/findings/query"
 
+#: The domains endpoint answers with the ``VCFDomainSummaries`` model: three
+#: sibling arrays, not one ``domains`` list. Taken from the VCF Operations 9.1
+#: API reference (Integrations -> "Get Domain Summary"), whose documented
+#: example body is ``{"configuredDomains": [], "notConfiguredDomains": [],
+#: "removedDomains": []}``. Looking only for a single container is why a fleet
+#: with one configured domain reported none on a real 9.1 appliance.
+#:
+#: The bucket is carried onto each row rather than flattened away: a removed
+#: domain must not read as a live one just because it arrived in the same body.
+DOMAIN_BUCKETS = {
+    "configuredDomains": "configured",
+    "notConfiguredDomains": "not_configured",
+    "removedDomains": "removed",
+}
+
 
 def _domains_path(integration_id: str) -> str:
     """Path for one VCF integration's domains. Kept here so the id is the only variable."""
@@ -204,6 +219,35 @@ def _summarize_domain(row: dict) -> dict:
     }
 
 
+def _extract_domain_rows(data: Any) -> tuple[list[tuple[dict, str]], bool]:
+    """Return ``([(row, configuration_state), ...], recognized)`` from a domains response.
+
+    Reads every ``VCFDomainSummaries`` bucket present, tagging each row with the
+    bucket it came from. A bucket that is present but empty still counts as
+    recognised — that is what lets a fleet with genuinely no domains report a
+    confirmed "none" instead of an unconfirmed one.
+
+    Falls back to the single-container shapes for any appliance that answers
+    with a plain ``domains`` list; those rows carry no bucket, since none was
+    stated.
+    """
+    if not isinstance(data, dict):
+        return [], False
+
+    tagged: list[tuple[dict, str]] = []
+    matched = False
+    for key, state in DOMAIN_BUCKETS.items():
+        bucket = data.get(key)
+        if isinstance(bucket, list):
+            matched = True
+            tagged.extend((row, state) for row in bucket if isinstance(row, dict))
+    if matched:
+        return tagged, True
+
+    rows, recognized = _extract_rows(data, "domains", "domainList", "items", "values")
+    return [(row, "") for row in rows], recognized
+
+
 def list_fleet_domains(client: AriaClient, integration_id: str, limit: int | None = 50) -> dict:
     """List the SDDC/workload domains behind one registered VCF integration.
 
@@ -218,15 +262,18 @@ def list_fleet_domains(client: AriaClient, integration_id: str, limit: int | Non
         limit: Max rows to return. ``None`` returns all.
 
     Returns:
-        Family envelope: domain summaries under ``items``.
+        Family envelope: domain summaries under ``items``, each carrying a
+        ``configuration_state`` of configured / not_configured / removed — the
+        VCFDomainSummaries bucket it came from. Empty when the bucket was not
+        stated by the appliance.
     """
     data = client.get(_domains_path(integration_id))
-    rows, recognized = _extract_rows(data, "domains", "domainList", "items", "values")
-    total = len(rows)
+    tagged, recognized = _extract_domain_rows(data)
+    total = len(tagged)
     if limit and limit > 0:
-        rows = rows[:limit]
+        tagged = tagged[:limit]
     return paginated(
-        [_summarize_domain(r) for r in rows],
+        [{**_summarize_domain(r), "configuration_state": state} for r, state in tagged],
         limit=limit,
         total=total,
         **_fleet_extra(recognized),

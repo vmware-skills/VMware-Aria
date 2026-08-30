@@ -775,16 +775,21 @@ def fleet_domains(
     from vmware_aria.ops.fleet import list_fleet_domains
 
     client, _ = _get_connection(target, config)
-    items = list_fleet_domains(client, integration_id=integration_id, limit=limit)["items"]
+    result = list_fleet_domains(client, integration_id=integration_id, limit=limit)
 
     table = Table(title="VCF Domains", show_lines=False)
     table.add_column("Name", style="bold")
     table.add_column("Type")
     table.add_column("Status")
+    table.add_column("Configuration")
     table.add_column("ID")
-    for r in items:
-        table.add_row(r["name"], r["type"], r["status"], r["id"][:36])
+    for r in result["items"]:
+        table.add_row(r["name"], r["type"], r["status"], r["configuration_state"], r["id"][:36])
     console.print(table)
+    # Reading only ["items"] here is what made an unparsed body indistinguishable
+    # from an empty fleet: the note was in the envelope and nobody ever saw it.
+    if result.get("note"):
+        console.print(f"[yellow]Note: {result['note']}[/yellow]")
 
 
 @fleet_app.command("findings")
