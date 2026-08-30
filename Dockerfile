@@ -4,7 +4,7 @@ WORKDIR /app
 
 RUN pip install --no-cache-dir uv
 
-COPY pyproject.toml .
+COPY pyproject.toml README.md ./
 COPY vmware_aria/ vmware_aria/
 
 RUN uv pip install --system .
