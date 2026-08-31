@@ -206,6 +206,19 @@ def _list_row_title(row: dict) -> str:
     no longer share a helper.
 
     ``name`` is still preferred if a future schema adds one.
+
+    **This and :func:`_definition_title` read different sources, and a rename
+    could split them.** This one uses whatever the report row carries; the other
+    asks the definition live. On a live 9.1 appliance they agree byte for byte
+    today -- checked against all 86 definitions on it, and against both the
+    single and the list definition endpoint -- but nobody has established whether
+    ``/reports[].description`` is resolved live or snapshotted when the report is
+    generated. If it is a snapshot, then after a definition is renamed
+    ``list_reports`` keeps the old title while ``get_report`` shows the new one.
+
+    Settling that needs a definition renamed, which is a write, so it is recorded
+    here rather than answered. If the two ever do disagree, ``get_report`` is the
+    fresher: it read the definition just now.
     """
     return sanitize(row.get("name") or row.get("description") or "", max_len=300)
 
@@ -219,6 +232,15 @@ def _definition_title(client: "AriaClient", definition_id: str) -> str | None:
     never the blurb -- when there is no definition id, the fetch fails, or the
     definition has no name. A caller can tell "no title available" from a title;
     it could not tell a title from a sentence.
+
+    Why the definition's ``name`` is the right field rather than a guess: across
+    all 86 definitions on a live 9.1 appliance, 0 of the ``name`` values contain
+    a full stop (median 36 characters) while 70 of the ``description`` values do
+    (median 80). They are structurally a title and a sentence, not two spellings
+    of one thing.
+
+    See :func:`_list_row_title` for the one thing still unestablished -- the two
+    functions read different sources, and a definition rename could split them.
     """
     if not definition_id:
         return None
