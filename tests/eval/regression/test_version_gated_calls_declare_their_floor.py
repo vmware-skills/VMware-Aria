@@ -114,7 +114,7 @@ def _call_sites() -> list[tuple[str, str, int, bool]]:
             if not path or not path.startswith("/"):
                 continue
             declares = any(kw.arg == "requires" for kw in node.keywords)
-            sites.append((path, str(file.relative_to(REPO_ROOT)), node.lineno, declares))
+            sites.append((path, file.relative_to(REPO_ROOT).as_posix(), node.lineno, declares))
     assert sites, f"no client call sites found under {PACKAGE} — check broken"
     return sites
 

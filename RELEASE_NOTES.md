@@ -1,3 +1,35 @@
+## v1.9.0 — two report fields that were not what their names said
+
+**`GET /reports` rows have no `name`.** The title is in `description`; the
+endpoint that has both fields with different meanings is `/reportdefinitions`,
+and its convention had been applied to the wrong endpoint. Every report ever
+listed showed an empty Name. What made it hard to diagnose is the asymmetry: the
+*server-side* name filter works, so a caller could successfully filter by a title
+the tool had never shown them, which reads as "filtering is broken" rather than
+"the column is empty".
+
+**`get_report` needed its own rule, not the list's.** `GET /reports/{id}` also
+has a null `name` and also has a `description` — holding the explanatory blurb,
+not the title. Reusing the list's rule put a whole sentence in the name field and
+made two functions disagree about the same report. The title now comes from the
+report's definition, or is `null`; the blurb is reported as `description`, as
+itself.
+
+**`completion_time_ms` was a date string.** The appliance sends
+`"Sun Aug 30 04:40:08 UTC 2026"` under a name promising epoch milliseconds.
+`completion_time` now carries the raw value and `completion_time_ms` is populated
+only when it really is a number — `null` means "not expressed as epoch ms", which
+a caller can branch on. A guessed conversion could not be told from a real one.
+
+**Version floors on the six calls that only exist on 9.x.** Their absence from
+the vROps 8.6 operation index in `tests/eval/spec` is the evidence, not a
+recollection. On an 8.x appliance they 404, and the generic remedy sent operators
+after a UUID that was never wrong. The other 20 call sites are in the 8.6 index
+and are deliberately left alone.
+
+Also: `.env` permissions go through `vmware_policy.fsperms` rather than POSIX
+mode bits.
+
 ## v1.8.15 — the test suite runs on a non-UTF-8 machine, and the guardrail tests with it
 
 

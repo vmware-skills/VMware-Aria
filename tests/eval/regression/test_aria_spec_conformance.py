@@ -105,7 +105,7 @@ def _collect_api_calls() -> list[tuple[str, str, str]]:
                     path = path[len("{param}"):]
                 if not path.startswith("/"):
                     continue
-                calls.append((f"{py.relative_to(REPO_ROOT)}:{node.lineno}", method, path))
+                calls.append((f"{py.relative_to(REPO_ROOT).as_posix()}:{node.lineno}", method, path))
     return calls
 
 
@@ -141,7 +141,12 @@ def test_raw_request_confined_to_connection_and_promql() -> None:
     found: set[str] = set()
     for scan_dir in SCAN_DIRS:
         for py in sorted(scan_dir.rglob("*.py")):
-            rel = str(py.relative_to(REPO_ROOT))
+            # as_posix(), not str(): on Windows str() yields
+            # "vmware_aria\\connection.py" and the allowlist below is written
+            # with forward slashes, so every file looked like a new offender
+            # and the guard's own "did it scan anything" assertion fired. The
+            # guard was right; the comparison was platform-dependent.
+            rel = py.relative_to(REPO_ROOT).as_posix()
             if "raw_request" in py.read_text(encoding="utf-8"):
                 found.add(rel)
                 if rel not in allowed:

@@ -124,7 +124,10 @@ def get_report(
 ) -> dict:
     """[READ] Get status and download URLs for a generated report.
 
-    Returns id, name, status (PENDING, RUNNING, COMPLETED, FAILED),
+    Returns id, name (the report's title, fetched from its definition — null if
+    that definition is gone; this endpoint carries no title of its own),
+    description (the definition's explanatory blurb, which is NOT the title),
+    status (PENDING, RUNNING, COMPLETED, FAILED),
     definition_id, completion_time (the appliance's own rendering, e.g.
     "Sun Aug 30 04:40:08 UTC 2026"), completion_time_ms (epoch ms, or null when
     the appliance sent a date string), download_url (PDF) and csv_url. Use

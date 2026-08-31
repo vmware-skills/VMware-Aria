@@ -184,29 +184,52 @@ def generate_report(
 
 
 
-def _report_title(row: dict) -> str:
-    """The human-readable title of one ``GET /reports`` row.
+def _list_row_title(row: dict) -> str:
+    """The title of one row from ``GET /reports`` (the *list* endpoint).
 
-    ``/reports`` and ``/reportdefinitions`` use two different field conventions
-    and this code applied the definition's to the instance's. A real 9.1 row
-    carries exactly these keys::
+    A real 9.1 row carries exactly these keys::
 
         ['completionTime', 'description', 'id', 'links', 'owner', 'publish',
          'reportDefinitionId', 'resourceId', 'status', 'subject']
 
-    There is no ``name``. The title lives in ``description`` — e.g.
-    "Utilization Report - vSphere Clusters" — so ``r.get("name", "")`` returned
+    There is no ``name``, and ``description`` here holds the title
+    ("Utilization Report - vSphere Clusters"), so ``r.get("name", "")`` returned
     "" for every report ever listed.
 
-    What made that hard to see is the asymmetry: the *server-side* ``name``
-    filter works. A caller could successfully filter by a title the tool had
-    never once shown them, which reads as "filtering is broken" rather than
-    "the column is empty". Both halves now agree because both come from here.
+    **This rule is for the list endpoint only.** ``GET /reports/{id}`` also has a
+    null ``name`` and also has a ``description`` -- but that one holds the
+    *explanatory blurb* ("This report provides a utilization summary of powered
+    on vSphere Clusters."), not the title. Applying this function there swapped a
+    report's name for a sentence, which is how the first version of this fix
+    broke get_report while repairing list_reports. Two endpoints, one field name,
+    two meanings: only a live appliance shows that, and it is why the two paths
+    no longer share a helper.
 
-    ``name`` is still preferred when present so a definition row, or a future
-    schema that adds one, keeps working.
+    ``name`` is still preferred if a future schema adds one.
     """
     return sanitize(row.get("name") or row.get("description") or "", max_len=300)
+
+
+def _definition_title(client: "AriaClient", definition_id: str) -> str | None:
+    """The report's title, from the definition that produced it.
+
+    ``GET /reports/{id}`` does not carry the title in any field, so it has to be
+    fetched from ``GET /reportdefinitions/{id}`` (both paths verified against the
+    operation index in tests/eval/spec). Returns ``None`` -- never a guess and
+    never the blurb -- when there is no definition id, the fetch fails, or the
+    definition has no name. A caller can tell "no title available" from a title;
+    it could not tell a title from a sentence.
+    """
+    if not definition_id:
+        return None
+    try:
+        data = client.get(f"/reportdefinitions/{definition_id}")
+    except Exception:  # noqa: BLE001 -- a missing title must not fail the report read
+        return None
+    if not isinstance(data, dict):
+        return None
+    name = data.get("name")
+    return sanitize(name, max_len=300) if isinstance(name, str) and name.strip() else None
 
 
 def _completion_time(row: dict) -> tuple[str, int | None]:
@@ -289,7 +312,7 @@ def list_reports(
     rows = [
         {
             "id": sanitize(r.get("id", "")),
-            "name": _report_title(r),
+            "name": _list_row_title(r),
             "status": sanitize(r.get("status", "")),
             "definition_id": sanitize(r.get("reportDefinitionId", "")),
             "completion_time": _completion_time(r)[0],
@@ -337,7 +360,10 @@ def get_report(
 
     return {
         "id": sanitize(data.get("id", "")),
-        "name": _report_title(data),
+        # From the definition, or None. The blurb this endpoint returns under
+        # `description` is not a name and is reported below as itself.
+        "name": _definition_title(client, str(data.get("reportDefinitionId") or "")),
+        "description": sanitize(data.get("description", ""), max_len=500) or None,
         "status": sanitize(data.get("status", "")),
         "definition_id": sanitize(data.get("reportDefinitionId", "")),
         # wire field is `completionTime` (generationTime/finishTime don't exist)
