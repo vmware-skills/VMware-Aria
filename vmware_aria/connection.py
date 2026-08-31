@@ -20,6 +20,8 @@ from typing import Any
 
 import httpx
 
+from vmware_policy.compat import Requires, version_remedy
+
 from vmware_aria.config import AppConfig, TargetConfig, load_config
 
 _log = logging.getLogger("vmware-aria.connection")
@@ -38,6 +40,12 @@ _RETRY_DELAY_SEC = 2.0
 # of back-to-back calls reuse the cached client without re-probing, while still
 # catching a dropped session within a few seconds.
 _LIVENESS_TTL_SEC = 30.0
+
+
+#: Sentinel for "the version probe has not run yet". ``None`` already means
+#: "probed and could not read it", and collapsing the two would re-probe an
+#: unreadable appliance on every single 404.
+_UNPROBED = object()
 
 
 class AriaApiError(Exception):
@@ -149,6 +157,7 @@ class AriaClient:
         # Epoch seconds of the last is_alive() that returned True; gates the
         # liveness probe so a burst of connect() calls doesn't re-probe each time.
         self._liveness_checked_at: float = 0.0
+        self._product_version: str | None | object = _UNPROBED
 
 
         self._client = httpx.Client(
@@ -264,6 +273,7 @@ class AriaClient:
         params: dict[str, Any] | None = None,
         json_data: dict[str, Any] | None = None,
         retries: int = 1,
+        requires: Requires | None = None,
     ) -> httpx.Response:
         """Send one request, recovering from auth and transient failures.
 
@@ -308,9 +318,20 @@ class AriaClient:
                 continue
 
             if resp.status_code >= 400:
+                # A 404 on a call declared newer than this appliance is not a
+                # bad id, and the generic remedy ("verify the id") sends the
+                # operator hunting for a UUID that was never wrong. Only a
+                # version floor that is actually unmet replaces the hint —
+                # version_remedy() returns None when the appliance already
+                # meets it, so a 9.1 box that 404s still gets the id advice.
+                hint = _hint_for_status(resp.status_code)
+                if resp.status_code == 404 and requires is not None:
+                    explained = version_remedy(requires, self.product_version())
+                    if explained:
+                        hint = explained
                 raise AriaApiError(
                     f"Aria Operations returned HTTP {resp.status_code}. "
-                    f"{_hint_for_status(resp.status_code)} "
+                    f"{hint} "
                     f"Run 'vmware-aria doctor' if every call to this target "
                     f"fails. Failing call: {method} {path}",
                     status_code=resp.status_code,
@@ -319,14 +340,21 @@ class AriaClient:
                 )
             return resp
 
-    def get(self, path: str, params: dict[str, Any] | None = None, *, retries: int = 1) -> dict:
+    def get(
+        self,
+        path: str,
+        params: dict[str, Any] | None = None,
+        *,
+        retries: int = 1,
+        requires: Requires | None = None,
+    ) -> dict:
         """Single GET request. Returns parsed JSON response.
 
         Pass retries=0 for probes where an error status is itself the answer
         (e.g. a health check reading a 503 as "not ONLINE") to skip the
         transient back-off.
         """
-        resp = self._request("GET", path, params=params, retries=retries)
+        resp = self._request("GET", path, params=params, retries=retries, requires=requires)
         return resp.json() if resp.content else {}
 
     def post(
@@ -336,6 +364,7 @@ class AriaClient:
         params: dict[str, Any] | None = None,
         *,
         retries: int = 0,
+        requires: Requires | None = None,
     ) -> dict:
         """POST request. Returns parsed JSON response.
 
@@ -345,13 +374,58 @@ class AriaClient:
         replayed — that would duplicate the side effect. Idempotent callers
         (pure query endpoints like /alerts/query) opt in with retries=1.
         """
-        resp = self._request("POST", path, params=params, json_data=json_data, retries=retries)
+        resp = self._request(
+            "POST", path, params=params, json_data=json_data, retries=retries, requires=requires
+        )
         return resp.json() if resp.content else {}
 
     def put(self, path: str, json_data: dict[str, Any] | None = None) -> dict:
         """PUT request. Returns parsed JSON response."""
         resp = self._request("PUT", path, json_data=json_data)
         return resp.json() if resp.content else {}
+
+    def product_version(self) -> str | None:
+        """Best-effort appliance version string, or ``None`` if unreadable.
+
+        Called only from the 404 error path, which imposes three constraints:
+
+        * **It must never raise.** It runs while another error is being
+          constructed; an exception here would replace a useful message with a
+          confusing one.
+        * **It must never recurse.** It calls ``_request`` without ``requires``,
+          so its own 404 cannot re-enter this method.
+        * **It must cache its failure too.** Otherwise a target that cannot
+          answer is re-probed on every subsequent 404.
+
+        Field names are NOT verified against a live appliance. Neither endpoint
+        below has been replayed from this skill, so rather than guess one key
+        and be silently wrong, this tries several plausible ones and returns
+        ``None`` when none parse. ``None`` is a supported answer here — it
+        routes to the "could not read the version" wording, which asserts
+        nothing about the operator's build. Guessing a key and reading garbage
+        would instead produce a confident, wrong version claim (踩坑 #36).
+        """
+        if self._product_version is not _UNPROBED:
+            return self._product_version
+
+        self._product_version = None  # cache the failure before probing
+        for path in ("/versions/current", "/deployment/node/status"):
+            try:
+                data = self._request("GET", path, retries=0).json()
+            except Exception:  # noqa: BLE001 — unreadable is a supported answer
+                continue
+            if not isinstance(data, dict):
+                continue
+            for key in ("releaseName", "version", "productVersion", "humanlyReadableAdvancedVersion"):
+                value = data.get(key)
+                if isinstance(value, dict):  # {"major": 8, "minor": 6, ...}
+                    parts = [value.get(k) for k in ("major", "minor", "patch")]
+                    nums = [str(x) for x in parts if isinstance(x, int)]
+                    value = ".".join(nums) if nums else None
+                if isinstance(value, str) and value.strip():
+                    self._product_version = value.strip()
+                    return self._product_version
+        return self._product_version
 
     @property
     def base_url(self) -> str:

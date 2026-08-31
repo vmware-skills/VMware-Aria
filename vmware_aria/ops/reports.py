@@ -183,6 +183,55 @@ def generate_report(
 # ---------------------------------------------------------------------------
 
 
+
+def _report_title(row: dict) -> str:
+    """The human-readable title of one ``GET /reports`` row.
+
+    ``/reports`` and ``/reportdefinitions`` use two different field conventions
+    and this code applied the definition's to the instance's. A real 9.1 row
+    carries exactly these keys::
+
+        ['completionTime', 'description', 'id', 'links', 'owner', 'publish',
+         'reportDefinitionId', 'resourceId', 'status', 'subject']
+
+    There is no ``name``. The title lives in ``description`` — e.g.
+    "Utilization Report - vSphere Clusters" — so ``r.get("name", "")`` returned
+    "" for every report ever listed.
+
+    What made that hard to see is the asymmetry: the *server-side* ``name``
+    filter works. A caller could successfully filter by a title the tool had
+    never once shown them, which reads as "filtering is broken" rather than
+    "the column is empty". Both halves now agree because both come from here.
+
+    ``name`` is still preferred when present so a definition row, or a future
+    schema that adds one, keeps working.
+    """
+    return sanitize(row.get("name") or row.get("description") or "", max_len=300)
+
+
+def _completion_time(row: dict) -> tuple[str, int | None]:
+    """``(raw_string, epoch_ms_or_None)`` for one report's completion time.
+
+    The field was returned as ``completion_time_ms`` while a real appliance sends
+    ``"Sun Aug 30 04:40:08 UTC 2026"`` — a name promising an integer over a
+    human-readable date string. Arithmetic, sorting and timezone maths on it all
+    break, and they break late and quietly.
+
+    So the raw value keeps a truthful name, and the millisecond field is only
+    populated when the value really is a number. ``None`` means "not expressed
+    as epoch milliseconds", which a caller can branch on; a guessed conversion
+    could not be distinguished from a real one.
+    """
+    raw = row.get("completionTime")
+    if isinstance(raw, bool):
+        return "", None
+    if isinstance(raw, (int, float)):
+        return str(raw), int(raw)
+    if isinstance(raw, str) and raw.strip().isdigit():
+        return sanitize(raw, max_len=100), int(raw.strip())
+    return (sanitize(str(raw), max_len=100) if raw else ""), None
+
+
 def list_reports(
     client: AriaClient,
     definition_id: str | None = None,
@@ -201,7 +250,10 @@ def list_reports(
 
     Returns:
         Result envelope with report summary dicts under ``items``, each with
-        id, name, status, completion_time_ms. GET /reports is unpaged, so the
+        id, name (the report's title), status, completion_time (as the
+        appliance renders it) and completion_time_ms (epoch ms, or None when
+        the appliance sent a date string rather than a number).
+        GET /reports is unpaged, so the
         whole matching set is in hand and ``total`` states it exactly.
     """
     limit = max(1, min(limit, 200))
@@ -237,10 +289,11 @@ def list_reports(
     rows = [
         {
             "id": sanitize(r.get("id", "")),
-            "name": sanitize(r.get("name", ""), max_len=300),
+            "name": _report_title(r),
             "status": sanitize(r.get("status", "")),
             "definition_id": sanitize(r.get("reportDefinitionId", "")),
-            "completion_time_ms": r.get("completionTime"),
+            "completion_time": _completion_time(r)[0],
+            "completion_time_ms": _completion_time(r)[1],
             "owner": sanitize(r.get("owner", ""), max_len=200),
         }
         for r in items
@@ -284,11 +337,12 @@ def get_report(
 
     return {
         "id": sanitize(data.get("id", "")),
-        "name": sanitize(data.get("name", ""), max_len=300),
+        "name": _report_title(data),
         "status": sanitize(data.get("status", "")),
         "definition_id": sanitize(data.get("reportDefinitionId", "")),
         # wire field is `completionTime` (generationTime/finishTime don't exist)
-        "completion_time_ms": data.get("completionTime"),
+        "completion_time": _completion_time(data)[0],
+        "completion_time_ms": _completion_time(data)[1],
         "download_url": download_url,
         "csv_url": csv_url,
     }

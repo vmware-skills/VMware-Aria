@@ -294,12 +294,12 @@ def _promql_client(*, has_vodap: bool = True, token: str = "jwt-abc") -> MagicMo
         {"services": [{"type": "VCF_VODAP", "serviceKeys": ["k1"]}]} if has_vodap else {"services": []}
     )
 
-    def _get(path, params=None):
+    def _get(path, params=None, *, retries=1, requires=None):
         if path == "/integrations/services":
             return services
         return {}
 
-    def _post(path, json_data=None, params=None, retries=0):
+    def _post(path, json_data=None, params=None, *, retries=0, requires=None):
         if path == "/auth/token/exchange":
             return {"token": token} if token else {}
         return {}
@@ -378,7 +378,7 @@ def test_promql_unrecognized_services_shape_does_not_claim_vodap_absent() -> Non
 
     c = _promql_client()
     # Non-empty but unrecognised container shape for the services list.
-    c.get.side_effect = lambda path, params=None: (
+    c.get.side_effect = lambda path, params=None, **_kw: (
         {"payload": {"data": [{"type": "VCF_VODAP"}]}}
         if path == "/integrations/services"
         else {}
@@ -411,7 +411,7 @@ def test_promql_vodap_without_service_keys_is_a_teaching_error() -> None:
     from vmware_aria.ops.promql import run_promql_query
 
     c = _promql_client()
-    c.get.side_effect = lambda path, params=None: (
+    c.get.side_effect = lambda path, params=None, **_kw: (
         {"services": [{"type": "VCF_VODAP"}]}  # registered, but no serviceKeys
         if path == "/integrations/services"
         else {}

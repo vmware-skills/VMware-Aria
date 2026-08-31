@@ -27,6 +27,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from vmware_policy import paginated, sanitize
+from vmware_policy.compat import Requires
 
 from vmware_aria.connection import AriaApiError
 
@@ -42,6 +43,16 @@ VODAP_SERVICE_TYPE = "VCF_VODAP"
 #: VCF-spec conformance test can assert each is a VERIFIED endpoint.
 INTEGRATIONS_SERVICES_PATH = "/integrations/services"
 TOKEN_EXCHANGE_PATH = "/auth/token/exchange"
+
+#: VODAP real-time metrics is a 9.x capability: neither /integrations/services
+#: nor /auth/token/exchange appears in the vROps 8.6 operation index kept under
+#: tests/eval/spec/. Declared beside the paths for the same reason as the fleet
+#: block: the requirement travels with the request it describes.
+REQUIRES_VODAP = Requires(
+    product="VCF Operations",
+    minimum=(9, 0),
+    feature="Real-time (VODAP) PromQL metrics",
+)
 
 #: Real-time metrics service base prefix and query path. INFERRED base — see
 #: module docstring. Validated against the VCF spec by the new regression test.
@@ -78,7 +89,7 @@ def _find_vodap_service(client: AriaClient) -> tuple[dict | None, bool]:
     could not parse the /integrations/services response" — the latter must NOT
     emit a confident "enable VODAP" instruction (形态 #1: 空结果读作没问题).
     """
-    data = client.get(INTEGRATIONS_SERVICES_PATH)
+    data = client.get(INTEGRATIONS_SERVICES_PATH, requires=REQUIRES_VODAP)
     services, recognized = _extract_rows(
         data, "services", "integrationServices", "items", "values"
     )
@@ -132,6 +143,7 @@ def _exchange_vodap_token(client: AriaClient) -> str:
         TOKEN_EXCHANGE_PATH,
         json_data={"serviceKeys": service_keys},
         retries=1,
+        requires=REQUIRES_VODAP,
     )
     token = resp.get("token") or resp.get("accessToken") or resp.get("access_token")
     if not token:

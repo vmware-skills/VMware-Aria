@@ -125,7 +125,9 @@ def get_report(
     """[READ] Get status and download URLs for a generated report.
 
     Returns id, name, status (PENDING, RUNNING, COMPLETED, FAILED),
-    definition_id, completion_time_ms, download_url (PDF) and csv_url. Use
+    definition_id, completion_time (the appliance's own rendering, e.g.
+    "Sun Aug 30 04:40:08 UTC 2026"), completion_time_ms (epoch ms, or null when
+    the appliance sent a date string), download_url (PDF) and csv_url. Use
     this to poll after generate_report. The URLs are always constructed, so a
     download_url is present even while the report is still PENDING — check
     status before fetching it.

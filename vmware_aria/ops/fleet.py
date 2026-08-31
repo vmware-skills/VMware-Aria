@@ -31,6 +31,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from vmware_policy import paginated, sanitize
+from vmware_policy.compat import Requires
 
 if TYPE_CHECKING:
     from vmware_aria.connection import AriaClient
@@ -56,6 +57,21 @@ _UNRECOGNIZED_SHAPE_NOTE = (
 CERT_QUERY_PATH = "/fleet-management/certificate-management/certificates/query"
 PASSWORD_ACCOUNT_QUERY_PATH = "/fleet-management/password-management/accounts/query"
 FINDINGS_QUERY_PATH = "/diagnostics/findings/query"
+
+#: These four queries exist only on VCF Operations 9.x — they are absent from the
+#: vROps 8.6 operation index this repo keeps under tests/eval/spec/, which is the
+#: mechanical evidence, not a recollection. Declared here, beside the paths, so
+#: the requirement and the request are one edit rather than two (形态 #6).
+#:
+#: Passed as ``requires=`` on each call so a 404 from an 8.x appliance is
+#: explained as a version floor instead of the generic "verify the id" remedy,
+#: which sends an operator hunting for a UUID that was never wrong. It changes
+#: nothing on a 9.x appliance: the floor is met, so the ordinary remedy stands.
+REQUIRES_FLEET = Requires(
+    product="VCF Operations",
+    minimum=(9, 0),
+    feature="Fleet management and diagnostics queries",
+)
 
 #: The domains endpoint answers with the ``VCFDomainSummaries`` model: three
 #: sibling arrays, not one ``domains`` list. Taken from the VCF Operations 9.1
@@ -206,7 +222,7 @@ def list_fleet_certificates(client: AriaClient, limit: int | None = 50) -> dict:
         returned/limit/total/truncated/hint. ``total`` is the full count
         returned by the query (the endpoint is unpaged at the fleet scale).
     """
-    data = client.post(CERT_QUERY_PATH, json_data={}, retries=1)
+    data = client.post(CERT_QUERY_PATH, json_data={}, retries=1, requires=REQUIRES_FLEET)
     rows, recognized = _extract_rows(data, "certificates", "certificateList")
     total = len(rows)
     if limit and limit > 0:
@@ -254,7 +270,7 @@ def list_fleet_password_accounts(client: AriaClient, limit: int | None = 50) -> 
     Returns:
         Family envelope: account summaries under ``items``.
     """
-    data = client.post(PASSWORD_ACCOUNT_QUERY_PATH, json_data={}, retries=1)
+    data = client.post(PASSWORD_ACCOUNT_QUERY_PATH, json_data={}, retries=1, requires=REQUIRES_FLEET)
     rows, recognized = _extract_rows(data, "accounts", "passwordAccounts")
     total = len(rows)
     if limit and limit > 0:
@@ -330,7 +346,7 @@ def list_fleet_domains(client: AriaClient, integration_id: str, limit: int | Non
         VCFDomainSummaries bucket it came from. Empty when the bucket was not
         stated by the appliance.
     """
-    data = client.get(_domains_path(integration_id))
+    data = client.get(_domains_path(integration_id), requires=REQUIRES_FLEET)
     tagged, recognized = _extract_domain_rows(data)
     total = len(tagged)
     if limit and limit > 0:
@@ -406,7 +422,7 @@ def list_findings(
     if finding_types:
         body["findingTypes"] = [str(t) for t in finding_types]
 
-    data = client.post(FINDINGS_QUERY_PATH, json_data=body, retries=1)
+    data = client.post(FINDINGS_QUERY_PATH, json_data=body, retries=1, requires=REQUIRES_FLEET)
     rows, recognized = _extract_rows(data, "findings", "findingList")
     total = len(rows)
     if limit and limit > 0:
