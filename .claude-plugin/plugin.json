@@ -2,7 +2,7 @@
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "vmware-aria",
   "displayName": "VMware Aria",
-  "version": "1.8.14",
+  "version": "1.8.15",
   "description": "VMware Aria Operations: metrics, alerts, capacity, anomaly detection — 33 MCP tools.",
   "author": {
     "name": "Wei Zhou",

@@ -39,7 +39,7 @@ targets:
 @pytest.mark.unit
 def test_the_env_var_decides_which_file_is_resolved(tmp_path, monkeypatch):
     elsewhere = tmp_path / "elsewhere.yaml"
-    elsewhere.write_text(_MINIMAL)
+    elsewhere.write_text(_MINIMAL, encoding="utf-8")
     monkeypatch.setenv("VMWARE_ARIA_CONFIG", str(elsewhere))
 
     assert cfg.resolve_config_path() == elsewhere
@@ -50,7 +50,7 @@ def test_an_explicit_path_still_beats_the_env_var(tmp_path, monkeypatch):
     """The control on precedence: `--config` is the operator saying which file
     they mean, and it has to keep winning."""
     explicit = tmp_path / "explicit.yaml"
-    explicit.write_text(_MINIMAL)
+    explicit.write_text(_MINIMAL, encoding="utf-8")
     monkeypatch.setenv("VMWARE_ARIA_CONFIG", str(tmp_path / "ignored.yaml"))
 
     assert cfg.resolve_config_path(explicit) == explicit
@@ -108,7 +108,7 @@ def test_doctor_reads_the_env_vars_file_not_the_default(tmp_path, monkeypatch, c
     """The positive half: pointed at a real file elsewhere, the doctor reports
     on that one."""
     elsewhere = tmp_path / "elsewhere.yaml"
-    elsewhere.write_text(_MINIMAL)
+    elsewhere.write_text(_MINIMAL, encoding="utf-8")
     monkeypatch.setenv("VMWARE_ARIA_CONFIG", str(elsewhere))
     _wide(monkeypatch)
 

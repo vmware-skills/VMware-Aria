@@ -42,7 +42,7 @@ _HTTP_METHODS = {"get": "GET", "post": "POST", "put": "PUT", "delete": "DELETE"}
 
 
 def _spec() -> dict:
-    return json.loads(VCF_SPEC_PATH.read_text())
+    return json.loads(VCF_SPEC_PATH.read_text(encoding="utf-8"))
 
 
 def test_vcf_spec_loads_and_lists_the_expected_endpoints() -> None:
@@ -125,7 +125,7 @@ def _literal_path(node: ast.AST) -> str | None:
 
 def _collect_calls(py: Path) -> list[tuple[int, str, str]]:
     """(lineno, METHOD, path) for every client.<get|post|put|delete>() in a file."""
-    tree = ast.parse(py.read_text())
+    tree = ast.parse(py.read_text(encoding="utf-8"))
     assigned: dict[str, str] = {}
     for node in ast.walk(tree):
         if isinstance(node, ast.Assign) and len(node.targets) == 1:

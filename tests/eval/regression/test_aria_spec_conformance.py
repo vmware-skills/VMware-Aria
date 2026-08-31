@@ -41,11 +41,11 @@ _HTTP_METHODS = {"get": "GET", "post": "POST", "put": "PUT", "delete": "DELETE"}
 
 def _spec_matchers() -> list[tuple[str, re.Pattern]]:
     """Spec operations as (method, compiled path regex with {param} wildcards)."""
-    operations = list(json.loads(SPEC_PATH.read_text())["operations"])
+    operations = list(json.loads(SPEC_PATH.read_text(encoding="utf-8"))["operations"])
     # Add the VCF 9.1 suite-api operations (base "/suite-api"). The lone
     # data-query-service op (base "/data-query-service") is excluded — it is
     # not reachable by the suite-api-relative calls this scan validates.
-    for op in json.loads(VCF_SPEC_PATH.read_text())["operations"]:
+    for op in json.loads(VCF_SPEC_PATH.read_text(encoding="utf-8"))["operations"]:
         if op.get("base", "/suite-api") == "/suite-api":
             operations.append(op)
     matchers = []
@@ -76,7 +76,7 @@ def _collect_api_calls() -> list[tuple[str, str, str]]:
     calls = []
     for scan_dir in SCAN_DIRS:
         for py in sorted(scan_dir.rglob("*.py")):
-            tree = ast.parse(py.read_text())
+            tree = ast.parse(py.read_text(encoding="utf-8"))
             # simple `url = "<literal-or-fstring>"` assignments, so calls like
             # `self._client.post(url, ...)` (token acquire) resolve too
             assigned: dict[str, str] = {}
@@ -110,7 +110,7 @@ def _collect_api_calls() -> list[tuple[str, str, str]]:
 
 
 def test_spec_index_is_loaded() -> None:
-    spec = json.loads(SPEC_PATH.read_text())
+    spec = json.loads(SPEC_PATH.read_text(encoding="utf-8"))
     assert spec["operation_count"] >= 300, "spec index missing or truncated"
 
 
@@ -142,7 +142,7 @@ def test_raw_request_confined_to_connection_and_promql() -> None:
     for scan_dir in SCAN_DIRS:
         for py in sorted(scan_dir.rglob("*.py")):
             rel = str(py.relative_to(REPO_ROOT))
-            if "raw_request" in py.read_text():
+            if "raw_request" in py.read_text(encoding="utf-8"):
                 found.add(rel)
                 if rel not in allowed:
                     offenders.append(rel)

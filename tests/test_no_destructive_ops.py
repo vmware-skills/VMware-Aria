@@ -57,7 +57,7 @@ CLI_CONFIRM_COMMANDS = [
 
 
 def _find_function(path: Path, func_name: str) -> ast.FunctionDef | ast.AsyncFunctionDef:
-    tree = ast.parse(path.read_text())
+    tree = ast.parse(path.read_text(encoding="utf-8"))
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == func_name:
             return node

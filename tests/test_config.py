@@ -106,7 +106,7 @@ class TestLoadConfig:
                 host: aria.example.com
                 username: admin
             default_target: prod
-        """))
+        """), encoding="utf-8")
         monkeypatch.setenv("VMWARE_ARIA_CONFIG", str(cfg_file))
 
         cfg = load_config(cfg_file)
@@ -127,7 +127,7 @@ class TestLoadConfig:
                 verify_ssl: false
                 auth_source: LDAP
             default_target: lab
-        """))
+        """), encoding="utf-8")
 
         cfg = load_config(cfg_file)
         t = cfg.targets["lab"]
@@ -147,7 +147,7 @@ class TestLoadConfig:
                 host: staging.example.com
                 username: admin
             default_target: prod
-        """))
+        """), encoding="utf-8")
 
         cfg = load_config(cfg_file)
         assert len(cfg.targets) == 2
@@ -169,7 +169,7 @@ class TestLoadConfig:
                 host: aria.example.com
                 username: admin
             default_target: nonexistent
-        """))
+        """), encoding="utf-8")
 
         cfg = load_config(cfg_file)
         assert cfg.default_target is None
@@ -184,7 +184,7 @@ class TestLoadConfig:
               env:
                 host: env.example.com
                 username: admin
-        """))
+        """), encoding="utf-8")
         monkeypatch.setenv("VMWARE_ARIA_CONFIG", str(cfg_file))
 
         cfg = load_config()
@@ -193,7 +193,7 @@ class TestLoadConfig:
     def test_load_empty_targets(self, tmp_path: Path) -> None:
         """load_config should handle a config with no targets."""
         cfg_file = tmp_path / "config.yaml"
-        cfg_file.write_text("targets: {}\n")
+        cfg_file.write_text("targets: {}\n", encoding="utf-8")
 
         cfg = load_config(cfg_file)
         assert len(cfg.targets) == 0
