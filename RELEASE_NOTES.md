@@ -1,3 +1,20 @@
+## v1.9.1 — two prompts before an irreversible report delete
+
+`report delete` — whose own tool description says "Irreversible" — asked once,
+while the rest of the family asks twice for anything the MCP layer annotates
+`destructiveHint=True`. `alert cancel` did the same. Both ask twice now.
+
+**`--yes` still works, and skips both prompts.** Removing it was tried on a
+consistency argument and reverted: `yes | vmware-aria report delete r-1`
+satisfies any number of prompts, so the flag grants nothing a shell does not
+already grant — this project's own docs say the prompts "defend the mistyped
+command, not a determined caller". What removing it *would* have done is break
+every script using a flag documented in three places. A declared `--yes` is also
+more auditable than a pipe, which leaves nothing behind.
+
+`alert acknowledge` is unchanged: it takes ownership, destroys nothing, and is
+not annotated destructive.
+
 ## v1.9.0 — two report fields that were not what their names said
 
 **`GET /reports` rows have no `name`.** The title is in `description`; the

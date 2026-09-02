@@ -163,13 +163,13 @@ Options:
 
 ### `vmware-aria alert cancel`
 
-Cancel (dismiss) an alert.
+Cancel (dismiss) an alert. **Asks twice** unless `--yes` is given.
 
 ```
 vmware-aria alert cancel <alert-id> [OPTIONS]
 
 Options:
-  --yes -y          Skip confirmation prompt
+  --yes -y          Skip both confirmation prompts
   --target -t TEXT  Target name
 ```
 
@@ -352,12 +352,13 @@ vmware-aria report get <report-id> [OPTIONS]
 ### `vmware-aria report delete`
 
 Delete a generated report (the definition and schedules remain intact).
+**Irreversible — asks twice** unless `--yes` is given.
 
 ```
 vmware-aria report delete <report-id> [OPTIONS]
 
 Options:
-  --yes -y          Skip confirmation prompt
+  --yes -y          Skip both confirmation prompts
   --target -t TEXT  Target name
 ```
 
