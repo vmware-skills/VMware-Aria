@@ -426,13 +426,16 @@ def alert_cancel(
     alert_id: str,
     target: TargetOption = None,
     config: ConfigOption = None,
-    yes: Annotated[bool, typer.Option("--yes", "-y", help="Skip confirmation prompt")] = False,
 ) -> None:
     """Cancel (dismiss) an active alert."""
     from vmware_aria.ops.alerts import cancel_alert
 
-    if not yes:
-        typer.confirm(f"Cancel alert {alert_id}? This will dismiss it.", abort=True)
+    # No --yes here, and two prompts. Cancelling an alert closes it; the family's
+    # rule for a destructive-annotated command is two prompts and no bypass flag,
+    # and a second prompt with a documented `--yes` beside it is decoration.
+    if not _confirm_destructive("alert", alert_id, verb="cancel"):
+        console.print("[yellow]Aborted.[/yellow]")
+        raise typer.Exit(1)
 
     client, cfg = _get_connection(target, config)
     target_name = target or cfg.default_target or "default"
@@ -749,6 +752,27 @@ def report_get(
         console.print(f"CSV: {data['csv_url']}")
 
 
+def _confirm_destructive(resource_type: str, resource_id: str, verb: str = "delete") -> bool:
+    """Two prompts before an irreversible operation.
+
+    The family's rule is that a CLI command whose MCP tool is annotated
+    ``destructiveHint=True`` asks twice. It was enforced by one repo's test
+    rather than a family gate, so this file asked once for `report delete` —
+    a command whose own tool description says "Irreversible". Same shape as
+    NSX-Security's helper, deliberately: a reader who has seen one should
+    recognise the other.
+    """
+    console.print(
+        f"[bold red]WARNING:[/] This will permanently {verb} {resource_type} "
+        f"'[bold]{resource_id}[/]'. This cannot be undone."
+    )
+    if not typer.confirm("Are you sure you want to proceed?", default=False):
+        return False
+    return typer.confirm(
+        f"Second confirmation: {verb.upper()} {resource_type} '{resource_id}'?", default=False
+    )
+
+
 @report_app.command("delete")
 @_friendly_errors
 @guarded(risk_level='medium')
@@ -756,13 +780,13 @@ def report_delete(
     report_id: str,
     target: TargetOption = None,
     config: ConfigOption = None,
-    yes: Annotated[bool, typer.Option("--yes", "-y", help="Skip confirmation")] = False,
 ) -> None:
     """Delete a generated report."""
     from vmware_aria.ops.reports import delete_report
 
-    if not yes:
-        typer.confirm(f"Delete report {report_id}?", abort=True)
+    if not _confirm_destructive("report", report_id):
+        console.print("[yellow]Aborted.[/yellow]")
+        raise typer.Exit(1)
 
     client, cfg = _get_connection(target, config)
     target_name = target or cfg.default_target or "default"
