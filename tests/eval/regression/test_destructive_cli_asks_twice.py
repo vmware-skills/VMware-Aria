@@ -1,12 +1,15 @@
-"""Aria's irreversible CLI commands ask twice, and take no bypass flag.
+"""Aria's irreversible CLI commands ask twice — and keep their ``--yes``.
 
-The family's rule — a CLI command whose MCP tool is annotated
-``destructiveHint=True`` prompts twice and offers no way to skip it — lived in
-one repo's test rather than a family gate, so this repo asked once and offered
-``--yes``. `delete_report`'s own tool description says "Irreversible".
+`delete_report`'s own tool description says "Irreversible" and the command asked
+once, while the rest of the family asks twice for anything annotated
+``destructiveHint=True``. That gap is what these tests close.
 
-A second prompt beside a documented ``--yes`` is decoration, which is why the
-flag went with the fix rather than after it.
+``--yes`` deliberately stays. Removing it was tried and reverted: it buys no
+safety, because `yes | vmware-aria report delete r-1` satisfies any number of
+prompts — this family's own capabilities.md says the prompts "defend the
+mistyped command, not a determined caller". What it does buy is a broken script
+for everyone who had automated the documented flag. Two prompts for the human,
+one declared flag for the caller who has already decided.
 """
 
 from __future__ import annotations
@@ -54,21 +57,18 @@ def test_alert_cancel_stops_at_the_second_prompt() -> None:
     cancel.assert_not_called()
 
 
-def test_neither_command_offers_a_way_to_skip_the_prompts() -> None:
-    """--yes on an irreversible command undoes the whole guard.
+def test_the_documented_bypass_still_works() -> None:
+    """``--yes`` is documented in cli-reference.md and must keep working.
 
-    Both carried one. Everywhere else in the family the bypass exists only on
-    `mcp-config install`, which writes a local config file.
+    It was removed in the first cut of this change on a consistency argument,
+    and the argument was wrong: the flag adds no exposure that `yes |` does not
+    already give, and removing it silently breaks every script that used it.
+    Pinned so the same reasoning does not get re-applied later.
     """
-    import ast
-    import pathlib
+    result, del_report, _ = _invoke(["report", "delete", "r-1", "--yes"], "")
+    assert result.exit_code == 0, result.output
+    del_report.assert_called_once()
 
-    src = pathlib.Path(cli.__file__).read_bytes().decode("utf-8")
-    tree = ast.parse(src)
-    offenders = []
-    for node in ast.walk(tree):
-        if not isinstance(node, ast.FunctionDef) or node.name not in ("alert_cancel", "report_delete"):
-            continue
-        if "--yes" in ast.unparse(node.args):
-            offenders.append(node.name)
-    assert not offenders, f"bypass flag reintroduced on: {offenders}"
+    result, _, cancel = _invoke(["alert", "cancel", "a-1", "--yes"], "")
+    assert result.exit_code == 0, result.output
+    cancel.assert_called_once()

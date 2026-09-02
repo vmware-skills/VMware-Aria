@@ -426,14 +426,16 @@ def alert_cancel(
     alert_id: str,
     target: TargetOption = None,
     config: ConfigOption = None,
+    yes: Annotated[bool, typer.Option("--yes", "-y", help="Skip confirmation prompts")] = False,
 ) -> None:
     """Cancel (dismiss) an active alert."""
     from vmware_aria.ops.alerts import cancel_alert
 
-    # No --yes here, and two prompts. Cancelling an alert closes it; the family's
-    # rule for a destructive-annotated command is two prompts and no bypass flag,
-    # and a second prompt with a documented `--yes` beside it is decoration.
-    if not _confirm_destructive("alert", alert_id, verb="cancel"):
+    # Two prompts when a human is driving; `--yes` for a caller who has already
+    # decided. The prompts defend the mistyped id, not a determined caller —
+    # this repo's own docs say so, since `yes |` satisfies them anyway. Removing
+    # the flag would have bought no safety and broken every script using it.
+    if not yes and not _confirm_destructive("alert", alert_id, verb="cancel"):
         console.print("[yellow]Aborted.[/yellow]")
         raise typer.Exit(1)
 
@@ -780,11 +782,12 @@ def report_delete(
     report_id: str,
     target: TargetOption = None,
     config: ConfigOption = None,
+    yes: Annotated[bool, typer.Option("--yes", "-y", help="Skip confirmation prompts")] = False,
 ) -> None:
     """Delete a generated report."""
     from vmware_aria.ops.reports import delete_report
 
-    if not _confirm_destructive("report", report_id):
+    if not yes and not _confirm_destructive("report", report_id):
         console.print("[yellow]Aborted.[/yellow]")
         raise typer.Exit(1)
 
