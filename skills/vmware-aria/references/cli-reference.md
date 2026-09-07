@@ -237,7 +237,7 @@ Options:
   --target -t TEXT     Target name
 ```
 
-**Output**: Table with VM name, recommended CPU, and recommended memory (from the `OnlineCapacityAnalytics|{cpu,mem}|recommendedSize` metrics).
+**Output**: Table with VM name, sizing status, and recommended CPU / memory / disk (from the `OnlineCapacityAnalytics|{cpu,mem,diskspace}|recommendedSize` metrics). Status `reclaimable` means the engine publishes 0 for the VM — that is not a recommendation of zero; `none published` means the VM either needs no resizing or was never scored, which the appliance does not distinguish.
 
 ---
 

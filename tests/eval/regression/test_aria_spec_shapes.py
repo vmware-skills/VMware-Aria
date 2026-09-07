@@ -765,3 +765,62 @@ def test_a_size_beside_a_zero_is_reported_as_a_recommendation() -> None:
     assert row["sizing_status"] == "recommendation"
     assert row["recommended_cpu"] == 2.0
     assert row["recommended_memory"] is None, "the zero must not surface as a size"
+
+
+def test_the_cli_renders_the_three_sizing_states_distinctly(monkeypatch) -> None:
+    """The Monitor lesson from this same week, applied here before release: the
+    payload learned three states and the CLI kept printing raw values, so a
+    reclaimable VM and one with nothing published would both have rendered as an
+    identical empty pair — "no data", the exact misreading sizing_status exists
+    to prevent. And str(None) is the string 'None'.
+    """
+    from typer.testing import CliRunner
+
+    from vmware_aria.cli import app
+
+    c = _client()
+    c.get.return_value = {
+        "resourceList": [
+            {"identifier": "vm-1", "resourceKey": {"name": "sized-01"}},
+            {"identifier": "vm-2", "resourceKey": {"name": "idle-01"}},
+            {"identifier": "vm-3", "resourceKey": {"name": "quiet-01"}},
+        ],
+        "pageInfo": {"totalCount": 3},
+    }
+    def st(k, v):
+        return {"statKey": {"key": k}, "data": [v]}
+    c.post.return_value = {"values": [
+        {"resourceId": "vm-1", "stat-list": {"stat": [
+            st("OnlineCapacityAnalytics|cpu|recommendedSize", 2.0)]}},
+        {"resourceId": "vm-2", "stat-list": {"stat": [
+            st("OnlineCapacityAnalytics|cpu|recommendedSize", 0.0)]}},
+        {"resourceId": "vm-3", "stat-list": {"stat": []}},
+    ]}
+    monkeypatch.setattr(
+        "vmware_aria.cli._get_connection", lambda target, config: (c, __import__("unittest.mock", fromlist=["MagicMock"]).MagicMock())
+    )
+
+    result = CliRunner().invoke(app, ["capacity", "rightsizing"])
+    assert result.exit_code == 0, result.output
+
+    assert "reclaimable" in result.output, "the reclaimable state must be visible"
+    assert "none published" in result.output, "so must the none-published state"
+    assert "None" not in result.output, "str(None) leaking into the table"
+
+
+def test_rightsizing_asks_for_a_day_wide_window() -> None:
+    """The capacity engine publishes on its own cadence, which no document
+    commits to. Behind the helper's 1-hour default, any cadence longer than an
+    hour reads every VM as none_published on an estate that has
+    recommendations — an empty table that looks like an answer. 25 hours covers
+    a daily cycle; LATEST still returns one newest point.
+    """
+    from vmware_aria.ops.capacity import list_rightsizing_recommendations
+
+    client = _rightsizing_client({"OnlineCapacityAnalytics|cpu|recommendedSize": 2.0})
+    list_rightsizing_recommendations(client, resource_id="vm-1")
+
+    body = client.post.call_args.kwargs["json_data"]
+    assert body["end"] - body["begin"] == 25 * 3_600_000, (
+        "the rightsizing stats window must span 25 hours"
+    )

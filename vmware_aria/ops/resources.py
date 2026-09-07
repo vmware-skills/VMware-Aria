@@ -324,6 +324,7 @@ def latest_stats_bulk(
     client: AriaClient,
     resource_ids: list[str],
     stat_keys: list[str],
+    window_ms: int = 3_600_000,
 ) -> dict[str, dict[str, float | None]]:
     """Fetch the latest value of each statKey for many resources in ONE request.
 
@@ -355,7 +356,7 @@ def latest_stats_bulk(
     payload: dict[str, Any] = {
         "resourceId": ids,
         "statKey": list(stat_keys),
-        "begin": end_ms - 3_600_000,  # 1 hour trailing window
+        "begin": end_ms - window_ms,  # trailing window; 1 h default
         "end": end_ms,
         "rollUpType": "LATEST",
         "intervalType": "MINUTES",

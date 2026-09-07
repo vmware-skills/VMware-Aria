@@ -541,14 +541,33 @@ def capacity_rightsizing(
 
     table = Table(title="Rightsizing (OnlineCapacityAnalytics recommendedSize)", show_lines=False)
     table.add_column("VM Name", style="bold")
-    table.add_column("Recommended CPU")
-    table.add_column("Recommended Mem")
+    table.add_column("Status")
+    table.add_column("Rec. CPU")
+    table.add_column("Rec. Mem")
+    table.add_column("Rec. Disk")
+
+    # Three states, three renderings — a reclaimable VM and one with nothing
+    # published must not both come out as an empty pair of cells, because
+    # "no data" is exactly the misreading the sizing_status field exists to
+    # prevent. A zero from the engine means reclaimable (KB 379521), never a
+    # recommendation of zero.
+    _status_style = {
+        "recommendation": "[green]recommendation[/]",
+        "reclaimable": "[yellow]reclaimable[/]",
+        "none_published": "[dim]none published[/]",
+    }
+
+    def _cell(value: object) -> str:
+        return "—" if value is None else str(value)
 
     for r in items:
+        status = r.get("sizing_status", "")
         table.add_row(
             (r["name"] or r["id"])[:40],
-            str(r.get("recommended_cpu", "")),
-            str(r.get("recommended_memory", "")),
+            _status_style.get(status, status),
+            _cell(r.get("recommended_cpu")),
+            _cell(r.get("recommended_memory")),
+            _cell(r.get("recommended_diskspace")),
         )
 
     console.print(table)

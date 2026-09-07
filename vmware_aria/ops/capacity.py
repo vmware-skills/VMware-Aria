@@ -281,7 +281,18 @@ def list_rightsizing_recommendations(
     # One bulk POST /resources/stats/query for every target — replaces the old
     # per-VM GET /resources/{id}/stats/latest loop (an N+1 firing up to one
     # round-trip per VM, ~101 for a full listing).
-    stats_by_resource = latest_stats_bulk(client, list(targets), stat_keys)
+    #
+    # 25-hour window rather than the helper's 1-hour default. The capacity
+    # engine publishes on its own cadence, which no document commits to; behind
+    # a 1-hour window any cadence longer than an hour reads every VM as
+    # "none_published" on an estate that has recommendations. LATEST rollup
+    # still returns one newest point per key, and a day-old recommendation is
+    # current for a signal that moves as slowly as capacity. The probe reports
+    # per-key presence against the catalogue, which is what would expose a
+    # window still too short.
+    stats_by_resource = latest_stats_bulk(
+        client, list(targets), stat_keys, window_ms=25 * 3_600_000
+    )
 
     results = []
     for rid, name in targets.items():
