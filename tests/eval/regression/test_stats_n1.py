@@ -95,6 +95,7 @@ def test_list_rightsizing_issues_one_bulk_stats_query_not_per_vm_loop() -> None:
         stat_key_values={
             "OnlineCapacityAnalytics|cpu|recommendedSize": 2.0,
             "OnlineCapacityAnalytics|mem|recommendedSize": 4096.0,
+            "OnlineCapacityAnalytics|diskspace|recommendedSize": 40960.0,
         },
     )
     results = list_rightsizing_recommendations(client, limit=50)["items"]
@@ -110,6 +111,15 @@ def test_list_rightsizing_issues_one_bulk_stats_query_not_per_vm_loop() -> None:
     assert len(body["resourceId"]) == 50
     # Output shape preserved.
     assert results and len(results) == 50
-    assert set(results[0]) == {"id", "name", "recommended_cpu", "recommended_memory"}
+    assert set(results[0]) == {
+        "id",
+        "name",
+        "recommended_cpu",
+        "recommended_memory",
+        "recommended_diskspace",
+        "sizing_status",
+    }
     assert results[0]["recommended_cpu"] == 2.0
     assert results[0]["recommended_memory"] == 4096.0
+    assert results[0]["recommended_diskspace"] == 40960.0
+    assert results[0]["sizing_status"] == "recommendation"

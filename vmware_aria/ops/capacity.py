@@ -207,12 +207,31 @@ def list_rightsizing_recommendations(
     resource_id: str | None = None,
     limit: int = 50,
 ) -> dict:
-    """List VM rightsizing data (recommended vs provisioned size).
+    """List VM rightsizing data from the capacity engine's published metrics.
 
-    The suite-api exposes rightsizing exclusively as per-VM metrics
-    (OnlineCapacityAnalytics recommendedSize); the UI "Rightsize" page uses
-    internal APIs. This queries the recommended-size metrics for the given
-    VM, or for up to ``limit`` VMs when no resource_id is given.
+    The suite-api has no rightsizing endpoint. Broadcom's Capacity Analytics
+    metric list publishes it on the VM as three keys —
+    ``OnlineCapacityAnalytics|{cpu,mem,diskspace}|recommendedSize`` — and those
+    are what this reads, on both the 8.x and 9.x lines.
+
+    **This is not the number the UI shows.** The product's own field engineering
+    states the UI does not give the recommended absolute vCPU or memory; the
+    Rightsize view presents allocated plus a suggested delta. An operator
+    comparing this row against that screen will see two different numbers, both
+    correct, describing different things.
+
+    Reading the values (KB 379521, behaviour introduced after 8.17):
+
+    * a value above zero is a recommended size;
+    * **zero is not a recommended size** — the engine publishes 0 continuously
+      while it considers the VM reclaimable, so a raw pass-through would tell a
+      caller to size a VM down to nothing. Zero is reported as
+      ``sizing_status: "reclaimable"`` with the recommendation left ``None``;
+    * **nothing published is not "no data"** — a VM that needs no resizing
+      publishes no metric at all, and so does one the analytics have never
+      scored. The appliance does not distinguish those two, so neither does
+      this: both are ``sizing_status: "none_published"``, which says the
+      ambiguity out loud rather than picking a side.
 
     Args:
         client: Authenticated Aria Operations API client.
@@ -220,11 +239,12 @@ def list_rightsizing_recommendations(
         limit: Maximum number of VMs to evaluate when listing (1–100).
 
     Returns:
-        Result envelope with dicts under ``items`` carrying VM id, name, and
-        recommended cpu/mem sizes; values are None for VMs where capacity
-        analytics have no data. One row is returned per VM evaluated, so
-        ``total`` carries the environment's VM ``pageInfo.totalCount`` — a run
-        that evaluated every VM reads as complete, a capped one as truncated.
+        Result envelope whose ``items`` carry VM id and name, the three
+        ``recommended_*`` sizes, and ``sizing_status`` (one of
+        ``recommendation`` / ``reclaimable`` / ``none_published``). One row per
+        VM evaluated, so ``total`` carries the environment's VM
+        ``pageInfo.totalCount`` — a run that evaluated every VM reads as
+        complete, a capped one as truncated.
     """
     limit = max(1, min(limit, 100))
 
@@ -241,11 +261,13 @@ def list_rightsizing_recommendations(
             for r in listing.get("resourceList", [])
         }
 
-    # VM-published rightsizing keys have NO demand segment (spec audit):
-    # OnlineCapacityAnalytics|{cpu,mem}|recommendedSize.
+    # VM-published rightsizing keys have NO demand segment (spec audit), and
+    # Broadcom's Capacity Analytics metric list names three of them, not two —
+    # diskspace was simply missing here until 2026-09-07.
     stat_keys = [
         "OnlineCapacityAnalytics|cpu|recommendedSize",
         "OnlineCapacityAnalytics|mem|recommendedSize",
+        "OnlineCapacityAnalytics|diskspace|recommendedSize",
     ]
 
     # One bulk POST /resources/stats/query for every target — replaces the old
@@ -258,12 +280,27 @@ def list_rightsizing_recommendations(
         if not rid:
             continue
         values = stats_by_resource.get(rid, {})
+        raw = {
+            dim: values.get(f"OnlineCapacityAnalytics|{dim}|recommendedSize")
+            for dim in ("cpu", "mem", "diskspace")
+        }
+        # A published 0 means "reclaimable", not "recommend zero" (KB 379521),
+        # so it must not reach the caller in a field named recommended_*.
+        sized = {d: v for d, v in raw.items() if v is not None and float(v) > 0}
+        if sized:
+            status = "recommendation"
+        elif any(v is not None for v in raw.values()):
+            status = "reclaimable"
+        else:
+            status = "none_published"
         results.append(
             {
                 "id": sanitize(rid),
                 "name": name,
-                "recommended_cpu": values.get("OnlineCapacityAnalytics|cpu|recommendedSize"),
-                "recommended_memory": values.get("OnlineCapacityAnalytics|mem|recommendedSize"),
+                "recommended_cpu": sized.get("cpu"),
+                "recommended_memory": sized.get("mem"),
+                "recommended_diskspace": sized.get("diskspace"),
+                "sizing_status": status,
             }
         )
     if resource_id:

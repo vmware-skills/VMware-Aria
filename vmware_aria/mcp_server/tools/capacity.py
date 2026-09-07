@@ -81,13 +81,25 @@ def list_rightsizing_recommendations(
     limit: int = 50,
     target: Optional[str] = None,
 ) -> dict:
-    """[READ] List VM rightsizing data — recommended CPU/memory size per VM.
+    """[READ] List VM rightsizing data — recommended CPU/memory/disk size per VM.
 
-    Reads the OnlineCapacityAnalytics recommendedSize metrics (the public
-    API's rightsizing signal; the UI Rightsize page uses internal APIs).
-    Compare against the VM's provisioned size to find over/under-provisioning.
-    Values are None while capacity analytics warm up. One stats call per VM —
-    keep limit modest. Get VM UUIDs from list_resources.
+    Reads the three OnlineCapacityAnalytics recommendedSize metrics, the only
+    rightsizing signal the public API publishes, on both 8.x and 9.x. Compare
+    against the VM's provisioned size to find over/under-provisioning. Get VM
+    UUIDs from list_resources. One bulk stats call covers the whole page.
+
+    Read `sizing_status` before quoting any number:
+      recommendation  — recommended_* carry sizes.
+      reclaimable     — the engine publishes 0 for a VM it holds reclaimable.
+                        That is NOT a recommendation to size it to zero, and
+                        recommended_* are null here.
+      none_published  — the VM needs no resizing OR analytics never scored it.
+                        The appliance does not distinguish these two; do not
+                        report it as either one.
+
+    This is not the number the vendor UI's Rightsize page shows — that view
+    presents allocated plus a suggested delta, not the absolute recommended
+    size. Both are correct and they will not match.
 
     Returns a paginated envelope: items, returned, limit, total (null
     when the API reports no size), truncated, hint. Check truncated

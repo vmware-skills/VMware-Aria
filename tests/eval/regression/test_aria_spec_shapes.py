@@ -436,6 +436,9 @@ def test_rightsizing_keys_have_no_demand_segment() -> None:
     assert body["statKey"] == [
         "OnlineCapacityAnalytics|cpu|recommendedSize",
         "OnlineCapacityAnalytics|mem|recommendedSize",
+        # Broadcom's Capacity Analytics list names three keys on the VM; the
+        # third was missing here until 2026-09-07.
+        "OnlineCapacityAnalytics|diskspace|recommendedSize",
     ]
     assert body["resourceId"] == ["vm-1"]
 
@@ -669,3 +672,77 @@ def test_list_resources_explicit_limit_stops_early() -> None:
 
     assert len(results) == 50
     assert client.get.call_count == 1, "limit satisfied on page 0 — no second fetch"
+
+
+# ── Rightsizing: a published zero is not a recommended size ────────────
+
+
+def _rightsizing_client(values: dict):
+    """A client whose bulk stats query answers with `values` for one VM."""
+    client = _client()
+    client.get.return_value = {
+        "resourceList": [{"identifier": "vm-1", "resourceKey": {"name": "web-01"}}],
+        "pageInfo": {"totalCount": 1},
+    }
+    client.post.return_value = {
+        "values": [
+            {
+                "resourceId": "vm-1",
+                "stat-list": {
+                    "stat": [
+                        {"statKey": {"key": k}, "data": [v]} for k, v in values.items()
+                    ]
+                },
+            }
+        ]
+    }
+    return client
+
+
+def test_a_published_zero_is_reclaimable_not_a_recommendation() -> None:
+    """KB 379521: after 8.17 the engine publishes 0 continuously while it holds
+    a VM to be reclaimable. Passing that through in a field called
+    ``recommended_cpu`` tells the caller to size the VM down to nothing."""
+    from vmware_aria.ops.capacity import list_rightsizing_recommendations
+
+    client = _rightsizing_client(
+        {
+            "OnlineCapacityAnalytics|cpu|recommendedSize": 0.0,
+            "OnlineCapacityAnalytics|mem|recommendedSize": 0.0,
+        }
+    )
+    row = list_rightsizing_recommendations(client)["items"][0]
+
+    assert row["sizing_status"] == "reclaimable"
+    assert row["recommended_cpu"] is None, "a zero must not surface as a size"
+    assert row["recommended_memory"] is None
+
+
+def test_nothing_published_says_so_rather_than_claiming_no_data() -> None:
+    """A VM that needs no resizing publishes no metric, and so does one the
+    analytics never scored. The appliance does not separate them, so the reply
+    names the ambiguity instead of picking one."""
+    from vmware_aria.ops.capacity import list_rightsizing_recommendations
+
+    row = list_rightsizing_recommendations(_rightsizing_client({}))["items"][0]
+
+    assert row["sizing_status"] == "none_published"
+    assert row["recommended_cpu"] is None
+
+
+def test_a_real_recommendation_still_comes_through() -> None:
+    """The positive control. Without it the two tests above would keep passing
+    with the whole query stubbed out."""
+    from vmware_aria.ops.capacity import list_rightsizing_recommendations
+
+    client = _rightsizing_client(
+        {
+            "OnlineCapacityAnalytics|cpu|recommendedSize": 2.0,
+            "OnlineCapacityAnalytics|diskspace|recommendedSize": 40960.0,
+        }
+    )
+    row = list_rightsizing_recommendations(client)["items"][0]
+
+    assert row["sizing_status"] == "recommendation"
+    assert row["recommended_cpu"] == 2.0
+    assert row["recommended_diskspace"] == 40960.0, "the third key must be read"
