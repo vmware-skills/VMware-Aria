@@ -1,3 +1,43 @@
+## v1.10.0 — a zero from the capacity engine is not a size
+
+Rightsizing rebuilt against what the official documentation and both API lines
+actually say, ahead of a customer engagement that leads with it.
+
+**A published zero now reads as `reclaimable`.** KB 379521: after 8.17 the
+engine publishes 0 continuously while it holds a VM reclaimable. This tool
+passed that through in a field called `recommended_cpu` — telling a caller, or
+an agent, to size the VM down to nothing. Zero now sets
+`sizing_status: "reclaimable"` and the recommendation stays null.
+
+**Absence stopped pretending to be "no data".** A VM needing no resize
+publishes nothing, and so does one the analytics never scored; the appliance
+does not distinguish them, so `sizing_status: "none_published"` says the
+ambiguity out loud. The CLI renders the three states distinctly — a reclaimable
+VM and an unscored one no longer print as the same empty pair.
+
+**The third documented key.** Broadcom's Capacity Analytics list names
+`OnlineCapacityAnalytics|{cpu,mem,diskspace}|recommendedSize`; this read two.
+`recommended_diskspace` is now in the row.
+
+**A 25-hour stats window.** The capacity engine publishes on its own cadence,
+which no document commits to; behind the previous 1-hour window, any cadence
+longer than an hour read every VM as none_published on an estate that has
+recommendations. LATEST still returns one newest point per key.
+
+**Both API lines are now asserted, not assumed.** The full VCF Operations
+9.1.0.0 operation index (504 operations, from the official vcf-api-specs repo)
+sits beside the 8.6 one, and a regression test requires every call this skill
+makes to resolve in both — with the five 9.1-only calls (Fleet, Diagnostics,
+PromQL) named in an explicit list, so a sixth cannot slip in and quietly 404 on
+8.x estates.
+
+Breaking for consumers of `list_rightsizing_recommendations`: rows carry two new
+fields, and a raw 0 will no longer appear as a recommended size.
+
+`scripts/probe_aria_rightsizing.py` (read-only, in the family repo) asks a live
+appliance which of these keys it actually publishes and what they answer —
+run it on each estate before quoting numbers from this tool.
+
 ## v1.9.1 — two prompts before an irreversible report delete
 
 `report delete` — whose own tool description says "Irreversible" — asked once,
