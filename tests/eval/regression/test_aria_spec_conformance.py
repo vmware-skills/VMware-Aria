@@ -34,6 +34,13 @@ SPEC_PATH = SPEC_DIR / "vrops86_operations.json"
 # the data-query-service PromQL call is on a separate base + Bearer JWT and is
 # issued via client.raw_request(), which this AST scan does not collect.
 VCF_SPEC_PATH = SPEC_DIR / "vcf91_fleet_operations.json"
+# The FULL VCF Operations 9.1.0.0 index (504 operations), from the same official
+# repo the fleet subset came from. Until 2026-09-07 only that 7-path subset was
+# seeded, so this guard could not see any 9.x path outside Fleet: a hallucinated
+# 9.x endpoint would have passed it. Merged rather than substituted because the
+# skill supports both lines — every call it makes resolves in both indexes, and
+# a path that exists in one but not the other is a fact a caller needs.
+VCFOPS91_SPEC_PATH = SPEC_DIR / "vcfops91_operations.json"
 SCAN_DIRS = [REPO_ROOT / "vmware_aria"]
 
 _HTTP_METHODS = {"get": "GET", "post": "POST", "put": "PUT", "delete": "DELETE"}
@@ -48,6 +55,7 @@ def _spec_matchers() -> list[tuple[str, re.Pattern]]:
     for op in json.loads(VCF_SPEC_PATH.read_text(encoding="utf-8"))["operations"]:
         if op.get("base", "/suite-api") == "/suite-api":
             operations.append(op)
+    operations.extend(json.loads(VCFOPS91_SPEC_PATH.read_text(encoding="utf-8"))["operations"])
     matchers = []
     for op in operations:
         # /api/resources/{id}/stats -> ^/api/resources/[^/]+/stats$
@@ -183,4 +191,59 @@ def test_every_api_call_exists_in_suite_api_spec() -> None:
     assert not violations, (
         "API calls not present in the vROps 8.6 suite-api spec "
         "(invented endpoints WILL 404 in production):\n  " + "\n  ".join(violations)
+    )
+
+
+def test_every_call_resolves_in_both_the_8_x_and_9_x_index() -> None:
+    """This skill claims to support 8.x and 9.x. That claim is mechanical here.
+
+    A call that resolves only in the 8.6 index is one this skill would issue
+    against a 9.x appliance that no longer serves it — a 404 the caller reads as
+    "no data". One that resolves only in 9.1 breaks the 8.x estates. Both are
+    silent, so both are asserted rather than assumed.
+
+    Measured when this was written: 23 distinct calls, all present in both.
+    """
+    def _index(name: str) -> list[tuple[str, re.Pattern]]:
+        ops = json.loads((SPEC_DIR / name).read_text(encoding="utf-8"))["operations"]
+        out = []
+        for op in ops:
+            if op.get("base", "/suite-api") != "/suite-api":
+                continue
+            out.append((op["method"], re.compile("^" + re.sub(r"\{[^}]+\}", r"[^/]+", op["path"]) + "$")))
+        return out
+
+    eight = _index("vrops86_operations.json")
+    nine = _index("vcfops91_operations.json") + _index("vcf91_fleet_operations.json")
+
+    def _resolves(method: str, path: str, index) -> bool:
+        probe = path if path.startswith("/api/") else "/api" + path
+        return any(m == method and rx.match(probe) for m, rx in index)
+
+    calls = sorted({(m, path) for _, m, path in _collect_api_calls()})
+    assert calls, "the AST scan collected no calls — the check would pass vacuously"
+
+    only_eight = [c for c in calls if _resolves(*c, eight) and not _resolves(*c, nine)]
+    only_nine = {c for c in calls if _resolves(*c, nine) and not _resolves(*c, eight)}
+
+    assert not only_eight, (
+        "these calls exist in the 8.6 index but not in 9.x — they 404 on a 9.x "
+        f"appliance: {only_eight}"
+    )
+
+    # 9.x-only is allowed, but only where this skill says so. These five back the
+    # Fleet, Diagnostics and real-time PromQL tools, which are documented as
+    # 9.1 features; on an 8.x estate they 404 and the tool says so. A SIXTH one
+    # appearing here means a call was added that quietly does nothing on 8.x.
+    DECLARED_NINE_ONLY = {
+        ("GET", "/integrations/services"),
+        ("POST", "/auth/token/exchange"),
+        ("POST", "/diagnostics/findings/query"),
+        ("POST", "/fleet-management/certificate-management/certificates/query"),
+        ("POST", "/fleet-management/password-management/accounts/query"),
+    }
+    assert only_nine == DECLARED_NINE_ONLY, (
+        "the set of 9.x-only calls changed. Undeclared additions 404 on every 8.x "
+        f"estate: {sorted(only_nine - DECLARED_NINE_ONLY)}; declared but no longer "
+        f"present: {sorted(DECLARED_NINE_ONLY - only_nine)}"
     )

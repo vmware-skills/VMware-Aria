@@ -1,0 +1,2529 @@
+{
+  "source": "github.com/vmware/vcf-api-specs — specifications/vcf-operations/vcf-operations-openapi.json (VMware Cloud Foundation Operations API 9.1.0.0), the same repo the fleet subset was seeded from.",
+  "spec_version": "9.1.0.0",
+  "retrieved": "2026-09-07",
+  "note": "The FULL 9.x operation index. Until now only a 7-path fleet subset was seeded, so the conformance gate that guards against 踩坑 #36 could not see any 9.x path outside Fleet — a hallucinated 9.x endpoint would have passed. Kept alongside the 8.6 index rather than replacing it: this skill supports both, and a path present in one and absent in the other is exactly the fact a caller needs.",
+  "operation_count": 504,
+  "operations": [
+    {
+      "method": "GET",
+      "path": "/api/actiondefinitions",
+      "description": "Look up Action Definitions in the system"
+    },
+    {
+      "method": "POST",
+      "path": "/api/actions/{id}",
+      "description": "Perform an Action on one or more resources"
+    },
+    {
+      "method": "POST",
+      "path": "/api/actions/{id}/query",
+      "description": "Populate the information needed to run an action"
+    },
+    {
+      "method": "GET",
+      "path": "/api/actions/{taskId}/status",
+      "description": "Get action status by the given task Id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/adapterkinds",
+      "description": "Get Adapter Types"
+    },
+    {
+      "method": "GET",
+      "path": "/api/adapterkinds/{adapterKindKey}/resourcekinds/{resourceKindKey}",
+      "description": "Get a specific Resource Kind supported by a specific Adapter Kind"
+    },
+    {
+      "method": "GET",
+      "path": "/api/adapterkinds/{adapterKindKey}/resourcekinds/{resourceKindKey}/identifiers",
+      "description": "Get details for resource identifiers, with provided adapter kind and resource kind."
+    },
+    {
+      "method": "GET",
+      "path": "/api/adapterkinds/{adapterKindKey}/resourcekinds/{resourceKindKey}/properties",
+      "description": "Get the meta-data for properties for a specific Resource Kind supported by a specific Adapter Kind"
+    },
+    {
+      "method": "GET",
+      "path": "/api/adapterkinds/{adapterKindKey}/resourcekinds/{resourceKindKey}/resources",
+      "description": "Query for Resources within a particular Adapter Kind and Resource Kind "
+    },
+    {
+      "method": "GET",
+      "path": "/api/adapterkinds/{adapterKindKey}/resourcekinds/{resourceKindKey}/statkeys",
+      "description": "Get the meta-data for attributes (excluding properties) for a specific Resource Kind supported by a specific Adapter Kind"
+    },
+    {
+      "method": "GET",
+      "path": "/api/adapterkinds/{adapterKindKey}/resources",
+      "description": "Query for Resources of a particular Adapter Kind"
+    },
+    {
+      "method": "GET",
+      "path": "/api/adapterkinds/{id}",
+      "description": "Get an Adapter Kind using the specified identifier"
+    },
+    {
+      "method": "GET",
+      "path": "/api/adapterkinds/{key}/resourcekinds",
+      "description": "Get all the Resource Kinds supported by a specific Adapter Kind"
+    },
+    {
+      "method": "GET",
+      "path": "/api/adapters",
+      "description": "Get all the adapter instance resources in the system"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/adapters",
+      "description": "Patch an Adapter Instance"
+    },
+    {
+      "method": "POST",
+      "path": "/api/adapters",
+      "description": "Create an Adapter Instance"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/adapters",
+      "description": "Update an Adapter Instance"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/adapters/testConnection",
+      "description": "Patch an Adapter Instance Connection"
+    },
+    {
+      "method": "POST",
+      "path": "/api/adapters/testConnection",
+      "description": "Test Adapter Instance connection"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/adapters/{adapterId}",
+      "description": "Delete an Adapter Instance"
+    },
+    {
+      "method": "GET",
+      "path": "/api/adapters/{adapterId}",
+      "description": "Look up a single adapter instance using an identifier"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/adapters/{adapterId}/maintained",
+      "description": "Mark the adapter instance as being STARTED"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/adapters/{adapterId}/maintained",
+      "description": "Mark the adapter instance as being MAINTAINED for the given duration"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/adapters/{adapterId}/monitoringstate/start",
+      "description": "Start the adapter instance from monitoring its resources"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/adapters/{adapterId}/monitoringstate/stop",
+      "description": "Stop the adapter instance from monitoring its resources"
+    },
+    {
+      "method": "GET",
+      "path": "/api/adapters/{adapterId}/resources",
+      "description": "Enumerate all resources managed by an adapter instance"
+    },
+    {
+      "method": "GET",
+      "path": "/api/alertdefinitions",
+      "description": "Get collection of Alert Definitions matching the search criteria specified"
+    },
+    {
+      "method": "POST",
+      "path": "/api/alertdefinitions",
+      "description": "Create an Alert Definition"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/alertdefinitions",
+      "description": "Update an existing Alert Definition"
+    },
+    {
+      "method": "POST",
+      "path": "/api/alertdefinitions/query",
+      "description": "Query collection of alert definitions matching the search criteria specified"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/alertdefinitions/{id}",
+      "description": "Delete an Alert Definition"
+    },
+    {
+      "method": "GET",
+      "path": "/api/alertdefinitions/{id}",
+      "description": "Get the Alert Definition using the identifier specified"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/alertdefinitions/{id}/disable",
+      "description": "Disable alert definition in policies"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/alertdefinitions/{id}/enable",
+      "description": "Enable alert definition in policies"
+    },
+    {
+      "method": "GET",
+      "path": "/api/alertplugins",
+      "description": "Get Notification Plugins, optionally filtered for a specific type"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/alertplugins",
+      "description": "Patch a new Notification Plugin Instance"
+    },
+    {
+      "method": "POST",
+      "path": "/api/alertplugins",
+      "description": "Create a new Notification Plugin Instance"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/alertplugins",
+      "description": "Update an existing Notification Plugin Instance"
+    },
+    {
+      "method": "GET",
+      "path": "/api/alertplugins/types",
+      "description": "Get the available Notification Plugin Types"
+    },
+    {
+      "method": "GET",
+      "path": "/api/alertplugins/types/{pluginTypeId}",
+      "description": "Get the Notification Plugin Type Metadata"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/alertplugins/{pluginId}",
+      "description": "Delete an existing Notification Plugin Instance"
+    },
+    {
+      "method": "GET",
+      "path": "/api/alertplugins/{pluginId}",
+      "description": "Get Notification Plugin specified by plugin id"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/alertplugins/{pluginId}/enable/{enabled}",
+      "description": "Start or stop an existing Notification Plugin Instance"
+    },
+    {
+      "method": "GET",
+      "path": "/api/alertplugins/{pluginId}/rules",
+      "description": "Retrieve all the notification rules of the plugin instance"
+    },
+    {
+      "method": "POST",
+      "path": "/api/alertplugins/{pluginId}/test",
+      "description": "Test existing Notification Plugin Instance connectivity"
+    },
+    {
+      "method": "GET",
+      "path": "/api/alerts",
+      "description": "Look up Alerts by their identifiers or using the identifiers of the Resources they are associated with"
+    },
+    {
+      "method": "POST",
+      "path": "/api/alerts",
+      "description": "Perform operations on one or more Alerts"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/alerts/bulk",
+      "description": "Delete canceled alerts using one or more criteria specified in the Query Spec"
+    },
+    {
+      "method": "GET",
+      "path": "/api/alerts/contributingsymptoms",
+      "description": "Get the list of triggered symptoms for the requested alerts"
+    },
+    {
+      "method": "POST",
+      "path": "/api/alerts/group/{groupingCondition}/query",
+      "description": "Query for Alert groups using one or more criteria specified in the Query Spec"
+    },
+    {
+      "method": "POST",
+      "path": "/api/alerts/notes/query",
+      "description": "Query for Alert Notes based on specified criteria"
+    },
+    {
+      "method": "POST",
+      "path": "/api/alerts/query",
+      "description": "Query for Alerts using one or more criteria specified in the Query Spec"
+    },
+    {
+      "method": "GET",
+      "path": "/api/alerts/types",
+      "description": "Get all the Alert Types and Subtypes defined in the system."
+    },
+    {
+      "method": "GET",
+      "path": "/api/alerts/{id}",
+      "description": "Look up an Alert by its identifier"
+    },
+    {
+      "method": "GET",
+      "path": "/api/alerts/{id}/notes",
+      "description": "Get all the Alert Notes associated with an Alert"
+    },
+    {
+      "method": "POST",
+      "path": "/api/alerts/{id}/notes",
+      "description": "Add a Note to an Alert"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/alerts/{id}/notes/{noteId}",
+      "description": "Delete a specific Alert Note for a specific Alert"
+    },
+    {
+      "method": "GET",
+      "path": "/api/alerts/{id}/notes/{noteId}",
+      "description": "Get the requested Alert Note associated with an Alert"
+    },
+    {
+      "method": "GET",
+      "path": "/api/applications",
+      "description": "Get all the created application monitoring configurations"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/applications/agents",
+      "description": "Uninstall agent from the resource"
+    },
+    {
+      "method": "POST",
+      "path": "/api/applications/agents",
+      "description": "Install agent on resource"
+    },
+    {
+      "method": "POST",
+      "path": "/api/applications/agents/certificates/renew",
+      "description": "Renew client certificate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/applications/agents/certificates/renew/status",
+      "description": "Status of renew client certificate operations."
+    },
+    {
+      "method": "POST",
+      "path": "/api/applications/agents/services",
+      "description": "Save application service configuration on multiple resources."
+    },
+    {
+      "method": "GET",
+      "path": "/api/applications/agents/services/{taskId}/status",
+      "description": "Get application configuration status by the given taskId"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/applications/agents/start",
+      "description": "Start agent on the specified resources"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/applications/agents/stop",
+      "description": "Stop agent on the specified resources"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/applications/agents/upgrade",
+      "description": "Upgrade agent on the specified resources"
+    },
+    {
+      "method": "POST",
+      "path": "/api/applications/agents/{id}/certificates/renew",
+      "description": "Renew endPoint's certificate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/applications/agents/{id}/certificates/renew/status",
+      "description": "Status of renew client certificate operation."
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/applications/agents/{id}/services",
+      "description": "Remove application service configuration from the specified resource"
+    },
+    {
+      "method": "GET",
+      "path": "/api/applications/agents/{id}/services",
+      "description": "Get applications service configurations on the resource"
+    },
+    {
+      "method": "POST",
+      "path": "/api/applications/agents/{id}/services",
+      "description": "Save application service configuration on the specified resource"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/applications/agents/{id}/services",
+      "description": "Update application service configuration on the specified resource"
+    },
+    {
+      "method": "GET",
+      "path": "/api/applications/agents/{id}/services/{name}",
+      "description": "Get application service configuration by service name on the resource"
+    },
+    {
+      "method": "GET",
+      "path": "/api/applications/agents/{taskId}/status",
+      "description": "Get bootstrap action status by the given taskId"
+    },
+    {
+      "method": "POST",
+      "path": "/api/applications/clientCertificate/{collectorId}",
+      "description": "Query to sign the Arc Client certificate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/applications/clientCertificate/{collectorIpOrGroupName}",
+      "description": "Download Client Certificates"
+    },
+    {
+      "method": "GET",
+      "path": "/api/applications/resources",
+      "description": "Get all available resources for application monitoring"
+    },
+    {
+      "method": "GET",
+      "path": "/api/applications/services/{name}",
+      "description": "Get template of application configuration"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/applications/subscribe",
+      "description": "Subscribe to Application Monitoring by downloading bootstrap bundle containing all required scripts for bootstraping ARC Agent from Endpoints"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/applications/unsubscribe",
+      "description": "UnSubscribe to Application Monitoring by downloading bootstrap bundle containing all required scripts for Unbootstraping ARC Agent from Endpoints."
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/applications/vccpmappings",
+      "description": "Delete vCenters mapping info"
+    },
+    {
+      "method": "POST",
+      "path": "/api/applications/vccpmappings",
+      "description": "Create vCenter mappings"
+    },
+    {
+      "method": "POST",
+      "path": "/api/applications/vccpmappings/query",
+      "description": "Get vCenter mappings info"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/applications/vcenter/add",
+      "description": "Add a vCenter to be monitored by the specified application monitoring configuration"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/applications/vcenter/remove",
+      "description": "Remove a vCenter from Application Monitoring Configuration"
+    },
+    {
+      "method": "GET",
+      "path": "/api/audit/system",
+      "description": "Get system audit report"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/currentuser",
+      "description": "Look up for an initiator of this API method"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/currentuser/permissions",
+      "description": "Get assigned role permissions for an initiator of this API method"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/currentuser/roles/{roleName}/privileges",
+      "description": "Get privileges of a role for an initiator of this API method"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/privilegegroups",
+      "description": "Get the available privilege groups"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/privileges",
+      "description": "Get the available privileges"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/roles",
+      "description": "Find list of application roles using the role names"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/roles",
+      "description": "Create a user role"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/auth/roles",
+      "description": "Update a user role"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/auth/roles/{roleName}",
+      "description": "Remove role with given role name"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/roles/{roleName}",
+      "description": "Look up a role with the given name"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/auth/roles/{roleName}/privileges",
+      "description": "Remove specified privileges from the user role"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/roles/{roleName}/privileges",
+      "description": "Get the privileges for a user role"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/roles/{roleName}/privileges",
+      "description": "Add the privileges to a user role"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/auth/roles/{roleName}/privileges",
+      "description": "Set the privileges for a user role"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/auth/scopes",
+      "description": "Delete scopes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/scopes",
+      "description": "Get all scopes"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/scopes",
+      "description": "Create a new Scope"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/auth/scopes",
+      "description": "Modify a Scope"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/scopes/{scopeId}",
+      "description": "Get the scope"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/sources",
+      "description": "Get all the available authentication sources in the system"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/auth/sources",
+      "description": "Patch an already added authentication source with the certificate data"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/sources",
+      "description": "Add a new authentication source in the system"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/auth/sources",
+      "description": "Update an authentication source in the system"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/auth/sources/test",
+      "description": "Patch an already tested authentication source with the certificate data"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/sources/test",
+      "description": "Test a new or an existing authentication source in the system"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/sources/vidb/well-known-url",
+      "description": "Get VIDB well-known URL"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/sources/{id}/usergroups/search",
+      "description": "Search user-groups for an auth source"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/auth/sources/{id}/usergroups/synchronize",
+      "description": "Synchronize user groups"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/sources/{id}/users",
+      "description": "Import users from the auth source"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/sources/{id}/users/search",
+      "description": "Search users for an auth source"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/auth/sources/{sourceId}",
+      "description": "Delete an authentication source"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/sources/{sourceId}",
+      "description": "Retrieve detailed information about a particular authentication source"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/sourcetypes",
+      "description": "Get all the available authentication source types"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/sourcetypes/{sourceId}",
+      "description": "Retrieve information about a particular authentication source type"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/token/acquire",
+      "description": "Acquire a token to perform REST API calls"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/token/exchange",
+      "description": "Exchange current user token with jwt token"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/token/release",
+      "description": "Terminate the current sessionId"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/traversalspecs",
+      "description": "Get/Query the list of all traversal specification templates in the system"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/auth/usergroups",
+      "description": "Delete a list of user groups using their identifiers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/usergroups",
+      "description": "Retrieve a list of local user groups using identifiers or/and names"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/usergroups",
+      "description": "Create a new local user group or import SSO/VIDM/LDAP/AD/VIDB user groups"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/auth/usergroups",
+      "description": "Modify a local user group"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/usergroups/{groupId}/permissions",
+      "description": "Get assigned role permissions for the user group"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/auth/usergroups/{groupId}/permissions",
+      "description": "Assign a role permission to a particular user group"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/auth/usergroups/{groupId}/permissions/{roleName}",
+      "description": "Unassign role permission from a user group"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/auth/usergroups/{groupId}/traversalspecs",
+      "description": "(Deprecated) Assign a traversal specification to a particular user"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/auth/usergroups/{id}",
+      "description": "Delete a local user group"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/usergroups/{id}",
+      "description": "Look up a local user group using its identifier"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/auth/users",
+      "description": "Delete a collection of users with the given identifiers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/users",
+      "description": "Look up a list of users using the user identifiers or their role names"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/users",
+      "description": "Create a new user"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/auth/users",
+      "description": "Modify the details of a particular user"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/auth/users/passwordchange",
+      "description": "Change the password of the active user"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/auth/users/{id}",
+      "description": "Delete a user"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/users/{id}",
+      "description": "Look up a particular user using its identifier"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/users/{userId}/permissions",
+      "description": "Get assigned role permissions for a user"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/auth/users/{userId}/permissions",
+      "description": "Assign a role permission to a particular user"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/auth/users/{userId}/permissions/{roleName}",
+      "description": "Unassign role permission from a user"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/auth/users/{userId}/traversalspecs",
+      "description": "(Deprecated) Assign a traversal specification to a particular user."
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/certificate",
+      "description": "Delete a certificate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/certificate",
+      "description": "Get all certificates"
+    },
+    {
+      "method": "POST",
+      "path": "/api/certificate",
+      "description": "Import certificate file"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chargeback/bills",
+      "description": "Create and save the Bills based on the Bill Generate Request"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chargeback/bills/query",
+      "description": "Get metering Bills summary based on the Request"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/chargeback/bills/{id}",
+      "description": "Delete generated bill for the specified bill identifier"
+    },
+    {
+      "method": "GET",
+      "path": "/api/chargeback/bills/{id}",
+      "description": "Get bill for the specified bill identifier"
+    },
+    {
+      "method": "GET",
+      "path": "/api/chargeback/bills/{id}/download",
+      "description": "Download the bill given its identifier"
+    },
+    {
+      "method": "GET",
+      "path": "/api/chargeback/notifications/rules",
+      "description": "Get all the tenant notification rules defined in the system"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chargeback/notifications/rules",
+      "description": "Create a new tenant notification rule"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/chargeback/notifications/rules",
+      "description": "Update a specific tenant notification rule"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/chargeback/notifications/rules/{id}",
+      "description": "Delete a specific existing tenant notification rule"
+    },
+    {
+      "method": "GET",
+      "path": "/api/chargeback/notifications/rules/{id}",
+      "description": "Get the tenant notification rule for the specified identifier"
+    },
+    {
+      "method": "GET",
+      "path": "/api/chargeback/reportdefinitions/{id}/schedules",
+      "description": "Get all the Tenant Report Schedules associated with a Report Definition"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chargeback/reportdefinitions/{id}/schedules",
+      "description": "Create a Tenant Report Schedule to generate a Report for the specified Report Definition and Resource(s)"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/chargeback/reportdefinitions/{id}/schedules",
+      "description": "Update Tenant Report Schedule associated with the specific Report Definition and for the specified Schedule identifier"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/chargeback/reportdefinitions/{id}/schedules/{scheduleId}",
+      "description": "Delete Tenant Report Schedule associated with the specific Report Definition and for the specified Schedule identifier"
+    },
+    {
+      "method": "GET",
+      "path": "/api/chargeback/reportdefinitions/{id}/schedules/{scheduleId}",
+      "description": "Get a specific Tenant Report Schedule for the specified Report Definition and Schedule identifier"
+    },
+    {
+      "method": "GET",
+      "path": "/api/chargeback/reports",
+      "description": "Get the Tenant Reports based on the Report Query Spec provided"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chargeback/reports",
+      "description": "Generate (create) a Tenant Report using the specified Report Definition and for the specified Resource"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/chargeback/reports/{id}",
+      "description": "Delete a tenant report by its identifier"
+    },
+    {
+      "method": "GET",
+      "path": "/api/chargeback/reports/{id}",
+      "description": "Get the detail of a Tenant Report given its identifier"
+    },
+    {
+      "method": "GET",
+      "path": "/api/chargeback/reports/{id}/download",
+      "description": "Download the Tenant Report given its identifier"
+    },
+    {
+      "method": "GET",
+      "path": "/api/collectorgroups",
+      "description": "Enumerate all the Collector Groups defined in the system"
+    },
+    {
+      "method": "POST",
+      "path": "/api/collectorgroups",
+      "description": "Create a new Collector Group in the system"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/collectorgroups",
+      "description": "Update a Collector Group in the system"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/collectorgroups/{id}",
+      "description": "Delete a Collector Group from the system using its identifier"
+    },
+    {
+      "method": "GET",
+      "path": "/api/collectorgroups/{id}",
+      "description": "Get details of a particular Collector Group in the system"
+    },
+    {
+      "method": "POST",
+      "path": "/api/collectorgroups/{id}/certificates/renew",
+      "description": "Renew Collector Group CA Certificate."
+    },
+    {
+      "method": "GET",
+      "path": "/api/collectorgroups/{id}/certificates/renew/status",
+      "description": "Status of Collector Group CA Certificate renewal action."
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/collectorgroups/{id}/collector/{collectorId}",
+      "description": "Remove a Collector from a Collector Group"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/collectorgroups/{id}/collector/{collectorId}",
+      "description": "Add a Collector to Collector Group"
+    },
+    {
+      "method": "GET",
+      "path": "/api/collectors",
+      "description": "Get all the Collectors registered with the VMware Cloud Foundation Operations system"
+    },
+    {
+      "method": "GET",
+      "path": "/api/collectors/{id}/adapters",
+      "description": "Get all the Collectors registered with the VMware Cloud Foundation Operations system"
+    },
+    {
+      "method": "POST",
+      "path": "/api/collectors/{id}/certificates/renew",
+      "description": "Renew Cloud Proxy CA Certificate."
+    },
+    {
+      "method": "GET",
+      "path": "/api/collectors/{id}/certificates/renew/status",
+      "description": "Status of Collector CA Certificate renewal Operation."
+    },
+    {
+      "method": "PUT",
+      "path": "/api/collectors/{id}/datapersistence/disable",
+      "description": "Disable data persistence on cloud proxy"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/collectors/{id}/datapersistence/enable",
+      "description": "Enable data persistence on cloud proxy"
+    },
+    {
+      "method": "GET",
+      "path": "/api/configurations/files",
+      "description": "Get details of the specified configuration file."
+    },
+    {
+      "method": "POST",
+      "path": "/api/content/backup",
+      "description": "(Deprecated) Backup content for current user"
+    },
+    {
+      "method": "GET",
+      "path": "/api/content/backup/result",
+      "description": "(Deprecated) Download backup for current user"
+    },
+    {
+      "method": "GET",
+      "path": "/api/content/operations/export",
+      "description": "Get the last export operation details"
+    },
+    {
+      "method": "POST",
+      "path": "/api/content/operations/export",
+      "description": "Export content for current user"
+    },
+    {
+      "method": "GET",
+      "path": "/api/content/operations/export/zip",
+      "description": "Download the latest export"
+    },
+    {
+      "method": "GET",
+      "path": "/api/content/operations/import",
+      "description": "Get the last import operation details"
+    },
+    {
+      "method": "POST",
+      "path": "/api/content/operations/import",
+      "description": "Import content for current user from uploaded file"
+    },
+    {
+      "method": "GET",
+      "path": "/api/content/progress",
+      "description": "(Deprecated) Get content progress"
+    },
+    {
+      "method": "POST",
+      "path": "/api/content/restore",
+      "description": "(Deprecated) Restore content for current user from uploaded file"
+    },
+    {
+      "method": "GET",
+      "path": "/api/content/restore/result",
+      "description": "(Deprecated) Get restore data report for current user"
+    },
+    {
+      "method": "GET",
+      "path": "/api/costconfig/currency",
+      "description": "Get details of currently selected currency such as display name, code, etc."
+    },
+    {
+      "method": "POST",
+      "path": "/api/costconfig/currency",
+      "description": "Set currency"
+    },
+    {
+      "method": "GET",
+      "path": "/api/credentialkinds",
+      "description": "Get all Credential Kinds defined in the system"
+    },
+    {
+      "method": "GET",
+      "path": "/api/credentials",
+      "description": "Get all Credential Instances in the system"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/credentials",
+      "description": "Partial update an existing Credential Instance"
+    },
+    {
+      "method": "POST",
+      "path": "/api/credentials",
+      "description": "Create a new Credential Instance"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/credentials",
+      "description": "Update an existing Credential Instance"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/credentials/{id}",
+      "description": "Delete a Credential Instance"
+    },
+    {
+      "method": "GET",
+      "path": "/api/credentials/{id}",
+      "description": "Get a Credential Instance"
+    },
+    {
+      "method": "GET",
+      "path": "/api/credentials/{id}/adapters",
+      "description": "Get all Adapter Instances using the Credential Instance"
+    },
+    {
+      "method": "GET",
+      "path": "/api/credentials/{id}/resources",
+      "description": "Get the Objects using the Credential Instance"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/deployment/cluster/dt",
+      "description": "Manages a specific run of Dynamic Threshold (DT) Computation in a VMware Cloud Foundation Operations Cluster"
+    },
+    {
+      "method": "GET",
+      "path": "/api/deployment/config/globalsettings",
+      "description": "Get all global setting values"
+    },
+    {
+      "method": "GET",
+      "path": "/api/deployment/config/globalsettings/metadata",
+      "description": "Get global settings metadata"
+    },
+    {
+      "method": "GET",
+      "path": "/api/deployment/config/globalsettings/{key}",
+      "description": "Get global setting value for the requested key"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/deployment/config/globalsettings/{key}/{value}",
+      "description": "Update global setting value for specified key"
+    },
+    {
+      "method": "GET",
+      "path": "/api/deployment/node/services/info",
+      "description": "Get the health of all Services"
+    },
+    {
+      "method": "GET",
+      "path": "/api/deployment/node/services/{name}/info",
+      "description": "Get information about a specific Service that is part of the VMware Cloud Foundation Operations stack"
+    },
+    {
+      "method": "GET",
+      "path": "/api/deployment/node/status",
+      "description": "Get the status of the node"
+    },
+    {
+      "method": "POST",
+      "path": "/api/diagnostics/findings/query",
+      "description": "Get filtered and paginated list of findings "
+    },
+    {
+      "method": "POST",
+      "path": "/api/diagnostics/findings/{ruleUuid}/affectedobjects/query",
+      "description": "Get filtered and paginated list of affected objects for a rule"
+    },
+    {
+      "method": "POST",
+      "path": "/api/events",
+      "description": "Push a single Event into the system"
+    },
+    {
+      "method": "POST",
+      "path": "/api/events/adapterkinds/{adapterKind}",
+      "description": "Push a single Event into the system with associating an adapter kind as the event source"
+    },
+    {
+      "method": "POST",
+      "path": "/api/events/bulk",
+      "description": "Push one or more Events into the system"
+    },
+    {
+      "method": "POST",
+      "path": "/api/events/bulk/adapterkinds/{adapterKind}",
+      "description": "Push one or more Events into the system with associating an adapter kind as the event source"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/certificate-management/certificate-authorities",
+      "description": "Get Certificates Authorities"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/fleet-management/certificate-management/certificate-authorities",
+      "description": "Update / save the certificate authority configuration"
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/certificate-management/certificates/query",
+      "description": "Get paginated list of certificates based on query parameters"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/certificate-management/certificates/{certificateId}",
+      "description": "Get certificate info for the given Certificate Id"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/fleet-management/certificate-management/certificates/{certificateId}",
+      "description": "Replace the certificate of the given appliance"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/certificate-management/csrs",
+      "description": "Return list of Certificate CSRs."
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/certificate-management/csrs",
+      "description": "Generate Certificate Signing Request (CSR) for the given VCF component"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/iam/components",
+      "description": "Get Eligible Components for Custom Roles"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/fleet-management/iam/components/auth-sources",
+      "description": "Delete Iam Component Auth Source"
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/iam/components/auth-sources",
+      "description": "Create Iam Component Auth Source (VCF or Management Component based)."
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/iam/components/auth-sources/query",
+      "description": "Get Iam Component Auth Sources"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/iam/components/roles",
+      "description": "Get List of Provisioned Custom Component Roles"
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/iam/components/roles",
+      "description": "Create and provision Custom Component Role"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/fleet-management/iam/components/roles",
+      "description": "Update Custom Component Role"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/iam/components/roles/summaries",
+      "description": "Get List of Component Roles"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/fleet-management/iam/components/roles/{roleId}",
+      "description": "Delete Custom Component Role"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/iam/components/roles/{roleId}",
+      "description": "Get Custom Role Details by ID"
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/iam/components/roles/{roleId}/drift-check",
+      "description": "Trigger Drift Check for Custom Role"
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/iam/components/roles/{roleId}/retry",
+      "description": "Retry Failed Custom Role Provisioning"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/iam/components/{componentId}/role-definitions",
+      "description": "Get Role Definitions of custom roles defined at the component"
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/iam/identity-providers",
+      "description": "Create Identity Provider configuration (OIDC, SAML, or LDAP)"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/fleet-management/iam/identity-providers",
+      "description": "Update Identity Provider configuration."
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/fleet-management/iam/identity-providers/{idpConfigId}",
+      "description": "Delete Identity Provider configuration (optionally force delete components)"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/iam/identity-providers/{idpConfigId}",
+      "description": "Get Identity Provider configuration."
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/iam/identity-providers/{idpConfigId}/directories/{directoryId}/sync-client",
+      "description": "Get information about the SCIM sync client for the given directory"
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/iam/identity-providers/{idpConfigId}/directories/{directoryId}/sync-client",
+      "description": "Generate OAuth2 SCIM sync client and optionally bearer token for directory"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/iam/identity-providers/{idpConfigId}/ldap-directories",
+      "description": "Get all LDAP directories for an identity provider"
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/iam/identity-providers/{idpConfigId}/ldap-directories/{ldapDirectoryId}/groups/query",
+      "description": "Query and search groups in LDAP directory"
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/iam/identity-providers/{idpConfigId}/ldap-directories/{ldapDirectoryId}/sync",
+      "description": "Trigger LDAP synchronization for identity provider and directory"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/iam/identity-providers/{idpConfigId}/ldap-directories/{ldapDirectoryId}/sync-logs",
+      "description": "Get paginated LDAP sync logs for identity provider and directory"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/iam/identity-providers/{idpConfigId}/ldap-directories/{ldapDirectoryId}/sync-logs/{syncLogId}",
+      "description": "Get specific LDAP sync log by ID"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/iam/identity-providers/{idpConfigId}/ldap-directories/{ldapDirectoryId}/sync-profile",
+      "description": "Get LDAP sync profile configuration"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/fleet-management/iam/identity-providers/{idpConfigId}/ldap-directories/{ldapDirectoryId}/sync-profile",
+      "description": "Update LDAP Sync profile."
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/iam/identity-providers/{idpConfigId}/ldap-directories/{ldapDirectoryId}/users/query",
+      "description": "Query and search users in LDAP directory"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/iam/roles",
+      "description": "Get Paginated List of VCF Roles"
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/iam/roles",
+      "description": "Create Custom VCF Role"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/fleet-management/iam/roles",
+      "description": "Update VCF Role"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/fleet-management/iam/roles/{name}",
+      "description": "Delete VCF Role"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/iam/roles/{name}",
+      "description": "Get VCF Role"
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/iam/saml-metadata/validate",
+      "description": "Validate SAML metadata XML or URL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/iam/settings",
+      "description": "Get IAM Global Settings"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/fleet-management/iam/settings",
+      "description": "Update IAM Global Settings"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/iam/ssorealms",
+      "description": "Get all SSO Realms"
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/iam/ssorealms",
+      "description": "Create new SSO Realm configuration"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}",
+      "description": "Delete SSO Realm by ID"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}",
+      "description": "Get SSO Realm by ID"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/api-clients",
+      "description": "Update API Client details"
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/api-clients",
+      "description": "Create new API Client in SSO Realm"
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/api-clients/query",
+      "description": "Query API Clients with search filters and pagination"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/api-clients/{clientId}",
+      "description": "Delete API Client by ID"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/api-clients/{clientId}",
+      "description": "Get API Client details by ID"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/api-tokens",
+      "description": "Update API Token details"
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/api-tokens",
+      "description": "Generate new API Token for API Client"
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/api-tokens/query",
+      "description": "Query API Tokens with search filters and pagination"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/api-tokens/{apiTokenId}",
+      "description": "Delete API Token by ID"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/api-tokens/{apiTokenId}",
+      "description": "Get API Token details by ID"
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/api-tokens/{apiTokenId}/regenerate",
+      "description": "Regenerate API Token secret value"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/emergency-clients",
+      "description": "List all Emergency Clients in SSO Realm"
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/emergency-clients",
+      "description": "Create Emergency Client with generated token in SSO Realm"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/emergency-clients/{clientId}",
+      "description": "Delete Emergency Client and its associated token"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/emergency-clients/{clientId}",
+      "description": "Get Emergency Client details by ID"
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/emergency-clients/{clientId}/regenerate",
+      "description": "Regenerate Emergency Client token secret"
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/groups/query",
+      "description": "Get paginated list of groups with search filters"
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/groups/{groupId}/members/query",
+      "description": "Get paginated list of group members with search filters"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/oauth-apps",
+      "description": "List all OAuth Apps in SSO Realm"
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/oauth-apps",
+      "description": "Create new OAuth App in SSO Realm"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/oauth-apps",
+      "description": "Update OAuth App details"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/oauth-apps/{oauthAppId}",
+      "description": "Delete OAuth App by ID"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/oauth-apps/{oauthAppId}",
+      "description": "Get OAuth App details by ID"
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/oauth-apps/{oauthAppId}/rotate",
+      "description": "Rotate OAuth App client secret"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/principals/{principalId}/roles",
+      "description": "Remove all role assignments from principal"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/principals/{principalId}/roles",
+      "description": "Get role assignments for principal"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/principals/{principalId}/roles",
+      "description": "Update role assignments for principal"
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/iam/ssorealms/{ssoRealmId}/users/query",
+      "description": "Get paginated list of users with search filters"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/iam/tasks/{taskId}",
+      "description": "Get IAM Task Details"
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet-management/iam/vidbs",
+      "description": "Get eligible identity broker instances for IDP configuration"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/fleet-management/iam/vidbs",
+      "description": "Update identity broker display name"
+    },
+    {
+      "method": "POST",
+      "path": "/api/fleet-management/password-management/accounts/query",
+      "description": "Get paginated list of password accounts based on query parameters"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/fleet-management/password-management/accounts/{passwordAccountKey}/password",
+      "description": "Update the password for given account"
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/services",
+      "description": "Get registered services details"
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/services/certificate-management/{serviceKey}/certificates",
+      "description": "Get VVF certificates for a service"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/integrations/services/certificate-management/{serviceKey}/certificates",
+      "description": "Replace the certificate of the given ingress component"
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/services/certificate-management/{serviceKey}/csrs",
+      "description": "Get all Certificate Signing Requests (CSRs) for a service"
+    },
+    {
+      "method": "POST",
+      "path": "/api/integrations/services/certificate-management/{serviceKey}/csrs",
+      "description": "Generate a Certificate Signing Request (CSR) for a service"
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/services/password-management/{serviceKey}/accounts",
+      "description": "get the list of accounts"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/integrations/services/password-management/{serviceKey}/accounts/password",
+      "description": "Update the password for a system account"
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/services/password-management/{serviceKey}/tasks/{taskId}",
+      "description": "Get the status of a task"
+    },
+    {
+      "method": "POST",
+      "path": "/api/integrations/vcenters",
+      "description": "Create a vCenter integration, with vSAN and Service Discovery configs"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/integrations/vcenters",
+      "description": "Update existing vCenter integration, with vSAN and Service Discovery configs"
+    },
+    {
+      "method": "POST",
+      "path": "/api/integrations/vcenters/testConnection",
+      "description": "Test provided vCenter integration"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/integrations/vcenters/{integrationId}",
+      "description": "Delete vcenter integration by provided id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/vcenters/{integrationId}",
+      "description": "Get vCenter integration, with vSAN and Service Discovery configs"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/integrations/vcenters/{integrationId}/register",
+      "description": "Register vc with provided credentials, and id"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/integrations/vcenters/{integrationId}/unregister",
+      "description": "Unregister vc with provided credentials, and id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/integrations/vcf",
+      "description": "Create VCF integration with provided parameters. vCenter,vSAN and NSXT adapters for domains, will be created and configured automatically"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/integrations/vcf",
+      "description": "Update existing VCF integration with provided parameters"
+    },
+    {
+      "method": "POST",
+      "path": "/api/integrations/vcf/testConnection",
+      "description": "Test provided VCF integration"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/integrations/vcf/{integrationId}",
+      "description": "Delete integration by provided id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/vcf/{integrationId}",
+      "description": "Get VCF integration, by specified id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/vcf/{integrationId}/domains",
+      "description": "Get all VCF domains summary for VCF by provided id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/integrations/vcf/{integrationId}/domains/{domainId}",
+      "description": "Delete domain by provided id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/vcf/{integrationId}/domains/{domainId}",
+      "description": "Get VCF domain by provided VCF and domain ids"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/integrations/vcf/{integrationId}/domains/{domainId}",
+      "description": "Update VCF domain, by provided domain model, and VCF id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/integrations/vcf/{integrationId}/domains/{domainId}/testConnection",
+      "description": "Test VCF domain, by provided domain update model, VCF id and domain id"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/integrations/vcf/{integrationId}/register",
+      "description": "Register vcf with provided id"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/integrations/vcf/{integrationId}/unregister",
+      "description": "Unregister vcf with provided id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/logs/configuration/{logtype}",
+      "description": "Get logs configurations of certain type"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/logs/configuration/{logtype}",
+      "description": "Change level of the logs"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/logs/configuration/{logtype}/settings",
+      "description": "Remove the log classes from the log type"
+    },
+    {
+      "method": "GET",
+      "path": "/api/logs/forwarding",
+      "description": "Get log forwarding configuration"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/logs/forwarding",
+      "description": "Create a new or update an existing log forwarding configuration"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/logs/forwarding/disable",
+      "description": "Disable log forwarding"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/logs/forwarding/enable",
+      "description": "Enable log forwarding"
+    },
+    {
+      "method": "GET",
+      "path": "/api/logs/queryconfigs",
+      "description": "Get all query configs"
+    },
+    {
+      "method": "POST",
+      "path": "/api/logs/queryconfigs",
+      "description": "Create query config"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/logs/queryconfigs",
+      "description": "Update query config"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/logs/queryconfigs/{queryConfigId}",
+      "description": "Delete query config with specified id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/logs/queryconfigs/{queryConfigId}",
+      "description": "Get query config with specified id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/maintenanceschedules",
+      "description": "Delete maintenance schedules with the given identifiers."
+    },
+    {
+      "method": "GET",
+      "path": "/api/maintenanceschedules",
+      "description": "Query for all maintenance schedules based on schedule id, schedule name and resource id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/maintenanceschedules",
+      "description": "Create a maintenance schedule"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/maintenanceschedules",
+      "description": "Update an existing maintenance schedules"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications/rules",
+      "description": "Get all the Notification Rules defined in the system"
+    },
+    {
+      "method": "POST",
+      "path": "/api/notifications/rules",
+      "description": "Create a new Notification Rule for a Notification Plugin Instance"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notifications/rules",
+      "description": "Update a specific Notification Rule for a Notification Plugin Instance"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/notifications/rules/{id}",
+      "description": "Delete a specific existing Notification Rule associated with a Notification Plugin Instance"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications/rules/{id}",
+      "description": "Get the Notification Rule for the specified identifier"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications/templates",
+      "description": "Get notification templates matching the search criteria specified"
+    },
+    {
+      "method": "POST",
+      "path": "/api/notifications/templates",
+      "description": "Create a new notification template"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/notifications/templates",
+      "description": "Update an existing notification template"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/notifications/templates/{id}",
+      "description": "Delete notification template"
+    },
+    {
+      "method": "GET",
+      "path": "/api/notifications/templates/{id}",
+      "description": "Get notification template"
+    },
+    {
+      "method": "GET",
+      "path": "/api/optimization/datacenters/{dataCenterId}/exclusion/tags",
+      "description": "Get DC optimization configurations for capacity exclusion"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/optimization/datacenters/{dataCenterId}/exclusion/tags",
+      "description": "Update your DC optimization configurations for capacity exclusion partially"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/optimization/datacenters/{dataCenterId}/exclusion/tags",
+      "description": "Create or update your DC optimization configurations for capacity exclusion fully"
+    },
+    {
+      "method": "GET",
+      "path": "/api/optimization/datacenters/{id}/reclaim/resources",
+      "description": "Reclaim data for VMs or for orphaned disks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/optimization/datacenters/{id}/rightsize/resources",
+      "description": "Rightsize data for VMs"
+    },
+    {
+      "method": "POST",
+      "path": "/api/optimization/reclaim/orphaneddisks/{id}/exclude",
+      "description": "Exclude orphaned disk"
+    },
+    {
+      "method": "POST",
+      "path": "/api/optimization/reclaim/orphaneddisks/{id}/include",
+      "description": "Include orphaned disk"
+    },
+    {
+      "method": "POST",
+      "path": "/api/optimization/reclaim/vms/{id}/exclude",
+      "description": "Exclude reclaimable VM"
+    },
+    {
+      "method": "POST",
+      "path": "/api/optimization/reclaim/vms/{id}/include",
+      "description": "Include reclaimable VM"
+    },
+    {
+      "method": "POST",
+      "path": "/api/optimization/rightsizing/vms/{id}/exclude",
+      "description": "Exclude rightsizing VM"
+    },
+    {
+      "method": "POST",
+      "path": "/api/optimization/rightsizing/vms/{id}/include",
+      "description": "Include rightsizing VM"
+    },
+    {
+      "method": "POST",
+      "path": "/api/optimization/workloadplacement/history/query",
+      "description": "Get WLP History."
+    },
+    {
+      "method": "PUT",
+      "path": "/api/optimization/workloadplacement/{dataCenterId}/automation/disable",
+      "description": "Turning off automation"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/optimization/workloadplacement/{dataCenterId}/automation/enable",
+      "description": "Turning on automation"
+    },
+    {
+      "method": "GET",
+      "path": "/api/optimization/workloadplacement/{dataCenterId}/automation/status",
+      "description": "Get optimization automation status"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/optimization/workloadplacement/{dataCenterId}/crossdcmove/disable",
+      "description": "Disable cluster-level optimization across datacenter boundaries in a vCenter"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/optimization/workloadplacement/{dataCenterId}/crossdcmove/enable",
+      "description": "Enable cluster-level optimization across datacenter boundaries in a vCenter"
+    },
+    {
+      "method": "GET",
+      "path": "/api/optimization/workloadplacement/{dataCenterId}/crossdcmove/status",
+      "description": "Get cross datacenter move allowed status"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/optimization/workloadplacement/{dataCenterId}/settings",
+      "description": "Turn off placement settings on datacenter"
+    },
+    {
+      "method": "GET",
+      "path": "/api/optimization/workloadplacement/{dataCenterId}/settings",
+      "description": "Get placement settings"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/optimization/workloadplacement/{dataCenterId}/settings",
+      "description": "Set up your business intent to place VMs based on criteria"
+    },
+    {
+      "method": "GET",
+      "path": "/api/policies",
+      "description": "Get all available policies."
+    },
+    {
+      "method": "POST",
+      "path": "/api/policies",
+      "description": "Create a new policy."
+    },
+    {
+      "method": "POST",
+      "path": "/api/policies/apply",
+      "description": "Apply policy to the given groups"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/policies/default",
+      "description": "Set given policy as default policy."
+    },
+    {
+      "method": "GET",
+      "path": "/api/policies/export",
+      "description": "Export the content of policies into ZIP archive."
+    },
+    {
+      "method": "POST",
+      "path": "/api/policies/import",
+      "description": "Import policy content from an archive of ZIP format"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/policies/priorities",
+      "description": "Update priority order of provided policies"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/policies/{id}",
+      "description": "Delete policy for the specified identifier included descendants if requested."
+    },
+    {
+      "method": "PUT",
+      "path": "/api/policies/{id}/assign",
+      "description": "Assign policy to the given groups, and objects"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/policies/{id}/settings",
+      "description": "Make provided settings in the policy inherited from parent policy."
+    },
+    {
+      "method": "GET",
+      "path": "/api/policies/{id}/settings",
+      "description": "Get policy settings for the specified identifier."
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/policies/{id}/settings",
+      "description": "Update only provided settings in the policy."
+    },
+    {
+      "method": "PUT",
+      "path": "/api/policies/{id}/unassign",
+      "description": "Unassign policy from given groups, and objects"
+    },
+    {
+      "method": "GET",
+      "path": "/api/product/licensing/edition",
+      "description": "Get edition of product licensing"
+    },
+    {
+      "method": "GET",
+      "path": "/api/product/licensing/info",
+      "description": "Get the license info for VMware Cloud Foundation Operations instance"
+    },
+    {
+      "method": "GET",
+      "path": "/api/product/licensing/npc/status",
+      "description": "Get native public cloud licensing status"
+    },
+    {
+      "method": "GET",
+      "path": "/api/recommendations",
+      "description": "Get recommendations"
+    },
+    {
+      "method": "POST",
+      "path": "/api/recommendations",
+      "description": "Create a recommendation"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/recommendations",
+      "description": "Update an existing recommendation"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/recommendations/{id}",
+      "description": "Delete a recommendation"
+    },
+    {
+      "method": "GET",
+      "path": "/api/recommendations/{id}",
+      "description": "Get the recommendation specified by the given identifier"
+    },
+    {
+      "method": "GET",
+      "path": "/api/reportdefinitions",
+      "description": "Get the Report Definitions based on the query specification specified"
+    },
+    {
+      "method": "GET",
+      "path": "/api/reportdefinitions/{id}",
+      "description": "Get a Report Definition"
+    },
+    {
+      "method": "GET",
+      "path": "/api/reportdefinitions/{id}/schedules",
+      "description": "Get all the Report Schedules associated with a Report Definition"
+    },
+    {
+      "method": "POST",
+      "path": "/api/reportdefinitions/{id}/schedules",
+      "description": "Create a Report Schedule to generate a Report for the specified Report Definition and Resource(s)"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/reportdefinitions/{id}/schedules",
+      "description": "Update Report Schedule associated with the specific Report Definition and for the specified Schedule identifier"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/reportdefinitions/{id}/schedules/{scheduleId}",
+      "description": "Delete Report Schedule associated with the specific Report Definition and for the specified Schedule identifier"
+    },
+    {
+      "method": "GET",
+      "path": "/api/reportdefinitions/{id}/schedules/{scheduleId}",
+      "description": "Get a specific Report Schedule for the specified Report Definition and Schedule identifier"
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports",
+      "description": "Get the Reports based on the Report Query Spec provided"
+    },
+    {
+      "method": "POST",
+      "path": "/api/reports",
+      "description": "Generate (create) a Report using the specified Report Definition and for the specified Resource"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/reports/{id}",
+      "description": "Delete a report by its identifier"
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/{id}",
+      "description": "Get the detail of a Report given its identifier"
+    },
+    {
+      "method": "GET",
+      "path": "/api/reports/{id}/download",
+      "description": "Download the Report given its identifier"
+    },
+    {
+      "method": "GET",
+      "path": "/api/resources",
+      "description": "Get a listing of resources based on the query spec specified"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/resources",
+      "description": "Update a Resource in the system"
+    },
+    {
+      "method": "POST",
+      "path": "/api/resources/adapterkinds/{adapterKindKey}",
+      "description": "Create a new Resource in the system associated with the specified adapter kind"
+    },
+    {
+      "method": "POST",
+      "path": "/api/resources/adapters/{adapterInstanceId}",
+      "description": "Create a new Resource in the system associated with an existing adapter instance"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/resources/bulk",
+      "description": "Delete multiple Resources"
+    },
+    {
+      "method": "POST",
+      "path": "/api/resources/bulk/relationships",
+      "description": "Get resources that satisfy filtering criteria and are related to specified list of resources with the given relationship type"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/resources/customdatacenters",
+      "description": "Delete custom datacenters"
+    },
+    {
+      "method": "GET",
+      "path": "/api/resources/customdatacenters",
+      "description": "Get custom datacenters"
+    },
+    {
+      "method": "POST",
+      "path": "/api/resources/customdatacenters",
+      "description": "Create a custom datacenter"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/resources/customdatacenters",
+      "description": "Update a custom datacenter"
+    },
+    {
+      "method": "GET",
+      "path": "/api/resources/customdatacenters/{id}",
+      "description": "Get custom datacenter by id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/resources/groups",
+      "description": "Get all custom groups"
+    },
+    {
+      "method": "POST",
+      "path": "/api/resources/groups",
+      "description": "Create a new custom group definition"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/resources/groups",
+      "description": "Modify an existing custom group definition"
+    },
+    {
+      "method": "GET",
+      "path": "/api/resources/groups/types",
+      "description": "Get group types"
+    },
+    {
+      "method": "POST",
+      "path": "/api/resources/groups/types",
+      "description": "Add a new group type"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/resources/groups/types/{key}",
+      "description": "Delete the group type"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/resources/groups/{groupId}",
+      "description": "Delete a custom group"
+    },
+    {
+      "method": "GET",
+      "path": "/api/resources/groups/{groupId}",
+      "description": "Get custom group"
+    },
+    {
+      "method": "GET",
+      "path": "/api/resources/groups/{groupId}/members",
+      "description": "Get members of the group"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/resources/maintained",
+      "description": "Bring the specified set of Resources out of Maintenance manually"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/resources/maintained",
+      "description": "Put all the specified Resource in Maintenance"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/resources/monitoringstate/start",
+      "description": "Inform one or more or all Adapters to start monitoring a Collection of Resources. Note: Start isn't supported on per resource bases any more."
+    },
+    {
+      "method": "PUT",
+      "path": "/api/resources/monitoringstate/stop",
+      "description": "Inform one or more or all Adapters to stop monitoring a Collection of Resources. Note: Stop isn't supported on per resource bases any more."
+    },
+    {
+      "method": "GET",
+      "path": "/api/resources/profiles",
+      "description": "Get all custom profiles"
+    },
+    {
+      "method": "POST",
+      "path": "/api/resources/profiles",
+      "description": "Create a new custom profile definition"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/resources/profiles",
+      "description": "Modify an existing custom profile definition"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/resources/profiles/{profileId}",
+      "description": "Delete a custom profile"
+    },
+    {
+      "method": "GET",
+      "path": "/api/resources/profiles/{profileId}",
+      "description": "Get custom profile"
+    },
+    {
+      "method": "GET",
+      "path": "/api/resources/properties",
+      "description": "Get all the Properties and their current (latest) values for the specified Resources"
+    },
+    {
+      "method": "POST",
+      "path": "/api/resources/properties",
+      "description": "Add Properties to Resources"
+    },
+    {
+      "method": "POST",
+      "path": "/api/resources/properties/adapterkinds/{adapterKind}",
+      "description": "Add Properties to Resources Using Adapter Kind"
+    },
+    {
+      "method": "POST",
+      "path": "/api/resources/properties/latest/query",
+      "description": "Get current (latest) values of requested properties for the specified resources"
+    },
+    {
+      "method": "POST",
+      "path": "/api/resources/query",
+      "description": "Gets a listing of resources based on the query spec specified"
+    },
+    {
+      "method": "GET",
+      "path": "/api/resources/statkeys",
+      "description": "Get all the available stat keys and their details for the specified resource"
+    },
+    {
+      "method": "GET",
+      "path": "/api/resources/stats",
+      "description": "Get stats for one or more Resources using the specific query spec"
+    },
+    {
+      "method": "POST",
+      "path": "/api/resources/stats",
+      "description": "Add Stats to a Collection of Resources"
+    },
+    {
+      "method": "POST",
+      "path": "/api/resources/stats/adapterkinds/{adapterKind}",
+      "description": "Adds Stats to a Collection of Resources along with associating an adapter instance of the specified adapter kind as the source of data"
+    },
+    {
+      "method": "POST",
+      "path": "/api/resources/stats/dt/query",
+      "description": "Get Stats and Dynamic Threshold values for one or more StatKeys and for a Collection of Resources"
+    },
+    {
+      "method": "GET",
+      "path": "/api/resources/stats/latest",
+      "description": "Get Latest stats of one or more Resources using the query spec that is specified"
+    },
+    {
+      "method": "POST",
+      "path": "/api/resources/stats/latest/query",
+      "description": "Get the last \"maxSamples\" stats values for specified one or more Resources"
+    },
+    {
+      "method": "POST",
+      "path": "/api/resources/stats/query",
+      "description": "Get stats for one or more Resources using the specific query spec"
+    },
+    {
+      "method": "GET",
+      "path": "/api/resources/stats/topn",
+      "description": "Get the Top-N stats data for one or more Resources and a set of StatKeys"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/resources/{id}",
+      "description": "Delete a Resource with the given identifier"
+    },
+    {
+      "method": "GET",
+      "path": "/api/resources/{id}",
+      "description": "Get the Resource for the specified identifier"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/resources/{id}/geolocation",
+      "description": "Update the geographical location of the Resource"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/resources/{id}/maintained",
+      "description": "Bring the Resource out of Maintenance manually"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/resources/{id}/maintained",
+      "description": "Put the specific Resource in Maintenance"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/resources/{id}/monitoringstate/start",
+      "description": "Inform one or more or all Adapters to start monitoring this Resource. Note: Start isn't supported on per resource bases any more."
+    },
+    {
+      "method": "PUT",
+      "path": "/api/resources/{id}/monitoringstate/stop",
+      "description": "Inform one or more or all Adapters to stop monitoring this Resource. Note: Stop isn't supported on per resource bases any more."
+    },
+    {
+      "method": "GET",
+      "path": "/api/resources/{id}/properties",
+      "description": "Get all the properties for the specified Resource"
+    },
+    {
+      "method": "POST",
+      "path": "/api/resources/{id}/properties",
+      "description": "Add Properties to a Resource"
+    },
+    {
+      "method": "POST",
+      "path": "/api/resources/{id}/properties/adapterkinds/{adapterKind}",
+      "description": "Add Properties to a Resource along with associating an adapter instance of the specified adapter kind as the source of data"
+    },
+    {
+      "method": "GET",
+      "path": "/api/resources/{id}/relationships",
+      "description": "Get ALL the related resources of a particular Relationship Type for a Resource"
+    },
+    {
+      "method": "GET",
+      "path": "/api/resources/{id}/relationships/{relationshipType}",
+      "description": "Get the related resources of a particular Relationship Type for a Resource"
+    },
+    {
+      "method": "POST",
+      "path": "/api/resources/{id}/relationships/{relationshipType}",
+      "description": "Add relationships of given type to the resource with specified resourceId"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/resources/{id}/relationships/{relationshipType}",
+      "description": "Set (Replace) Resource as RelationshipType of a specific Resource"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/resources/{id}/relationships/{relationshipType}/{relatedId}",
+      "description": "Delete (remove) a Resource as RelationshipType of a specific Resource"
+    },
+    {
+      "method": "GET",
+      "path": "/api/resources/{id}/statkeys",
+      "description": "Get all the stat keys for the specified Resource"
+    },
+    {
+      "method": "GET",
+      "path": "/api/resources/{id}/stats",
+      "description": "Look up stats of a group of objects with the resource ids"
+    },
+    {
+      "method": "POST",
+      "path": "/api/resources/{id}/stats",
+      "description": "Add Stats to a Resource"
+    },
+    {
+      "method": "POST",
+      "path": "/api/resources/{id}/stats/adapterkinds/{adapterKind}",
+      "description": "Add Stats to a Resource along with associating an adapter instance of the specified adapter kind as the source of data"
+    },
+    {
+      "method": "GET",
+      "path": "/api/resources/{id}/stats/dt",
+      "description": "Get Stats and Dynamic Threshold values for one or more StatKeys and for a Collection of Resources"
+    },
+    {
+      "method": "GET",
+      "path": "/api/resources/{id}/stats/latest",
+      "description": "Get the latest stat for a given Resource and given a set of attributes"
+    },
+    {
+      "method": "POST",
+      "path": "/api/resources/{id}/stats/query",
+      "description": "Look up stats of a group of objects with the resource ids"
+    },
+    {
+      "method": "GET",
+      "path": "/api/resources/{id}/stats/topn",
+      "description": "Get the TopN stats for a given Resource and given a set of attributes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/salt/resources/statuses",
+      "description": "Get all resources with their respective salt status"
+    },
+    {
+      "method": "POST",
+      "path": "/api/salt/resources/{id}/enable",
+      "description": "Configuration for enabling salt for a particular resource"
+    },
+    {
+      "method": "POST",
+      "path": "/api/salt/resources/{id}/keys/rotate",
+      "description": "Rotate keys for resource"
+    },
+    {
+      "method": "GET",
+      "path": "/api/salt/resources/{id}/status",
+      "description": "Get salt status for a resource"
+    },
+    {
+      "method": "GET",
+      "path": "/api/salt/tasks/{taskId}",
+      "description": "Get task details for a task Id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/solutions",
+      "description": "Get all solutions installed in the product"
+    },
+    {
+      "method": "GET",
+      "path": "/api/solutions/{solutionId}",
+      "description": "Get solution data for the specified id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/solutions/{solutionId}/adapterkinds",
+      "description": "Get Adapter Kind details for the specified solution id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/supermetrics",
+      "description": "Get a collection of SuperMetrics based on search parameters"
+    },
+    {
+      "method": "POST",
+      "path": "/api/supermetrics",
+      "description": "Create a SuperMetric with the given name, formula and description"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/supermetrics",
+      "description": "Update a SuperMetric with the given name, formula and description"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/supermetrics/{id}",
+      "description": "Delete a SuperMetric"
+    },
+    {
+      "method": "GET",
+      "path": "/api/supermetrics/{id}",
+      "description": "Get a SuperMetric with the given id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/symptomdefinitions",
+      "description": "Get Symptom Definitions"
+    },
+    {
+      "method": "POST",
+      "path": "/api/symptomdefinitions",
+      "description": "Create the Symptom Definition"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/symptomdefinitions",
+      "description": "Update an existing Symptom Definition"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/symptomdefinitions/{id}",
+      "description": "Delete a Symptom Definition"
+    },
+    {
+      "method": "GET",
+      "path": "/api/symptomdefinitions/{id}",
+      "description": "Get Symptom Definition specified by id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/symptoms",
+      "description": "Look up all Symptoms in the system"
+    },
+    {
+      "method": "POST",
+      "path": "/api/symptoms/query",
+      "description": "Look up a set of Symptoms using a query object"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks",
+      "description": "Look up a list of task objects' statuses"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks/{id}",
+      "description": "Look up a task status with the given identifier"
+    },
+    {
+      "method": "GET",
+      "path": "/api/versions",
+      "description": "Get all supported versions by the service"
+    },
+    {
+      "method": "GET",
+      "path": "/api/versions/current",
+      "description": "Get the current version of the service"
+    },
+    {
+      "method": "GET",
+      "path": "/api/whatif/scenarios",
+      "description": "Get all saved scenarios"
+    },
+    {
+      "method": "POST",
+      "path": "/api/whatif/scenarios",
+      "description": "Save scenario"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/whatif/scenarios",
+      "description": "Update scenario"
+    },
+    {
+      "method": "POST",
+      "path": "/api/whatif/scenarios/run",
+      "description": "Run scenario"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/whatif/scenarios/{id}",
+      "description": "Delete list of saved scenarios"
+    },
+    {
+      "method": "GET",
+      "path": "/api/whatif/serverconfigs",
+      "description": "Get server configs"
+    },
+    {
+      "method": "GET",
+      "path": "/api/workflows/requests/{requestId}",
+      "description": "Get request by Id"
+    }
+  ]
+}
