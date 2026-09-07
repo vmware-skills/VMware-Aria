@@ -746,3 +746,22 @@ def test_a_real_recommendation_still_comes_through() -> None:
     assert row["sizing_status"] == "recommendation"
     assert row["recommended_cpu"] == 2.0
     assert row["recommended_diskspace"] == 40960.0, "the third key must be read"
+
+
+def test_a_size_beside_a_zero_is_reported_as_a_recommendation() -> None:
+    """Declared precedence, not an accident. Reclaimable is a VM-level state per
+    KB 379521, so a row with one dimension sized and another at zero should not
+    occur — but the code cannot know that, so what it does is pinned."""
+    from vmware_aria.ops.capacity import list_rightsizing_recommendations
+
+    client = _rightsizing_client(
+        {
+            "OnlineCapacityAnalytics|cpu|recommendedSize": 2.0,
+            "OnlineCapacityAnalytics|mem|recommendedSize": 0.0,
+        }
+    )
+    row = list_rightsizing_recommendations(client)["items"][0]
+
+    assert row["sizing_status"] == "recommendation"
+    assert row["recommended_cpu"] == 2.0
+    assert row["recommended_memory"] is None, "the zero must not surface as a size"

@@ -233,6 +233,14 @@ def list_rightsizing_recommendations(
       this: both are ``sizing_status: "none_published"``, which says the
       ambiguity out loud rather than picking a side.
 
+    Precedence, for the case where dimensions disagree: any dimension carrying a
+    size makes the row a ``recommendation``, and a zero sitting beside it is not
+    reported. KB 379521 describes reclaimable as a state of the VM rather than
+    of one dimension, so the three should move together and this should not
+    arise; it is written down because the code cannot tell that it never does.
+    ``scripts/probe_aria_rightsizing.py`` counts the three outcomes per key on a
+    real estate, which is what would show it happening.
+
     Args:
         client: Authenticated Aria Operations API client.
         resource_id: Optional VM resource UUID to scope the query.
