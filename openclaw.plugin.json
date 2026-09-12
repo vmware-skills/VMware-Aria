@@ -1,0 +1,24 @@
+{
+  "id": "vmware-aria",
+  "name": "VMware Aria",
+  "description": "VMware Aria Operations: metrics, alerts, capacity, anomaly detection — 33 MCP tools.",
+  "skills": [
+    "./skills"
+  ],
+  "mcpServers": {
+    "vmware-aria": {
+      "transport": "stdio",
+      "command": "uvx",
+      "args": [
+        "--from",
+        "vmware-aria==1.11.0",
+        "vmware-aria-mcp"
+      ]
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}
