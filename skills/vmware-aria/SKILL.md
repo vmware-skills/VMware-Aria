@@ -12,7 +12,7 @@ installer:
   package: vmware-aria
 allowed-tools:
   - Bash
-metadata: {"openclaw":{"requires":{"env":["VMWARE_ARIA_CONFIG"],"bins":["vmware-aria"],"config":["~/.vmware-aria/config.yaml","~/.vmware-aria/.env"]},"optional":{"env":["VMWARE_ARIA_<TARGET>_PASSWORD","VMWARE_ARIA_<TARGET>_USERNAME","VMWARE_AUDIT_APPROVED_BY"],"bins":["vmware-policy"]},"primaryEnv":"VMWARE_ARIA_CONFIG","homepage":"https://github.com/vmware-skills/VMware-Aria","emoji":"📊","os":["macos","linux"]}}
+metadata: {"openclaw":{"requires":{"anyBins":["vmware-aria","uvx"]},"optional":{"env":["VMWARE_ARIA_CONFIG","VMWARE_ARIA_<TARGET>_PASSWORD","VMWARE_ARIA_<TARGET>_USERNAME","VMWARE_AUDIT_APPROVED_BY"],"bins":["vmware-policy"]},"homepage":"https://github.com/vmware-skills/VMware-Aria","emoji":"📊","os":["macos","linux"]}}
 compatibility: >
   vmware-policy auto-installed as Python dependency (provides @vmware_tool decorator and audit logging). All write operations audited to ~/.vmware/audit.db.
   Credentials: Each Aria Operations target requires a per-target password env var in ~/.vmware-aria/.env following the pattern VMWARE_ARIA_<TARGET_NAME_UPPER>_PASSWORD. Passwords are never logged or echoed.
@@ -49,7 +49,7 @@ VMware Aria Operations (vRealize Operations / VCF Operations 9.1) AI-assisted mo
 ## Quick Install
 
 ```bash
-uv tool install vmware-aria
+uv tool install vmware-aria==1.11.0
 vmware-aria init      # guided setup: writes config + .env (chmod 600, password grep-safe), then verifies
 vmware-aria doctor
 ```
@@ -323,7 +323,7 @@ Variable names follow the pattern `VMWARE_ARIA_<TARGET_NAME_UPPER>_PASSWORD` whe
 
 ### `invalid peer certificate: UnknownIssuer` when running uvx (corporate TLS proxy)
 
-`uvx` re-resolves dependencies from PyPI on every launch. Behind a corporate TLS-intercepting proxy whose CA is not in uv's bundled cert store, the handshake fails. Use the v1.5.15+ recommended single-command form `vmware-aria mcp` (after `uv tool install vmware-aria` — no network on launch), or set `UV_NATIVE_TLS=true` to make uv use the system cert store.
+`uvx` re-resolves dependencies from PyPI on every launch. Behind a corporate TLS-intercepting proxy whose CA is not in uv's bundled cert store, the handshake fails. Use the v1.5.15+ recommended single-command form `vmware-aria mcp` (after `uv tool install vmware-aria==1.11.0` — no network on launch), or set `UV_NATIVE_TLS=true` to make uv use the system cert store.
 
 ## Safety
 
@@ -332,12 +332,13 @@ Variable names follow the pattern `VMWARE_ARIA_<TARGET_NAME_UPPER>_PASSWORD` whe
 - **Token expiry handling**: vRealizeOpsToken re-acquired automatically 60 seconds before expiry (6-hour sliding validity, extended on each call)
 - **Prompt injection defense**: API text values sanitized via `_sanitize()` — strips control characters, truncates to 500 chars
 - **Credential safety**: Passwords loaded only from environment variables (`.env` file), never from `config.yaml`
+- **TLS verification**: On by default (`verify_ssl: true`). For a private CA set `SSL_CERT_FILE` to its PEM rather than disabling verification; `verify_ssl: false` is for isolated labs only (see `references/setup-guide.md`)
 - **Input validation**: resource_id and alert_id validated before API calls; criticality values validated against known enum
 
 ## Setup
 
 ```bash
-uv tool install vmware-aria
+uv tool install vmware-aria==1.11.0
 mkdir -p ~/.vmware-aria
 cp config.example.yaml ~/.vmware-aria/config.yaml
 # Edit config.yaml with your Aria Operations host details

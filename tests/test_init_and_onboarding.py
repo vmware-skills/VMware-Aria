@@ -115,3 +115,21 @@ def test_tls_error_hint_suggests_verify_ssl():
 
     assert _is_tls_verify_error(Exception("certificate verify failed: self signed"))
     assert not _is_tls_verify_error(Exception("Connection refused"))
+
+
+def test_tls_error_hint_offers_trusting_the_ca_before_disabling_verification():
+    """The remedy an agent reads first is the one it applies.
+
+    The only fix this hint used to name was `verify_ssl: false`, which sends
+    the Aria password to whatever answers at that address — while the setup
+    guide tells operators to trust the CA instead. httpx honours SSL_CERT_FILE
+    (verified with a real handshake against a private CA), so that comes first
+    and disabling verification is offered only for an isolated lab.
+    """
+    from vmware_aria.connection import _transport_hint
+
+    hint = _transport_hint(Exception("certificate verify failed: self signed"))
+    assert "SSL_CERT_FILE" in hint
+    assert "verify_ssl: false" in hint
+    assert hint.index("SSL_CERT_FILE") < hint.index("verify_ssl: false")
+    assert "lab" in hint[hint.index("SSL_CERT_FILE"):]

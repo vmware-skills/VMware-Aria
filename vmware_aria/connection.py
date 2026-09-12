@@ -127,9 +127,12 @@ def _transport_hint(exc: Exception) -> str:
     the server log through ``exc_info``.
     """
     if _is_tls_verify_error(exc):
+        # Kept short on purpose: _safe_error caps delivered text at 300 chars,
+        # and the lab fallback at the end must survive the cut.
         return (
-            "The certificate could not be verified — for a self-signed lab cert "
-            "set `verify_ssl: false` for this target in "
+            "Certificate not trusted. Set SSL_CERT_FILE to a PEM bundle of the "
+            "public roots plus your CA (MCP `env` block or shell). Isolated "
+            "self-signed lab only: `verify_ssl: false` in "
             "~/.vmware-aria/config.yaml."
         )
     return (

@@ -187,7 +187,7 @@ VMs / Hosts / Clusters / Alerts / Capacity
 - Passwords loaded from env vars or `.env` file, never from `config.yaml`
 - Write operations (alert acknowledge/cancel, alert definition management, report generate/delete) audit-logged to `~/.vmware/audit.db` (MCP, via vmware-policy) and `~/.vmware-aria/audit.log` (CLI)
 - API responses sanitized (control chars stripped, 500-char limit) to prevent prompt injection
-- Supports self-signed certificates (`verify_ssl: false`) for lab environments
+- TLS verification is on by default; for a private CA set `SSL_CERT_FILE` to a bundle with your CA (see setup guide). `verify_ssl: false` is for isolated self-signed labs only
 
 #### Official Broadcom References
 

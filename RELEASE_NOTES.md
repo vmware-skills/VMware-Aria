@@ -1,3 +1,50 @@
+## v1.11.0 — trust a private CA instead of turning verification off
+
+The setup guide put `verify_ssl: false` and `curl -k` in copyable form, and told operators to
+install their CA into the system trust store — which this client does not read (httpx uses the
+certifi bundle and honours `SSL_CERT_FILE`, verified with a real handshake). The guide now leads
+with `SSL_CERT_FILE`, keeps `verify_ssl: false` for isolated labs only, and the runtime TLS error
+offers the CA first.
+
+CLI commands are now authorised and audited under their MCP tool names, so one
+deny rule scopes both surfaces. `@guarded` had defaulted to the Python function
+name, so a rule denying `delete_report` refused the agent and let
+`vmware-aria report delete` do the same delete. Audit rows for these commands
+carry the new names from this release on:
+
+| CLI command | was | now |
+|---|---|---|
+| `alert acknowledge` | `alert_acknowledge` | `acknowledge_alert` |
+| `alert cancel` | `alert_cancel` | `cancel_alert` |
+| `report generate` | `report_generate` | `generate_report` |
+| `report delete` | `report_delete` | `delete_report` |
+
+Rows written before this release keep the old names, so a query over `~/.vmware/audit.db` that
+spans the upgrade needs both. **A deny rule written against an old CLI name no longer matches** —
+rename it to the MCP tool name in the table, or the command it was meant to stop runs unchecked.
+
+**Environment-scoped deny rules now apply to CLI writes.** The skill's environment resolver was
+registered only when the MCP server was imported, which the CLI never does — so a
+`freeze-production-writes` rule stopped the MCP tool and not the CLI command doing the same
+thing. It now lives in `policy_environment.py`, imported by both surfaces. (With vmware-policy
+1.13.1 the CLI's `--config` file is the one whose labels are judged.)
+
+**OpenClaw could not show this skill to the model.** `metadata.openclaw.requires` listed
+config *file paths* under `requires.config`, which OpenClaw reads as `openclaw.json` keys that
+must be truthy — so the skill was "needs setup / not visible to the model" whatever was on disk
+(verified on OpenClaw 2026.6.35). `requires.env` named an optional override and `requires.bins`
+demanded a CLI that a plugin install (uvx) never has. `requires` is now `anyBins: [<cli>, "uvx"]`;
+the variables are still declared, under `optional.env`.
+
+**Install commands in the skill pin this release.** ClawHub reviews SKILL.md and references/,
+not the package they install, so an unpinned `uv tool install` vouched for code nobody reviewed.
+Every install command for this package in the skill now names this version.
+
+**A config path written as `~/…` now resolves.** Every MCP example config and setup-guide snippet
+sets `VMWARE_ARIA_CONFIG` to `~/.vmware-aria/config.yaml`, but MCP clients pass env values verbatim and the
+path was used unexpanded, so copying the snippet gave "Config file not found" for a file that was
+there. `~` is now expanded in the variable and in `--config`.
+
 ## v1.10.0 — a zero from the capacity engine is not a size
 
 Rightsizing rebuilt against what the official documentation and both API lines

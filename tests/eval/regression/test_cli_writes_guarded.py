@@ -185,3 +185,118 @@ def test_high_blast_radius_commands_are_derived_and_guarded():
             f"ops→command derivation stopped resolving it (did the ops scan drop "
             f"mcp_server/server.py?)"
         )
+
+
+def _scoped_refs(tree: ast.AST, node: ast.FunctionDef) -> tuple[dict[str, str], set[str]]:
+    """``_ops_refs`` as seen from inside ``node``: its own imports win.
+
+    ``_ops_refs(tree)`` walks every import in the file into one map, so two
+    function-local imports under the same alias collide — ``delete_alert_definition``
+    and ``delete_report`` both import their op ``as _delete``, and the file-wide
+    map kept only the last, making ``delete_alert_definition`` look like it calls
+    ``delete_report``. A name the function imports itself resolves to that import.
+    """
+    func_map, mods = _ops_refs(tree)
+    local_map, local_mods = _ops_refs(node)
+    return {**func_map, **local_map}, mods | local_mods
+
+
+def _op_to_mcp_tools() -> dict[str, set[str]]:
+    """Write ops function -> the MCP write tools whose body calls it.
+
+    Scans the whole ``mcp_server/`` tree for the same reason ``_write_ops`` does:
+    the confirmed-gate tools live in ``server.py``, not ``tools/``.
+    """
+    targets = _write_tool_names()
+    out: dict[str, set[str]] = {}
+    for path in sorted(TOOLS_DIR.rglob("*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef) and node.name in targets:
+                for op in _ops_calls(node, *_scoped_refs(tree, node)):
+                    out.setdefault(op, set()).add(node.name)
+    return out
+
+
+def _mcp_tool_fn(name: str):
+    """The decorated MCP tool function, wherever in ``mcp_server`` it is defined."""
+    import importlib
+
+    for path in sorted(TOOLS_DIR.rglob("*.py")):
+        rel = path.relative_to(_REPO).with_suffix("")
+        if rel.name == "__main__":
+            continue  # importing __main__ runs the server
+        mod = importlib.import_module(".".join(rel.parts).removesuffix(".__init__"))
+        fn = getattr(mod, name, None)
+        if fn is not None and hasattr(fn, "_risk_level"):
+            return fn
+    raise AssertionError(f"MCP tool {name!r} not found under {TOOLS_DIR}")
+
+
+# Guarded CLI writes whose ops function backs more than one MCP write tool —
+# listed for an explicit decision, never guessed. Guarded CLI writes with no MCP
+# twin keep their own name and are listed with a reason. The test fails if an
+# entry stops holding, so neither list can go stale.
+_AMBIGUOUS: dict[str, str] = {}
+_CLI_ONLY: dict[str, str] = {}
+
+
+def test_guarded_cli_writes_carry_their_mcp_tool_name():
+    """A deny rule names a tool; it must stop the CLI twin of that tool too (HLD I-3).
+
+    ``@guarded`` defaults the tool name to the function's ``__name__``, so
+    ``report delete`` was guarded as ``report_delete`` while its MCP twin is
+    ``delete_report`` — a rule denying ``delete_report`` refused the agent and
+    let the same delete through the CLI, and the two surfaces wrote the one audit
+    sink under two names. The twin is DERIVED: the MCP write tool that calls the
+    same ops function the command calls.
+    """
+    from vmware_aria import cli
+
+    op_tools = _op_to_mcp_tools()
+    write_ops = frozenset(op_tools)
+    checked: list[str] = []
+    mismatched: list[str] = []
+    stale: list[str] = []
+    for path in _cli_files():
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.FunctionDef):
+                continue
+            fn = getattr(cli, node.name, None)
+            if not getattr(fn, "_is_guarded", False):
+                continue  # unguarded writes are the test above's finding
+            ops = _ops_calls(node, *_scoped_refs(tree, node)) & write_ops
+            twins = set().union(*(op_tools[o] for o in ops)) if ops else set()
+            if node.name in _CLI_ONLY:
+                if twins:
+                    stale.append(f"{node.name} is listed CLI-only but maps to {sorted(twins)}")
+                continue
+            if node.name in _AMBIGUOUS:
+                if len(twins) <= 1:
+                    stale.append(f"{node.name} is listed ambiguous but maps to {sorted(twins)}")
+                continue
+            assert twins, (
+                f"{node.name} is @guarded but calls no MCP write tool's ops — list it "
+                f"in _CLI_ONLY with a reason, or the derivation is stale"
+            )
+            assert len(twins) == 1, (
+                f"{node.name} maps to several MCP tools {sorted(twins)} — list it in "
+                f"_AMBIGUOUS rather than guess"
+            )
+            (twin,) = twins
+            checked.append(node.name)
+            twin_risk = _mcp_tool_fn(twin)._risk_level
+            if fn._guarded_tool != twin:
+                mismatched.append(f"{node.name}: guarded as {fn._guarded_tool!r}, MCP tool {twin!r}")
+            elif fn._risk_level != twin_risk:
+                mismatched.append(
+                    f"{node.name}: risk {fn._risk_level!r}, MCP tool {twin!r} risk {twin_risk!r}"
+                )
+    assert not stale, "allowlist entries no longer hold: " + "; ".join(stale)
+    assert len(checked) >= 4, f"only {checked} checked — derivation likely stale"
+    assert not mismatched, (
+        "these CLI writes are guarded under a different name or risk than their "
+        "MCP tool, so one deny rule does not scope both surfaces — pass the MCP "
+        "tool name to @guarded(...): " + "; ".join(mismatched)
+    )

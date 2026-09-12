@@ -174,7 +174,7 @@ Token 为 6 小时滑动有效期（每次调用自动延长，官方规范行�
 - 密码仅从环境变量或 `.env` 文件加载，不存入 `config.yaml`
 - 写操作（告警确认/取消、告警定义管理、报表生成/删除）记录审计日志至 `~/.vmware/audit.db`（MCP，经 vmware-policy）和 `~/.vmware-aria/audit.log`（CLI）
 - API 响应经过净化处理（去除控制字符，截断至 500 字符），防止提示注入攻击
-- 支持自签名证书（`verify_ssl: false`），适用于实验环境
+- 默认开启 TLS 校验；私有 CA 请把 `SSL_CERT_FILE` 指向包含你 CA 的证书包（见 setup guide）。`verify_ssl: false` 仅用于隔离的自签名实验环境
 
 ## 许可证
 

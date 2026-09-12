@@ -18,6 +18,9 @@ from vmware_policy import PolicyDenied, guarded
 
 from vmware_aria.notify.audit import AuditLogger
 import sys
+# Registers this skill's environment resolver, so environment-scoped policy
+# rules apply to @guarded CLI writes exactly as they do to MCP tools.
+import vmware_aria.policy_environment  # noqa: F401 — imported to register the resolver; do not remove
 
 
 def _harden_console_encoding() -> None:
@@ -400,7 +403,7 @@ def alert_get(
 
 @alert_app.command("acknowledge")
 @_friendly_errors
-@guarded(risk_level='medium')
+@guarded("acknowledge_alert", risk_level="medium")
 def alert_acknowledge(
     alert_id: str,
     target: TargetOption = None,
@@ -421,7 +424,7 @@ def alert_acknowledge(
 
 @alert_app.command("cancel")
 @_friendly_errors
-@guarded(risk_level='medium')
+@guarded("cancel_alert", risk_level="medium")
 def alert_cancel(
     alert_id: str,
     target: TargetOption = None,
@@ -707,7 +710,7 @@ def report_definitions(
 
 @report_app.command("generate")
 @_friendly_errors
-@guarded(risk_level='medium')
+@guarded("generate_report", risk_level="medium")
 def report_generate(
     definition_id: str,
     resource_ids: Annotated[str | None, typer.Option("--resources", help="Comma-separated resource UUIDs")] = None,
@@ -796,7 +799,7 @@ def _confirm_destructive(resource_type: str, resource_id: str, verb: str = "dele
 
 @report_app.command("delete")
 @_friendly_errors
-@guarded(risk_level='medium')
+@guarded("delete_report", risk_level="medium")
 def report_delete(
     report_id: str,
     target: TargetOption = None,
