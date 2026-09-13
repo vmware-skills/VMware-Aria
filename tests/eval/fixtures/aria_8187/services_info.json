@@ -1,0 +1,56 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab), read-only GETs/queries",
+ "_note": "GET /deployment/node/services/info captured in the same minute as node_status_503.json",
+ "http_status": 200,
+ "body": {
+  "service": [
+   {
+    "name": "CASA",
+    "health": "OK",
+    "details": "Success, Service CASA is running and responding",
+    "uptime": 21098166,
+    "startedOn": 1789259858081
+   },
+   {
+    "name": "ADMINUI",
+    "health": "OK",
+    "details": "Success, Service ADMINUI is running and responding",
+    "uptime": 20435596,
+    "startedOn": 1789260520969
+   },
+   {
+    "name": "LOCATOR",
+    "health": "ERROR",
+    "details": "Service LOCATOR not responding"
+   },
+   {
+    "name": "API",
+    "health": "OK",
+    "details": "Success, Service API is running and responding",
+    "uptime": 20409429,
+    "startedOn": 1789260547234
+   },
+   {
+    "name": "COLLECTOR",
+    "health": "OK",
+    "details": "Success, Service COLLECTOR is running and responding",
+    "uptime": 20417468,
+    "startedOn": 1789260539158
+   },
+   {
+    "name": "UI",
+    "health": "OK",
+    "details": "Success, Service UI is running and responding",
+    "uptime": 20435703,
+    "startedOn": 1789260520969
+   },
+   {
+    "name": "ANALYTICS",
+    "health": "OK",
+    "details": "Success, Service ANALYTICS is running and responding",
+    "uptime": 20424062,
+    "startedOn": 1789260533613
+   }
+  ]
+ }
+}

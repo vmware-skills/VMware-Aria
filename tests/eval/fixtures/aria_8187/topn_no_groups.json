@@ -1,0 +1,10 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab), read-only GETs/queries",
+ "_note": "GET /resources/stats/topn with statKey=nonexistent|bogus_key over 9 VMs",
+ "http_status": 200,
+ "body": {
+  "groupBy": "RESOURCE",
+  "sortOrder": "DESCENDING",
+  "resourceStatGroups": []
+ }
+}

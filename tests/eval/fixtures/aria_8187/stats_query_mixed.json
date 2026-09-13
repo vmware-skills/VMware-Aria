@@ -1,0 +1,59 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab), read-only GETs/queries",
+ "_note": "POST /resources/{id}/stats/query for that VM: the two keys it does not have are silently absent. resourceId replaced",
+ "http_status": 200,
+ "request_statKey": [
+  "cpu|usage_average",
+  "mem|guest_demand",
+  "nonexistent|bogus_key"
+ ],
+ "body": {
+  "values": [
+   {
+    "resourceId": "11111111-2222-4333-8444-555555555555",
+    "stat-list": {
+     "stat": [
+      {
+       "timestamps": [
+        1789277519999,
+        1789277819999,
+        1789278119999,
+        1789278419999,
+        1789278719999,
+        1789279019999,
+        1789279319999,
+        1789279619999,
+        1789279919999,
+        1789280219999,
+        1789280519999,
+        1789280819999
+       ],
+       "statKey": {
+        "key": "mem|guest_demand"
+       },
+       "rollUpType": "AVG",
+       "intervalUnit": {
+        "quantifier": 5,
+        "intervalType": "MINUTES"
+       },
+       "data": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      }
+     ]
+    }
+   }
+  ]
+ }
+}

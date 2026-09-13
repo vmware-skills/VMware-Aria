@@ -13,16 +13,17 @@ from vmware_aria.mcp_server._shared import mcp
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
 @vmware_tool(risk_level="low")
 def get_aria_health(target: Optional[str] = None) -> dict:
-    """[READ] Check Aria Operations platform node status (ONLINE/OFFLINE).
+    """[READ] Check Aria Operations platform health, per service, plus its version.
 
-    Returns overall_status ("ONLINE" when all internal services run, else
-    "OFFLINE" — the endpoint itself answers 503 when offline), healthy bool,
-    system_time_ms, and details. Use this to verify Aria Operations is
-    functioning before investigating monitoring blind spots; per-service
-    breakdown is not exposed by the public API. A 503 from the platform is
-    reported as OFFLINE and never raised, so this answers even while Aria is
-    down. When status is ONLINE but data looks stale, check
-    list_collector_groups next.
+    Returns assessment: HEALTHY, DEGRADED (some services OK, some ERROR — the
+    platform still answers), DOWN (no service OK) or UNKNOWN (breakdown
+    unreadable). overall_status is the node's own flag: OFFLINE whenever any
+    one service is not running, so OFFLINE alone is not an outage. Also
+    services (name, health, details; null when unreadable), services_not_ok,
+    healthy, system_time_ms, details, and product_version / product_line
+    ("8.x", "9.x") / release_name — check the line before assuming 9.x-only
+    tools (fleet_*, findings_list, promql_query) exist. A 503 is reported,
+    never raised. If HEALTHY but data looks stale, check list_collector_groups.
 
     Args:
         target: Aria target name from config; default when omitted.

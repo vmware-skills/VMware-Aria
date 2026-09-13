@@ -1,0 +1,174 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab), read-only GETs/queries",
+ "_note": "GET /resources/{id}/statkeys for a powered VM with no cpu|usage_average key (55 keys)",
+ "http_status": 200,
+ "body": {
+  "stat-key": [
+   {
+    "key": "badge|workload"
+   },
+   {
+    "key": "mem|host_demand"
+   },
+   {
+    "key": "System Attributes|health"
+   },
+   {
+    "key": "System Attributes|all_metrics"
+   },
+   {
+    "key": "System Attributes|child_all_metrics"
+   },
+   {
+    "key": "mem|effective_limit"
+   },
+   {
+    "key": "mem|guest_demand"
+   },
+   {
+    "key": "System Attributes|total_alarms"
+   },
+   {
+    "key": "mem|guest_provisioned"
+   },
+   {
+    "key": "System Attributes|availability"
+   },
+   {
+    "key": "System Attributes|alert_count_critical"
+   },
+   {
+    "key": "System Attributes|alert_count_immediate"
+   },
+   {
+    "key": "net|received_average"
+   },
+   {
+    "key": "System Attributes|alert_count_warning"
+   },
+   {
+    "key": "net|transmitted_average"
+   },
+   {
+    "key": "System Attributes|alert_count_info"
+   },
+   {
+    "key": "System Attributes|total_alert_count"
+   },
+   {
+    "key": "System Attributes|self_alert_count"
+   },
+   {
+    "key": "net|20_sec_peak_usage_average"
+   },
+   {
+    "key": "summary|availability_kpi"
+   },
+   {
+    "key": "summary|running"
+   },
+   {
+    "key": "guestfilesystem|usage_total"
+   },
+   {
+    "key": "mem|vmMemoryDemand"
+   },
+   {
+    "key": "config|hardware|disk_Space"
+   },
+   {
+    "key": "vmop|vmotion|total_successes"
+   },
+   {
+    "key": "config|hardware|num_Cpu"
+   },
+   {
+    "key": "cpu|effective_limit"
+   },
+   {
+    "key": "badge|efficiency"
+   },
+   {
+    "key": "badge|risk"
+   },
+   {
+    "key": "badge|health"
+   },
+   {
+    "key": "badge|compliance"
+   },
+   {
+    "key": "vmop|vmotion|total_failures"
+   },
+   {
+    "key": "net|usage_average"
+   },
+   {
+    "key": "diskspace|activeNotShared"
+   },
+   {
+    "key": "diskspace|notshared"
+   },
+   {
+    "key": "diskspace|provisionedSpace"
+   },
+   {
+    "key": "diskspace|snapshot|used"
+   },
+   {
+    "key": "diskspace:61|perDsUsed"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|timeRemaining"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|capacityRemainingPercentage"
+   },
+   {
+    "key": "guest|tools_running_status"
+   },
+   {
+    "key": "mem|workload"
+   },
+   {
+    "key": "mem-host|workload"
+   },
+   {
+    "key": "diskspace-total|workload"
+   },
+   {
+    "key": "datastore|demand_oio"
+   },
+   {
+    "key": "datastore|numberReadAveraged_average"
+   },
+   {
+    "key": "datastore|numberWriteAveraged_average"
+   },
+   {
+    "key": "datastore|read_average"
+   },
+   {
+    "key": "datastore|write_average"
+   },
+   {
+    "key": "cpu|demandmhz"
+   },
+   {
+    "key": "diskspace|snapshot"
+   },
+   {
+    "key": "diskspace|used"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|mem|timeRemaining"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|mem|recommendedSize"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|mem|capacityRemaining"
+   }
+  ]
+ }
+}

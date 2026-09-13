@@ -1,0 +1,10 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab), read-only GETs/queries",
+ "_note": "GET /deployment/node/status while every service but LOCATOR reported OK; persisted 3h+",
+ "http_status": 503,
+ "body": {
+  "status": "OFFLINE",
+  "systemTime": 1789280956353,
+  "humanlyReadableSystemTime": "13-09-2026 06:29:16 UTC"
+ }
+}
