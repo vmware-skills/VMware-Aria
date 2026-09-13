@@ -297,7 +297,7 @@ vmware-aria doctor [--skip-auth]
 | Disk Latency | `virtualDisk\|peak_vDisk_readLatency`, `virtualDisk\|peak_vDisk_writeLatency` | ms | Highest across the VM's virtual disks |
 | Network | `net\|received_average`, `net\|transmitted_average` | KBps | Receive / transmit rate |
 
-These are VirtualMachine keys and units as Aria Operations 8.18.7 defines them; other kinds differ (a host's `cpu|ready_summation` is ms). A key the resource does not report comes back under `missing` with `similar_keys`.
+VirtualMachine keys and units as defined on Aria Operations 8.18.7; other resource kinds use different keys. Unreported keys come back under `missing`.
 
 > Full CLI reference with all options and output formats: see `references/cli-reference.md`
 
