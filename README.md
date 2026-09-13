@@ -95,17 +95,17 @@ vmware-aria alert list --criticality CRITICAL
 # Acknowledge an alert
 vmware-aria alert acknowledge <alert-id>
 
-# Fetch 4-hour CPU + memory metrics for a VM
+# Fetch 4-hour CPU + memory metrics for a VM ("missing" says why a key has no points)
 vmware-aria resource metrics <vm-id> --metrics cpu|usage_average,mem|usage_average --hours 4
 
 # Check cluster capacity
 vmware-aria capacity remaining <cluster-id>
 vmware-aria capacity time-remaining <cluster-id>
 
-# Find rightsizing opportunities
+# Find rightsizing opportunities (vCPU / memory now → recommended, direction, actionable)
 vmware-aria capacity rightsizing
 
-# Check Aria platform health
+# Check Aria platform health: HEALTHY / DEGRADED / DOWN / UNKNOWN, per service, plus version
 vmware-aria health status
 vmware-aria health collectors
 ```

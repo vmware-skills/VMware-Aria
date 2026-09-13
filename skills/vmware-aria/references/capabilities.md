@@ -24,13 +24,13 @@ Each operation is classified by autonomy level per the Enterprise Harness Engine
 - **List any resource type**: VirtualMachine, HostSystem, ClusterComputeResource, Datastore, Datacenter, ResourcePool
 - **Filter by name**: substring match across any resource list
 - **Get resource details**: health, risk, and efficiency badges plus all identifiers
-- **Fetch metric time series**: any metric key with configurable time window and rollup (AVG/MAX/MIN)
-- **Find top consumers**: rank VMs or hosts by CPU, memory, disk, or network usage
+- **Fetch metric time series**: any metric key with configurable time window and rollup (AVG/MAX/MIN). Keys with no points are listed under `missing` with a reason (`not_collected_for_resource` with `similar_keys`, `no_data_in_window`, `resource_reports_no_stat_keys`, `undetermined`) instead of silently vanishing
+- **Find top consumers**: rank VMs or hosts by CPU, memory, disk, or network usage. Resources with no data for the key are left out, not ranked at zero; `hint` says when that shortened the list
 
 ### Alert Management
 
-- **List active or all alerts**: filter by criticality (INFORMATION/WARNING/IMMEDIATE/CRITICAL) or resource. Alerts carry the resource ID only (the Alert model has no resource name) — resolve names via `get_resource`
-- **Inspect alert details**: contributing (triggered) symptoms from the dedicated contributingsymptoms endpoint, plus timeline. Recommendations are attached to the alert definition, not the alert
+- **List active or all alerts**: filter by criticality (INFORMATION/WARNING/IMMEDIATE/CRITICAL) or resource. The Alert model has no resource name, so each row's `resource_name` and `resource_kind` are resolved in one batched `/resources` lookup per page; `null` means unknown, and `resource_names_note` says how many failed or were not found
+- **Inspect alert details**: contributing (triggered) symptoms from the dedicated contributingsymptoms endpoint, plus timeline. A symptom that carries no name or severity (every symptom on Aria Operations 8.18.7) takes both from its symptom definition, fetched in one batched `/symptomdefinitions` lookup; `definition_lookup` and `symptom_definitions_note` say when that did not work. Recommendations are attached to the alert definition, not the alert
 - **Investigate an alert end-to-end**: `investigate_alert` resolves an alert to its affected resource in one call — fetches the alert, reads `resourceId`, fetches that resource, confirms name and kind, and returns both UUIDs *explicitly labelled* plus a ready-to-use handoff naming the exact vmware-monitor tool and argument. Use it instead of chaining `get_alert` → `get_resource` by hand: the two UUIDs are different objects and a small model will otherwise swap them. An unresolvable resource degrades to a warning plus explicit nulls rather than losing the alert
 - **Acknowledge alerts**: mark as seen without closing (control state → ACKNOWLEDGED)
 - **Cancel alerts**: permanently dismiss (status → CANCELLED)
@@ -41,7 +41,7 @@ Each operation is classified by autonomy level per the Enterprise Harness Engine
 - **Cluster capacity overview**: group-level remaining-capacity percentage plus per-dimension (cpu/mem/diskspace) headroom and days-until-full (the percentage metric only exists at group level)
 - **Remaining capacity**: how much more CPU, memory, disk can be added before hitting limits
 - **Time remaining**: predicted days until each capacity dimension is exhausted (based on trend)
-- **Rightsizing recommendations**: identify over-provisioned VMs (reclaim resources) and under-provisioned VMs (prevent degradation)
+- **Rightsizing recommendations**: identify over-provisioned VMs (reclaim resources) and under-provisioned VMs (prevent degradation). Raw recommendations are MHz / KB / GB (`recommended_units`); `recommended_vcpus` converts CPU with the VM's own MHz per vCPU. `cpu_direction` / `memory_direction` compare against the current configuration (memory within 1% is `right_sized`). Powered-off VMs and templates are listed but never `actionable`, and `caveats` flag engine disagreement and vendor minimum sizes before any reduction
 
 ### Anomaly Detection
 
@@ -50,7 +50,7 @@ Each operation is classified by autonomy level per the Enterprise Harness Engine
 
 ### Platform Health
 
-- **Aria health check**: node status (ONLINE / OFFLINE) — a per-service breakdown is not exposed by the public API
+- **Aria health check**: `assessment` HEALTHY / DEGRADED / DOWN / UNKNOWN from the node status plus the per-service breakdown, and the product version and line (8.x / 9.x). The node reports OFFLINE whenever any one service is not running, so OFFLINE with some services OK is DEGRADED, not down
 - **Collector group status**: list collector groups (member IDs) enriched with each collector's name, UP/DOWN state, and local flag
 
 ---
@@ -79,9 +79,11 @@ All requests carry `Authorization: vRealizeOpsToken <token>`.
 |----------|---------|
 | `POST /suite-api/api/auth/token/acquire` | Token authentication |
 | `POST /suite-api/api/auth/token/release` | Token release on close (no body; token identified by the Authorization header) |
-| `GET /suite-api/api/resources` | list_resources (also candidate listing for topn / anomaly / rightsizing scans) |
+| `GET /suite-api/api/resources` | list_resources (also candidate listing for topn / anomaly / rightsizing scans); list_alerts resource names (`resourceId` repeated, 100 per request) |
 | `GET /suite-api/api/resources/{id}` | get_resource, get_resource_health, get_resource_riskbadge (badges come from the `badges[]` array — there are no `/badge/*` endpoints), investigate_alert (resource-side leg) |
 | `POST /suite-api/api/resources/{id}/stats/query` | get_resource_metrics |
+| `GET /suite-api/api/resources/{id}/statkeys` | get_resource_metrics (only when a requested key returned no points, to explain why) |
+| `POST /suite-api/api/resources/properties/latest/query` | list_rightsizing_recommendations (current vCPUs, memory, CPU speed, power state, template flag, product name) |
 | `GET /suite-api/api/resources/stats/topn` | get_top_consumers (resourceId list capped at 100) |
 | `GET /suite-api/api/resources/{id}/stats/latest` | capacity tools (OnlineCapacityAnalytics keys), list_anomalies (`System Attributes\|total_alarms`) |
 | `POST /suite-api/api/alerts/query` | list_alerts (server-side status/criticality/resource filtering) |
@@ -93,12 +95,14 @@ All requests carry `Authorization: vRealizeOpsToken <token>`.
 | `POST /suite-api/api/alertdefinitions` | create_alert_definition |
 | `PUT /suite-api/api/alertdefinitions/{id}/enable` (or `/disable`) | set_alert_definition_state |
 | `DELETE /suite-api/api/alertdefinitions/{id}` | delete_alert_definition |
-| `GET /suite-api/api/symptomdefinitions` | list_symptom_definitions (filter param is `resourceKind`) |
+| `GET /suite-api/api/symptomdefinitions` | list_symptom_definitions (filter param is `resourceKind`); get_alert / investigate_alert symptom names and severities (`id` repeated, 50 per request) |
 | `GET /suite-api/api/reportdefinitions` | list_report_definitions (`subject` is an array of resource-kind strings) |
 | `POST /suite-api/api/reports` | generate_report (requires at least one resource UUID) |
 | `GET /suite-api/api/reports` / `GET /suite-api/api/reports/{id}` | list_reports / get_report (timestamp field is `completionTime`; definition filter and limit applied client-side) |
 | `DELETE /suite-api/api/reports/{id}` | delete_report |
-| `GET /suite-api/api/deployment/node/status` | get_aria_health, is_alive |
+| `GET /suite-api/api/deployment/node/status` | get_aria_health (a 503 is read as a status, not an error), is_alive |
+| `GET /suite-api/api/deployment/node/services/info` | get_aria_health, doctor (per-service health) |
+| `GET /suite-api/api/versions/current` | get_aria_health, doctor "Aria version" row, and the version shown when a 9.0+ tool (fleet_*, findings_list, promql_query) is called on an older appliance |
 | `GET /suite-api/api/collectorgroups` + `GET /suite-api/api/collectors` | list_collector_groups (groups carry member IDs; details enriched from /collectors) |
 
 ---

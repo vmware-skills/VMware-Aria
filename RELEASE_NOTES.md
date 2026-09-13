@@ -1,3 +1,71 @@
+## Unreleased
+
+Fixes from a run against a live Aria Operations 8.18.7, where several outputs were empty, unnamed
+or misleading.
+
+**Breaking: `get_resource_metrics` returns an object, not a bare dict of metrics.** On 8.18.7 a
+key that is not collected and a key with no points in the window both came back as simply absent,
+so an agent could not tell a wrong key from a quiet resource, and could report either as zero.
+The ops function, the MCP tool and the CLI `resource metrics` (which prints it as-is) change shape:
+
+```jsonc
+// before
+{"cpu|usage_average": [{"timestamp_ms": 1757700300000, "value": 3.2}]}
+
+// after
+{
+  "resource_id": "<uuid>",
+  "window_begin_ms": 1757700000000,
+  "window_end_ms": 1757703600000,
+  "metrics": {"cpu|usage_average": [{"timestamp_ms": 1757700300000, "value": 3.2}]},
+  "missing": [{"metric_key": "mem|usage_avg", "reason": "not_collected_for_resource",
+               "detail": "...", "similar_keys": ["mem|usage_average"]}],
+  "stat_keys_on_resource": 170
+}
+```
+
+`reason` is `not_collected_for_resource`, `no_data_in_window`, `resource_reports_no_stat_keys` or
+`undetermined`. Code that read `result["<metric key>"]` must read `result["metrics"]["<metric key>"]`.
+
+- **Alerts named no resource.** Every `list_alerts` row was a bare UUID. Rows now carry
+  `resource_name` and `resource_kind` from one batched `/resources` lookup per page, and the result
+  carries `resource_names_note` when some could not be resolved (`null` name = unknown).
+- **Alert symptoms had no name or severity.** 8.18.7 symptom instances carry only ids, so all eight
+  symptoms on four live alerts were blank. Each symptom now takes its name and severity from
+  `/symptomdefinitions` (one batched lookup), with `definition_lookup` per symptom and
+  `symptom_definitions_note` when some did not resolve.
+- **Rightsizing numbers had no unit.** The CPU recommendation is MHz, not vCPUs; memory is KB; disk
+  is GB (verified on 8.18.7). Rows now carry `recommended_units`, `current_vcpus`,
+  `cpu_mhz_per_vcpu`, `recommended_vcpus`, `current_memory_kb`, `cpu_direction` and
+  `memory_direction` (`oversized` / `undersized` / `right_sized` / `null`).
+- **Rightsizing called drift a resize.** A +3 MB memory recommendation on an 8 GiB VM read as
+  undersized. Memory within 1% (`MEMORY_DIRECTION_TOLERANCE`) is now `right_sized`, and CPU MHz
+  within 0.01 of a whole core rounds to that core.
+- **Rightsizing listed powered-off VMs and templates as if running.** Rows now carry `power_state`,
+  `is_template`, `product_name`, `aria_verdict`, `actionable` (never true for a powered-off VM or a
+  template) and `caveats` — including when `recommendedSize` disagrees with the engine's own
+  `summary|oversized|*` / `summary|undersized|*` (seen live: 2 → 1 vCPU recommended while
+  `summary|oversized|vcpus` was 0), and a reminder to check vendor minimum sizes before reducing,
+  since appliances cannot be identified reliably from the API.
+- **`health status` called a working platform OFFLINE.** The node reported OFFLINE (HTTP 503) with
+  only `LOCATOR` not OK while data kept flowing. The health tool and CLI now add `assessment`
+  (HEALTHY / DEGRADED / DOWN / UNKNOWN), `services`, `services_not_ok`, `services_unrecognized`,
+  `services_error`, and `product_version`, `product_line`, `release_name`, `build_number`,
+  `version_error`. That node now reads DEGRADED.
+- **`doctor` could not show the version and sent you back to `doctor`.** It read a `nodeType` field
+  NodeStatus does not have, and failed whenever the node was not fully ONLINE. It now has an
+  "Aria version" row from `/versions/current` (e.g. "VMware Aria Operations 8.18.7 (8.x line, build
+  25423534)"), the "Aria platform" row is WARN when degraded, and its error details no longer say
+  "run 'vmware-aria doctor'".
+- **9.0+ tools on 8.x said the version could not be read.** `product_version()` returned the whole
+  release name, which the version check could not parse. It now returns the dotted version, so when
+  the fleet tools, `findings_list` or `promql_query` get a 404 on 8.x they say the capability requires
+  VCF Operations 9.0 or newer and name the version the appliance reports (e.g. 8.18.7).
+- **`AriaApiError` gains `body` and `diagnosis`**: the parsed JSON error body (the health check reads
+  the 503 body), and the message without the "run the doctor" step.
+- **`get_top_consumers` ranked silence.** Resources with no data for the key are left out rather
+  than ranked at zero, and `hint` says when that shortened the list.
+
 ## v1.11.0 — trust a private CA instead of turning verification off
 
 The setup guide put `verify_ssl: false` and `curl -k` in copyable form, and told operators to

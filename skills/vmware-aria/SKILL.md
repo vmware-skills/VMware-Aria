@@ -178,11 +178,11 @@ All MCP tools accept an optional `target` parameter to select which Aria Operati
 |----------|------|:----:|-------------|
 | Resource | `list_resources` | Read | List VMs, hosts, clusters by resource kind |
 | | `get_resource` | Read | Get resource details with health, risk, efficiency badges |
-| | `get_resource_metrics` | Read | Fetch time-series metric stats for any resource |
+| | `get_resource_metrics` | Read | Fetch time-series metric stats; `missing` says why a key has no points |
 | | `get_resource_health` | Read | Get health badge score (0–100) |
 | | `get_top_consumers` | Read | Rank resources by CPU, memory, disk, or network usage |
-| Alerts | `list_alerts` | Read | List active alerts with criticality and resource ID (resolve names via `get_resource`) |
-| | `get_alert` | Read | Get alert details with contributing symptoms (recommendations live on the alert definition) |
+| Alerts | `list_alerts` | Read | List active alerts with criticality, resource ID, name and kind (`resource_name: null` = unknown, see `resource_names_note`) |
+| | `get_alert` | Read | Get alert details with contributing symptoms, named from their symptom definitions (recommendations live on the alert definition) |
 | | `investigate_alert` | Read | Resolve an alert to its confirmed affected resource in one call — returns both UUIDs explicitly labelled plus the vmware-monitor handoff |
 | | `acknowledge_alert` | **Write** | Mark an alert as acknowledged (does not close it) |
 | | `cancel_alert` | **Write** | Cancel (dismiss) an active alert |
@@ -194,7 +194,7 @@ All MCP tools accept an optional `target` parameter to select which Aria Operati
 | Capacity | `get_capacity_overview` | Read | Group-level remaining % + per-dimension headroom and days-until-full |
 | | `get_remaining_capacity` | Read | Remaining CPU, memory, disk before hitting limits |
 | | `get_time_remaining` | Read | Days until cluster capacity is exhausted |
-| | `list_rightsizing_recommendations` | Read | VMs to resize: over/under-provisioned |
+| | `list_rightsizing_recommendations` | Read | Per-VM recommended size (raw MHz/KB/GB; use `recommended_vcpus`), direction, power state, `actionable`, `caveats` |
 | Reports | `list_report_definitions` | Read | List available report definition templates |
 | | `generate_report` | **Write** | Trigger report generation (async; returns report_id) |
 | | `list_reports` | Read | List generated reports, optionally by definition |
@@ -202,7 +202,7 @@ All MCP tools accept an optional `target` parameter to select which Aria Operati
 | | `delete_report` | **Write** | Delete a generated report |
 | Anomaly | `list_anomalies` | Read | Per-resource anomaly counts (System Attributes\|total_alarms metric) |
 | | `get_resource_riskbadge` | Read | Risk score (0–100): likelihood of future problems |
-| Health | `get_aria_health` | Read | Aria platform node status (ONLINE/OFFLINE) |
+| Health | `get_aria_health` | Read | Platform `assessment` (HEALTHY/DEGRADED/DOWN/UNKNOWN), per-service health, product version |
 | | `list_collector_groups` | Read | Collector agents status and connectivity |
 | Fleet / PromQL (VCF Ops 9.1) | `fleet_certificate_list` | Read | Certificate status/expiry across the VCF fleet |
 | | `fleet_password_account_list` | Read | Managed password-account status (read-only; does not rotate) |
@@ -315,7 +315,11 @@ The collector agent may be offline. Check `list_collector_groups` for any collec
 
 ### Metrics return empty data
 
-The resource may not have metric collection configured, or the requested metric key is incorrect. Verify metric keys against the resource's available metrics in the Aria Ops UI (Metrics tab on the resource detail page).
+Read `missing[].reason`: `not_collected_for_resource` (wrong key for this resource — try `similar_keys`), `no_data_in_window` (widen `--hours`, check collectors), `resource_reports_no_stat_keys`, or `undetermined`. Never report a missing key as zero.
+
+### `health status` says OFFLINE (HTTP 503) but data still flows
+
+The node flag is OFFLINE whenever any one service is not running. Read `assessment`: DEGRADED means some services are OK and others are not — not an outage. Seen on Aria Operations 8.18.7 with only `LOCATOR` not OK; `services_not_ok` names the failed ones.
 
 ### "Password not found" error
 

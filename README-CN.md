@@ -88,17 +88,17 @@ vmware-aria alert list --criticality CRITICAL
 # 确认告警
 vmware-aria alert acknowledge <alert-id>
 
-# 查询虚拟机 CPU 和内存指标（最近 4 小时）
+# 查询虚拟机 CPU 和内存指标（最近 4 小时；"missing" 说明某个指标为何没有数据点）
 vmware-aria resource metrics <vm-id> --metrics cpu|usage_average,mem|usage_average --hours 4
 
 # 集群容量规划
 vmware-aria capacity remaining <cluster-id>
 vmware-aria capacity time-remaining <cluster-id>
 
-# 查找虚拟机资源调整建议
+# 查找虚拟机资源调整建议（vCPU / 内存 当前 → 建议、调整方向、是否可执行）
 vmware-aria capacity rightsizing
 
-# Aria 平台自身健康检查
+# Aria 平台自身健康检查：HEALTHY / DEGRADED / DOWN / UNKNOWN、逐服务状态、产品版本
 vmware-aria health status
 ```
 

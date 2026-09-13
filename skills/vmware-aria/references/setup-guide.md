@@ -299,4 +299,4 @@ into the system trust store has no effect: the client uses the `certifi` bundle.
 
 ### Metrics return empty list
 
-The metric key may not apply to this resource kind, or collection has not started yet. Browse available metric keys in the Aria Ops UI: navigate to the resource → Metrics tab.
+The metric key may not apply to this resource kind, or collection has not started yet. The `missing` list in the output says which: `not_collected_for_resource` (try one of its `similar_keys`), `no_data_in_window`, `resource_reports_no_stat_keys`, or `undetermined`. You can also browse available metric keys in the Aria Ops UI: navigate to the resource → Metrics tab.
