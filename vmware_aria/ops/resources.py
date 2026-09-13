@@ -571,7 +571,10 @@ def get_top_consumers(
 
     Returns:
         Result envelope with dicts under ``items`` carrying resource id, name,
-        and latest metric value, sorted descending. A ranking is a top-N slice
+        ``value`` — the average of the window's points, which is what Aria ranks
+        by (last hour, 5-minute AVG rollup; live 8.18.7 orders by it, not by the
+        last point) — and ``latest_value``, the most recent point. Items keep
+        Aria's order, descending by ``value``. A ranking is a top-N slice
         of an unbounded set, so ``total`` is None and a full page is flagged
         truncated.
     """
@@ -628,14 +631,12 @@ def get_top_consumers(
     excluded = 0
     for group in groups:
         rid = group.get("groupKey", "")
-        latest_value = None
+        points: list[float] = []
         # Each resourceStats[] element is {resourceId, stat: {statKey,
         # timestamps, data}} — the data array nests under `stat`.
         for entry in group.get("resourceStats", []):
-            points = entry.get("stat", {}).get("data", [])
-            if points:
-                latest_value = points[-1]
-        if latest_value is None:
+            points.extend(entry.get("stat", {}).get("data", []) or [])
+        if not points:
             # Listed with no points: not a zero, so not a rank.
             excluded += 1
             continue
@@ -644,7 +645,10 @@ def get_top_consumers(
                 "id": sanitize(rid),
                 "name": names.get(rid, ""),
                 "metric_key": metric_key,
-                "value": latest_value,
+                # The ranking is by the window average; reporting the last point
+                # as the value made a correct ranking read as unsorted.
+                "value": sum(points) / len(points),
+                "latest_value": points[-1],
             }
         )
     envelope = {**paginated(results, limit=top_n), "excluded_no_data": excluded}

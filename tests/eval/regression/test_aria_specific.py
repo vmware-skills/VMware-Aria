@@ -101,7 +101,7 @@ def test_top_consumers_uses_get_stats_topn() -> None:
     assert topn_call.kwargs["params"]["resourceId"] == ["vm-1"]
     assert "intervalQuantifier" in topn_call.kwargs["params"]
     client.post.assert_not_called()
-    assert results[0] == {"id": "vm-1", "name": "web-01", "metric_key": "cpu|usage_average", "value": 42.0}
+    assert results[0] == {"id": "vm-1", "name": "web-01", "metric_key": "cpu|usage_average", "value": 42.0, "latest_value": 42.0}
 
 
 # ── #5: alert filtering must go through POST /alerts/query ─────────────

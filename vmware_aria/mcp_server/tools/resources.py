@@ -149,7 +149,9 @@ def get_top_consumers(
     before calling this the complete set. Resources with no data for the key
     are left out, not ranked at zero; excluded_no_data counts the ones the
     ranking API listed with no points, and hint says how many were left out
-    when that shortened the list.
+    when that shortened the list. Each item's value is the average over the
+    last hour (the number Aria ranks by) and latest_value the most recent
+    point; items are descending by value.
 
     Args:
         metric_key: Metric to rank by, e.g. cpu|usage_average,

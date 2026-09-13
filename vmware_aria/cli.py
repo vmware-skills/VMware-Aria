@@ -549,7 +549,8 @@ def capacity_rightsizing(
     from vmware_aria.ops.capacity import list_rightsizing_recommendations
 
     client, _ = _get_connection(target, config)
-    items = list_rightsizing_recommendations(client, resource_id=resource_id, limit=limit)["items"]
+    result = list_rightsizing_recommendations(client, resource_id=resource_id, limit=limit)
+    items = result["items"]
 
     table = Table(title="Rightsizing (OnlineCapacityAnalytics recommendedSize)", show_lines=False)
     table.add_column("VM Name", style="bold")
@@ -612,6 +613,9 @@ def capacity_rightsizing(
     for r in items:
         for caveat in r.get("caveats") or []:
             console.print(f"[dim]• {(r['name'] or r['id'])[:40]}: {caveat}[/]")
+    if result.get("properties_note"):
+        # Without it a failed property read shows only per-row caveats, never why.
+        console.print(f"[yellow]{result['properties_note']}[/]")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
