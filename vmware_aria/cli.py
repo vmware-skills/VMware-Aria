@@ -75,7 +75,7 @@ def _print_next_page(result: dict) -> None:
 
 # ─── Sub-command groups ──────────────────────────────────────────────────────
 
-resource_app = typer.Typer(help="Resource queries: list, get, metrics, health, top consumers.")
+resource_app = typer.Typer(help="Resource queries: list, get, metrics, health, top, keys, properties, relationships.")
 alert_app = typer.Typer(help="Alert management: list, get, acknowledge, cancel, definitions.")
 capacity_app = typer.Typer(help="Capacity planning: overview, remaining, time-remaining, rightsizing.")
 anomaly_app = typer.Typer(help="Anomaly detection: list anomalies, risk badge.")
@@ -1007,3 +1007,7 @@ def fleet_promql(
     client, _ = _get_connection(target, config)
     result = run_promql_query(client, query=query, time=at_time, source_id=source_id, limit=limit)
     _json_output(result)
+
+
+# resource keys / properties / relationships live in cli_catalog.py (registered on import).
+import vmware_aria.cli_catalog  # noqa: E402,F401

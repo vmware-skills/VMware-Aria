@@ -1,0 +1,549 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab), read-only GETs/queries",
+ "_note": "GET /resources/{id}/statkeys for VM test-llm f654322a-50c3-4a9a-937c-2d4bae8a2b36 after the appliance restart (180 keys; 34 are instanced, e.g. guestfilesystem:/boot|usage, and join to the kind definition only with the instance stripped).",
+ "http_status": 200,
+ "body": {
+  "stat-key": [
+   {
+    "key": "mem|host_demand"
+   },
+   {
+    "key": "System Attributes|health"
+   },
+   {
+    "key": "System Attributes|all_metrics"
+   },
+   {
+    "key": "net:Aggregate of all instances|droppedPct"
+   },
+   {
+    "key": "System Attributes|child_all_metrics"
+   },
+   {
+    "key": "net:Aggregate of all instances|packetsTxPerSec"
+   },
+   {
+    "key": "mem|host_contentionPct"
+   },
+   {
+    "key": "power|energy_summation_sum"
+   },
+   {
+    "key": "System Attributes|total_alarms"
+   },
+   {
+    "key": "rescpu|actav1_latest"
+   },
+   {
+    "key": "System Attributes|availability"
+   },
+   {
+    "key": "System Attributes|alert_count_critical"
+   },
+   {
+    "key": "mem|overhead_average"
+   },
+   {
+    "key": "System Attributes|alert_count_immediate"
+   },
+   {
+    "key": "net|received_average"
+   },
+   {
+    "key": "System Attributes|alert_count_warning"
+   },
+   {
+    "key": "net|transmitted_average"
+   },
+   {
+    "key": "System Attributes|alert_count_info"
+   },
+   {
+    "key": "storage|totalReadLatency_average"
+   },
+   {
+    "key": "System Attributes|total_alert_count"
+   },
+   {
+    "key": "storage|totalWriteLatency_average"
+   },
+   {
+    "key": "System Attributes|self_alert_count"
+   },
+   {
+    "key": "guestfilesystem|usage_total"
+   },
+   {
+    "key": "sys|poweredOn"
+   },
+   {
+    "key": "disk|usage_average"
+   },
+   {
+    "key": "mem|vmMemoryDemand"
+   },
+   {
+    "key": "config|hardware|disk_Space"
+   },
+   {
+    "key": "vmop|vmotion|total_successes"
+   },
+   {
+    "key": "config|hardware|num_Cpu"
+   },
+   {
+    "key": "cpu|20_sec_peak_costopPct"
+   },
+   {
+    "key": "cpu|20_sec_peak_iowaitPct"
+   },
+   {
+    "key": "cpu|20_sec_peak_overlap"
+   },
+   {
+    "key": "cpu|20_sec_peak_readyPct"
+   },
+   {
+    "key": "cpu|costopPct"
+   },
+   {
+    "key": "cpu|effective_limit"
+   },
+   {
+    "key": "badge|efficiency"
+   },
+   {
+    "key": "cpu|iowaitPct"
+   },
+   {
+    "key": "badge|risk"
+   },
+   {
+    "key": "cpu|net_run"
+   },
+   {
+    "key": "badge|health"
+   },
+   {
+    "key": "cpu|peak_vcpu_ready"
+   },
+   {
+    "key": "badge|compliance"
+   },
+   {
+    "key": "cpu|peak_vcpu_usage"
+   },
+   {
+    "key": "cpu|readyPct"
+   },
+   {
+    "key": "cpu|run_summation"
+   },
+   {
+    "key": "cpu|swapwaitPct"
+   },
+   {
+    "key": "cpu|vcpu_usage_disparity"
+   },
+   {
+    "key": "diskspace|activeNotShared"
+   },
+   {
+    "key": "diskspace|notshared"
+   },
+   {
+    "key": "diskspace|provisionedSpace"
+   },
+   {
+    "key": "diskspace|snapshot|used"
+   },
+   {
+    "key": "diskspace:61|perDsUsed"
+   },
+   {
+    "key": "guest|20_sec_peak_contextSwapRate_latest"
+   },
+   {
+    "key": "guest|20_sec_peak_cpu_queue"
+   },
+   {
+    "key": "guest|20_sec_peak_disk_queue"
+   },
+   {
+    "key": "guest|20_sec_peak_page.outRate_latest"
+   },
+   {
+    "key": "guest|contextSwapRate_latest"
+   },
+   {
+    "key": "guest|cpu_queue"
+   },
+   {
+    "key": "guest|disk_queue"
+   },
+   {
+    "key": "guest|mem.free_latest"
+   },
+   {
+    "key": "cpu|workload"
+   },
+   {
+    "key": "guest|mem.needed_latest"
+   },
+   {
+    "key": "guest|mem.physUsable_latest"
+   },
+   {
+    "key": "guest|page.inRate_latest"
+   },
+   {
+    "key": "guest|page.outRate_latest"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|timeRemaining"
+   },
+   {
+    "key": "guest|page.size_latest"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|capacityRemainingPercentage"
+   },
+   {
+    "key": "guest|swap.spaceRemaining_latest"
+   },
+   {
+    "key": "guest|tools_running_status"
+   },
+   {
+    "key": "mem|workload"
+   },
+   {
+    "key": "guest|used_memory"
+   },
+   {
+    "key": "guestfilesystem|capacity_total"
+   },
+   {
+    "key": "mem-host|workload"
+   },
+   {
+    "key": "guestfilesystem|percentage_total"
+   },
+   {
+    "key": "diskspace|workload"
+   },
+   {
+    "key": "guestfilesystem:/|capacity"
+   },
+   {
+    "key": "diskspace-total|workload"
+   },
+   {
+    "key": "guestfilesystem:/|percentage"
+   },
+   {
+    "key": "guestfilesystem:/|usage"
+   },
+   {
+    "key": "guestfilesystem:/boot|capacity"
+   },
+   {
+    "key": "guestfilesystem:/boot|percentage"
+   },
+   {
+    "key": "cpu|usagemhz_average_daily"
+   },
+   {
+    "key": "guestfilesystem:/boot|usage"
+   },
+   {
+    "key": "mem|consumed_average_daily"
+   },
+   {
+    "key": "datastore|demand_oio"
+   },
+   {
+    "key": "guestfilesystem:/boot/efi|capacity"
+   },
+   {
+    "key": "datastore|numberReadAveraged_average"
+   },
+   {
+    "key": "guestfilesystem:/boot/efi|percentage"
+   },
+   {
+    "key": "datastore|numberWriteAveraged_average"
+   },
+   {
+    "key": "guestfilesystem:/boot/efi|usage"
+   },
+   {
+    "key": "datastore|read_average"
+   },
+   {
+    "key": "datastore|write_average"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|mem|timeRemaining"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|mem|recommendedSize"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|mem|capacityRemaining"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|cpu|timeRemaining"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|cpu|recommendedSize"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|cpu|capacityRemaining"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|diskspace|timeRemaining"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|diskspace|recommendedSize"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|diskspace|capacityRemaining"
+   },
+   {
+    "key": "badge|workload"
+   },
+   {
+    "key": "mem|20_sec_peak_host_contentionPct"
+   },
+   {
+    "key": "mem|balloonPct"
+   },
+   {
+    "key": "mem|consumedPct"
+   },
+   {
+    "key": "mem|effective_limit"
+   },
+   {
+    "key": "mem|guest_demand"
+   },
+   {
+    "key": "mem|guest_provisioned"
+   },
+   {
+    "key": "mem|guest_usage"
+   },
+   {
+    "key": "mem|nonzero_active"
+   },
+   {
+    "key": "mem|overheadMax_average"
+   },
+   {
+    "key": "mem|reservation_used"
+   },
+   {
+    "key": "mem|swapped_average"
+   },
+   {
+    "key": "net|20_sec_peak_packetsPerSec"
+   },
+   {
+    "key": "net|20_sec_peak_usage_average"
+   },
+   {
+    "key": "net|broadcastTx_summation"
+   },
+   {
+    "key": "net|broadcastTx_summation_sum"
+   },
+   {
+    "key": "net|droppedTxPct_max"
+   },
+   {
+    "key": "cpu|corecount_provisioned"
+   },
+   {
+    "key": "net|multicastTx_summation"
+   },
+   {
+    "key": "net|multicastTx_summation_sum"
+   },
+   {
+    "key": "net:Aggregate of all instances|packetsRxPerSec"
+   },
+   {
+    "key": "performance|number_of_kpis_breached"
+   },
+   {
+    "key": "rescpu|actav5_latest"
+   },
+   {
+    "key": "summary|availability_kpi"
+   },
+   {
+    "key": "summary|running"
+   },
+   {
+    "key": "sys|osUptime_latest"
+   },
+   {
+    "key": "virtualDisk|20_sec_peak_totalLatency_average"
+   },
+   {
+    "key": "virtualDisk|peak_vDisk_iops"
+   },
+   {
+    "key": "virtualDisk|peak_vDisk_readLatency"
+   },
+   {
+    "key": "virtualDisk|peak_vDisk_writeLatency"
+   },
+   {
+    "key": "virtualDisk|read_average"
+   },
+   {
+    "key": "virtualDisk|write_average"
+   },
+   {
+    "key": "virtualDisk:Aggregate of all instances|commandsAveraged_average"
+   },
+   {
+    "key": "virtualDisk:Aggregate of all instances|numberReadAveraged_average"
+   },
+   {
+    "key": "virtualDisk:Aggregate of all instances|numberWriteAveraged_average"
+   },
+   {
+    "key": "virtualDisk:Aggregate of all instances|totalLatency"
+   },
+   {
+    "key": "virtualDisk:Aggregate of all instances|totalReadLatency_average"
+   },
+   {
+    "key": "virtualDisk:Aggregate of all instances|totalWriteLatency_average"
+   },
+   {
+    "key": "virtualDisk:Aggregate of all instances|usage"
+   },
+   {
+    "key": "vmop|vmotion|total_failures"
+   },
+   {
+    "key": "virtualDisk:Aggregate of all instances|vDiskOIO"
+   },
+   {
+    "key": "virtualDisk:scsi0:0|actualUsage"
+   },
+   {
+    "key": "summary|oversized"
+   },
+   {
+    "key": "virtualDisk:scsi0:0|numberReadAveraged_average"
+   },
+   {
+    "key": "summary|oversized|memory"
+   },
+   {
+    "key": "net|usage_average"
+   },
+   {
+    "key": "virtualDisk:scsi0:0|numberWriteAveraged_average"
+   },
+   {
+    "key": "summary|undersized|vcpus"
+   },
+   {
+    "key": "virtualDisk:scsi0:0|read_average"
+   },
+   {
+    "key": "summary|undersized|memory"
+   },
+   {
+    "key": "virtualDisk:scsi0:0|totalReadLatency_average"
+   },
+   {
+    "key": "summary|oversized|vcpus"
+   },
+   {
+    "key": "virtualDisk:scsi0:0|totalWriteLatency_average"
+   },
+   {
+    "key": "summary|undersized"
+   },
+   {
+    "key": "virtualDisk:scsi0:0|write_average"
+   },
+   {
+    "key": "cpu|vm_capacity_provisioned"
+   },
+   {
+    "key": "cpu|usage_average"
+   },
+   {
+    "key": "cpu|usagemhz_average"
+   },
+   {
+    "key": "cpu|demandmhz"
+   },
+   {
+    "key": "datastore:Aggregate of all instances|commandsAveraged_average"
+   },
+   {
+    "key": "datastore:Aggregate of all instances|totalLatency_average"
+   },
+   {
+    "key": "datastore:Aggregate of all instances|totalReadLatency_average"
+   },
+   {
+    "key": "datastore:Aggregate of all instances|totalWriteLatency_average"
+   },
+   {
+    "key": "datastore:Aggregate of all instances|usage_average"
+   },
+   {
+    "key": "disk|read_average"
+   },
+   {
+    "key": "disk|write_average"
+   },
+   {
+    "key": "disk:Aggregate of all instances|commandsAveraged_average"
+   },
+   {
+    "key": "diskspace|snapshot"
+   },
+   {
+    "key": "diskspace|used"
+   },
+   {
+    "key": "mem|compressed_average"
+   },
+   {
+    "key": "mem|consumed_average"
+   },
+   {
+    "key": "mem|swapinRate_average"
+   },
+   {
+    "key": "mem|swapoutRate_average"
+   },
+   {
+    "key": "mem|usage_average"
+   },
+   {
+    "key": "cpu|capacity_contentionPct"
+   },
+   {
+    "key": "cpu|demandPct"
+   },
+   {
+    "key": "net|droppedTx_summation"
+   },
+   {
+    "key": "net|droppedTx_summation_sum"
+   }
+  ]
+ }
+}

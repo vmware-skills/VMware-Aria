@@ -1,0 +1,25 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab), read-only GETs/queries",
+ "_note": "GET /resources/{id}/relationships/CHILD for VM test-llm f654322a-50c3-4a9a-937c-2d4bae8a2b36; rows trimmed to identifier/resourceKey/status (badges, links, identifiers dropped). Measured: ALL == PARENT | CHILD, disjoint.",
+ "http_status": 200,
+ "body": {
+  "pageInfo": {
+   "totalCount": 1,
+   "page": 0,
+   "pageSize": 1000
+  },
+  "relationshipType": "CHILD",
+  "resourceList": [
+   {
+    "identifier": "3ad7800f-1c52-483a-862e-af0bcd3cc647",
+    "resourceKey": {
+     "name": "datastore1",
+     "adapterKindKey": "VMWARE",
+     "resourceKindKey": "Datastore"
+    },
+    "resourceStatusStates": [],
+    "relatedResources": []
+   }
+  ]
+ }
+}

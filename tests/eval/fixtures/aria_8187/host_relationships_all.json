@@ -1,0 +1,125 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab), read-only GETs/queries",
+ "_note": "GET /resources/{id}/relationships for host 192.168.60.15 12adc0ff-f9ff-4a43-b0e1-22664a058376; rows trimmed to identifier/resourceKey/status (badges, links, identifiers dropped). Measured: ALL == PARENT | CHILD, disjoint.",
+ "http_status": 200,
+ "body": {
+  "pageInfo": {
+   "totalCount": 11,
+   "page": 0,
+   "pageSize": 1000
+  },
+  "relationshipType": "ALL",
+  "resourceList": [
+   {
+    "identifier": "08702a91-2c8c-4604-831b-b83ffedb30e2",
+    "resourceKey": {
+     "name": "Open-test",
+     "adapterKindKey": "VMWARE",
+     "resourceKindKey": "VirtualMachine"
+    },
+    "resourceStatusStates": [],
+    "relatedResources": []
+   },
+   {
+    "identifier": "317166e1-7662-4e49-97ea-bb373992731c",
+    "resourceKey": {
+     "name": "igel-os-vm3",
+     "adapterKindKey": "VMWARE",
+     "resourceKindKey": "VirtualMachine"
+    },
+    "resourceStatusStates": [],
+    "relatedResources": []
+   },
+   {
+    "identifier": "3ad7800f-1c52-483a-862e-af0bcd3cc647",
+    "resourceKey": {
+     "name": "datastore1",
+     "adapterKindKey": "VMWARE",
+     "resourceKindKey": "Datastore"
+    },
+    "resourceStatusStates": [],
+    "relatedResources": []
+   },
+   {
+    "identifier": "45e70f07-02d9-4b9f-aa4d-4cf122c08ff5",
+    "resourceKey": {
+     "name": "Hermers - TT",
+     "adapterKindKey": "VMWARE",
+     "resourceKindKey": "VirtualMachine"
+    },
+    "resourceStatusStates": [],
+    "relatedResources": []
+   },
+   {
+    "identifier": "694b4c53-fafc-4e7d-bf4c-0d8edd42d58d",
+    "resourceKey": {
+     "name": "VMware vCenter Server",
+     "adapterKindKey": "VMWARE",
+     "resourceKindKey": "VirtualMachine"
+    },
+    "resourceStatusStates": [],
+    "relatedResources": []
+   },
+   {
+    "identifier": "8281c4a5-8477-4fb0-8f3a-9f78b98f535d",
+    "resourceKey": {
+     "name": "PoweredOn:new VC",
+     "adapterKindKey": "VMWARE",
+     "resourceKindKey": "VM Entity Status"
+    },
+    "resourceStatusStates": [],
+    "relatedResources": []
+   },
+   {
+    "identifier": "925c1437-161e-4616-bbfe-2e6fd9181903",
+    "resourceKey": {
+     "name": "vplc",
+     "adapterKindKey": "VMWARE",
+     "resourceKindKey": "VirtualMachine"
+    },
+    "resourceStatusStates": [],
+    "relatedResources": []
+   },
+   {
+    "identifier": "bee935c7-b343-4720-8b09-c1ca31667b39",
+    "resourceKey": {
+     "name": "agent-test-vm-01",
+     "adapterKindKey": "VMWARE",
+     "resourceKindKey": "VirtualMachine"
+    },
+    "resourceStatusStates": [],
+    "relatedResources": []
+   },
+   {
+    "identifier": "c996e529-35fb-46e1-ae37-11186cb97751",
+    "resourceKey": {
+     "name": "vcsa",
+     "adapterKindKey": "VMWARE",
+     "resourceKindKey": "VirtualMachine"
+    },
+    "resourceStatusStates": [],
+    "relatedResources": []
+   },
+   {
+    "identifier": "d676277b-969b-4aa4-a6e9-ee0c2ed4f268",
+    "resourceKey": {
+     "name": "home",
+     "adapterKindKey": "VMWARE",
+     "resourceKindKey": "Datacenter"
+    },
+    "resourceStatusStates": [],
+    "relatedResources": []
+   },
+   {
+    "identifier": "f654322a-50c3-4a9a-937c-2d4bae8a2b36",
+    "resourceKey": {
+     "name": "test-llm",
+     "adapterKindKey": "VMWARE",
+     "resourceKindKey": "VirtualMachine"
+    },
+    "resourceStatusStates": [],
+    "relatedResources": []
+   }
+  ]
+ }
+}
