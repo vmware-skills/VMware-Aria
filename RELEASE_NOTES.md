@@ -1,6 +1,6 @@
 ## Unreleased
 
-Eleven new MCP tools (33 → 44: 34 read, 10 write) and eight new CLI commands.
+Eleven new MCP tools (33 → 44: 34 read, 10 write) and eleven new CLI commands.
 
 **Resource catalog (3 read)** — look things up before querying them:
 
@@ -27,9 +27,10 @@ Eleven new MCP tools (33 → 44: 34 read, 10 write) and eight new CLI commands.
 
 - `start_resource_maintenance` (write, risk medium; CLI `maintenance start <resource-id> [--duration MIN | --end EPOCH_MS]`):
   a timed window, or with neither option manual maintenance until ended. Returns the state before and after; undo is
-  `end_resource_maintenance`.
+  `end_resource_maintenance`, recorded only when the resource was known not to be in maintenance before.
 - `end_resource_maintenance` (write, risk medium; CLI `maintenance end <resource-id>`): refuses a resource confirmed
-  not in maintenance.
+  not in maintenance; an unknown state (unreadable, or an adapter reporting `UNKNOWN` / `NONE`) proceeds. Its undo is
+  recorded only when the resource was known to be in maintenance.
 - `list_maintenance_schedules` (CLI `maintenance schedules`).
 - `list_alert_notes` (CLI `alert notes <alert-id>`).
 - `add_alert_note` (write, risk low; CLI `alert note-add <alert-id> <text>`): does not change the alert's status.

@@ -1,6 +1,6 @@
 # Ops Playbooks — Troubleshooting Paths with vmware-aria
 
-Each path below uses only commands this skill ships, in the order an operator would run them. Every step was run against a live Aria Operations 8.18.7 appliance (2026-09-13); the examples quote what came back. MCP tool names are in brackets where they differ from the command.
+Each path below uses only commands this skill ships, in the order an operator would run them. Every read step was run against a live Aria Operations 8.18.7 appliance (2026-09-13); the examples quote what came back. The write steps — `alert note-add`, `alert acknowledge`, `maintenance start` and `maintenance end` — were not sent to it: they were run only with `--dry-run` or not at all, so what they return is described from the code and its tests, not observed. MCP tool names are in brackets where they differ from the command.
 
 Quote any argument that contains `|` (`'cpu|readyPct'`) — a shell reads a bare `|` as a pipe.
 
@@ -28,7 +28,7 @@ For a root cause (not just a symptom), finish with [`investigation-protocol.md`]
 
 **Question**: what is affected, why, and what does VMware recommend?
 
-1. Open alerts → `vmware-aria alert list --criticality CRITICAL` [`list_alerts`] — rows carry the affected resource's name and kind
+1. Open alerts → `vmware-aria alert list --criticality CRITICAL` [`list_alerts`] — rows carry the affected resource's name and ID (the MCP tool also returns its `resource_kind`; the CLI table has no kind column)
 2. Symptoms → `vmware-aria alert get <alert-id>` [`get_alert`] — each symptom is named from its definition, with severity
 3. Recommended actions → `vmware-aria alert recommendations <alert-id>` [`get_alert_recommendations`]
    - `status: found` lists them by priority; `none_defined` means the definition has none; `unknown` means they could not be read — not the same thing
@@ -77,6 +77,6 @@ For a root cause (not just a symptom), finish with [`investigation-protocol.md`]
 2. Preview → `vmware-aria maintenance start <resource-id> --duration 60 --dry-run` — prints `PUT /suite-api/api/resources/<id>/maintained?duration=60` without connecting
 3. Start → the same without `--dry-run` [`start_resource_maintenance`, write, medium] — omit `--duration` and `--end` for indefinite maintenance
 4. Do the work (for VM changes, vmware-aiops)
-5. End → `vmware-aria maintenance end <resource-id>` [`end_resource_maintenance`, write, medium] — refused when the resource is known not to be in maintenance
+5. End → `vmware-aria maintenance end <resource-id>` [`end_resource_maintenance`, write, medium] — refused only when the resource is known not to be in maintenance; when its state is unknown (unreadable, or an adapter reports `UNKNOWN` / `NONE`) it proceeds
 
 Both write commands confirm once (`--yes` skips) and are audited to `~/.vmware/audit.db`.

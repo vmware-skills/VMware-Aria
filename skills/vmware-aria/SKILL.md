@@ -1,10 +1,9 @@
 ---
 name: vmware-aria
 description: >
-  Use this skill whenever the user needs VMware Aria Operations (rebranded VMware VCF Operations in VCF 9 and later) data — performance metrics, alerts, capacity planning, anomaly detection, and automated reports.
-  Directly handles: query resource metrics, list/acknowledge/cancel alerts, manage alert definitions, check capacity and time-remaining forecasts, detect anomalies, generate and manage reports.
-  Always use this skill for "check vSphere capacity", "what Aria Operations alerts are active", "show VMware anomalies", "generate an Aria report", "rightsizing recommendations", "VCF Operations alerts", or any Aria Operations / VCF Operations / vRealize Operations task.
-  Combined with LLM, Aria data powers natural language reports: "give me a capacity report" → Aria collects data → LLM formats the report.
+  Use this skill whenever the user needs VMware Aria Operations (VMware VCF Operations in VCF 9+) data — metrics, alerts, capacity, anomalies, reports.
+  Directly handles: resource metrics plus metric key/property/relationship lookup, list/acknowledge/cancel alerts with notes and recommendations, alert definitions, capacity forecasts, anomalies, reports, resource maintenance mode, Aria's own node health and adapter collection state.
+  Always use this skill for "check vSphere capacity", "what Aria Operations alerts are active", "show VMware anomalies", "generate an Aria report", "rightsizing recommendations", "VCF Operations alerts", "put this host in Aria maintenance mode", "is Aria Operations still collecting from vCenter", "what does Aria recommend for this alert", or any Aria Operations / VCF Operations / vRealize Operations task.
   Do NOT use for real-time vCenter alarms/events (use vmware-monitor), VM operations (use vmware-aiops), or NSX networking (use vmware-nsx).
   For load balancing/AVI/AKO use vmware-avi.
 installer:

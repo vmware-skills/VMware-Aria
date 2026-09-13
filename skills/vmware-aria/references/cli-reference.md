@@ -481,7 +481,7 @@ Options:
 
 Reads Aria's own self-monitoring objects (`vC-Ops-Node`, `vC-Ops-Watchdog`).
 
-**Output**: Per node — name and collection status; `Memory pressure: <level> — <basis>`; a table (Metric, Latest, Min, Avg, Max) of memory (`mem|total`, `mem|used`, `mem|free`, `mem|actualFree`, `mem|actualUsed`), swap (`swap|total`, `swap|used`, `swap|free`), heap (`heap|MaxHeapSize`, `heap|CurrentHeapSize`, `heap|CommittedMemory`, `heap|NodeHeapMemoryRemaining`) and committed heap per component, with units from Aria's own statkey definitions (GB for memory and swap, MB for heap sizes on 8.18.7); then the latest watchdog restarts per service, and a yellow `Missing <key>: <reason> — <detail>` line for each key with no value (`not_reported`, `no_data` or `undetermined` — never shown as zero). Min/avg/max are over 5-minute averages, so a shorter spike is smoothed. Watchdog restarts print `unknown — <why>` when they could not be read; yellow `units_error` / `latest_error` / `window_error` / `watchdog_error` lines name reads that failed.
+**Output**: Per node — name and collection status; `Memory pressure: <level> — <basis>`; a table (Metric, Latest, Min, Avg, Max) of memory (`mem|total`, `mem|used`, `mem|free`, `mem|actualFree`, `mem|actualUsed`), swap (`swap|total`, `swap|used`, `swap|free`), heap (`heap|MaxHeapSize`, `heap|CurrentHeapSize`, `heap|CommittedMemory`, `heap|NodeHeapMemoryRemaining`) and committed heap per component, with units from Aria's own statkey definitions (on 8.18.7: GB for memory and swap, MB for the heap sizes, % for `heap|NodeHeapMemoryRemaining`); then the latest watchdog restarts per service, and a yellow `Missing <key>: <reason> — <detail>` line for each key with no value (`not_reported`, `no_data` or `undetermined` — never shown as zero). Min/avg/max are over 5-minute averages, so a shorter spike is smoothed. Watchdog restarts print `unknown — <why>` when they could not be read; yellow `units_error` / `latest_error` / `window_error` / `watchdog_error` lines name reads that failed.
 
 Memory pressure is an indicator, not a diagnosis: HIGH when actual free memory (`mem|actualFree`) is below 10% of `mem|total`, ELEVATED below 20%, NORMAL at 20% or more, UNKNOWN when the readings do not settle it. On Aria Operations 8.18.7 after a memory upgrade the node read `mem|total` 15.61 GB (was 7.75), actual free 41%, NORMAL, and 9 watchdog services with 0 restarts. The MCP tool is `get_aria_node_resources` (`window_hours`).
 
@@ -589,7 +589,8 @@ Put a resource in maintenance.
 ```
 vmware-aria maintenance start <resource-id> [OPTIONS]
 vmware-aria maintenance start <host-id> --duration 120
-vmware-aria maintenance start <host-id> --end 1789300000000 --dry-run
+vmware-aria maintenance start <host-id> --duration 60 --dry-run
+vmware-aria maintenance start <host-id> --end $(( ($(date +%s) + 7200) * 1000 ))
 
 Arguments:
   resource-id  Resource UUID (from `vmware-aria resource list`) (required)
@@ -603,7 +604,7 @@ Options:
   --config -c PATH  Config file path
 ```
 
-With `--duration` (1–525600 minutes) or `--end` (epoch **milliseconds**, in the future) the resource is `MAINTAINED` for that window and returns to its prior state when it expires; give one, not both. With neither it enters manual maintenance (`MAINTAINED_MANUAL`) that lasts until `maintenance end` — easy to forget, so prefer a window. An invalid window is refused (exit 2) before anything is sent. `--dry-run` prints `PUT /suite-api/api/resources/<resource-id>/maintained` with the `duration` or `end` query parameter.
+With `--duration` (1–525600 minutes) or `--end` (epoch **milliseconds**, in the future — the example above computes two hours from now in any POSIX shell; a fixed timestamp stops working once it passes) the resource is `MAINTAINED` for that window and returns to its prior state when it expires; give one, not both. With neither it enters manual maintenance (`MAINTAINED_MANUAL`) that lasts until `maintenance end` — easy to forget, so prefer a window. An invalid window is refused (exit 2) before anything is sent. `--dry-run` prints `PUT /suite-api/api/resources/<resource-id>/maintained` with the `duration` or `end` query parameter.
 
 **Output**: JSON with `requested` (`mode` timed / manual, `duration_minutes`, `end_time_ms`), `before` and `after` (each: `name`, `kind`, `adapter_states`, `in_maintenance`, `maintenance_mode`, `note`, `read_error`), `confirmed` (true / false / null — null means the state could not be read afterwards, which is unknown, not failure) and `note`.
 
@@ -623,11 +624,11 @@ Options:
   --config -c PATH  Config file path
 ```
 
-Refused (exit 2) when the resource's state was read and is not `MAINTAINED` / `MAINTAINED_MANUAL` — there is nothing to end. When the state cannot be read the call proceeds and `before` says unknown. `--dry-run` prints `DELETE /suite-api/api/resources/<resource-id>/maintained`.
+Refused (exit 2) only when the resource is known not to be in maintenance — an adapter reports a state such as `STARTED` or `STOPPED`, so there is nothing to end. When the state is unknown (it cannot be read, or an adapter reports `UNKNOWN` / `NONE`) the call proceeds and `before` says unknown. `--dry-run` prints `DELETE /suite-api/api/resources/<resource-id>/maintained`.
 
 **Output**: JSON with `before`, `after`, `confirmed` (true once the resource no longer reports maintenance, false when it still does, null when unknown) and `note`.
 
-**Audit logged**: yes, with before and after state. The MCP undo (`start_resource_maintenance`) re-enters manual maintenance — the end of a timed window is not restored.
+**Audit logged**: yes, with before and after state. The MCP undo (`start_resource_maintenance`) is recorded only when the resource was known to be in maintenance before; it re-enters manual maintenance — the end of a timed window is not restored.
 
 ### `vmware-aria maintenance schedules`
 

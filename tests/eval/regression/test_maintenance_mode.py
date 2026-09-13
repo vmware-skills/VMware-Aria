@@ -435,3 +435,122 @@ def test_cli_guarded_names_equal_the_mcp_tool_names() -> None:
     ):
         assert command._guarded_tool == tool
         assert command._risk_level == getattr(server, tool)._risk_level
+
+
+# ---------------------------------------------------------------------------
+# Review 2026-09-13: UNKNOWN / NONE, undo from the before-state, dry-run input
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "states",
+    [("UNKNOWN",), ("NONE",), ("UNKNOWN", "STARTED"), ("NONE", "MAINTAINED")],
+    ids=["unknown", "none", "unknown-and-started", "none-and-maintained"],
+)
+def test_an_adapter_that_does_not_know_the_state_makes_it_unknown(states: tuple[str, ...]) -> None:
+    from vmware_aria.ops.maintenance import read_maintenance_state
+
+    state = read_maintenance_state(_Client(_resource(*states)), RID)
+    assert state["in_maintenance"] is None, f"{states} must not read as 'not in maintenance'"
+    assert state["note"], "an unknown state must say why it is unknown"
+
+
+@pytest.mark.parametrize(
+    "state_name", ["STARTED", "STOPPED", "STARTING", "STOPPING", "UPDATING", "FAILED", "REMOVING", "NOT_EXISTING"]
+)
+def test_a_reported_non_maintenance_state_reads_as_not_in_maintenance(state_name: str) -> None:
+    from vmware_aria.ops.maintenance import read_maintenance_state
+
+    state = read_maintenance_state(_Client(_resource(state_name)), RID)
+    assert state["in_maintenance"] is False
+    assert state["note"] is None
+
+
+def test_end_is_not_refused_when_the_adapter_reports_unknown() -> None:
+    from vmware_aria.ops.maintenance import end_resource_maintenance
+
+    client = _Client(_resource("UNKNOWN"), _resource("STARTED"))
+    result = end_resource_maintenance(client, RID)
+    assert client.writes == [("DELETE", f"/resources/{RID}/maintained", None, None)]
+    assert result["before"]["in_maintenance"] is None
+
+
+@pytest.mark.parametrize(
+    ("before", "expect_undo"),
+    [
+        pytest.param(_resource("STARTED"), True, id="before-false"),
+        pytest.param(_resource("MAINTAINED_MANUAL"), False, id="before-true-already-in-maintenance"),
+        pytest.param(_unavailable(), False, id="before-unknown"),
+    ],
+)
+def test_start_records_its_undo_only_when_it_began_the_maintenance(monkeypatch, undo_store, before, expect_undo) -> None:
+    import vmware_aria.mcp_server.server as server
+
+    client = _Client(before, _resource("MAINTAINED"))
+    monkeypatch.setattr(server, "_get_connection", lambda target=None: client)
+    server.start_resource_maintenance(RID, duration_minutes=30, confirmed=True)
+    assert client.writes, "the write itself must still run"
+    if expect_undo:
+        (row,) = undo_store.rows
+        assert row["undo_descriptor"]["tool"] == "end_resource_maintenance"
+    else:
+        assert undo_store.rows == [], "replaying this undo would end a window this call did not open"
+
+
+@pytest.mark.parametrize(
+    ("before", "expect_undo"),
+    [
+        pytest.param(_resource("MAINTAINED"), True, id="before-true"),
+        pytest.param(_unavailable(), False, id="before-unknown"),
+        pytest.param(_resource("UNKNOWN"), False, id="before-adapter-unknown"),
+    ],
+)
+def test_end_records_its_undo_only_when_the_resource_was_in_maintenance(monkeypatch, undo_store, before, expect_undo) -> None:
+    import vmware_aria.mcp_server.server as server
+
+    client = _Client(before, _resource("STARTED"))
+    monkeypatch.setattr(server, "_get_connection", lambda target=None: client)
+    server.end_resource_maintenance(RID, confirmed=True)
+    assert client.writes, "the write itself must still run"
+    if expect_undo:
+        (row,) = undo_store.rows
+        descriptor = row["undo_descriptor"]
+        assert descriptor["tool"] == "start_resource_maintenance"
+        assert "not restored" in descriptor["note"]
+    else:
+        assert undo_store.rows == [], "replaying this undo could put a resource into indefinite maintenance"
+
+
+@pytest.mark.parametrize("in_maintenance", [True, False, None])
+def test_undo_functions_follow_the_before_state(in_maintenance: bool | None) -> None:
+    from vmware_aria.mcp_server.tools.maintenance import _undo_end, _undo_start
+
+    result = {"before": {"in_maintenance": in_maintenance}, "after": {"in_maintenance": None}}
+    params = {"resource_id": RID, "target": "home-aria"}
+    assert (_undo_start(params, result) is not None) is (in_maintenance is False)
+    assert (_undo_end(params, result) is not None) is (in_maintenance is True)
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        ["maintenance", "start", " ", "--duration", "60", "--dry-run"],
+        ["maintenance", "start", "", "--dry-run"],
+        ["maintenance", "end", " ", "--dry-run"],
+    ],
+    ids=["start-blank", "start-empty", "end-blank"],
+)
+def test_cli_dry_run_refuses_a_blank_resource_id(args: list[str]) -> None:
+    result, connect, start, end = _cli(args)
+    assert result.exit_code == 2, result.output
+    assert "DRY-RUN" not in result.output
+    assert "resource_id" in result.output
+    connect.assert_not_called()
+    start.assert_not_called()
+    end.assert_not_called()
+
+
+def test_cli_dry_run_prints_the_id_the_real_call_would_use() -> None:
+    result, _, _, _ = _cli(["maintenance", "start", "  r-1 ", "--duration", "60", "--dry-run"])
+    assert result.exit_code == 0, result.output
+    assert "/resources/r-1/maintained?duration=60" in result.output

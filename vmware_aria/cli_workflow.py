@@ -16,6 +16,7 @@ the module at call time so tests patching them on ``cli`` reach these commands.
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from typing import Annotated, Any
 
 import typer
@@ -70,6 +71,19 @@ def _window_params(duration: int | None, end: int | None) -> dict[str, int] | No
         return None  # unreachable; _refuse always exits
 
 
+def _checked(check: Callable[[Any], str], value: Any) -> str:
+    """Run the ops layer's own argument check before anything, dry-run included.
+
+    ``--dry-run`` must refuse exactly what the real call refuses, and print
+    the value the real call would send (stripped), not the raw argument.
+    """
+    try:
+        return check(value)
+    except ValueError as exc:
+        _refuse(exc)
+        return ""  # unreachable; _refuse always exits
+
+
 def _connect(target: str | None, config: Any) -> tuple[Any, str]:
     client, cfg = _cli._get_connection(target, config)
     return client, target or cfg.default_target or "default"
@@ -97,11 +111,12 @@ def maintenance_start(
     With neither --duration nor --end the resource stays in maintenance until
     `vmware-aria maintenance end`.
     """
-    from vmware_aria.ops.maintenance import start_resource_maintenance
+    from vmware_aria.ops.maintenance import require_resource_id, start_resource_maintenance
 
+    rid = _checked(require_resource_id, resource_id)
     params = _window_params(duration, end)
     if dry_run:
-        _print_dry_run("PUT", f"/resources/{resource_id}/maintained", target, params=params)
+        _print_dry_run("PUT", f"/resources/{rid}/maintained", target, params=params)
         return
     if duration is not None:
         window = f"for {duration} minutes"
@@ -110,11 +125,11 @@ def maintenance_start(
     else:
         window = "with NO end (until `vmware-aria maintenance end`)"
     if not yes:
-        typer.confirm(f"Put resource {resource_id} in maintenance {window}? Alerting and collection stop.", abort=True)
+        typer.confirm(f"Put resource {rid} in maintenance {window}? Alerting and collection stop.", abort=True)
 
     client, target_name = _connect(target, config)
     result = start_resource_maintenance(
-        client, resource_id, duration_minutes=duration, end_time_ms=end, audit_logger=_cli._audit, target_name=target_name
+        client, rid, duration_minutes=duration, end_time_ms=end, audit_logger=_cli._audit, target_name=target_name
     )
     _cli._json_output(result)
 
@@ -130,17 +145,18 @@ def maintenance_end(
     config: ConfigOption = None,
 ) -> None:
     """Take a resource out of maintenance: Aria resumes alerting and collection."""
-    from vmware_aria.ops.maintenance import end_resource_maintenance
+    from vmware_aria.ops.maintenance import end_resource_maintenance, require_resource_id
 
+    rid = _checked(require_resource_id, resource_id)
     if dry_run:
-        _print_dry_run("DELETE", f"/resources/{resource_id}/maintained", target)
+        _print_dry_run("DELETE", f"/resources/{rid}/maintained", target)
         return
     if not yes:
-        typer.confirm(f"Take resource {resource_id} out of maintenance? Alerting and collection resume.", abort=True)
+        typer.confirm(f"Take resource {rid} out of maintenance? Alerting and collection resume.", abort=True)
 
     client, target_name = _connect(target, config)
     try:
-        result = end_resource_maintenance(client, resource_id, audit_logger=_cli._audit, target_name=target_name)
+        result = end_resource_maintenance(client, rid, audit_logger=_cli._audit, target_name=target_name)
     except ValueError as exc:
         _refuse(exc)
     _cli._json_output(result)
@@ -220,18 +236,18 @@ def alert_note_add(
     config: ConfigOption = None,
 ) -> None:
     """Add a note to an alert."""
-    from vmware_aria.ops.alert_notes import add_alert_note
+    from vmware_aria.ops.alert_notes import add_alert_note, require_alert_id, require_note_text
 
-    if not text.strip():
-        _refuse(ValueError("The note text is empty — say who is handling the alert or what was done."))
+    aid = _checked(require_alert_id, alert_id)
+    content = _checked(require_note_text, text)
     if dry_run:
-        _print_dry_run("POST", f"/alerts/{alert_id}/notes", target, body={"content": text.strip()})
+        _print_dry_run("POST", f"/alerts/{aid}/notes", target, body={"content": content})
         return
     if not yes:
-        typer.confirm(f"Add this note to alert {alert_id}?", abort=True)
+        typer.confirm(f"Add this note to alert {aid}?", abort=True)
 
     client, target_name = _connect(target, config)
-    result = add_alert_note(client, alert_id, text, audit_logger=_cli._audit, target_name=target_name)
+    result = add_alert_note(client, aid, content, audit_logger=_cli._audit, target_name=target_name)
     _cli._json_output(result)
 
 

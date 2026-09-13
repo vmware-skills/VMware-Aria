@@ -259,3 +259,23 @@ def test_cli_guarded_name_equals_the_mcp_tool_name() -> None:
 
     assert cli_workflow.alert_note_add._guarded_tool == "add_alert_note"
     assert cli_workflow.alert_note_add._risk_level == server.add_alert_note._risk_level
+
+
+@pytest.mark.parametrize(
+    "args",
+    [["alert", "note-add", " ", "rebooting host", "--dry-run"], ["alert", "note-add", "a-1", "   ", "--dry-run"]],
+    ids=["blank-alert-id", "blank-text"],
+)
+def test_cli_note_add_dry_run_refuses_blank_arguments(args: list[str]) -> None:
+    result, connect, add, _ = _cli(args)
+    assert result.exit_code == 2, result.output
+    assert "DRY-RUN" not in result.output
+    connect.assert_not_called()
+    add.assert_not_called()
+
+
+def test_cli_note_add_dry_run_prints_the_id_and_text_the_real_call_would_send() -> None:
+    result, _, _, _ = _cli(["alert", "note-add", " a-1 ", "  rebooting host ", "--dry-run"])
+    assert result.exit_code == 0, result.output
+    assert "/alerts/a-1/notes" in result.output
+    assert '{"content": "rebooting host"}' in result.output

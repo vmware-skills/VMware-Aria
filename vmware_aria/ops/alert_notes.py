@@ -41,6 +41,16 @@ def require_alert_id(alert_id: Any) -> str:
     return alert_id.strip()
 
 
+def require_note_text(note: Any) -> str:
+    """The stripped note text, or a teaching ``ValueError``."""
+    if not isinstance(note, str) or not note.strip():
+        raise ValueError(
+            "note must be non-empty text — say who is handling the alert or what was done, "
+            "e.g. 'Taking this: rebooting esx-03 after the memory upgrade'."
+        )
+    return note.strip()
+
+
 def _note_row(raw: dict) -> dict:
     return {
         "id": text_or_none(raw.get("id")),
@@ -113,12 +123,7 @@ def add_alert_note(
         ``confirmation_note`` (why ``created`` is ``None``).
     """
     aid = require_alert_id(alert_id)
-    if not isinstance(note, str) or not note.strip():
-        raise ValueError(
-            "note must be non-empty text — say who is handling the alert or what was done, "
-            "e.g. 'Taking this: rebooting esx-03 after the memory upgrade'."
-        )
-    content = note.strip()
+    content = require_note_text(note)
 
     data = client.post(f"/alerts/{aid}/notes", json_data={"content": content})
 

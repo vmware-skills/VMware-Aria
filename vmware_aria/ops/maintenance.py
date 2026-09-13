@@ -46,6 +46,17 @@ KNOWN_RESOURCE_STATES = frozenset({
     "MAINTAINED", "MAINTAINED_MANUAL", "REMOVING", "NOT_EXISTING", "NONE", "UNKNOWN",
 })
 
+#: States in the enum that report the absence of a state, not a state. A
+#: resource in maintenance could be behind either, so any adapter reporting one
+#: makes ``in_maintenance`` unknown (``None``) — never "not in maintenance",
+#: which would make end_resource_maintenance refuse a resource that may be in it.
+#:
+#: Every other known state proves "not in maintenance": STOPPED, STARTING,
+#: STARTED, STOPPING, UPDATING, FAILED, REMOVING and NOT_EXISTING are each a
+#: lifecycle state the adapter positively observed, and an adapter reports a
+#: resource in maintenance as MAINTAINED / MAINTAINED_MANUAL instead of them.
+UNKNOWN_STATES = frozenset({"NONE", "UNKNOWN"})
+
 #: One year. The API field is int32 minutes; this is our bound, chosen so a
 #: typo of extra digits is refused rather than silencing a resource for decades.
 MAX_DURATION_MINUTES = 525_600
@@ -64,7 +75,8 @@ def _is_int(value: Any) -> bool:
     return isinstance(value, int) and not isinstance(value, bool)
 
 
-def _require_resource_id(resource_id: Any) -> str:
+def require_resource_id(resource_id: Any) -> str:
+    """The stripped resource id, or a teaching ``ValueError``."""
     if not isinstance(resource_id, str) or not resource_id.strip():
         raise ValueError(f"resource_id must be a non-empty Aria resource UUID. {_ID_HINT}")
     return resource_id.strip()
@@ -102,8 +114,8 @@ def maintenance_window_params(
     if end_time_ms is not None:
         if not _is_int(end_time_ms) or end_time_ms < _MIN_EPOCH_MS:
             raise ValueError(
-                f"Invalid end_time_ms {end_time_ms!r}: pass epoch MILLISECONDS (13 digits, e.g. "
-                f"1789300000000). A 10-digit value is seconds — multiply it by 1000."
+                f"Invalid end_time_ms {end_time_ms!r}: pass epoch MILLISECONDS in the future (13 digits). "
+                f"A 10-digit value is seconds — multiply it by 1000. Or pass duration_minutes instead."
             )
         now_ms = int(time.time() * 1000)
         if end_time_ms <= now_ms:
@@ -130,6 +142,12 @@ def _verdict(raw: Any, adapter_states: list[dict]) -> tuple[bool | None, str | N
     unrecognised = sorted({s for s in states if s not in KNOWN_RESOURCE_STATES})
     if unrecognised:
         return None, None, f"Unrecognised resource state {unrecognised}, so the maintenance state is unknown."
+    unknown = sorted({s for s in states if s in UNKNOWN_STATES})
+    if unknown:
+        return None, None, (
+            f"An adapter reports {', '.join(unknown)} ({', '.join(states)}), which is no state at all, "
+            "so the maintenance state is unknown."
+        )
     maintained = [s for s in states if s in MAINTENANCE_STATES]
     if not maintained:
         return False, None, None
@@ -159,7 +177,7 @@ def read_maintenance_state(client: AriaClient, resource_id: str) -> dict:
         ``read_error`` (``None`` here; set by the write paths when the read
         itself failed).
     """
-    rid = _require_resource_id(resource_id)
+    rid = require_resource_id(resource_id)
     data = client.get(f"/resources/{rid}")
     body = data if isinstance(data, dict) else {}
     key = body.get("resourceKey") if isinstance(body.get("resourceKey"), dict) else {}
@@ -274,7 +292,7 @@ def start_resource_maintenance(
         ``requested`` window, ``before`` / ``after`` state, ``confirmed``
         (True / False / ``None`` when the after-state is unknown) and ``note``.
     """
-    rid = _require_resource_id(resource_id)
+    rid = require_resource_id(resource_id)
     params = maintenance_window_params(duration_minutes, end_time_ms)
     before = _read_or_unknown(client, rid)
 
@@ -325,7 +343,7 @@ def end_resource_maintenance(
     Raises:
         ValueError: The resource is confirmed not in maintenance.
     """
-    rid = _require_resource_id(resource_id)
+    rid = require_resource_id(resource_id)
     before = _read_or_unknown(client, rid)
     if before["in_maintenance"] is False:
         states = ", ".join(s["state"] for s in before["adapter_states"] or []) or "unknown"

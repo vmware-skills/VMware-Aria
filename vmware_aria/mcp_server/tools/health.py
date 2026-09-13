@@ -83,7 +83,8 @@ def get_aria_node_resources(window_hours: int = 24, target: Optional[str] = None
     heap|NodeHeapMemoryRemaining), heap_components (committed heap per
     component: Analytics, SuiteAPI, Collector, ...) and watchdog_restarts per
     service. Each value has latest, latest_time_ms, unit (from Aria's own statkey
-    definitions: GB for mem/swap and MB for heap on 8.18.7; null when undefined)
+    definitions, on 8.18.7: GB for mem/swap, MB for the heap sizes and
+    heap_components, % for heap|NodeHeapMemoryRemaining; null when undefined)
     and window {min, avg, max, points} over window_hours of 5-minute averages.
     memory_pressure.level is an indicator, not a diagnosis: HIGH when actual
     free memory is below 10% of total, ELEVATED below 20%, NORMAL at 20% or

@@ -2,7 +2,8 @@
 
 The two writes carry a ``confirmed=False`` preview gate like acknowledge_alert
 (same risk: reversible, but alerting on the resource stops), and declare each
-other as their undo. ``tests/test_no_destructive_ops.py`` finds the gate here by
+other as their undo — recorded only when the before-state shows the undo would
+restore it (start: was not in maintenance; end: was in maintenance). ``tests/test_no_destructive_ops.py`` finds the gate here by
 searching the whole ``mcp_server`` tree.
 """
 
@@ -20,8 +21,17 @@ def _changed(result: Any) -> bool:
     return isinstance(result, dict) and not result.get("preview") and not result.get("error")
 
 
+def _before_in_maintenance(result: Any) -> Optional[bool]:
+    """``before.in_maintenance`` from an executed write: True / False / None (unknown)."""
+    before = result.get("before") if isinstance(result, dict) else None
+    return before.get("in_maintenance") if isinstance(before, dict) else None
+
+
 def _undo_start(params: dict, result: Any) -> Optional[dict]:
-    if not _changed(result):
+    # Only a call that opened the window may close it. Already in maintenance
+    # (True) means ending it would close someone else's window; unknown (None)
+    # cannot rule that out. Either way, record no undo.
+    if not _changed(result) or _before_in_maintenance(result) is not False:
         return None
     return {
         "tool": "end_resource_maintenance",
@@ -32,7 +42,11 @@ def _undo_start(params: dict, result: Any) -> Optional[dict]:
 
 
 def _undo_end(params: dict, result: Any) -> Optional[dict]:
-    if not _changed(result):
+    # The undo re-enters maintenance with no end. Record it only when the
+    # resource is known to have been in maintenance: from an unknown (None)
+    # before-state, replaying it could put a resource that never was in
+    # maintenance into indefinite maintenance.
+    if not _changed(result) or _before_in_maintenance(result) is not True:
         return None
     return {
         "tool": "start_resource_maintenance",
@@ -71,7 +85,8 @@ def start_resource_maintenance(
     state before and after, confirmed (true / false / null when the after-state
     could not be read — null is unknown, not failure) and a note. Default
     confirmed=False returns a preview without connecting. Undo:
-    end_resource_maintenance.
+    end_resource_maintenance, recorded only when the resource was known not to
+    be in maintenance before.
 
     Args:
         resource_id: Resource UUID from list_resources (not the resource name).
@@ -120,11 +135,14 @@ def end_resource_maintenance(
 ) -> dict:
     """[WRITE] Take one resource out of maintenance so Aria resumes alerting on it and collecting its data.
 
-    Refuses a resource whose state was read and is not MAINTAINED /
-    MAINTAINED_MANUAL (nothing to end). Returns the state before and after,
+    Refuses only a resource known not to be in maintenance (an adapter reports
+    a state such as STARTED or STOPPED — nothing to end). When the state is
+    unknown (unreadable, or reported as UNKNOWN / NONE) it proceeds and
+    before.in_maintenance is null. Returns the state before and after,
     confirmed (true / false / null when unknown) and a note. Default
     confirmed=False returns a preview without connecting. Undo:
-    start_resource_maintenance (re-enters as manual maintenance).
+    start_resource_maintenance (re-enters as manual maintenance), recorded only
+    when the resource was known to be in maintenance before.
 
     Args:
         resource_id: Resource UUID from list_resources (not the resource name).
