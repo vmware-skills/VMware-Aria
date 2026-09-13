@@ -1,4 +1,4 @@
-## Unreleased
+## v1.13.0 — look things up, check Aria itself, and handle maintenance and alert notes
 
 Eleven new MCP tools (33 → 44: 34 read, 10 write) and eleven new CLI commands.
 
