@@ -39,6 +39,10 @@ class _FakeClient:
 
     def post(self, path: str, json_data: dict | None = None, **_kwargs) -> dict:
         self.post_calls.append((path, json_data))
+        if path != "/resources/stats/query":
+            # Rightsizing also issues ONE bulk properties query per page; this
+            # fake publishes no properties, which the row reports as unknown.
+            return {"values": []}
         # Bulk stats/query response shape: values[].{resourceId, stat-list.stat[]}
         ids = (json_data or {}).get("resourceId", [])
         keys = (json_data or {}).get("statKey", [])
@@ -50,6 +54,7 @@ class _FakeClient:
                         "stat": [
                             {"statKey": {"key": k}, "timestamps": [1000], "data": [self._stat_key_values[k]]}
                             for k in keys
+                            if k in self._stat_key_values  # unpublished keys are omitted, as on the appliance
                         ]
                     },
                 }
@@ -111,7 +116,8 @@ def test_list_rightsizing_issues_one_bulk_stats_query_not_per_vm_loop() -> None:
     assert len(body["resourceId"]) == 50
     # Output shape preserved.
     assert results and len(results) == 50
-    assert set(results[0]) == {
+    # Original fields preserved (2026-09-13 added units/direction/power fields beside them).
+    assert set(results[0]) >= {
         "id",
         "name",
         "recommended_cpu",

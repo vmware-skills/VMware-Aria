@@ -13,6 +13,7 @@ All API responses pass through sanitize() to strip control characters.
 from __future__ import annotations
 
 import logging
+import math
 from typing import TYPE_CHECKING
 
 from vmware_policy import paginated, sanitize
@@ -241,16 +242,46 @@ def list_rightsizing_recommendations(
     ``scripts/probe_aria_rightsizing.py`` counts the three outcomes per key on a
     real estate, which is what would show it happening.
 
+    Units and direction (verified on a live 8.18.7, 2026-09-13). The raw
+    ``recommended_*`` numbers are MHz / KB / GB — ``recommended_units`` says so on
+    every row. CPU MHz is recommended cores times the host's MHz per core, so it
+    is converted with the VM's own ``cpu|speed`` property (total Hz across its
+    vCPUs) into ``recommended_vcpus``, rounded up. ``cpu_direction`` /
+    ``memory_direction`` compare that against ``config|hardware|numCpu`` and
+    ``config|hardware|memoryKB``: ``oversized`` / ``undersized`` / ``right_sized``,
+    or ``None`` when either side is not published. Disk carries no direction:
+    what baseline the engine sizes disk against is unverified, and a virtual
+    disk cannot be shrunk in place.
+
+    Powered-off VMs and templates are **labelled, not dropped**: dropping them
+    would break ``total``/``truncated`` (one row per VM evaluated), and a
+    powered-off VM is itself a reclamation candidate. ``actionable`` is True only
+    for a powered-on non-template VM whose CPU or memory is off its
+    recommendation; every other row carries ``caveats`` saying why.
+
+    Vendor appliances cannot be identified reliably: ``summary|config|productName``
+    is published only for OVF deployments that carry a vApp product (present on
+    the Aria appliance, absent on a vCenter appliance in the same estate). So
+    ``product_name`` is reported when published, and every reduction carries a
+    caveat to check the vendor minimum size — no name-based guessing.
+
+    ``aria_verdict`` surfaces the engine's own ``summary|oversized|*`` /
+    ``summary|undersized|*`` statistics; when they point a different way from
+    ``recommendedSize`` (seen live: 2 -> 1 vCPU recommended while
+    ``summary|oversized|vcpus`` is 0) a caveat names both.
+
     Args:
         client: Authenticated Aria Operations API client.
         resource_id: Optional VM resource UUID to scope the query.
         limit: Maximum number of VMs to evaluate when listing (1–100).
 
     Returns:
-        Result envelope whose ``items`` carry VM id and name, the three
-        ``recommended_*`` sizes, and ``sizing_status`` (one of
-        ``recommendation`` / ``reclaimable`` / ``none_published``). One row per
-        VM evaluated, so ``total`` carries the environment's VM
+        Result envelope whose ``items`` carry VM id and name, the three raw
+        ``recommended_*`` sizes with ``recommended_units``, ``sizing_status`` (one
+        of ``recommendation`` / ``reclaimable`` / ``none_published``), current
+        configuration and direction, power state, template flag, product name,
+        ``aria_verdict``, ``actionable`` and ``caveats``. One row per VM
+        evaluated, so ``total`` carries the environment's VM
         ``pageInfo.totalCount`` — a run that evaluated every VM reads as
         complete, a capped one as truncated.
     """
@@ -269,15 +300,6 @@ def list_rightsizing_recommendations(
             for r in listing.get("resourceList", [])
         }
 
-    # VM-published rightsizing keys have NO demand segment (spec audit), and
-    # Broadcom's Capacity Analytics metric list names three of them, not two —
-    # diskspace was simply missing here until 2026-09-07.
-    stat_keys = [
-        "OnlineCapacityAnalytics|cpu|recommendedSize",
-        "OnlineCapacityAnalytics|mem|recommendedSize",
-        "OnlineCapacityAnalytics|diskspace|recommendedSize",
-    ]
-
     # One bulk POST /resources/stats/query for every target — replaces the old
     # per-VM GET /resources/{id}/stats/latest loop (an N+1 firing up to one
     # round-trip per VM, ~101 for a full listing).
@@ -290,38 +312,235 @@ def list_rightsizing_recommendations(
     # current for a signal that moves as slowly as capacity. The probe reports
     # per-key presence against the catalogue, which is what would expose a
     # window still too short.
+    ids = [rid for rid in targets if rid]
     stats_by_resource = latest_stats_bulk(
-        client, list(targets), stat_keys, window_ms=25 * 3_600_000
+        client, ids, _RIGHTSIZING_STAT_KEYS, window_ms=25 * 3_600_000
     )
+    # Current configuration, power state and template flag are properties, not
+    # stats — one bulk query for the page, same no-N+1 rule.
+    props_by_resource = _latest_properties_bulk(client, ids, _RIGHTSIZING_PROPERTY_KEYS)
 
-    results = []
-    for rid, name in targets.items():
-        if not rid:
-            continue
-        values = stats_by_resource.get(rid, {})
-        raw = {
-            dim: values.get(f"OnlineCapacityAnalytics|{dim}|recommendedSize")
-            for dim in ("cpu", "mem", "diskspace")
-        }
-        # A published 0 means "reclaimable", not "recommend zero" (KB 379521),
-        # so it must not reach the caller in a field named recommended_*.
-        sized = {d: v for d, v in raw.items() if v is not None and float(v) > 0}
-        if sized:
-            status = "recommendation"
-        elif any(v is not None for v in raw.values()):
-            status = "reclaimable"
-        else:
-            status = "none_published"
-        results.append(
-            {
-                "id": sanitize(rid),
-                "name": name,
-                "recommended_cpu": sized.get("cpu"),
-                "recommended_memory": sized.get("mem"),
-                "recommended_diskspace": sized.get("diskspace"),
-                "sizing_status": status,
-            }
-        )
+    results = [
+        _rightsizing_row(rid, name, stats_by_resource.get(rid, {}), props_by_resource.get(rid, {}))
+        for rid, name in targets.items()
+        if rid
+    ]
     if resource_id:
         return paginated(results)
     return paginated(results, limit=limit, total=vm_total)
+
+
+# ---------------------------------------------------------------------------
+# rightsizing helpers
+# ---------------------------------------------------------------------------
+
+_DIMENSIONS = ("cpu", "mem", "diskspace")
+
+#: VM-published rightsizing keys have NO demand segment (spec audit), and
+#: Broadcom's Capacity Analytics metric list names three of them.
+_RECOMMENDED_KEYS = {dim: f"OnlineCapacityAnalytics|{dim}|recommendedSize" for dim in _DIMENSIONS}
+
+#: Units per the 8.18.7 VirtualMachine statkey catalogue, and confirmed against
+#: vCenter: cpu == cores x host MHz/core, mem == configured-style KB.
+_RECOMMENDED_UNITS = {"cpu": "MHz", "memory": "KB", "diskspace": "GB"}
+
+#: The engine's own verdict (8.18.7 catalogue; memory amounts in KB).
+_VERDICT_KEYS = {
+    "oversized": "summary|oversized",
+    "oversized_vcpus": "summary|oversized|vcpus",
+    "oversized_memory_kb": "summary|oversized|memory",
+    "undersized": "summary|undersized",
+    "undersized_vcpus": "summary|undersized|vcpus",
+    "undersized_memory_kb": "summary|undersized|memory",
+}
+
+_RIGHTSIZING_STAT_KEYS = list(_RECOMMENDED_KEYS.values()) + list(_VERDICT_KEYS.values())
+
+# Property keys, each seen answered on a live 8.18.7 before use (踩坑 #36).
+_PROP_NUM_CPU = "config|hardware|numCpu"
+_PROP_MEMORY_KB = "config|hardware|memoryKB"
+_PROP_CPU_SPEED_HZ = "cpu|speed"  # total Hz across the VM's vCPUs (== vCenter host hz x numCpu)
+_PROP_POWER_STATE = "summary|runtime|powerState"  # "Powered On" / "Powered Off"
+_PROP_IS_TEMPLATE = "summary|config|isTemplate"  # "true" / "false"
+_PROP_PRODUCT_NAME = "summary|config|productName"  # only OVF deployments with a vApp product
+
+_RIGHTSIZING_PROPERTY_KEYS = [
+    _PROP_NUM_CPU,
+    _PROP_MEMORY_KB,
+    _PROP_CPU_SPEED_HZ,
+    _PROP_POWER_STATE,
+    _PROP_IS_TEMPLATE,
+    _PROP_PRODUCT_NAME,
+]
+
+_POWERED_ON = "Powered On"
+_POWERED_OFF = "Powered Off"
+
+
+def _latest_properties_bulk(
+    client: AriaClient, resource_ids: list[str], property_keys: list[str]
+) -> dict[str, dict[str, object]]:
+    """Latest property values for many resources in ONE POST.
+
+    ``POST /resources/properties/latest/query`` (in both the 8.6 and 9.1 operation
+    indexes). Observed 8.18.7 reply: ``values[].property-contents.property-content[]``
+    with ``statKey`` as a plain string, numeric values under ``data`` and string
+    values under ``values``; a key the resource does not publish is omitted.
+    """
+    if not resource_ids:
+        return {}
+    data = client.post(
+        "/resources/properties/latest/query",
+        json_data={"resourceIds": list(resource_ids), "propertyKeys": list(property_keys)},
+        retries=1,
+    )
+    result: dict[str, dict[str, object]] = {}
+    for entry in data.get("values", []) or []:
+        contents = entry.get("property-contents") or entry.get("propertyContents") or {}
+        per_resource = result.setdefault(entry.get("resourceId", ""), {})
+        for prop in contents.get("property-content") or contents.get("propertyContent") or []:
+            key = prop.get("statKey")
+            points = prop.get("data") or prop.get("values") or []
+            if isinstance(key, str) and points:
+                per_resource[key] = points[-1]
+    return result
+
+
+def _as_float(value: object) -> float | None:
+    try:
+        return None if value is None else float(value)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return None
+
+
+def _as_bool(value: object) -> bool | None:
+    text = str(value).strip().lower() if value is not None else ""
+    return {"true": True, "false": False}.get(text)
+
+
+def _direction(current: float | None, recommended: float | None) -> str | None:
+    if current is None or recommended is None:
+        return None
+    if recommended < current:
+        return "oversized"
+    if recommended > current:
+        return "undersized"
+    return "right_sized"
+
+
+def _cpu_sizing(props: dict, recommended_mhz: float | None) -> dict:
+    """Current vCPUs, MHz per vCPU and the MHz recommendation in vCPUs."""
+    num_cpu = _as_float(props.get(_PROP_NUM_CPU))
+    speed_hz = _as_float(props.get(_PROP_CPU_SPEED_HZ))
+    mhz_per_vcpu = speed_hz / num_cpu / 1_000_000 if num_cpu and speed_hz else None
+    recommended_vcpus = None
+    if recommended_mhz is not None and mhz_per_vcpu:
+        # Round up: the engine's MHz is whole cores on 8.18.7, and a fraction
+        # left by float noise must never round a demand DOWN a core.
+        recommended_vcpus = max(1, math.ceil(recommended_mhz / mhz_per_vcpu - 1e-6))
+    current_vcpus = int(num_cpu) if num_cpu is not None else None
+    return {
+        "current_vcpus": current_vcpus,
+        "cpu_mhz_per_vcpu": round(mhz_per_vcpu, 2) if mhz_per_vcpu else None,
+        "recommended_vcpus": recommended_vcpus,
+        "cpu_direction": _direction(current_vcpus, recommended_vcpus),
+    }
+
+
+def _aria_verdict(stats: dict) -> dict | None:
+    raw = {field: _as_float(stats.get(key)) for field, key in _VERDICT_KEYS.items()}
+    if all(v is None for v in raw.values()):
+        return None
+    return {
+        field: (None if v is None else v > 0) if field in ("oversized", "undersized") else v
+        for field, v in raw.items()
+    }
+
+
+def _engine_direction(verdict: dict | None, unit: str) -> str | None:
+    if verdict is None:
+        return None
+    over, under = verdict.get(f"oversized_{unit}"), verdict.get(f"undersized_{unit}")
+    if over is None or under is None:
+        return None
+    return "oversized" if over > 0 else "undersized" if under > 0 else "right_sized"
+
+
+def _rightsizing_caveats(row: dict, props_published: bool) -> list[str]:
+    caveats: list[str] = []
+    power, template = row["power_state"], row["is_template"]
+    if power is None or template is None:
+        caveats.append(
+            "power state / template flag not published for this VM — cannot tell "
+            "whether it is a running workload"
+        )
+    elif template:
+        caveats.append("template: not a running workload — size the VMs deployed from it instead")
+    elif power == _POWERED_OFF:
+        caveats.append(
+            "powered off: the recommendation reflects past (or no) demand, not a "
+            "running workload — decide whether the VM is needed before sizing it"
+        )
+    elif power != _POWERED_ON:
+        caveats.append(f"power state is '{power}', not {_POWERED_ON}")
+    if row["current_vcpus"] is None or row["current_memory_kb"] is None:
+        if props_published or row["sizing_status"] == "recommendation":
+            caveats.append(
+                "current configuration (config|hardware|numCpu / memoryKB / cpu|speed) "
+                "not published — direction cannot be stated"
+            )
+    for dim, unit, key in (("cpu", "vcpus", "vcpus"), ("memory", "memory_kb", "memory")):
+        ours, engine = row[f"{dim}_direction"], _engine_direction(row["aria_verdict"], unit)
+        if ours and engine and ours != engine:
+            caveats.append(
+                f"recommendedSize reads {dim} as {ours} but the engine's own "
+                f"summary|oversized|{key} / summary|undersized|{key} read {engine} — "
+                "confirm in the Aria UI before acting"
+            )
+    if "oversized" in (row["cpu_direction"], row["memory_direction"]):
+        product = f" Aria reports product '{row['product_name']}'." if row["product_name"] else ""
+        caveats.append(
+            "before reducing, check the vendor minimum size for this guest — vendor "
+            "appliances publish floors, and appliances cannot be reliably identified "
+            f"from the API.{product}"
+        )
+    return caveats
+
+
+def _rightsizing_row(rid: str, name: str, stats: dict, props: dict) -> dict:
+    raw = {dim: stats.get(_RECOMMENDED_KEYS[dim]) for dim in _DIMENSIONS}
+    # A published 0 means "reclaimable", not "recommend zero" (KB 379521),
+    # so it must not reach the caller in a field named recommended_*.
+    sized = {d: float(v) for d, v in raw.items() if v is not None and float(v) > 0}
+    if sized:
+        status = "recommendation"
+    elif any(v is not None for v in raw.values()):
+        status = "reclaimable"
+    else:
+        status = "none_published"
+    power = props.get(_PROP_POWER_STATE)
+    product = props.get(_PROP_PRODUCT_NAME)
+    current_memory_kb = _as_float(props.get(_PROP_MEMORY_KB))
+    row = {
+        "id": sanitize(rid),
+        "name": name,
+        "recommended_cpu": sized.get("cpu"),
+        "recommended_memory": sized.get("mem"),
+        "recommended_diskspace": sized.get("diskspace"),
+        "recommended_units": dict(_RECOMMENDED_UNITS),
+        "sizing_status": status,
+        **_cpu_sizing(props, sized.get("cpu")),
+        "current_memory_kb": current_memory_kb,
+        "memory_direction": _direction(current_memory_kb, sized.get("mem")),
+        "power_state": sanitize(str(power)) if power is not None else None,
+        "is_template": _as_bool(props.get(_PROP_IS_TEMPLATE)),
+        "product_name": sanitize(str(product)) if product else None,
+        "aria_verdict": _aria_verdict(stats),
+    }
+    row["actionable"] = bool(
+        row["power_state"] == _POWERED_ON
+        and row["is_template"] is False
+        and {"oversized", "undersized"} & {row["cpu_direction"], row["memory_direction"]}
+    )
+    row["caveats"] = _rightsizing_caveats(row, props_published=bool(props))
+    return row

@@ -81,12 +81,12 @@ def list_rightsizing_recommendations(
     limit: int = 50,
     target: Optional[str] = None,
 ) -> dict:
-    """[READ] List VM rightsizing data — recommended CPU/memory/disk size per VM.
+    """[READ] List VM rightsizing data — recommended CPU/memory/disk size per VM, with units, direction and whether to act.
 
     Reads the three OnlineCapacityAnalytics recommendedSize metrics, the only
-    rightsizing signal the public API publishes, on both 8.x and 9.x. Compare
-    against the VM's provisioned size to find over/under-provisioning. Get VM
-    UUIDs from list_resources. One bulk stats call covers the whole page.
+    rightsizing signal the public API publishes, on both 8.x and 9.x. Get VM
+    UUIDs from list_resources. One bulk stats call and one bulk properties call
+    cover the whole page.
 
     Read `sizing_status` before quoting any number:
       recommendation  — recommended_* carry sizes.
@@ -96,6 +96,22 @@ def list_rightsizing_recommendations(
       none_published  — the VM needs no resizing OR analytics never scored it.
                         The appliance does not distinguish these two; do not
                         report it as either one.
+
+    Units: recommended_* are raw MHz / KB / GB (see `recommended_units`) — never
+    quote the CPU number as vCPUs. Use `recommended_vcpus` (MHz converted with
+    the VM's own host core speed, rounded up) against `current_vcpus`, and
+    `recommended_memory` against `current_memory_kb`. `cpu_direction` /
+    `memory_direction` are oversized / undersized / right_sized, or null when
+    the current size is not published. Disk has no direction.
+
+    Powered-off VMs and templates are listed, not dropped: check `power_state`,
+    `is_template` and `actionable` (true only for a powered-on non-template VM
+    whose CPU or memory is off its recommendation), and read `caveats` before
+    recommending a change. Vendor appliances (vCenter, Aria, NSX...) cannot be
+    identified reliably — `product_name` appears only when the VM publishes a
+    vApp product — so every reduction carries a caveat to check the vendor
+    minimum size first. `aria_verdict` is the engine's own summary|oversized /
+    undersized statistics; a caveat flags when it disagrees with recommendedSize.
 
     This is not the number the vendor UI's Rightsize page shows — that view
     presents allocated plus a suggested delta, not the absolute recommended

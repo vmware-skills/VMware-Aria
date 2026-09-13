@@ -544,10 +544,14 @@ def capacity_rightsizing(
 
     table = Table(title="Rightsizing (OnlineCapacityAnalytics recommendedSize)", show_lines=False)
     table.add_column("VM Name", style="bold")
-    table.add_column("Status")
-    table.add_column("Rec. CPU")
-    table.add_column("Rec. Mem")
-    table.add_column("Rec. Disk")
+    table.add_column("Power")
+    # min_width: on a narrow terminal Rich shrinks columns with an ellipsis, and
+    # a clipped "reclaima…" is the state this column exists to show.
+    table.add_column("Status", min_width=len("none published"))
+    table.add_column("vCPU now→rec")
+    table.add_column("Mem GiB now→rec")
+    table.add_column("Disk GB")
+    table.add_column("Act.")
 
     # Three states, three renderings — a reclaimable VM and one with nothing
     # published must not both come out as an empty pair of cells, because
@@ -563,17 +567,42 @@ def capacity_rightsizing(
     def _cell(value: object) -> str:
         return "—" if value is None else str(value)
 
+    def _gib(kb: object) -> str:
+        return "—" if kb is None else f"{float(kb) / 1_048_576:.1f}"
+
+    _arrow = {"oversized": "↓", "undersized": "↑", "right_sized": "="}
+
+    def _change(now: str, rec: str, direction: object) -> str:
+        # The raw recommendation is MHz/KB; these cells are converted so the
+        # comparison against the current size is readable, and the direction is
+        # marked rather than left for the reader to infer (legend under the table;
+        # an arrow survives an 80-column terminal where a word gets clipped).
+        return f"{now}→{rec} {_arrow.get(str(direction), '?')}" if direction else f"{now}→{rec}"
+
+    def _disk(gb: object) -> str:
+        return "—" if gb is None else f"{float(gb):.1f}"
+
     for r in items:
         status = r.get("sizing_status", "")
+        power = "template" if r.get("is_template") else _cell(r.get("power_state")).replace("Powered ", "")
         table.add_row(
             (r["name"] or r["id"])[:40],
+            power,
             _status_style.get(status, status),
-            _cell(r.get("recommended_cpu")),
-            _cell(r.get("recommended_memory")),
-            _cell(r.get("recommended_diskspace")),
+            _change(_cell(r.get("current_vcpus")), _cell(r.get("recommended_vcpus")), r.get("cpu_direction")),
+            _change(_gib(r.get("current_memory_kb")), _gib(r.get("recommended_memory")), r.get("memory_direction")),
+            _disk(r.get("recommended_diskspace")),
+            "[green]yes[/]" if r.get("actionable") else "[dim]no[/]",
         )
 
     console.print(table)
+    console.print(
+        "[dim]↓ oversized  ↑ undersized  = right-sized  (vs current config; GiB rounded). "
+        "Act. = powered on, not a template, and off its recommendation.[/]"
+    )
+    for r in items:
+        for caveat in r.get("caveats") or []:
+            console.print(f"[dim]• {(r['name'] or r['id'])[:40]}: {caveat}[/]")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
