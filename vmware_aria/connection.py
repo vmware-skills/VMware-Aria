@@ -20,7 +20,7 @@ import time
 from typing import Any
 
 import httpx
-
+from vmware_policy import sanitize
 from vmware_policy.compat import Requires, version_remedy
 
 from vmware_aria.config import AppConfig, TargetConfig, load_config
@@ -51,6 +51,9 @@ _DOCTOR_THEN = "Then run 'vmware-aria doctor'."
 
 #: A dotted version inside a release name: "VMware Aria Operations 8.18.7".
 _DOTTED_VERSION = re.compile(r"\d+(?:\.\d+)+")
+
+#: The release name is shown to agents verbatim; the live one is 29 characters.
+_RELEASE_NAME_MAX_LEN = 200
 
 
 #: Sentinel for "the version probe has not run yet". ``None`` already means
@@ -90,6 +93,14 @@ class AriaApiError(Exception):
         self.diagnosis = diagnosis if diagnosis is not None else message
 
 
+class NonJsonBodyError(AriaApiError):
+    """A successful status whose body is not JSON — not an answer from suite-api.
+
+    A login page, an SSO redirect or a proxy in front of the node answers 200
+    with HTML. ``status_code`` is that 2xx status.
+    """
+
+
 class NotSuiteApiError(ConnectionError):
     """Token acquisition answered 200 without a token: not a suite-api endpoint.
 
@@ -112,6 +123,37 @@ def _json_body(resp: httpx.Response) -> Any:
         return None
 
 
+def _json_result(resp: httpx.Response, method: str, path: str, host: str) -> Any:
+    """The parsed body of a successful response; ``{}`` when it has none.
+
+    A 2xx whose body is not JSON used to surface as a bare ``JSONDecodeError``
+    that no caller catches: the health check crashed on a login page, and the
+    doctor reported it as an auth failure right under "Token acquired"
+    (2026-09-13 review). It is translated here, once, like every error status
+    (踩坑 #37), into a :class:`NonJsonBodyError`.
+    """
+    if not resp.content:
+        return {}
+    try:
+        return resp.json()
+    except ValueError as exc:
+        content_type = sanitize(resp.headers.get("content-type") or "no content-type", max_len=80)
+        head = (
+            f"Aria Operations answered HTTP {resp.status_code} to {method} {path}, but the body "
+            f"is not JSON ({content_type}). A login page, an SSO redirect or a proxy in front "
+            f"of the node answers like this: check that this target's host and port reach "
+            f"the Aria Operations node itself."
+        )
+        tail = f"Configured host: {host}."
+        raise NonJsonBodyError(
+            f"{head} {_DOCTOR_POINTER} {tail}",
+            status_code=resp.status_code,
+            method=method,
+            path=path,
+            diagnosis=f"{head} {tail}",
+        ) from exc
+
+
 def parse_release_info(data: Any) -> dict[str, Any]:
     """Read the product identity out of a ``GET /versions/current`` body.
 
@@ -119,10 +161,11 @@ def parse_release_info(data: Any) -> dict[str, Any]:
     8.18.7"`` plus ``major: 1, minor: 77`` — and those two are the *API*
     version, not the product's, so they are never read. The version is the
     dotted number inside ``releaseName``; with none there every field is
-    ``None`` rather than a guess (踩坑 #36).
+    ``None`` rather than a guess (踩坑 #36). The name is API text and goes to
+    agents, so it is sanitized (control and format characters, length).
     """
     release = data.get("releaseName") if isinstance(data, dict) else None
-    release = release.strip() if isinstance(release, str) else ""
+    release = sanitize(release, max_len=_RELEASE_NAME_MAX_LEN).strip() if isinstance(release, str) else ""
     match = _DOTTED_VERSION.search(release)
     version = match.group() if match else None
     build = data.get("buildNumber") if isinstance(data, dict) else None
@@ -289,7 +332,11 @@ class AriaClient:
                 path="/auth/token/acquire",
                 diagnosis=f"{head} {host}",
             ) from exc
-        data = resp.json()
+        # A 200 that is not JSON (a login page) carries no token either, and is
+        # the same "not a suite-api endpoint" answer — not a JSONDecodeError.
+        data = _json_body(resp)
+        if not isinstance(data, dict):
+            data = {}
 
         token = data.get("token")
         if not token:
@@ -432,7 +479,7 @@ class AriaClient:
         transient back-off.
         """
         resp = self._request("GET", path, params=params, retries=retries, requires=requires)
-        return resp.json() if resp.content else {}
+        return _json_result(resp, "GET", path, self._target.host)
 
     def post(
         self,
@@ -454,12 +501,12 @@ class AriaClient:
         resp = self._request(
             "POST", path, params=params, json_data=json_data, retries=retries, requires=requires
         )
-        return resp.json() if resp.content else {}
+        return _json_result(resp, "POST", path, self._target.host)
 
     def put(self, path: str, json_data: dict[str, Any] | None = None) -> dict:
         """PUT request. Returns parsed JSON response."""
         resp = self._request("PUT", path, json_data=json_data)
-        return resp.json() if resp.content else {}
+        return _json_result(resp, "PUT", path, self._target.host)
 
     def product_version(self) -> str | None:
         """Best-effort appliance version string, or ``None`` if unreadable.
@@ -560,7 +607,7 @@ class AriaClient:
                     path=url,
                     body=_json_body(resp),
                 )
-            return resp.json() if resp.content else {}
+            return _json_result(resp, method, url, self._target.host)
 
     def delete(self, path: str) -> None:
         """DELETE request."""

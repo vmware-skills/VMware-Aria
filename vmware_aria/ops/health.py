@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 
 from vmware_policy import paginated, sanitize
 
-from vmware_aria.connection import AriaApiError, parse_release_info
+from vmware_aria.connection import AriaApiError, NonJsonBodyError, parse_release_info
 
 if TYPE_CHECKING:
     from vmware_aria.connection import AriaClient
@@ -25,6 +25,8 @@ _SERVICE_FAILED = frozenset({"ERROR"})
 
 
 def _describe_failure(exc: AriaApiError) -> str:
+    if isinstance(exc, NonJsonBodyError):
+        return f"HTTP {exc.status_code}, but the body is not JSON — a login page or proxy, not suite-api"
     return f"HTTP {exc.status_code}" if exc.status_code is not None else "no HTTP response"
 
 
@@ -94,15 +96,21 @@ def _read_services(client: AriaClient) -> tuple[list[dict] | None, str | None]:
     """Per-service health from ``GET /deployment/node/services/info``.
 
     Returns ``(services, None)`` or ``(None, reason)`` — never ``[]`` for an
-    unread breakdown, which would read as "no services are failing".
+    unread breakdown, which would read as "no services are failing". A body
+    with no usable service rows (no list, an empty list, no objects in it) is
+    unread too: an appliance always runs services, so an empty breakdown is a
+    shape this code does not recognise, not a clean bill of health.
     """
+    path = "/deployment/node/services/info"
     try:
-        data = client.get("/deployment/node/services/info", retries=0)
+        data = client.get(path, retries=0)
     except AriaApiError as exc:
-        return None, f"GET /deployment/node/services/info failed ({_describe_failure(exc)})."
+        return None, f"GET {path} failed ({_describe_failure(exc)})."
     rows = data.get("service") if isinstance(data, dict) else None
     if not isinstance(rows, list):
-        return None, "GET /deployment/node/services/info answered without a 'service' list."
+        return None, f"GET {path} answered without a 'service' list."
+    if not any(isinstance(r, dict) for r in rows):
+        return None, f"GET {path} answered a 'service' list with no service objects in it."
     services = [
         {
             "name": sanitize(str(r.get("name") or "")),
@@ -133,19 +141,44 @@ def _assess(node_status: str, services: list[dict] | None) -> str:
     return "UNKNOWN"
 
 
-_ASSESSMENT_TEXT = {
-    "HEALTHY": "The node reports ONLINE and no service reports a failure.",
-    "DEGRADED": (
-        "Some services report OK and others do not. The node flag is OFFLINE "
-        "whenever any one service is not running, so this is not an outage: "
-        "what the failed services provide may be unavailable, the rest answers."
-    ),
-    "DOWN": "No service reports OK.",
-    "UNKNOWN": (
-        "The node is not ONLINE and the per-service breakdown does not settle "
-        "whether that is an outage or one failed service."
-    ),
-}
+_DEGRADED_TEXT = (
+    "Some services report OK and others do not. The node flag is OFFLINE "
+    "whenever any one service is not running, so this is not an outage: "
+    "what the failed services provide may be unavailable, the rest answers."
+)
+
+
+def _describe_assessment(assessment: str, services: list[dict] | None, unrecognized: list[str] | None) -> str:
+    """The assessment in words, stating only what was observed.
+
+    One fixed sentence per assessment used to claim things nobody had read:
+    an ONLINE node with an unreadable breakdown said "no service reports a
+    failure", and an ONLINE node with an unrecognised service state said "the
+    node is not ONLINE" (2026-09-13 review).
+    """
+    if assessment == "HEALTHY":
+        if services is None:
+            return (
+                "The node reports ONLINE, which it does only when every service runs. "
+                "The per-service breakdown was not read, so no service was checked individually."
+            )
+        noun = "service reports" if len(services) == 1 else "services report"
+        return f"The node reports ONLINE and all {len(services)} {noun} OK."
+    if assessment == "DEGRADED":
+        return _DEGRADED_TEXT
+    if assessment == "DOWN":
+        return "No service reports OK."
+    if services is None:
+        return (
+            "The node is not ONLINE and the per-service breakdown was not read, so this "
+            "cannot be told apart from an outage or one failed service."
+        )
+    if unrecognized:
+        return (
+            f"Some services report a health other than OK or ERROR ({', '.join(unrecognized)}); "
+            "that is counted as neither working nor failed."
+        )
+    return "The node is not ONLINE, yet every service listed reports OK; the breakdown does not explain the node flag."
 
 
 def get_aria_health(client: AriaClient) -> dict:
@@ -157,9 +190,10 @@ def get_aria_health(client: AriaClient) -> dict:
         ``overall_status``: the node's own status verbatim ("ONLINE"/"OFFLINE").
         ONLINE only when *every* service runs, so a single stuck service makes
         it OFFLINE while the platform keeps serving data — it is not an outage
-        signal on its own. ``assessment``: HEALTHY (ONLINE, no failed service),
-        DEGRADED (some services OK, some ERROR), DOWN (none OK), UNKNOWN (not
-        ONLINE and the breakdown cannot tell). ``healthy``: assessment is
+        signal on its own. ``assessment``: HEALTHY (ONLINE, no failed service;
+        also ONLINE with the breakdown unread, which ``details`` says),
+        DEGRADED (some services OK, some ERROR), DOWN (none OK), UNKNOWN (the
+        observations do not settle it). ``healthy``: assessment is
         HEALTHY. ``services`` (None when unreadable, with ``services_error``),
         ``services_not_ok`` / ``services_unrecognized`` (names), plus
         ``system_time_ms``, ``details`` and the fields of
@@ -173,7 +207,8 @@ def get_aria_health(client: AriaClient) -> dict:
     unrecognized = None if services is None else [
         s["name"] for s in services if s["health"] != _SERVICE_OK and s["health"] not in _SERVICE_FAILED
     ]
-    details = f"Node reports {node_status or 'no status'}{http_note}. {_ASSESSMENT_TEXT[assessment]}"
+    description = _describe_assessment(assessment, services, unrecognized)
+    details = f"Node reports {node_status or 'no status'}{http_note}. {description}"
     if not_ok:
         details += f" Not OK: {', '.join(not_ok)}."
     if services_error:

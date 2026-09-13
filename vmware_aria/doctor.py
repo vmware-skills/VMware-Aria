@@ -37,6 +37,10 @@ def _platform_checks(name: str, client: object) -> list[tuple[str, object, str]]
     The version comes from /versions/current, which answers during startup;
     the old probe of /deployment/node/status printed FAIL whenever the node
     was not fully ONLINE, and read a ``nodeType`` field NodeStatus never had.
+
+    An unreadable version warns and does not fail the pre-flight: the health
+    check treats it as context, and a low-privilege account (403) or a release
+    name without a number says nothing about whether the target works.
     """
     from vmware_aria.connection import AriaApiError
     from vmware_aria.ops.health import get_aria_health, read_product_version
@@ -48,7 +52,7 @@ def _platform_checks(name: str, client: object) -> list[tuple[str, object, str]]
         build = version["build_number"]
         rows.append((f"Aria version ({name})", True, line + (f", build {build})" if build else ")")))
     else:
-        rows.append((f"Aria version ({name})", False, version["version_error"]))
+        rows.append((f"Aria version ({name})", WARN, f"Not read: {version['version_error']}"))
 
     try:
         health = get_aria_health(client)
@@ -62,6 +66,36 @@ def _platform_checks(name: str, client: object) -> list[tuple[str, object, str]]
     if failing:
         detail += " " + "; ".join(failing)
     rows.append((f"Aria platform ({name})", _ASSESSMENT_STATUS[health["assessment"]], detail))
+    return rows
+
+
+def _target_checks(name: str, config: object) -> list[tuple[str, object, str]]:
+    """Auth, version and platform rows for one target; always disconnects.
+
+    Only a failure to connect is an auth failure. Anything that broke after the
+    token was acquired used to fall into the auth handler, printing "Aria auth
+    FAIL" under "Aria auth PASS — Token acquired" and skipping the disconnect
+    (2026-09-13 review). It is the platform row now.
+    """
+    from vmware_aria.connection import ConnectionManager
+
+    try:
+        mgr = ConnectionManager(config)
+        client = mgr.connect(name)
+    except Exception as e:  # noqa: BLE001 — every connect failure is reported as a row
+        return [(f"Aria auth ({name})", False, _diagnosis(e))]
+
+    rows: list[tuple[str, object, str]] = [(f"Aria auth ({name})", True, "Token acquired")]
+    try:
+        rows.extend(_platform_checks(name, client))
+    except Exception as e:  # noqa: BLE001 — reported as the platform row
+        _log.exception("Platform checks for %s did not complete", name)
+        rows.append((f"Aria platform ({name})", False, f"Checks did not complete: {_diagnosis(e)}"))
+    finally:
+        try:
+            mgr.disconnect(name)
+        except Exception as e:  # noqa: BLE001 — a failed disconnect must not hide the report
+            _log.warning("Disconnect from %s failed: %s", name, e)
     return rows
 
 
@@ -159,16 +193,7 @@ def run_doctor(
     # ── 6 & 7. Aria Operations authentication, version, platform health ─────
     if not skip_auth:
         for name in config.targets:
-            try:
-                from vmware_aria.connection import ConnectionManager
-
-                mgr = ConnectionManager(config)
-                client = mgr.connect(name)
-                checks.append((f"Aria auth ({name})", True, "Token acquired"))
-                checks.extend(_platform_checks(name, client))
-                mgr.disconnect(name)
-            except Exception as e:
-                checks.append((f"Aria auth ({name})", False, _diagnosis(e)))
+            checks.extend(_target_checks(name, config))
 
     # ── 8. MCP server import check ───────────────────────────────────────────
     try:
