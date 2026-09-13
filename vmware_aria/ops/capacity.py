@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING
 
 from vmware_policy import paginated, sanitize
 
+from vmware_aria.connection import AriaApiError
 from vmware_aria.ops.resources import latest_stats_bulk
 
 if TYPE_CHECKING:
@@ -260,8 +261,18 @@ def list_rightsizing_recommendations(
     Powered-off VMs and templates are **labelled, not dropped**: dropping them
     would break ``total``/``truncated`` (one row per VM evaluated), and a
     powered-off VM is itself a reclamation candidate. ``actionable`` is True only
-    for a powered-on non-template VM whose CPU or memory is off its
-    recommendation; every other row carries ``caveats`` saying why.
+    when the power state was read as ``Powered On``, the template flag was read
+    as false, and CPU or memory has an oversized/undersized direction. An
+    unknown power state or template flag is never taken as "running": it makes
+    the row not actionable. A row held back by power, template or unknown state
+    carries a caveat saying why; a right-sized running VM needs none.
+
+    The property read is best-effort. If ``POST /resources/properties/latest/query``
+    fails, the rows are still returned from stats with every property-derived
+    field ``None``, nothing actionable, one caveat per row saying the properties
+    could not be read, and ``properties_note`` giving the failure. That is a
+    different state from "not published", which means the appliance answered
+    without the key, and the two are never reported with the same words.
 
     Vendor appliances cannot be identified reliably: ``summary|config|productName``
     is published only for OVF deployments that carry a vApp product (present on
@@ -287,7 +298,8 @@ def list_rightsizing_recommendations(
         ``aria_verdict``, ``actionable`` and ``caveats``. One row per VM
         evaluated, so ``total`` carries the environment's VM
         ``pageInfo.totalCount`` — a run that evaluated every VM reads as
-        complete, a capped one as truncated.
+        complete, a capped one as truncated. Top-level ``properties_note`` is
+        ``None`` when the property read succeeded, otherwise why it failed.
     """
     limit = max(1, min(limit, 100))
 
@@ -321,17 +333,25 @@ def list_rightsizing_recommendations(
         client, ids, _RIGHTSIZING_STAT_KEYS, window_ms=25 * 3_600_000
     )
     # Current configuration, power state and template flag are properties, not
-    # stats — one bulk query for the page, same no-N+1 rule.
-    props_by_resource = _latest_properties_bulk(client, ids, _RIGHTSIZING_PROPERTY_KEYS)
+    # stats — one bulk query for the page, same no-N+1 rule. Its failure is
+    # context lost, not the answer lost: the recommendations came from stats.
+    props_by_resource, properties_note = _read_rightsizing_properties(client, ids)
+    props_failed = properties_note is not None
 
     results = [
-        _rightsizing_row(rid, name, stats_by_resource.get(rid, {}), props_by_resource.get(rid, {}))
+        _rightsizing_row(
+            rid,
+            name,
+            stats_by_resource.get(rid, {}),
+            props_by_resource.get(rid, {}),
+            props_failed=props_failed,
+        )
         for rid, name in targets.items()
         if rid
     ]
     if resource_id:
-        return paginated(results)
-    return paginated(results, limit=limit, total=vm_total)
+        return paginated(results, properties_note=properties_note)
+    return paginated(results, limit=limit, total=vm_total, properties_note=properties_note)
 
 
 # ---------------------------------------------------------------------------
@@ -399,6 +419,37 @@ MEMORY_DIRECTION_TOLERANCE = 0.01
 _POWERED_ON = "Powered On"
 _POWERED_OFF = "Powered Off"
 
+_PROPERTIES_QUERY_PATH = "/resources/properties/latest/query"
+
+
+def _read_rightsizing_properties(
+    client: AriaClient, resource_ids: list[str]
+) -> tuple[dict[str, dict[str, object]], str | None]:
+    """The page's VM properties, or ``({}, why)`` when the bulk read failed.
+
+    ``why`` is the ``properties_note`` the envelope carries. It must stay
+    distinguishable from an appliance that answered without a key: that is
+    "not published", this is "could not be read", and only the first says
+    anything about the VM.
+    """
+    try:
+        return _latest_properties_bulk(client, resource_ids, _RIGHTSIZING_PROPERTY_KEYS), None
+    except AriaApiError as exc:
+        status = _describe_status(exc)
+        _log.warning("rightsizing: POST %s failed (%s): %s", _PROPERTIES_QUERY_PATH, status, exc)
+        return {}, (
+            f"POST {_PROPERTIES_QUERY_PATH} failed ({status}), so power state, template "
+            "flag, current size and product name could not be read for any VM here. "
+            "Those fields are null because they are unknown, not because the VMs do not "
+            "publish them, and no row is actionable. The recommended_* sizes and "
+            "sizing_status come from stats and are unaffected. HTTP 403 usually means "
+            "the account cannot read resource properties; otherwise retry."
+        )
+
+
+def _describe_status(exc: AriaApiError) -> str:
+    return f"HTTP {exc.status_code}" if exc.status_code is not None else "no HTTP response"
+
 
 def _latest_properties_bulk(
     client: AriaClient, resource_ids: list[str], property_keys: list[str]
@@ -413,7 +464,7 @@ def _latest_properties_bulk(
     if not resource_ids:
         return {}
     data = client.post(
-        "/resources/properties/latest/query",
+        _PROPERTIES_QUERY_PATH,
         json_data={"resourceIds": list(resource_ids), "propertyKeys": list(property_keys)},
         retries=1,
     )
@@ -496,7 +547,15 @@ def _engine_direction(verdict: dict | None, unit: str) -> str | None:
     return "oversized" if over > 0 else "undersized" if under > 0 else "right_sized"
 
 
-def _rightsizing_caveats(row: dict, props_published: bool) -> list[str]:
+def _rightsizing_caveats(row: dict, props_published: bool, props_failed: bool = False) -> list[str]:
+    if props_failed:
+        # Every property-derived field is None, so none of the checks below has
+        # anything to say — and their "not published" wording would be false.
+        return [
+            "VM properties could not be read (the bulk property query failed — see "
+            "properties_note): power state, template flag and current size are "
+            "unknown, so this row is not actionable"
+        ]
     caveats: list[str] = []
     power, template = row["power_state"], row["is_template"]
     if power is None or template is None:
@@ -537,7 +596,9 @@ def _rightsizing_caveats(row: dict, props_published: bool) -> list[str]:
     return caveats
 
 
-def _rightsizing_row(rid: str, name: str, stats: dict, props: dict) -> dict:
+def _rightsizing_row(
+    rid: str, name: str, stats: dict, props: dict, *, props_failed: bool = False
+) -> dict:
     raw = {dim: stats.get(_RECOMMENDED_KEYS[dim]) for dim in _DIMENSIONS}
     # A published 0 means "reclaimable", not "recommend zero" (KB 379521),
     # so it must not reach the caller in a field named recommended_*.
@@ -574,5 +635,7 @@ def _rightsizing_row(rid: str, name: str, stats: dict, props: dict) -> dict:
         and row["is_template"] is False
         and {"oversized", "undersized"} & {row["cpu_direction"], row["memory_direction"]}
     )
-    row["caveats"] = _rightsizing_caveats(row, props_published=bool(props))
+    row["caveats"] = _rightsizing_caveats(
+        row, props_published=bool(props), props_failed=props_failed
+    )
     return row
