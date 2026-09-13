@@ -118,8 +118,10 @@ def list_rightsizing_recommendations(
     size. Both are correct and they will not match.
 
     Returns a paginated envelope: items, returned, limit, total (null
-    when the API reports no size), truncated, hint. Check truncated
-    before calling this the complete set.
+    when the API reports no size), truncated, hint, properties_note. Check truncated
+    before calling this the complete set. properties_note is null unless the
+    VM property read failed; then power_state, is_template and current sizes
+    are null because they are UNKNOWN (not unpublished) and no row is actionable.
 
     Args:
         resource_id: Optional VM resource UUID to scope to a single VM.

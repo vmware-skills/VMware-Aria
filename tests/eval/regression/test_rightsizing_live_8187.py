@@ -367,3 +367,132 @@ def test_a_real_memory_change_just_past_the_tolerance_still_has_a_direction() ->
     row = _single_vm_row({"cpu": 2 * 2803.19, "mem": over}, _props(2.0, 2803.19, current))
     assert row["memory_direction"] == "undersized"
     assert row["actionable"] is True
+
+
+# ── pre-release review, 2026-09-13 ─────────────────────────────────────────
+#
+# 1. A failed property read must degrade, not raise. Before the property query
+#    existed the tool answered from stats alone; a 403/500 on it (e.g. an
+#    account without property read) made the whole tool fail.
+# 2. ``actionable`` needs BOTH power and template to be known. The earlier
+#    unknown-state test nulled power, template and direction together, so the
+#    direction guard alone kept it green while ``is_template is False`` could be
+#    weakened to ``is not True`` and ``== "Powered On"`` to ``!= "Powered Off"``.
+
+
+class _PropertiesFailClient(_ReplayClient):
+    """The 8.18.7 replay, except the bulk property query fails."""
+
+    def __init__(self, fixture: dict, status_code: int | None) -> None:
+        super().__init__(fixture)
+        self._status_code = status_code
+
+    def post(self, path: str, json_data: dict | None = None, **kw) -> dict:
+        if path == PROPS_PATH:
+            from vmware_aria.connection import AriaApiError
+
+            self.post_calls.append(path)
+            raise AriaApiError("boom", status_code=self._status_code, method="POST", path=PROPS_PATH)
+        return super().post(path, json_data, **kw)
+
+
+_UNKNOWN_WHEN_PROPERTIES_FAIL = (
+    "power_state",
+    "is_template",
+    "current_vcpus",
+    "current_memory_kb",
+    "recommended_vcpus",
+    "cpu_direction",
+    "memory_direction",
+    "product_name",
+)
+
+
+@pytest.mark.parametrize(
+    ("status_code", "described"), [(403, "HTTP 403"), (500, "HTTP 500"), (None, "no HTTP response")]
+)
+def test_a_failed_property_read_degrades_to_unknown_rows_instead_of_failing(
+    status_code: int | None, described: str
+) -> None:
+    from vmware_aria.ops.capacity import list_rightsizing_recommendations
+
+    result = list_rightsizing_recommendations(_PropertiesFailClient(FIXTURE, status_code), limit=50)
+
+    rows = {r["name"]: r for r in result["items"]}
+    assert set(rows) == set(ROWS), "every VM is still one row"
+    # The stats half of the answer is untouched.
+    assert rows["Open-test"]["recommended_cpu"] == ROWS["Open-test"]["recommended_cpu"]
+    assert rows["Open-test"]["sizing_status"] == "recommendation"
+    for name, row in rows.items():
+        for field in _UNKNOWN_WHEN_PROPERTIES_FAIL:
+            assert row[field] is None, (name, field)
+        assert row["actionable"] is False, name
+        text = " ".join(row["caveats"])
+        assert "could not be read" in text, name
+        # "not published" means the appliance answered without the key — a
+        # different fact from the read failing, and it must not be claimed.
+        assert "not published" not in text, name
+
+    note = result["properties_note"]
+    assert note and PROPS_PATH in note and described in note
+    assert "not published" not in note
+
+
+def test_properties_note_is_null_when_the_property_read_succeeds() -> None:
+    from vmware_aria.ops.capacity import list_rightsizing_recommendations
+
+    assert list_rightsizing_recommendations(_ReplayClient(FIXTURE), limit=50)["properties_note"] is None
+
+
+def test_an_empty_property_reply_is_not_reported_as_a_failed_read() -> None:
+    """The appliance answering with nothing is "not published", never "could not be read"."""
+    from vmware_aria.ops.capacity import list_rightsizing_recommendations
+
+    fixture = {**FIXTURE, "properties_query": {"values": []}}
+    result = list_rightsizing_recommendations(_ReplayClient(fixture), limit=50)
+    assert result["properties_note"] is None
+    assert all("could not be read" not in " ".join(r["caveats"]) for r in result["items"])
+
+
+def _oversized_props(**overrides: object) -> dict[str, object]:
+    """2 vCPU / 16 GiB, powered on, not a template; an override of None removes the key."""
+    props = _props(2.0, 2803.19, 16777216.0)
+    removed = {k for k, v in overrides.items() if v is None}
+    return {
+        **{k: v for k, v in props.items() if k not in removed},
+        **{k: v for k, v in overrides.items() if v is not None},
+    }
+
+
+def _oversized_row(props: dict[str, object]) -> dict:
+    # One core of MHz against 2 vCPUs: cpu_direction is oversized in every case below.
+    return _single_vm_row({"cpu": 2803.19, "mem": 16777216.0}, props)
+
+
+def test_powered_on_non_template_oversized_vm_is_actionable() -> None:
+    row = _oversized_row(_oversized_props())
+    assert row["cpu_direction"] == "oversized"
+    assert row["actionable"] is True
+
+
+def test_unknown_template_flag_alone_blocks_actionable() -> None:
+    row = _oversized_row(_oversized_props(**{"summary|config|isTemplate": None}))
+    assert row["power_state"] == "Powered On"
+    assert row["is_template"] is None
+    assert row["cpu_direction"] == "oversized"
+    assert row["actionable"] is False
+
+
+def test_unknown_power_state_alone_blocks_actionable() -> None:
+    row = _oversized_row(_oversized_props(**{"summary|runtime|powerState": None}))
+    assert row["power_state"] is None
+    assert row["is_template"] is False
+    assert row["cpu_direction"] == "oversized"
+    assert row["actionable"] is False
+
+
+@pytest.mark.parametrize("power", ["Suspended", "poweredOn"])
+def test_a_power_state_other_than_powered_on_blocks_actionable(power: str) -> None:
+    row = _oversized_row(_oversized_props(**{"summary|runtime|powerState": power}))
+    assert row["power_state"] == power
+    assert row["actionable"] is False
