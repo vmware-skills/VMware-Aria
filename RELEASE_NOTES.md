@@ -1,3 +1,46 @@
+## Unreleased
+
+Eleven new MCP tools (33 → 44: 34 read, 10 write) and eight new CLI commands.
+
+**Resource catalog (3 read)** — look things up before querying them:
+
+- `list_metric_keys` (CLI `resource keys [RESOURCE_ID] --kind --filter --limit --offset`): the keys a resource reports,
+  joined with its kind's definition name and unit, or the keys a kind defines. Each row's `definition` is `found`,
+  `found_by_instance`, `not_defined_for_kind` or `not_read` (definitions unreadable: name and unit unknown, not
+  absent). A nonexistent resource id is a 404 error, not an empty list.
+- `get_resource_properties` (CLI `resource properties <resource-id> --name`): current property values sorted by name.
+- `get_resource_relationships` (CLI `resource relationships <resource-id> --type ALL|PARENT|CHILD`): related
+  resources, each with `direction`. ANCESTOR and DESCENDANT are refused — Aria Operations 8.18.7 answers HTTP 400.
+
+**Platform self-check (2 read)**:
+
+- `get_aria_node_resources` (CLI `health node [--hours] [--json]`): Aria's own node memory, swap and heap per
+  component, and watchdog restarts, from its self-monitoring objects — latest value plus window min/avg/max. Memory
+  pressure is NORMAL / ELEVATED / HIGH / UNKNOWN (actual free below 20% / 10% of total); missing keys are listed, not
+  zeroed. On 8.18.7 after a memory upgrade the node showed `mem|total` 15.61 GB (was 7.75), actual free 41%, pressure
+  NORMAL, and 9 watchdog services with 0 restarts.
+- `list_adapters` (CLI `health adapters [--kind] [--limit] [--offset] [--json]`): adapter instances with last
+  collected and heartbeat age, interval, resource and metric counts, and `stale` (last collection older than
+  max(3 × interval, 15 min)). On 8.18.7, 6 adapters, none stale.
+
+**Maintenance and alert workflow (3 write, 3 read)**:
+
+- `start_resource_maintenance` (write, risk medium; CLI `maintenance start <resource-id> [--duration MIN | --end EPOCH_MS]`):
+  a timed window, or with neither option manual maintenance until ended. Returns the state before and after; undo is
+  `end_resource_maintenance`.
+- `end_resource_maintenance` (write, risk medium; CLI `maintenance end <resource-id>`): refuses a resource confirmed
+  not in maintenance.
+- `list_maintenance_schedules` (CLI `maintenance schedules`).
+- `list_alert_notes` (CLI `alert notes <alert-id>`).
+- `add_alert_note` (write, risk low; CLI `alert note-add <alert-id> <text>`): does not change the alert's status.
+- `get_alert_recommendations` (CLI `alert recommendations <alert-id>`): alert → the definition state matching the
+  alert's severity (else the only state, else all states, noted) → prioritized recommendations; `status` is `found`,
+  `partial`, `none_defined` or `unknown`. On 8.18.7 a CRITICAL vCenter-app alert returned 7.
+
+The three writes are audited. On the CLI each asks once (`--yes` skips) and `--dry-run` prints the API call without
+connecting. On MCP the two maintenance writes return a preview until `confirmed=True`; `add_alert_note` has no
+confirmation gate, since a note changes neither the alert nor monitoring.
+
 ## v1.12.0 — say only what Aria Operations actually reported
 
 Fixes from a run against a live Aria Operations 8.18.7, where several outputs were empty, unnamed

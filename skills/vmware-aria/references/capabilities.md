@@ -2,13 +2,13 @@
 
 ## Automation Level Reference
 
-Each operation is classified by autonomy level per the Enterprise Harness Engineering framework. **vmware-aria is heavily L1/L2 (21 read / 7 write)** — primarily a monitoring and analysis skill.
+Each operation is classified by autonomy level per the Enterprise Harness Engineering framework. **vmware-aria is heavily L1/L2 (34 read / 10 write)** — primarily a monitoring and analysis skill.
 
 | Level | Meaning | Agent autonomy | Examples in this skill |
 |:-:|---|---|---|
-| **L1** | Read-only, raw data | Always auto-run | `list_resources`, `get_resource`, `get_resource_metrics`, `list_alerts`, `get_alert`, `list_alert_definitions`, capacity / badge queries |
-| **L2** | Read + analysis / recommendation | Always auto-run | `investigate_alert` (alert → confirmed affected resource), anomaly counts, top-N consumer ranking, capacity trend forecasting, rightsizing recommendations |
-| **L3** | Single write — user must approve | Only after explicit confirmation | `acknowledge_alert` (via takeownership action), `cancel_alert`, `create_alert_definition`, `set_alert_definition_state`, `delete_alert_definition`, `generate_report`, `delete_report` *(the only writes; all auditable)* |
+| **L1** | Read-only, raw data | Always auto-run | `list_resources`, `get_resource`, `get_resource_metrics`, `list_metric_keys`, `get_resource_properties`, `get_resource_relationships`, `list_alerts`, `get_alert`, `list_alert_definitions`, `list_alert_notes`, `list_maintenance_schedules`, `get_aria_node_resources`, `list_adapters`, capacity / badge queries |
+| **L2** | Read + analysis / recommendation | Always auto-run | `investigate_alert` (alert → confirmed affected resource), `get_alert_recommendations` (alert → definition state → prioritized recommendations), anomaly counts, top-N consumer ranking, capacity trend forecasting, rightsizing recommendations |
+| **L3** | Single write — user must approve | Only after explicit confirmation | `acknowledge_alert` (via takeownership action), `cancel_alert`, `create_alert_definition`, `set_alert_definition_state`, `delete_alert_definition`, `generate_report`, `delete_report`, `start_resource_maintenance`, `end_resource_maintenance`, `add_alert_note` *(the only writes; all auditable. `add_alert_note` is low risk and has no `confirmed` gate on MCP — a note changes neither the alert nor monitoring; the CLI still asks once)* |
 | **L4** | Multi-step plan / apply workflow | *N/A currently* | — *(no multi-step orchestration; Aria is observe/analyze, not configure)* |
 | **L5** | Auto-remediation from learned pattern | Pattern library only; requires `risk:low` + `reversible:true` + `repeatable:true` | *(roadmap — candidates: auto-acknowledge known-noisy alerts, auto-cancel resolved-by-event alerts)* |
 
@@ -25,6 +25,9 @@ Each operation is classified by autonomy level per the Enterprise Harness Engine
 - **Filter by name**: substring match across any resource list
 - **Get resource details**: health, risk, and efficiency badges plus all identifiers
 - **Fetch metric time series**: any metric key with configurable time window and rollup (AVG/MAX/MIN). Keys with no points are listed under `missing` with a reason (`not_collected_for_resource` with `similar_keys`, `no_data_in_window`, `resource_reports_no_stat_keys`, `undetermined` — also when stat-key rows are in an unrecognised form) instead of silently vanishing. `similar_keys` holds at most 10 keys, only ones `sanitize()` leaves unchanged and at most 200 characters long
+- **Look up metric keys**: `list_metric_keys` lists the keys one resource actually reports, joined with its kind's definitions for name and unit. Each row's `definition` is `found`, `found_by_instance` (an instanced key such as `guestfilesystem:/boot|usage` joined to `guestfilesystem|usage`), `not_defined_for_kind` (also listed in `unjoined_keys`) or `not_read` (the definitions could not be read: `definitions_status: undetermined`, name and unit unknown, not absent). With `resource_kind` instead, it lists the keys the kind defines — a defined key is not collected on every resource. A nonexistent resource id is an HTTP 404 error, not an empty list
+- **Read properties**: `get_resource_properties` — current `{name, value}` rows sorted by name (power state, `summary|parentHost`, configured CPU and memory, `config|extraConfig|*` flags), filtered by a name substring. Configuration facts, not time series
+- **Walk relationships**: `get_resource_relationships` — related resources with `id`, `name`, `kind`, `adapter_kind` and `direction` (`parent` / `child` / `both` / `other`). `relationship_type` is exactly ALL, PARENT or CHILD; ANCESTOR and DESCENDANT are refused (Aria Operations 8.18.7 answers HTTP 400 for them), so walk PARENT one level at a time. With ALL, `direction` is null and `direction_note` says why when the PARENT/CHILD lists could not be read
 - **Find top consumers**: rank VMs or hosts by a metric's last-hour average (`value`, 5-minute AVG rollup — what Aria ranks by, descending; `latest_value` is the most recent point). Resources with no data for the key are left out, not ranked at zero; `excluded_no_data` counts the ones the ranking listed with no points, and `hint` says when that shortened the list — when they took slots of a full `top_n`, the result is `truncated` and `hint` says to raise `top_n`
 
 ### Alert Management
@@ -33,6 +36,8 @@ Each operation is classified by autonomy level per the Enterprise Harness Engine
 - **Inspect alert details**: contributing (triggered) symptoms from the dedicated contributingsymptoms endpoint, plus timeline. A symptom that carries no name or severity (every symptom on Aria Operations 8.18.7) takes both from its symptom definition, fetched in one batched `/symptomdefinitions` lookup; `definition_lookup` and `symptom_definitions_note` say when that did not work, including symptoms with no definition id to look up. Recommendations are attached to the alert definition, not the alert
 - **Investigate an alert end-to-end**: `investigate_alert` resolves an alert to its affected resource in one call — fetches the alert, reads `resourceId`, fetches that resource, confirms name and kind, and returns both UUIDs *explicitly labelled* plus a ready-to-use handoff naming the exact vmware-monitor tool and argument. Use it instead of chaining `get_alert` → `get_resource` by hand: the two UUIDs are different objects and a small model will otherwise swap them. An unresolvable resource degrades to a warning plus explicit nulls rather than losing the alert
 - **Acknowledge alerts**: mark as seen without closing (control state → ACKNOWLEDGED)
+- **Alert notes**: `list_alert_notes` returns an alert's notes (`note`, `type` USER / SYSTEM, `user_name`, `created_time_ms`); an unknown alert id is HTTP 404, and a set `notes_note` means the notes are unknown, not absent. `add_alert_note` records who is handling the alert or what was done — it does not change status or ownership (use `acknowledge_alert`), is not idempotent (two calls add two notes) and has no undo. `created: null` with `confirmation_note` means Aria did not confirm the note: run `list_alert_notes` before retrying
+- **Alert recommendations**: `get_alert_recommendations` resolves the alert to its alert definition, uses the state whose severity matches the alert's criticality (else the definition's only state, else every state merged at each recommendation's highest priority, with a `note`), and returns the recommendations sorted by priority (lower is more important) with description and action. `status`: `found`; `partial` (some text could not be read — `description: null` is unknown, not blank); `none_defined` (`recommendations: []`); `unknown` (the definition could not be read — `recommendations: null`, never "no recommendations"). On Aria Operations 8.18.7 a CRITICAL vCenter-app alert returned 7 prioritized recommendations
 - **Cancel alerts**: permanently dismiss (status → CANCELLED)
 - **Browse alert definitions**: the templates that define when alerts fire
 
@@ -43,6 +48,12 @@ Each operation is classified by autonomy level per the Enterprise Harness Engine
 - **Time remaining**: predicted days until each capacity dimension is exhausted (based on trend)
 - **Rightsizing recommendations**: identify over-provisioned VMs (reclaim resources) and under-provisioned VMs (prevent degradation). Raw recommendations are MHz / KB / GB (`recommended_units`); `recommended_vcpus` converts CPU with the VM's own MHz per vCPU. `cpu_direction` / `memory_direction` compare against the current configuration (memory within 1% is `right_sized`). Powered-off VMs and templates are listed but never `actionable`, nor is a VM whose power state or template flag is unknown. If the VM property read fails, the property-derived fields are null, no row is actionable, and `properties_note` names the failure. `caveats` flag engine disagreement and vendor minimum sizes before any reduction
 
+### Resource Maintenance
+
+- **Start maintenance**: `start_resource_maintenance` stops Aria alerting on one resource and collecting its data. With `duration_minutes` (1–525600) or `end_time_ms` (epoch milliseconds, in the future) the resource is `MAINTAINED` for that window and returns to its prior state when it expires; pass one, not both. With neither it is `MAINTAINED_MANUAL` until ended. Returns `requested`, `before` / `after` state, `confirmed` (true / false / null — null means the after-state could not be read, which is unknown, not failure) and `note`. On MCP the default `confirmed=False` returns a preview without connecting. Risk medium; audited with the before and after state; undo is `end_resource_maintenance`
+- **End maintenance**: `end_resource_maintenance` refuses a resource whose state was read and is not `MAINTAINED` / `MAINTAINED_MANUAL`; when the state cannot be read it proceeds and `before` says unknown. Risk medium, audited. Its undo re-enters manual maintenance — the end of a timed window is not restored
+- **Maintenance schedules**: `list_maintenance_schedules` — name, schedule type (ONCE / DAILY / WEEKLY / MONTHLY / YEARLY), recurrence, start hour and minute, duration in minutes, time zone, start and expiry. A schedule does not list its resources; pass `resource_id` for the schedules of one resource. A set `schedules_note` means the schedules are unknown, not absent
+
 ### Anomaly Detection
 
 - **List anomalies**: per-resource Total Anomalies counts (`System Attributes|total_alarms` metric — active symptoms, events, and DT violations on the object and its children), optionally scoped to one resource. The UI's anomalous-metrics list is not part of the public API
@@ -52,6 +63,8 @@ Each operation is classified by autonomy level per the Enterprise Harness Engine
 
 - **Aria health check**: `assessment` HEALTHY / DEGRADED / DOWN / UNKNOWN from the node status plus the per-service breakdown, and the product version and line (8.x / 9.x). The node reports OFFLINE whenever any one service is not running, so OFFLINE with some services OK is DEGRADED, not down. An ONLINE node whose per-service breakdown could not be read is HEALTHY with `details` saying no service was checked individually; a service in a state other than OK or ERROR makes it UNKNOWN unless DEGRADED. An unreadable version or service list is reported (`version_error` / `services_error`), not raised
 - **Collector group status**: list collector groups (member IDs) enriched with each collector's name, UP/DOWN state, and local flag
+- **Aria node resources**: `get_aria_node_resources` reads Aria's own self-monitoring objects (`vC-Ops-Node`, `vC-Ops-Watchdog`): per node memory (`mem|total`, `mem|used`, `mem|free`, `mem|actualFree`, `mem|actualUsed`), swap, heap overall and per component, and watchdog restarts per service. Each value has `latest`, `unit` (from Aria's statkey definitions, never assumed) and `window` min / avg / max / points over `window_hours` (1–720, default 24) of 5-minute averages. `memory_pressure.level` is an indicator: HIGH when actual free memory is below 10% of total, ELEVATED below 20%, NORMAL at 20% or more, UNKNOWN when the readings do not settle it. A key with no value is in the node's `missing` list (`not_reported` / `no_data` / `undetermined`), never zeroed; `watchdog_restarts: null` is unknown, not zero. On Aria Operations 8.18.7 after a memory upgrade the node read `mem|total` 15.61 GB (was 7.75), actual free 41%, pressure NORMAL, and 9 watchdog services with 0 restarts
+- **Adapter collection state**: `list_adapters` — each adapter instance's kind, collector, monitoring interval, resources and metrics collected, last collected and last heartbeat with ages in seconds, its own message, and `stale`: true when the last collection is older than max(3 × monitoring interval, 15 minutes), false within that, null when the fields cannot support a verdict (`stale_basis` shows the arithmetic). Ages use the appliance clock from node status when it is available (`reference_clock`). An empty or unrecognised answer is an error, never "no adapters". A recent collection does not prove every object behind the adapter receives data. On Aria Operations 8.18.7 all 6 adapters were not stale
 
 ---
 
@@ -67,7 +80,7 @@ Each operation is classified by autonomy level per the Enterprise Harness Engine
 | Tanzu Kubernetes cluster management | `vmware-vks` |
 | Create alert definitions | Supported via `create_alert_definition` (from symptom definition IDs) |
 | Configure dashboards | Not supported (UI required) |
-| Manage Aria adapter instances | Not supported (UI required) |
+| Manage Aria adapter instances | Not supported (UI required); `list_adapters` reads their collection state |
 
 ---
 
@@ -79,16 +92,27 @@ All requests carry `Authorization: vRealizeOpsToken <token>`.
 |----------|---------|
 | `POST /suite-api/api/auth/token/acquire` | Token authentication |
 | `POST /suite-api/api/auth/token/release` | Token release on close (no body; token identified by the Authorization header) |
-| `GET /suite-api/api/resources` | list_resources (also candidate listing for topn / anomaly / rightsizing scans); list_alerts resource names (`resourceId` repeated, 100 per request) |
-| `GET /suite-api/api/resources/{id}` | get_resource, get_resource_health, get_resource_riskbadge (badges come from the `badges[]` array — there are no `/badge/*` endpoints), investigate_alert (resource-side leg) |
+| `GET /suite-api/api/resources` | list_resources (also candidate listing for topn / anomaly / rightsizing scans); list_alerts resource names (`resourceId` repeated, 100 per request); get_aria_node_resources (self-monitoring `vC-Ops-Node` / `vC-Ops-Watchdog` objects) |
+| `GET /suite-api/api/resources/{id}` | get_resource, get_resource_health, get_resource_riskbadge (badges come from the `badges[]` array — there are no `/badge/*` endpoints), investigate_alert (resource-side leg), list_metric_keys (the resource's adapter and resource kind), start_resource_maintenance / end_resource_maintenance (state before and after, from `resourceStatusStates`) |
 | `POST /suite-api/api/resources/{id}/stats/query` | get_resource_metrics |
-| `GET /suite-api/api/resources/{id}/statkeys` | get_resource_metrics (only when a requested key returned no points, to explain why) |
+| `GET /suite-api/api/resources/{id}/statkeys` | get_resource_metrics (only when a requested key returned no points, to explain why); list_metric_keys (the keys a resource reports); get_aria_node_resources (the keys each node reports) |
+| `GET /suite-api/api/adapterkinds/{adapterKind}/resourcekinds/{resourceKind}/statkeys` | list_metric_keys (key names and units); get_aria_node_resources (units for the self-monitoring kinds) |
+| `GET /suite-api/api/resources/{id}/properties` | get_resource_properties |
+| `GET /suite-api/api/resources/{id}/relationships` + `/relationships/{PARENT\|CHILD}` | get_resource_relationships (paged walk; with ALL the PARENT and CHILD lists label `direction`) |
+| `GET /suite-api/api/resources/stats/latest` | get_aria_node_resources (latest values) |
 | `POST /suite-api/api/resources/properties/latest/query` | list_rightsizing_recommendations (current vCPUs, memory, CPU speed, power state, template flag, product name) |
 | `GET /suite-api/api/resources/stats/topn` | get_top_consumers (resourceId list capped at 100) |
 | `GET /suite-api/api/resources/{id}/stats/latest` | get_capacity_overview, get_remaining_capacity, get_time_remaining (OnlineCapacityAnalytics keys) |
-| `POST /suite-api/api/resources/stats/query` | list_rightsizing_recommendations (OnlineCapacityAnalytics recommendedSize keys), list_anomalies (`System Attributes\|total_alarms`) — one request for a resourceId array |
+| `POST /suite-api/api/resources/stats/query` | list_rightsizing_recommendations (OnlineCapacityAnalytics recommendedSize keys), list_anomalies (`System Attributes\|total_alarms`) — one request for a resourceId array; get_aria_node_resources (window min / avg / max) |
+| `PUT /suite-api/api/resources/{id}/maintained` | start_resource_maintenance (window as the `duration` or `end` query parameter; neither = manual maintenance) |
+| `DELETE /suite-api/api/resources/{id}/maintained` | end_resource_maintenance |
+| `GET /suite-api/api/maintenanceschedules` | list_maintenance_schedules (paged; `resourceId` filter) |
 | `POST /suite-api/api/alerts/query` | list_alerts (server-side status/criticality/resource filtering) |
-| `GET /suite-api/api/alerts/{id}` | get_alert, investigate_alert (alert-side leg; no dedicated endpoint — the tool composes the two existing reads) |
+| `GET /suite-api/api/alerts/{id}` | get_alert, investigate_alert (alert-side leg; no dedicated endpoint — the tool composes the two existing reads), get_alert_recommendations (the alert's definition id and criticality) |
+| `GET /suite-api/api/alerts/{id}/notes` | list_alert_notes (paged) |
+| `POST /suite-api/api/alerts/{id}/notes` | add_alert_note (body `{"content": …}`) |
+| `GET /suite-api/api/alertdefinitions/{id}` | get_alert_recommendations (states and their recommendation priorities) |
+| `GET /suite-api/api/recommendations` | get_alert_recommendations (recommendation text; `id` repeated, 50 per request) |
 | `GET /suite-api/api/alerts/contributingsymptoms?id={alertId}` | get_alert (triggered symptoms) |
 | `POST /suite-api/api/alerts?action=takeownership` | acknowledge_alert |
 | `POST /suite-api/api/alerts?action=cancel` | cancel_alert |
@@ -101,7 +125,8 @@ All requests carry `Authorization: vRealizeOpsToken <token>`.
 | `POST /suite-api/api/reports` | generate_report (requires at least one resource UUID) |
 | `GET /suite-api/api/reports` / `GET /suite-api/api/reports/{id}` | list_reports / get_report (timestamp field is `completionTime`; definition filter and limit applied client-side) |
 | `DELETE /suite-api/api/reports/{id}` | delete_report |
-| `GET /suite-api/api/deployment/node/status` | get_aria_health (a 503 is read as a status, not an error), is_alive |
+| `GET /suite-api/api/deployment/node/status` | get_aria_health (a 503 is read as a status, not an error), is_alive, list_adapters (the appliance clock, `systemTime`, for collection ages) |
+| `GET /suite-api/api/adapters` | list_adapters (unpaged) |
 | `GET /suite-api/api/deployment/node/services/info` | get_aria_health, doctor (per-service health) |
 | `GET /suite-api/api/versions/current` | get_aria_health, doctor "Aria version" row, and the version shown when a 9.0+ tool (fleet_*, findings_list, promql_query) is called on an older appliance |
 | `GET /suite-api/api/collectorgroups` + `GET /suite-api/api/collectors` | list_collector_groups (groups carry member IDs; details enriched from /collectors) |
@@ -131,6 +156,15 @@ size. It is never inferred:
 | `list_alerts` | — | `POST /alerts/query` reports no count; a full page is conservatively flagged truncated |
 | `get_top_consumers` | — | A top-N ranking is a slice of an unbounded set |
 | `list_collector_groups` | — | `GET /collectorgroups` is unpaged and takes no limit, so `truncated` is always `false` |
+| `list_adapters` | Count of matches from the unpaged `GET /adapters` | Exact; the `adapter_kind` filter is applied client-side and reflected in the count |
+| `list_metric_keys` | Count of rows after `key_filter` from the unpaged statkeys read | Exact |
+| `get_resource_properties` | Count of rows after `name_filter` from the unpaged `GET /resources/{id}/properties` | Exact |
+| `get_resource_relationships` | Count of related resources from a complete walk of the paged relationships endpoint | `null` only when the walk hit its safety cap (`direction_note` says so) |
+| `list_maintenance_schedules` | `pageInfo.totalCount` on `GET /maintenanceschedules` | `null` when the API reports no size; a set `schedules_note` means `items` is unknown, not empty |
+| `list_alert_notes` | `pageInfo.totalCount` on `GET /alerts/{id}/notes` | `null` when the API reports no size; a set `notes_note` means `items` is unknown, not empty |
+
+The six tools added above also return `next_offset`: pass it back as `offset`
+and stop when it is `null`.
 
 CLI commands unwrap `items` and print the rows; the envelope is the MCP/library
 contract.
@@ -158,4 +192,4 @@ Reading rules for an agent:
 | Anomaly detection | 7.5+ |
 | Suite API v2 paths used | 8.0+ |
 
-Endpoints are checked against the vROps 8.6 and VCF Operations 9.1 API indexes in `tests/eval/spec/`. Live-verified on Aria Operations 8.18.7 (2026-09): resources, metrics, alerts and symptoms, rightsizing, health, doctor.
+Endpoints are checked against the vROps 8.6 and VCF Operations 9.1 API indexes in `tests/eval/spec/`. Live-verified on Aria Operations 8.18.7 (2026-09): resources, metrics, alerts and symptoms, rightsizing, health, doctor, node resources, adapters, alert recommendations, and reads of maintenance schedules and alert notes (none existed).

@@ -14,20 +14,21 @@ AI-assisted monitoring and capacity planning for VMware Aria Operations (vRealiz
 
 ## Overview
 
-`vmware-aria` exposes 33 MCP tools for interacting with Aria Operations through natural language AI agents (Claude Code, Cursor, Goose, etc.):
+`vmware-aria` exposes 44 MCP tools for interacting with Aria Operations through natural language AI agents (Claude Code, Cursor, Goose, etc.):
 
 | Category | Tools | Type |
 |----------|-------|------|
-| **Resources** | list, get, metrics, health badge, top consumers | Read-only (5) |
-| **Alerts** | list, get, investigate (alert→resource), acknowledge, cancel, definitions | Read + 2 Write (6) |
+| **Resources** | list, get, metrics, health badge, top consumers, metric keys, properties, relationships | Read-only (8) |
+| **Alerts** | list, get, investigate (alert→resource), acknowledge, cancel, definitions, notes (list / add), recommendations | Read + 3 Write (9) |
 | **Alert Definitions** | symptom definitions, create, enable/disable, delete | Read + 3 Write (4) |
 | **Capacity** | overview, remaining, time-remaining, rightsizing | Read-only (4) |
 | **Reports** | definitions, generate, list, get, delete | Read + 2 Write (5) |
 | **Anomaly** | list anomalies, risk badge | Read-only (2) |
-| **Health** | platform health, collector groups | Read-only (2) |
+| **Health** | platform health, collector groups, Aria node memory/swap/heap, adapter collection state | Read-only (4) |
+| **Maintenance** | start / end resource maintenance, maintenance schedules | Read + 2 Write (3) |
 | **Fleet / PromQL** (VCF Ops 9.1) | fleet certificates, password accounts, VCF domains, diagnostic findings, real-time PromQL query | Read-only (5) |
 
-**Total**: 33 tools — 26 read-only, 7 write
+**Total**: 44 tools — 34 read-only, 10 write
 
 ## Quick Start
 
@@ -109,6 +110,21 @@ vmware-aria capacity rightsizing
 # Check Aria platform health: HEALTHY / DEGRADED / DOWN / UNKNOWN, per service, plus version
 vmware-aria health status
 vmware-aria health collectors
+
+# Is the Aria node short of memory? Which adapter stopped collecting?
+vmware-aria health node
+vmware-aria health adapters
+
+# Look up the metric keys a VM reports before querying them
+vmware-aria resource keys <vm-id> --filter 'mem|'
+
+# Put a host in maintenance for 2 hours before planned work, then end it (asks once; --dry-run prints the API call)
+vmware-aria maintenance start <host-id> --duration 120
+vmware-aria maintenance end <host-id>
+
+# Record who is handling an alert, and read what Aria recommends
+vmware-aria alert note-add <alert-id> "Taking this: rebooting esx-03"
+vmware-aria alert recommendations <alert-id>
 ```
 
 ## MCP Setup (Claude Code)
@@ -186,7 +202,7 @@ VMs / Hosts / Clusters / Alerts / Capacity
 ## Security
 
 - Passwords loaded from env vars or `.env` file, never from `config.yaml`
-- Write operations (alert acknowledge/cancel, alert definition management, report generate/delete) audit-logged to `~/.vmware/audit.db` (MCP, via vmware-policy) and `~/.vmware-aria/audit.log` (CLI)
+- Write operations (alert acknowledge/cancel, alert notes, alert definition management, report generate/delete, resource maintenance start/end) audit-logged to `~/.vmware/audit.db` (MCP, via vmware-policy) and `~/.vmware-aria/audit.log` (CLI)
 - API responses sanitized (control chars stripped, 500-char limit) to prevent prompt injection
 - TLS verification is on by default; for a private CA set `SSL_CERT_FILE` to a bundle with your CA (see setup guide). `verify_ssl: false` is for isolated self-signed labs only
 

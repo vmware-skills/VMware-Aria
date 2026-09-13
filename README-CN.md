@@ -9,20 +9,21 @@
 
 ## 概述
 
-`vmware-aria` 提供 33 个 MCP 工具，支持通过自然语言 AI Agent（Claude Code、Cursor、Goose 等）与 Aria Operations 交互：
+`vmware-aria` 提供 44 个 MCP 工具，支持通过自然语言 AI Agent（Claude Code、Cursor、Goose 等）与 Aria Operations 交互：
 
 | 类别 | 工具 | 类型 |
 |------|------|------|
-| **资源** | 列表、详情、指标、健康评分、高消耗排名 | 只读 (5) |
-| **告警** | 列表、详情、溯源（告警→资源）、确认、取消、告警定义 | 读+2写 (6) |
+| **资源** | 列表、详情、指标、健康评分、高消耗排名、指标键、属性、关联关系 | 只读 (8) |
+| **告警** | 列表、详情、溯源（告警→资源）、确认、取消、告警定义、备注（查看 / 添加）、处置建议 | 读+3写 (9) |
 | **告警定义** | 症状定义、创建、启用/禁用、删除 | 读+3写 (4) |
 | **容量** | 概览、剩余容量、时间预测、虚拟机调整 | 只读 (4) |
 | **报表** | 模板、生成、列表、状态、删除 | 读+2写 (5) |
 | **异常** | 异常列表、风险评分 | 只读 (2) |
-| **健康** | 平台健康、采集器状态 | 只读 (2) |
+| **健康** | 平台健康、采集器状态、Aria 节点内存/交换/堆、适配器采集状态 | 只读 (4) |
+| **维护** | 开始 / 结束资源维护模式、维护计划 | 读+2写 (3) |
 | **Fleet / PromQL**（VCF Ops 9.1） | Fleet 证书、密码账户、VCF 域、诊断发现、实时 PromQL 查询 | 只读 (5) |
 
-**共 33 个工具** — 26 只读、7 写操作
+**共 44 个工具** — 34 只读、10 写操作
 
 ## 快速开始
 
@@ -101,6 +102,21 @@ vmware-aria capacity rightsizing
 
 # Aria 平台自身健康检查：HEALTHY / DEGRADED / DOWN / UNKNOWN、逐服务状态、产品版本
 vmware-aria health status
+
+# Aria 节点是否内存不足？哪个适配器停止了采集？
+vmware-aria health node
+vmware-aria health adapters
+
+# 查询指标前，先查出虚拟机实际上报的指标键
+vmware-aria resource keys <vm-id> --filter 'mem|'
+
+# 计划内操作前将主机置于维护模式 2 小时，之后结束维护（确认一次；--dry-run 只打印 API 调用）
+vmware-aria maintenance start <host-id> --duration 120
+vmware-aria maintenance end <host-id>
+
+# 记录谁在处理某条告警，并查看 Aria 给出的处置建议
+vmware-aria alert note-add <alert-id> "Taking this: rebooting esx-03"
+vmware-aria alert recommendations <alert-id>
 ```
 
 ## MCP 配置（Claude Code）
@@ -173,7 +189,7 @@ Token 为 6 小时滑动有效期（每次调用自动延长，官方规范行�
 ## 安全性
 
 - 密码仅从环境变量或 `.env` 文件加载，不存入 `config.yaml`
-- 写操作（告警确认/取消、告警定义管理、报表生成/删除）记录审计日志至 `~/.vmware/audit.db`（MCP，经 vmware-policy）和 `~/.vmware-aria/audit.log`（CLI）
+- 写操作（告警确认/取消、告警备注、告警定义管理、报表生成/删除、资源维护开始/结束）记录审计日志至 `~/.vmware/audit.db`（MCP，经 vmware-policy）和 `~/.vmware-aria/audit.log`（CLI）
 - API 响应经过净化处理（去除控制字符，截断至 500 字符），防止提示注入攻击
 - 默认开启 TLS 校验；私有 CA 请把 `SSL_CERT_FILE` 指向包含你 CA 的证书包（见 setup guide）。`verify_ssl: false` 仅用于隔离的自签名实验环境
 

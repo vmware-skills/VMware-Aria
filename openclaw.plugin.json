@@ -1,7 +1,7 @@
 {
   "id": "vmware-aria",
   "name": "VMware Aria",
-  "description": "VMware Aria Operations: metrics, alerts, capacity, anomaly detection — 33 MCP tools.",
+  "description": "VMware Aria Operations: metrics, alerts, capacity, anomaly detection — 44 MCP tools.",
   "skills": [
     "./skills"
   ],

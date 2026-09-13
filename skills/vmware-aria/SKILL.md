@@ -16,7 +16,7 @@ metadata: {"openclaw":{"requires":{"anyBins":["vmware-aria","uvx"]},"optional":{
 compatibility: >
   vmware-policy auto-installed as Python dependency (provides @vmware_tool decorator and audit logging). All write operations audited to ~/.vmware/audit.db.
   Credentials: Each Aria Operations target requires a per-target password env var in ~/.vmware-aria/.env following the pattern VMWARE_ARIA_<TARGET_NAME_UPPER>_PASSWORD. Passwords are never logged or echoed.
-  Read-heavy: 26 of 33 tools are read-only. Write operations limited to alert acknowledge/cancel, alert definition management, and report management.
+  Read-heavy: 34 of 44 tools are read-only. Write operations limited to alert acknowledge/cancel, alert notes, alert definition management, report management, and resource maintenance start/end.
   No webhooks, no outbound network calls, no guest operations. Local only: stdio MCP + Aria Operations REST API (HTTPS 443).
   Transitive dependencies: Only vmware-policy (audit/policy). No post-install scripts or background services.
 ---
@@ -25,7 +25,7 @@ compatibility: >
 
 > **Disclaimer**: This is a community-maintained open-source project and is **not affiliated with, endorsed by, or sponsored by VMware, Inc. or Broadcom Inc.** "VMware" and "Aria" are trademarks of Broadcom. Source code is publicly auditable at [github.com/vmware-skills/VMware-Aria](https://github.com/vmware-skills/VMware-Aria) under the MIT license.
 
-VMware Aria Operations (vRealize Operations 8.x, VCF Operations 9.x) AI-assisted monitoring — 33 MCP tools for resources, alerts, alert definitions, capacity planning, anomaly detection, report automation, platform health, and VCF 9.1 fleet certificates/passwords/domains, diagnostic findings, and real-time PromQL metrics.
+VMware Aria Operations (vRealize Operations 8.x, VCF Operations 9.x) AI-assisted monitoring — 44 MCP tools for resources (metric keys, properties, relationships), alerts (notes, recommendations), alert definitions, capacity planning, anomaly detection, report automation, resource maintenance mode, platform health (Aria node memory, adapter collection), and VCF 9.1 fleet certificates/passwords/domains, diagnostic findings, and real-time PromQL metrics.
 
 > **Know the version first**: `vmware-aria health status` (MCP `get_aria_health`) names the product line. Fleet, findings and PromQL exist only on VCF Operations 9.0+ (PromQL uses the 9.1 VODAP service); on 8.x they return a "requires 9.0 or newer" error, not data.
 > **Companion skills**: vmware-monitor (real-time vSphere), vmware-aiops (VM lifecycle), vmware-nsx (networking), vmware-avi (AVI/ALB/AKO), vmware-harden (compliance), vmware-pilot (approval workflows), vmware-policy (audit/policy).
@@ -34,16 +34,17 @@ VMware Aria Operations (vRealize Operations 8.x, VCF Operations 9.x) AI-assisted
 
 | Category | Tools | Count |
 |----------|-------|:-----:|
-| **Resources** | list, get details, metrics, health badge, top consumers | 5 |
-| **Alerts** | list, get details, investigate (alert→resource), acknowledge, cancel, list definitions | 6 |
+| **Resources** | list, get details, metrics, health badge, top consumers, metric keys, properties, relationships | 8 |
+| **Alerts** | list, get details, investigate (alert→resource), acknowledge, cancel, list definitions, list/add notes, recommendations | 9 |
 | **Alert Definitions** | list symptoms, create definition, enable/disable, delete | 4 |
 | **Capacity** | cluster overview, remaining capacity, time remaining, rightsizing | 4 |
 | **Reports** | list templates, generate, list, get status+download URL, delete | 5 |
 | **Anomaly** | list anomalies, risk badge | 2 |
-| **Health** | Aria platform health, collector group status | 2 |
+| **Health** | Aria platform health, collector group status, Aria node memory/swap/heap, adapter collection state | 4 |
+| **Maintenance** | start / end resource maintenance, list maintenance schedules | 3 |
 | **Fleet / PromQL** (VCF Ops 9.1) | fleet certificates, password accounts, VCF domains, diagnostic findings, real-time PromQL query | 5 |
 
-**Total**: 33 tools (26 read-only + 7 write)
+**Total**: 44 tools (34 read-only + 10 write)
 
 ## Quick Install
 
@@ -55,11 +56,13 @@ vmware-aria doctor
 
 ## When to Use This Skill
 
+- **Lookup**: which metric keys a resource reports (name, unit) before querying them, its properties, its parents and children
 - **Performance**: VM contention (CPU Ready, balloon, swap), time-series metrics, top consumers, anomaly counts and risk badges
-- **Alerts**: list, investigate, acknowledge or cancel alerts; list, create, enable/disable or delete alert definitions (post-RCA)
+- **Alerts**: list, investigate, acknowledge or cancel alerts; read or add notes (who is handling it); read the alert's prioritized recommendations; list, create, enable/disable or delete alert definitions (post-RCA)
 - **Capacity**: cluster headroom, time until full, VM rightsizing
 - **Reports**: generate, poll, download and delete reports
-- **Platform**: is Aria Operations itself healthy (DEGRADED vs DOWN, which service), which version and product line, collector groups
+- **Maintenance**: put a resource in maintenance before planned work (timed or until ended), end it, list maintenance schedules
+- **Platform**: is Aria Operations itself healthy (DEGRADED vs DOWN, which service), which version and product line, collector groups, whether the Aria node is short of memory, which adapter stopped collecting
 
 For VM changes, NSX, vSphere alarms, storage or load balancing, route with the table below.
 
@@ -79,6 +82,8 @@ For VM changes, NSX, vSphere alarms, storage or load balancing, route with the t
 
 ## Common Workflows
 
+> **Troubleshooting paths**: step-by-step playbooks for a DEGRADED platform, alert triage, VM contention, empty metrics, pre-resize checks and planned maintenance — [`references/ops-playbooks.md`](references/ops-playbooks.md).
+>
 > **Diagnostic investigations**: Before running any "why is X slow / failing / down" workflow, follow [`references/investigation-protocol.md`](references/investigation-protocol.md). It enforces the four root-cause completeness criteria (falsifiability / sufficiency / necessity / mechanism) and the up-to-three-rounds deepening loop. Stopping at a partial conclusion is an anti-pattern — always self-check against the criteria before outputting a report.
 
 ### Daily VM Health Check (Proactive Ops)
@@ -133,7 +138,7 @@ Running vmware-aria with a local or small model? See [`references/agent-guardrai
 
 Every command accepts `--target <name>` (every MCP tool `target`) to pick the Aria Operations instance.
 
-## MCP Tools (33 — 26 read, 7 write)
+## MCP Tools (44 — 34 read, 10 write)
 
 All MCP tools accept an optional `target` parameter to select which Aria Operations instance to connect to.
 
@@ -144,12 +149,18 @@ All MCP tools accept an optional `target` parameter to select which Aria Operati
 | | `get_resource_metrics` | Read | Fetch time-series metric stats; `missing` says why a key has no points |
 | | `get_resource_health` | Read | Get health badge score (0–100) |
 | | `get_top_consumers` | Read | Rank by last-hour average `value` (`latest_value` = newest point) |
+| | `list_metric_keys` | Read | Keys a resource reports with name/unit and `definition`, or a kind's defined keys — look up before querying |
+| | `get_resource_properties` | Read | Current property values (power state, parent host, extraConfig) |
+| | `get_resource_relationships` | Read | Related resources with `direction`; `relationship_type` ALL / PARENT / CHILD |
 | Alerts | `list_alerts` | Read | List active alerts with criticality, resource ID, name and kind (`resource_name: null` = unknown, see `resource_names_note`) |
 | | `get_alert` | Read | Get alert details with contributing symptoms, named from their symptom definitions (recommendations live on the alert definition) |
 | | `investigate_alert` | Read | Resolve an alert to its confirmed affected resource in one call — returns both UUIDs explicitly labelled plus the vmware-monitor handoff |
 | | `acknowledge_alert` | **Write** | Mark an alert as acknowledged (does not close it) |
 | | `cancel_alert` | **Write** | Cancel (dismiss) an active alert |
 | | `list_alert_definitions` | Read | List alert templates configured in Aria Ops |
+| | `list_alert_notes` | Read | Notes on an alert (who is handling it, what was done) |
+| | `add_alert_note` | **Write** | Add a note; does not change the alert's status (low risk, not idempotent) |
+| | `get_alert_recommendations` | Read | Prioritized recommendations from the alert's definition; `status` found / partial / none_defined / unknown |
 | Alert Defs | `list_symptom_definitions` | Read | List symptom definitions — use IDs when creating alert defs |
 | | `create_alert_definition` | **Write** | Create new alert definition from symptom definition IDs |
 | | `set_alert_definition_state` | **Write** | Enable or disable an alert definition |
@@ -167,13 +178,18 @@ All MCP tools accept an optional `target` parameter to select which Aria Operati
 | | `get_resource_riskbadge` | Read | Risk score (0–100): likelihood of future problems |
 | Health | `get_aria_health` | Read | Platform `assessment` (HEALTHY/DEGRADED/DOWN/UNKNOWN), per-service health, product version |
 | | `list_collector_groups` | Read | Collector agents status and connectivity |
+| | `get_aria_node_resources` | Read | Aria node memory/swap/heap and watchdog restarts; memory pressure NORMAL / ELEVATED / HIGH / UNKNOWN |
+| | `list_adapters` | Read | Adapter instances, last collection age, `stale` |
+| Maintenance | `start_resource_maintenance` | **Write** | Timed (`duration_minutes` / `end_time_ms`) or manual maintenance; before/after state; undo = end |
+| | `end_resource_maintenance` | **Write** | End maintenance; refuses a resource confirmed not in maintenance |
+| | `list_maintenance_schedules` | Read | Recurring maintenance schedules, optionally for one `resource_id` |
 | Fleet / PromQL (VCF Ops 9.1) | `fleet_certificate_list` | Read | Certificate status/expiry across the VCF fleet |
 | | `fleet_password_account_list` | Read | Managed password-account status (read-only; does not rotate) |
 | | `fleet_domain_list` | Read | SDDC/workload domains behind one registered VCF integration |
 | | `findings_list` | Read | Operations diagnostic findings (not compliance — see vmware-harden) |
 | | `promql_query` | Read | Real-time PromQL instant query via the VODAP service (base path INFERRED, unverified on real hardware) |
 
-**Read/write split**: 26 read-only, 7 write. All write operations are audit-logged to `~/.vmware/audit.db` (via vmware-policy).
+**Read/write split**: 34 read-only, 10 write. All write operations are audit-logged to `~/.vmware/audit.db` (via vmware-policy).
 
 ### List results are envelopes — read `truncated` before you summarise
 
@@ -189,6 +205,9 @@ vmware-aria resource metrics <resource-id> --metrics 'cpu|usage_average,mem|usag
 vmware-aria resource metrics <vm-id> --metrics 'cpu|readyPct,mem|balloonPct' --hours 24
 vmware-aria resource health <resource-id>
 vmware-aria resource top --metric 'cpu|usage_average' --kind VirtualMachine --top 10
+vmware-aria resource keys <resource-id> [--filter 'mem|']   # or --kind VirtualMachine
+vmware-aria resource properties <resource-id> [--name 'summary|']
+vmware-aria resource relationships <resource-id> [--type PARENT]
 
 # Alerts
 vmware-aria alert list [--criticality CRITICAL|IMMEDIATE|WARNING|INFORMATION]
@@ -196,6 +215,9 @@ vmware-aria alert get <alert-id>
 vmware-aria alert acknowledge <alert-id>
 vmware-aria alert cancel <alert-id>
 vmware-aria alert definitions [--name <filter>]
+vmware-aria alert notes <alert-id>
+vmware-aria alert note-add <alert-id> "Taking this: rebooting esx-03"
+vmware-aria alert recommendations <alert-id>
 
 # Alert Definitions: creation/enable/disable/delete and symptom-definition
 # lookup are MCP-only tools (list_symptom_definitions, create_alert_definition,
@@ -221,6 +243,13 @@ vmware-aria anomaly risk <resource-id>
 # Health
 vmware-aria health status
 vmware-aria health collectors
+vmware-aria health node [--hours 24]        # Aria node memory pressure, watchdog restarts
+vmware-aria health adapters [--kind VMWARE] # stale = last collection older than max(3 x interval, 15 min)
+
+# Maintenance (writes ask once; --yes skips, --dry-run prints the API call without connecting)
+vmware-aria maintenance start <resource-id> --duration 60   # neither --duration nor --end = until `maintenance end`
+vmware-aria maintenance end <resource-id>
+vmware-aria maintenance schedules [--resource-id <id>]
 
 # Diagnostics
 vmware-aria doctor [--skip-auth]
@@ -281,7 +310,7 @@ Variable names follow the pattern `VMWARE_ARIA_<TARGET_NAME_UPPER>_PASSWORD` whe
 3. **No webhooks**: no outbound calls besides the Aria Operations REST API over HTTPS 443; the MCP server is local stdio.
 4. **TLS**: verification on by default; for a private CA set `SSL_CERT_FILE` rather than `verify_ssl: false` (isolated labs only).
 5. **Prompt-injection defense**: API text is sanitized (control characters stripped, length capped) before it reaches the agent.
-6. **Least privilege**: use an Aria Operations account with read-only roles unless the write tools (alert acknowledge/cancel, alert definitions, reports) are needed.
+6. **Least privilege**: use an Aria Operations account with read-only roles unless the write tools (alert acknowledge/cancel, alert notes, alert definitions, reports, resource maintenance) are needed.
 
 Every tool call goes through vmware-policy (`@vmware_tool`): audited to `~/.vmware/audit.db`, subject to `~/.vmware/rules.yaml` deny rules and maintenance windows, each tool risk-tagged. View with `vmware-audit log --last 20` or `--status denied`. The suite-api token is re-acquired automatically before it expires. Setup, multiple targets, MCP clients and Docker: [`references/setup-guide.md`](references/setup-guide.md).
 

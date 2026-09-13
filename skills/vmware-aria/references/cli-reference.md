@@ -148,6 +148,68 @@ Options:
 
 **Output**: Table with rank, name, value, unit. `value` is the average of the metric's points over the last hour (5-minute AVG rollup) — the number Aria Operations ranks by — and rows keep Aria's order, descending by `value`. The MCP tool `get_top_consumers` also returns `latest_value`, the most recent point. Resources with no data for the metric in the last hour are left out, not ranked at zero; `excluded_no_data` (MCP) counts the ones the ranking listed with no points. A yellow hint under the table says when that made the list shorter (or when no resources of that kind exist). When no-data rows took slots of a full `--top`, the result is marked truncated and the hint says to raise top_n.
 
+### `vmware-aria resource keys`
+
+List the metric keys a resource reports (with name and unit), or the keys a resource kind defines. Look keys up here before `resource metrics` or `resource top` instead of guessing.
+
+```
+vmware-aria resource keys [RESOURCE_ID] [OPTIONS]
+vmware-aria resource keys <vm-id> --filter 'mem|'
+vmware-aria resource keys --kind HostSystem --filter cpu
+
+Arguments:
+  RESOURCE_ID           Resource UUID; omit and pass --kind for a kind's definitions
+
+Options:
+  --kind -k TEXT        Resource kind, e.g. VirtualMachine
+  --adapter-kind TEXT   Adapter kind for --kind [default: VMWARE]
+  --filter -f TEXT      Substring of key or name, e.g. 'mem|'
+  --limit -n INT        Page size, 1-500 [default: 100]
+  --offset INT          Rows to skip; the next-page offset is printed below the table [default: 0]
+  --target -t TEXT      Target name
+  --config -c PATH      Config file path
+```
+
+Pass exactly one of RESOURCE_ID or `--kind`; both or neither is a usage error (exit 2).
+
+**Output**: Table titled with the resource kind — Key, Name, Unit, and for a resource a Definition column: `found`, `found_by_instance` (an instanced key such as `guestfilesystem:/boot|usage` matched to `guestfilesystem|usage`), `not_defined_for_kind`, or `not_read` (the kind's definitions could not be read, so name and unit are unknown, not absent; a yellow note says why). A yellow line counts keys not defined for the kind. With `--kind` the table lists what the kind defines — a defined key is not collected on every resource. A nonexistent resource ID is an HTTP 404 error, not an empty table. The MCP tool `list_metric_keys` returns the envelope plus `source`, `resource_kind`, `adapter_kind`, `definitions_status` (`read` / `undetermined`), `definitions_note`, `unjoined_count`, `unjoined_keys` and `next_offset`.
+
+### `vmware-aria resource properties`
+
+List a resource's current properties (power state, parent host, extraConfig, ...).
+
+```
+vmware-aria resource properties <resource-id> [OPTIONS]
+vmware-aria resource properties <vm-id> --name 'summary|'
+
+Options:
+  --name TEXT       Substring of the property name, e.g. 'summary|'
+  --limit -n INT    Page size, 1-500 [default: 100]
+  --offset INT      Rows to skip; the next-page offset is printed below the table [default: 0]
+  --target -t TEXT  Target name
+  --config -c PATH  Config file path
+```
+
+**Output**: Table of Name and Value, sorted by name — e.g. `summary|parentHost`, `summary|parentVcenter`, configured CPU and memory, `config|extraConfig|mem_hotadd`. These are current values; use `resource metrics` for time series. A failed or unrecognised read is an error, never an empty table; a missing resource is HTTP 404.
+
+### `vmware-aria resource relationships`
+
+List resources related to a resource (parents and children).
+
+```
+vmware-aria resource relationships <resource-id> [OPTIONS]
+vmware-aria resource relationships <vm-id> --type PARENT
+
+Options:
+  --type TEXT       ALL, PARENT or CHILD [default: ALL]
+  --limit -n INT    Page size, 1-500 [default: 100]
+  --offset INT      Rows to skip; the next-page offset is printed below the table [default: 0]
+  --target -t TEXT  Target name
+  --config -c PATH  Config file path
+```
+
+**Output**: Table of Direction (`parent`, `child`, `both`, `other`, or `unknown`), Kind, Name, ID, sorted by kind and name. `--type` must be exactly `ALL`, `PARENT` or `CHILD` in upper case; `ANCESTOR` and `DESCENDANT` are refused (exit 2) — Aria Operations 8.18.7 answers HTTP 400 for them — so walk further by running the command again on a returned ID. With `ALL`, direction is `unknown` and a yellow note says why when the PARENT/CHILD lists could not be read. The MCP tool is `get_resource_relationships`.
+
 ---
 
 ## Alert Commands
@@ -220,6 +282,66 @@ Options:
 ```
 
 **Output**: Table with Name, Criticality (max severity across the definition's states), Resource Kind, Impact. Creating, enabling/disabling, and deleting alert definitions are MCP-only tools.
+
+### `vmware-aria alert notes`
+
+List the notes on an alert — who is handling it and what was done.
+
+```
+vmware-aria alert notes <alert-id> [OPTIONS]
+
+Options:
+  --limit -n INT    Page size, 1-500 [default: 50]
+  --offset INT      Rows to skip; the next-page offset is printed below the table [default: 0]
+  --target -t TEXT  Target name
+  --config -c PATH  Config file path
+```
+
+**Output**: Table of Created (ms), Type (USER / SYSTEM), User, Note. An unknown alert ID is HTTP 404, not an empty table. A yellow note means Aria answered without a readable notes list: whether the alert has notes is unknown, not "no notes". The MCP tool `list_alert_notes` defaults to 100 rows.
+
+### `vmware-aria alert note-add`
+
+Add a note to an alert. It does not change the alert's status or ownership — use `alert acknowledge` for that. **Asks once** unless `--yes` is given.
+
+```
+vmware-aria alert note-add <alert-id> <text> [OPTIONS]
+vmware-aria alert note-add <alert-id> "Taking this: rebooting esx-03" --dry-run
+
+Options:
+  --dry-run         Print the API call without executing it
+  --yes -y          Skip the confirmation prompt
+  --target -t TEXT  Target name
+  --config -c PATH  Config file path
+```
+
+`--dry-run` prints the target and `POST /suite-api/api/alerts/<alert-id>/notes` with its body `{"content": "<text>"}`, and makes no connection. Empty text is refused (exit 2).
+
+**Output**: JSON with `alert_id`, `action`, `created` (the stored note) and `confirmation_note`. When `created` is null Aria did not confirm the note — run `alert notes` before adding it again, because every call adds a note.
+
+**Audit logged**: yes. Risk low; there is no undo for a note.
+
+### `vmware-aria alert recommendations`
+
+Show the prioritized recommendations for an alert, from its alert definition.
+
+```
+vmware-aria alert recommendations <alert-id> [OPTIONS]
+
+Options:
+  --target -t TEXT  Target name
+  --config -c PATH  Config file path
+```
+
+**Output**: JSON with `alert_id`, `alert_name`, `criticality`, `alert_definition_id`, `alert_definition_name`, `state_severity`, `status`, `recommendations` (each: `id`, `priority` — lower is more important — `description`, `action`, `lookup`) and `note`. The alert's definition state whose severity matches the alert's criticality is used; otherwise the definition's only state; otherwise the recommendations of every state are merged at their highest priority, `state_severity` is null and `note` says so.
+
+| `status` | Meaning |
+|----------|---------|
+| `found` | Every recommendation was read |
+| `partial` | Some texts could not be read — ids and priorities are listed; `description: null` is unknown, not blank |
+| `none_defined` | The definition defines none — `recommendations` is `[]` |
+| `unknown` | The definition could not be read — `recommendations` is `null`; never report it as "no recommendations" |
+
+An alert that cannot be read is an error. On Aria Operations 8.18.7 a CRITICAL vCenter-app alert returned 7 prioritized recommendations. The MCP tool is `get_alert_recommendations`.
 
 ---
 
@@ -342,6 +464,46 @@ vmware-aria health collectors [OPTIONS]
 
 **Output**: Per-group tables listing collector ID, name, state (UP/DOWN), and local flag (marks the built-in collector on the Aria node).
 
+### `vmware-aria health node`
+
+Aria node memory, swap, heap and watchdog restarts, with a memory-pressure indicator. Use it when `health status` shows a service in ERROR or the Aria UI/API is slow.
+
+```
+vmware-aria health node [OPTIONS]
+vmware-aria health node --hours 72 --json
+
+Options:
+  --hours INT       Window for min/avg/max, 1-720 hours [default: 24]
+  --json            Print the full result as JSON
+  --target -t TEXT  Target name
+  --config -c PATH  Config file path
+```
+
+Reads Aria's own self-monitoring objects (`vC-Ops-Node`, `vC-Ops-Watchdog`).
+
+**Output**: Per node — name and collection status; `Memory pressure: <level> — <basis>`; a table (Metric, Latest, Min, Avg, Max) of memory (`mem|total`, `mem|used`, `mem|free`, `mem|actualFree`, `mem|actualUsed`), swap (`swap|total`, `swap|used`, `swap|free`), heap (`heap|MaxHeapSize`, `heap|CurrentHeapSize`, `heap|CommittedMemory`, `heap|NodeHeapMemoryRemaining`) and committed heap per component, with units from Aria's own statkey definitions (GB for memory and swap, MB for heap sizes on 8.18.7); then the latest watchdog restarts per service, and a yellow `Missing <key>: <reason> — <detail>` line for each key with no value (`not_reported`, `no_data` or `undetermined` — never shown as zero). Min/avg/max are over 5-minute averages, so a shorter spike is smoothed. Watchdog restarts print `unknown — <why>` when they could not be read; yellow `units_error` / `latest_error` / `window_error` / `watchdog_error` lines name reads that failed.
+
+Memory pressure is an indicator, not a diagnosis: HIGH when actual free memory (`mem|actualFree`) is below 10% of `mem|total`, ELEVATED below 20%, NORMAL at 20% or more, UNKNOWN when the readings do not settle it. On Aria Operations 8.18.7 after a memory upgrade the node read `mem|total` 15.61 GB (was 7.75), actual free 41%, NORMAL, and 9 watchdog services with 0 restarts. The MCP tool is `get_aria_node_resources` (`window_hours`).
+
+### `vmware-aria health adapters`
+
+Adapter instances, when each last collected, and whether that is stale. Use it for "Objects are not receiving data" or metrics that stopped updating.
+
+```
+vmware-aria health adapters [OPTIONS]
+vmware-aria health adapters --kind VMWARE
+
+Options:
+  --kind TEXT       Adapter kind key, e.g. VMWARE (case-insensitive)
+  --limit -n INT    Page size, 1-500 [default: 100]
+  --offset INT      Rows to skip; the next-page offset is printed below the table [default: 0]
+  --json            Print the full result as JSON
+  --target -t TEXT  Target name
+  --config -c PATH  Config file path
+```
+
+**Output**: Table titled with the clock the ages are measured on (`appliance` — the node status `systemTime` — or `local` when that cannot be read): Name, Kind, Last collected (seconds ago), Interval (minutes), Stale (yes / no / unknown), Resources, Metrics; then each adapter's own message. Stale means the last collection is older than max(3 × the adapter's monitoring interval, 15 minutes); unknown means the timestamp or interval is missing. When `--kind` matches nothing, the kinds present are printed. An empty or unrecognised `GET /adapters` answer is an error, not "no adapters" — every deployment runs a self-monitoring adapter. A recent last collection does not prove every object behind the adapter receives data. `--json` adds `id`, `resource_kind`, `collector_id`, `collector_group_id`, `last_heartbeat_ms` and its age, `stale_basis`, and envelope-level `stale_adapters`, `staleness_unknown` and `adapter_kinds_present`. On Aria Operations 8.18.7 all 6 adapters were not stale. The MCP tool is `list_adapters`.
+
 ---
 
 ## Report Commands
@@ -413,6 +575,76 @@ Options:
 ```
 
 **Audit logged**: yes.
+
+---
+
+## Maintenance Commands
+
+Maintenance stops Aria alerting on a resource and collecting its data. `start` and `end` **ask once** unless `--yes` is given; `--dry-run` prints the API call and makes none — no connection, no request. Both are audited with the state before and after, and governed by vmware-policy under the MCP tool names `start_resource_maintenance` / `end_resource_maintenance` (risk medium).
+
+### `vmware-aria maintenance start`
+
+Put a resource in maintenance.
+
+```
+vmware-aria maintenance start <resource-id> [OPTIONS]
+vmware-aria maintenance start <host-id> --duration 120
+vmware-aria maintenance start <host-id> --end 1789300000000 --dry-run
+
+Arguments:
+  resource-id  Resource UUID (from `vmware-aria resource list`) (required)
+
+Options:
+  --duration INT    Window length in minutes
+  --end INT         Window end, epoch milliseconds
+  --dry-run         Print the API call without executing it
+  --yes -y          Skip the confirmation prompt
+  --target -t TEXT  Target name
+  --config -c PATH  Config file path
+```
+
+With `--duration` (1–525600 minutes) or `--end` (epoch **milliseconds**, in the future) the resource is `MAINTAINED` for that window and returns to its prior state when it expires; give one, not both. With neither it enters manual maintenance (`MAINTAINED_MANUAL`) that lasts until `maintenance end` — easy to forget, so prefer a window. An invalid window is refused (exit 2) before anything is sent. `--dry-run` prints `PUT /suite-api/api/resources/<resource-id>/maintained` with the `duration` or `end` query parameter.
+
+**Output**: JSON with `requested` (`mode` timed / manual, `duration_minutes`, `end_time_ms`), `before` and `after` (each: `name`, `kind`, `adapter_states`, `in_maintenance`, `maintenance_mode`, `note`, `read_error`), `confirmed` (true / false / null — null means the state could not be read afterwards, which is unknown, not failure) and `note`.
+
+**Audit logged**: yes, with before and after state. Undo: `maintenance end`.
+
+### `vmware-aria maintenance end`
+
+Take a resource out of maintenance: Aria resumes alerting and collection.
+
+```
+vmware-aria maintenance end <resource-id> [OPTIONS]
+
+Options:
+  --dry-run         Print the API call without executing it
+  --yes -y          Skip the confirmation prompt
+  --target -t TEXT  Target name
+  --config -c PATH  Config file path
+```
+
+Refused (exit 2) when the resource's state was read and is not `MAINTAINED` / `MAINTAINED_MANUAL` — there is nothing to end. When the state cannot be read the call proceeds and `before` says unknown. `--dry-run` prints `DELETE /suite-api/api/resources/<resource-id>/maintained`.
+
+**Output**: JSON with `before`, `after`, `confirmed` (true once the resource no longer reports maintenance, false when it still does, null when unknown) and `note`.
+
+**Audit logged**: yes, with before and after state. The MCP undo (`start_resource_maintenance`) re-enters manual maintenance — the end of a timed window is not restored.
+
+### `vmware-aria maintenance schedules`
+
+List maintenance schedules.
+
+```
+vmware-aria maintenance schedules [OPTIONS]
+
+Options:
+  --resource-id TEXT  Only schedules for this resource
+  --limit -n INT      Page size, 1-500 [default: 50]
+  --offset INT        Rows to skip; the next-page offset is printed below the table [default: 0]
+  --target -t TEXT    Target name
+  --config -c PATH    Config file path
+```
+
+**Output**: Table of Name, Type (ONCE / DAILY / WEEKLY / MONTHLY / YEARLY), Start (hour:minute and time zone), Duration (min), Recurrence, Expires (date, or `after N runs`), ID. A schedule does not list the resources it applies to — use `--resource-id`. A yellow note means the list could not be read: the schedules are unknown, not absent. The MCP tool `list_maintenance_schedules` defaults to 100 rows.
 
 ---
 
