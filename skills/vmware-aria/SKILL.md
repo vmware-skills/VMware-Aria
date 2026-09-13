@@ -49,7 +49,7 @@ VMware Aria Operations (vRealize Operations / VCF Operations 9.1) AI-assisted mo
 ## Quick Install
 
 ```bash
-uv tool install vmware-aria==1.11.0
+uv tool install vmware-aria==1.12.0
 vmware-aria init      # guided setup: writes config + .env (chmod 600, password grep-safe), then verifies
 vmware-aria doctor
 ```
@@ -328,7 +328,7 @@ Variable names follow the pattern `VMWARE_ARIA_<TARGET_NAME_UPPER>_PASSWORD` whe
 
 ### `invalid peer certificate: UnknownIssuer` when running uvx (corporate TLS proxy)
 
-`uvx` re-resolves dependencies from PyPI on every launch. Behind a corporate TLS-intercepting proxy whose CA is not in uv's bundled cert store, the handshake fails. Use the v1.5.15+ recommended single-command form `vmware-aria mcp` (after `uv tool install vmware-aria==1.11.0` — no network on launch), or set `UV_NATIVE_TLS=true` to make uv use the system cert store.
+`uvx` re-resolves dependencies from PyPI on every launch. Behind a corporate TLS-intercepting proxy whose CA is not in uv's bundled cert store, the handshake fails. Use the v1.5.15+ recommended single-command form `vmware-aria mcp` (after `uv tool install vmware-aria==1.12.0` — no network on launch), or set `UV_NATIVE_TLS=true` to make uv use the system cert store.
 
 ## Safety
 
@@ -343,7 +343,7 @@ Variable names follow the pattern `VMWARE_ARIA_<TARGET_NAME_UPPER>_PASSWORD` whe
 ## Setup
 
 ```bash
-uv tool install vmware-aria==1.11.0
+uv tool install vmware-aria==1.12.0
 mkdir -p ~/.vmware-aria
 cp config.example.yaml ~/.vmware-aria/config.yaml
 # Edit config.yaml with your Aria Operations host details

@@ -16,19 +16,19 @@ Complete setup and security guide for `vmware-aria`.
 ### Via uv (recommended)
 
 ```bash
-uv tool install vmware-aria==1.11.0
+uv tool install vmware-aria==1.12.0
 ```
 
 ### Via pip
 
 ```bash
-pip install vmware-aria==1.11.0
+pip install vmware-aria==1.12.0
 ```
 
 ### From source
 
 ```bash
-git clone --branch v1.11.0 https://github.com/vmware-skills/VMware-Aria.git
+git clone --branch v1.12.0 https://github.com/vmware-skills/VMware-Aria.git
 cd VMware-Aria
 pip install -e .
 ```
@@ -194,7 +194,7 @@ Add to `~/.claude.json` (or use `claude mcp add`):
 
 > v1.5.15+ recommends `vmware-aria mcp`. Pre-1.5.15 used the legacy
 > `vmware-aria-mcp` console script (still kept for backward compatibility).
-> If using `uvx --from vmware-aria==1.11.0 vmware-aria mcp` and you hit
+> If using `uvx --from vmware-aria==1.12.0 vmware-aria mcp` and you hit
 > `invalid peer certificate: UnknownIssuer` behind a corporate TLS proxy,
 > set `UV_NATIVE_TLS=true` or use the recommended form above.
 

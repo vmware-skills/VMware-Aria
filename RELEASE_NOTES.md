@@ -1,4 +1,4 @@
-## Unreleased
+## v1.12.0 — say only what Aria Operations actually reported
 
 Fixes from a run against a live Aria Operations 8.18.7, where several outputs were empty, unnamed
 or misleading.
