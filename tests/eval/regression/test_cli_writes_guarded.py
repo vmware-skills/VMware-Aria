@@ -42,12 +42,26 @@ assert CLI_FILE.is_file(), f"CLI module not found at {CLI_FILE} — the scan wou
 assert TOOLS_DIR.is_dir(), f"MCP server tree not found at {TOOLS_DIR} — the derivation would be empty"
 
 
+#: Registers the maintenance and alert-workflow commands onto the same Typer
+#: app as cli.py. A scan of cli.py alone would never derive its three writes,
+#: so they would look read-only — the "empty result read as no problem" shape.
+CLI_WORKFLOW_FILE = _REPO / "vmware_aria" / "cli_workflow.py"
+assert CLI_WORKFLOW_FILE.is_file(), f"{CLI_WORKFLOW_FILE} not found — its writes would go unchecked"
+
+
 def _cli_files() -> list[pathlib.Path]:
-    """CLI source files. Aria is a single module; a future cli/ package still works."""
+    """CLI source files: cli.py and cli_workflow.py; a future cli/ package still works."""
     cli_pkg = _REPO / "vmware_aria" / "cli"
     if cli_pkg.is_dir():
         return sorted(cli_pkg.rglob("*.py"))
-    return [CLI_FILE]
+    return [CLI_FILE, CLI_WORKFLOW_FILE]
+
+
+def _cli_module(path: pathlib.Path):
+    """The imported module a CLI source file defines."""
+    import importlib
+
+    return importlib.import_module(".".join(path.relative_to(_REPO).with_suffix("").parts))
 
 
 def _write_tool_names() -> frozenset[str]:
@@ -154,10 +168,10 @@ def _cli_write_commands() -> tuple[list[str], list[str]]:
 
 def test_every_write_cli_command_is_guarded():
     writing, unguarded = _cli_write_commands()
-    # Aria's CLI exposes 4 of the 7 write MCP tools (the alert-definition writes
+    # Aria's CLI exposes 7 of the 10 write MCP tools (the alert-definition writes
     # are MCP-only). The floor is the real derived count — a check matching
     # almost nothing is worse than none.
-    assert len(writing) >= 4, (
+    assert len(writing) >= 7, (
         f"only {len(writing)} write CLI commands derived ({writing}) — the "
         f"MCP→ops→CLI derivation is likely stale; a check matching almost nothing "
         f"is worse than none."
@@ -179,7 +193,9 @@ def test_high_blast_radius_commands_are_derived_and_guarded():
     """
     writing, _ = _cli_write_commands()
     names = {w.split(":", 1)[1] for w in writing}
-    for must in ("alert_acknowledge", "report_delete"):
+    # The last three prove cli_workflow.py is scanned, and that the maintenance
+    # pair — defined in mcp_server/tools/, not server.py — derives as writes.
+    for must in ("alert_acknowledge", "report_delete", "maintenance_start", "maintenance_end", "alert_note_add"):
         assert must in names, (
             f"{must} is no longer derived as a write command — the readOnlyHint→"
             f"ops→command derivation stopped resolving it (did the ops scan drop "
@@ -251,14 +267,13 @@ def test_guarded_cli_writes_carry_their_mcp_tool_name():
     sink under two names. The twin is DERIVED: the MCP write tool that calls the
     same ops function the command calls.
     """
-    from vmware_aria import cli
-
     op_tools = _op_to_mcp_tools()
     write_ops = frozenset(op_tools)
     checked: list[str] = []
     mismatched: list[str] = []
     stale: list[str] = []
     for path in _cli_files():
+        cli = _cli_module(path)
         tree = ast.parse(path.read_text(encoding="utf-8"))
         for node in ast.walk(tree):
             if not isinstance(node, ast.FunctionDef):
@@ -294,7 +309,7 @@ def test_guarded_cli_writes_carry_their_mcp_tool_name():
                     f"{node.name}: risk {fn._risk_level!r}, MCP tool {twin!r} risk {twin_risk!r}"
                 )
     assert not stale, "allowlist entries no longer hold: " + "; ".join(stale)
-    assert len(checked) >= 4, f"only {checked} checked — derivation likely stale"
+    assert len(checked) >= 7, f"only {checked} checked — derivation likely stale"
     assert not mismatched, (
         "these CLI writes are guarded under a different name or risk than their "
         "MCP tool, so one deny rule does not scope both surfaces — pass the MCP "

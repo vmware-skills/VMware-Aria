@@ -26,8 +26,12 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 OPS_DIR = REPO_ROOT / "vmware_aria" / "ops"
-CLI_PATH = REPO_ROOT / "vmware_aria" / "cli.py"
-MCP_PATH = REPO_ROOT / "vmware_aria" / "mcp_server" / "server.py"
+# The CLI is cli.py plus cli_workflow.py (maintenance and alert-workflow
+# commands registered onto the same app); a command may live in either.
+CLI_PATHS = [REPO_ROOT / "vmware_aria" / "cli.py", REPO_ROOT / "vmware_aria" / "cli_workflow.py"]
+# Confirmed-gate tools live in server.py and in tools/*.py (the maintenance
+# pair), so the whole server tree is searched.
+MCP_DIR = REPO_ROOT / "vmware_aria" / "mcp_server"
 
 # ops write functions: must accept audit_logger AND call .log on it.
 OPS_WRITE_FUNCTIONS: list[tuple[str, str]] = [
@@ -38,6 +42,9 @@ OPS_WRITE_FUNCTIONS: list[tuple[str, str]] = [
     ("alerts.py", "delete_alert_definition"),
     ("reports.py", "generate_report"),
     ("reports.py", "delete_report"),
+    ("maintenance.py", "start_resource_maintenance"),
+    ("maintenance.py", "end_resource_maintenance"),
+    ("alert_notes.py", "add_alert_note"),
 ]
 
 # MCP destructive tools: must gate on confirmed=False preview.
@@ -46,6 +53,8 @@ MCP_CONFIRMED_TOOLS = [
     "cancel_alert",
     "delete_alert_definition",
     "delete_report",
+    "start_resource_maintenance",
+    "end_resource_maintenance",
 ]
 
 # CLI destructive commands: must prompt via typer.confirm.
@@ -53,15 +62,21 @@ CLI_CONFIRM_COMMANDS = [
     "alert_acknowledge",
     "alert_cancel",
     "report_delete",
+    "maintenance_start",
+    "maintenance_end",
+    "alert_note_add",
 ]
 
 
-def _find_function(path: Path, func_name: str) -> ast.FunctionDef | ast.AsyncFunctionDef:
-    tree = ast.parse(path.read_text(encoding="utf-8"))
-    for node in ast.walk(tree):
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == func_name:
-            return node
-    raise AssertionError(f"{func_name} not found in {path}")
+def _find_function(paths: Path | list[Path], func_name: str) -> ast.FunctionDef | ast.AsyncFunctionDef:
+    candidates = [paths] if isinstance(paths, Path) else paths
+    assert candidates, "no files to search — the check would find nothing"
+    for path in candidates:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == func_name:
+                return node
+    raise AssertionError(f"{func_name} not found in {[str(p) for p in candidates]}")
 
 
 @pytest.mark.unit
@@ -87,7 +102,7 @@ class TestMcpConfirmedLayer:
 
     @pytest.mark.parametrize("func_name", MCP_CONFIRMED_TOOLS)
     def test_mcp_tool_has_confirmed_gate(self, func_name: str) -> None:
-        node = _find_function(MCP_PATH, func_name)
+        node = _find_function(sorted(MCP_DIR.rglob("*.py")), func_name)
         arg_names = {a.arg for a in node.args.args + node.args.kwonlyargs}
         assert "confirmed" in arg_names, (
             f"MCP tool {func_name} must take confirmed: bool = False "
@@ -105,7 +120,7 @@ class TestCliConfirmLayer:
 
     @pytest.mark.parametrize("func_name", CLI_CONFIRM_COMMANDS)
     def test_cli_command_prompts(self, func_name: str) -> None:
-        node = _find_function(CLI_PATH, func_name)
+        node = _find_function(CLI_PATHS, func_name)
         source = ast.dump(node)
         assert "confirm" in source, (
             f"CLI command {func_name} must prompt via typer.confirm "

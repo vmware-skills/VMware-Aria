@@ -1,0 +1,37 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab), read-only GETs",
+ "_note": "GET /recommendations?id=..&id=.. with the 7 ids above: all 7 returned, in a different order",
+ "http_status": 200,
+ "body": {
+  "recommendations": [
+   {
+    "id": "Recommendation-df-vCenterBackupJobFailRecommendation",
+    "description": "vCenter backup job is in failed state, please check the job details and fix it."
+   },
+   {
+    "id": "Recommendation-df-AppAvailabilityRecommendation",
+    "description": "Please check the Health Status of app"
+   },
+   {
+    "id": "Recommendation-df-vCenterServiceDownRecommendation",
+    "description": "Please try to restart the service."
+   },
+   {
+    "id": "Recommendation-df-vCenterNtpServerDownRecommendation",
+    "description": "vCenter NTP Server is in Failed/Down state, please check the NTP details and fix it."
+   },
+   {
+    "id": "Recommendation-df-AppPasswordExpiryRecommendation",
+    "description": "Please check the app Certificate expiry"
+   },
+   {
+    "id": "Recommendation-df-AppConnectivityRecommendation",
+    "description": "Please check if it is possible to ping app endpoint via Operations nodes."
+   },
+   {
+    "id": "Recommendation-df-AppCertificateExpiryRecommendation",
+    "description": "Please check the app Password expiry"
+   }
+  ]
+ }
+}

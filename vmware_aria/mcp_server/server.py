@@ -1,7 +1,7 @@
 """MCP server wrapping VMware Aria Operations monitoring and capacity planning.
 
 This module exposes VMware Aria Operations management tools via the Model
-Context Protocol (MCP) using stdio transport.  The 38 tools are split by
+Context Protocol (MCP) using stdio transport.  The 44 tools are split by
 domain across ``vmware_aria/mcp_server/tools/*.py``; each module registers its tools onto
 the shared ``mcp`` instance defined in ``vmware_aria/mcp_server/_shared.py``.  Importing
 those modules below is what performs the registration.
@@ -51,6 +51,14 @@ Tool categories
   generate_report, list_reports, get_report (``tools/reports.py``);
   delete_report (write, this file)
 
+* **Maintenance** (3 tools, 1 read + 2 write): list_maintenance_schedules
+  (read); start_resource_maintenance, end_resource_maintenance (write,
+  confirmed gate, each other's undo) — ``tools/maintenance.py``
+
+* **Alert workflow** (3 tools, 2 read + 1 write): list_alert_notes,
+  get_alert_recommendations (read); add_alert_note (write, low risk)
+  — ``tools/alert_workflow.py``
+
 Security considerations
 -----------------------
 * **Credential handling**: Credentials are loaded from environment
@@ -86,12 +94,14 @@ from vmware_aria.mcp_server._shared import (  # noqa: F401  (logger re-exported 
 # read/non-confirmed-write tools onto the shared `mcp` instance.
 from vmware_aria.mcp_server.tools import (  # noqa: F401  (imported for registration side-effect)
     alert_definitions,
+    alert_workflow,
     alerts,
     anomaly,
     capacity,
     catalog,
     fleet,
     health,
+    maintenance,
     reports,
     resources,
 )
@@ -101,6 +111,16 @@ from vmware_aria.mcp_server.tools import (  # noqa: F401  (imported for registra
 from vmware_aria.mcp_server.tools.alert_definitions import (  # noqa: F401
     create_alert_definition,
     set_alert_definition_state,
+)
+from vmware_aria.mcp_server.tools.alert_workflow import (  # noqa: F401
+    add_alert_note,
+    get_alert_recommendations,
+    list_alert_notes,
+)
+from vmware_aria.mcp_server.tools.maintenance import (  # noqa: F401
+    end_resource_maintenance,
+    list_maintenance_schedules,
+    start_resource_maintenance,
 )
 from vmware_aria.mcp_server.tools.alerts import (  # noqa: F401
     get_alert,
@@ -197,6 +217,12 @@ __all__ = [
     "list_reports",
     "get_report",
     "delete_report",
+    "start_resource_maintenance",
+    "end_resource_maintenance",
+    "list_maintenance_schedules",
+    "list_alert_notes",
+    "add_alert_note",
+    "get_alert_recommendations",
 ]
 
 

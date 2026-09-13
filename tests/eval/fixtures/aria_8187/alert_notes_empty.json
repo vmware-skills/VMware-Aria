@@ -1,0 +1,30 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab), read-only GETs",
+ "_note": "GET /alerts/{id}/notes for an alert with no notes: a recognised, genuinely empty answer",
+ "http_status": 200,
+ "body": {
+  "pageInfo": {
+   "totalCount": 0,
+   "page": 0,
+   "pageSize": 1000
+  },
+  "links": [
+   {
+    "href": "/suite-api/api/alerts/8bbb1892-9819-4982-8bed-fbfe30fce1a4/notes?page=0&amp;pageSize=1000",
+    "rel": "SELF",
+    "name": "current"
+   },
+   {
+    "href": "/suite-api/api/alerts/8bbb1892-9819-4982-8bed-fbfe30fce1a4/notes?page=0&amp;pageSize=1000",
+    "rel": "RELATED",
+    "name": "first"
+   },
+   {
+    "href": "/suite-api/api/alerts/8bbb1892-9819-4982-8bed-fbfe30fce1a4/notes?page=0&amp;pageSize=1000",
+    "rel": "RELATED",
+    "name": "last"
+   }
+  ],
+  "alertNotes": []
+ }
+}

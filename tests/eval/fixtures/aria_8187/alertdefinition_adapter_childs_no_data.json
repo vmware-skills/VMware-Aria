@@ -1,0 +1,41 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab), read-only GETs",
+ "_note": "GET /alertdefinitions/{id} whose id contains spaces; two recommendations",
+ "http_status": 200,
+ "body": {
+  "id": "AlertDefinition-vCenter Operations Adapter-AdapterChildsNoDataReceivingAlert",
+  "name": "Objects are not receiving data from adapter instance",
+  "description": "One or more Objects are not receiving data from adapter instance. The symptom details will indicate the number of Objects not receiving data.",
+  "adapterKindKey": "ALL",
+  "resourceKindKey": "All",
+  "waitCycles": 1,
+  "cancelCycles": 1,
+  "type": 20,
+  "subType": 18,
+  "states": [
+   {
+    "severity": "AUTO",
+    "base-symptom-set": {
+     "type": "SYMPTOM_SET",
+     "relation": "SELF",
+     "aggregation": "ANY",
+     "symptomSetOperator": "AND",
+     "symptomDefinitionIds": [
+      "SymptomDefinition-vCenter Operations Adapter-AdapterChildsNoDataReceivingSymptom",
+      "SymptomDefinition-vCenter Operations Adapter-AdapterInstanceResource"
+     ],
+     "alertConditions": []
+    },
+    "impact": {
+     "impactType": "BADGE",
+     "detail": "health"
+    },
+    "recommendationPriorityMap": {
+     "Recommendation-df-vCenter Operations Adapter-ResourceIsDownRecommendation": 2,
+     "Recommendation-df-vCenter Operations Adapter-AdapterInstanceDownRecommendation": 1
+    }
+   }
+  ],
+  "forVCDTenants": false
+ }
+}

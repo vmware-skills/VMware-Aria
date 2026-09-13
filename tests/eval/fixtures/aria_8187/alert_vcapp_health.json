@@ -1,0 +1,43 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab), read-only GETs",
+ "_note": "One row of GET /alerts?activeOnly=true — the active CRITICAL alert raised by AlertDefinition-VCAPPHealthStatus",
+ "http_status": 200,
+ "body": {
+  "alertId": "8bbb1892-9819-4982-8bed-fbfe30fce1a4",
+  "resourceId": "31aa1b41-2ae3-479b-8e25-176016ad874e",
+  "alertLevel": "CRITICAL",
+  "type": "15",
+  "subType": "18",
+  "status": "CANCELED",
+  "startTimeUTC": 1789262557450,
+  "cancelTimeUTC": 1789286888481,
+  "updateTimeUTC": 1789262557450,
+  "suspendUntilTimeUTC": 0,
+  "controlState": "OPEN",
+  "alertDefinitionId": "AlertDefinition-VCAPPHealthStatus",
+  "alertDefinitionName": "vCenter app health is affected",
+  "alertImpact": "HEALTH",
+  "links": [
+   {
+    "href": "/suite-api/api/alerts/8bbb1892-9819-4982-8bed-fbfe30fce1a4",
+    "rel": "SELF",
+    "name": "linkToSelf"
+   },
+   {
+    "href": "/suite-api/api/resources/31aa1b41-2ae3-479b-8e25-176016ad874e",
+    "rel": "RELATED",
+    "name": "alertOnResource"
+   },
+   {
+    "href": "/suite-api/api/auth/users/",
+    "rel": "RELATED",
+    "name": "ownerOfAlert"
+   },
+   {
+    "href": "/suite-api/api/alertdefinitions/AlertDefinition-VCAPPHealthStatus",
+    "rel": "RELATED",
+    "name": "problemDefinitionForAlert"
+   }
+  ]
+ }
+}

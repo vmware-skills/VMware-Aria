@@ -1,0 +1,160 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab), read-only GETs",
+ "_note": "GET /resources/{id} for VM test-llm; resourceStatusStates carries the maintenance state (STARTED here)",
+ "http_status": 200,
+ "body": {
+  "creationTime": 1789261278635,
+  "resourceKey": {
+   "name": "test-llm",
+   "adapterKindKey": "VMWARE",
+   "resourceKindKey": "VirtualMachine",
+   "resourceIdentifiers": [
+    {
+     "identifierType": {
+      "name": "isPingEnabled",
+      "dataType": "STRING",
+      "isPartOfUniqueness": false
+     },
+     "value": ""
+    },
+    {
+     "identifierType": {
+      "name": "VMEntityInstanceUUID",
+      "dataType": "STRING",
+      "isPartOfUniqueness": false
+     },
+     "value": "52fc5d3a-3c26-59ab-ef55-eb1206178afc"
+    },
+    {
+     "identifierType": {
+      "name": "VMEntityName",
+      "dataType": "STRING",
+      "isPartOfUniqueness": false
+     },
+     "value": "test-llm"
+    },
+    {
+     "identifierType": {
+      "name": "VMEntityObjectID",
+      "dataType": "STRING",
+      "isPartOfUniqueness": true
+     },
+     "value": "vm-2001"
+    },
+    {
+     "identifierType": {
+      "name": "VMEntityVCID",
+      "dataType": "STRING",
+      "isPartOfUniqueness": true
+     },
+     "value": "21e8a2f1-5484-4205-96b6-612afce2bde5"
+    },
+    {
+     "identifierType": {
+      "name": "VMServiceMonitoringEnabled",
+      "dataType": "STRING",
+      "isPartOfUniqueness": false
+     },
+     "value": ""
+    }
+   ]
+  },
+  "resourceStatusStates": [
+   {
+    "adapterInstanceId": "431af8a8-18b5-4811-aff5-ac903aaf03f7",
+    "resourceStatus": "DATA_RECEIVING",
+    "resourceState": "STARTED",
+    "statusMessage": ""
+   }
+  ],
+  "resourceHealth": "GREEN",
+  "resourceHealthValue": 100.0,
+  "dtEnabled": true,
+  "badges": [
+   {
+    "type": "HEALTH",
+    "color": "GREEN",
+    "score": 100.0
+   },
+   {
+    "type": "CAPACITY_REMAINING",
+    "color": "GREEN",
+    "score": 42.047523714057135
+   },
+   {
+    "type": "TIME_REMAINING",
+    "color": "GREEN",
+    "score": 366.0
+   },
+   {
+    "type": "COMPLIANCE",
+    "color": "GREY",
+    "score": -1.0
+   },
+   {
+    "type": "RISK",
+    "color": "GREEN",
+    "score": 0.0
+   },
+   {
+    "type": "EFFICIENCY",
+    "color": "GREEN",
+    "score": 100.0
+   },
+   {
+    "type": "WORKLOAD",
+    "color": "GREEN",
+    "score": 11.131509145100903
+   }
+  ],
+  "relatedResources": [],
+  "links": [
+   {
+    "href": "/suite-api/api/resources/f654322a-50c3-4a9a-937c-2d4bae8a2b36",
+    "rel": "SELF",
+    "name": "linkToSelf"
+   },
+   {
+    "href": "/suite-api/api/resources/f654322a-50c3-4a9a-937c-2d4bae8a2b36/relationships",
+    "rel": "RELATED",
+    "name": "relationsOfResource"
+   },
+   {
+    "href": "/suite-api/api/resources/f654322a-50c3-4a9a-937c-2d4bae8a2b36/properties",
+    "rel": "RELATED",
+    "name": "propertiesOfResource"
+   },
+   {
+    "href": "/suite-api/api/alerts?resourceId=f654322a-50c3-4a9a-937c-2d4bae8a2b36",
+    "rel": "RELATED",
+    "name": "alertsOfResource"
+   },
+   {
+    "href": "/suite-api/api/symptoms?resourceId=f654322a-50c3-4a9a-937c-2d4bae8a2b36",
+    "rel": "RELATED",
+    "name": "symptomsOfResource"
+   },
+   {
+    "href": "/suite-api/api/resources/f654322a-50c3-4a9a-937c-2d4bae8a2b36/statkeys",
+    "rel": "RELATED",
+    "name": "statKeysOfResource"
+   },
+   {
+    "href": "/suite-api/api/resources/f654322a-50c3-4a9a-937c-2d4bae8a2b36/stats/latest",
+    "rel": "RELATED",
+    "name": "latestStatsOfResource"
+   },
+   {
+    "href": "/suite-api/api/resources/f654322a-50c3-4a9a-937c-2d4bae8a2b36/properties",
+    "rel": "RELATED",
+    "name": "latestPropertiesOfResource"
+   },
+   {
+    "href": "/suite-api/api/credentials/",
+    "rel": "RELATED",
+    "name": "credentialsOfResource"
+   }
+  ],
+  "identifier": "f654322a-50c3-4a9a-937c-2d4bae8a2b36"
+ }
+}
