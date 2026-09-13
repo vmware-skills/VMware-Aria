@@ -110,6 +110,53 @@ def test_unreadable_stat_keys_leave_the_reason_undetermined_without_crashing():
 
 
 @pytest.mark.unit
+def test_similar_keys_are_sanitized_and_bounded():
+    """2026-09-13 review: an 813-char key with control characters came back verbatim."""
+    from vmware_aria.ops.resources import get_resource_metrics
+
+    hostile = "cpu|a" + "x" * 800 + "\x07\x1b[2J\u202e"
+    clean = [f"cpu|key_{i:04d}" for i in range(500)]
+    client = _client({"values": []}, {"stat-key": [{"key": hostile}, *({"key": k} for k in clean)]})
+    entry = _missing(get_resource_metrics(client, VM, ["cpu|usage_average"]))["cpu|usage_average"]
+
+    assert entry["reason"] == "not_collected_for_resource"
+    assert entry["similar_keys"], "the clean keys in the group are still offered"
+    assert len(entry["similar_keys"]) <= 10
+    for key in entry["similar_keys"]:
+        assert len(key) <= 200, "a similar key is a suggestion to pass back, not a payload"
+        assert not any(ord(c) < 32 or c == "\u202e" for c in key)
+    assert hostile not in entry["similar_keys"]
+    assert "omitted" in entry["detail"], "a dropped key is said, not silently lost"
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "answer",
+    [
+        {"statKeys": [{"key": "cpu|usage_average"}]},
+        {"stat-key": {"key": "cpu|usage_average"}},
+        {"stat-key": [{"statKey": {"key": "cpu|usage_average"}}]},
+        {"stat-key": ["cpu|usage_average"]},
+        {"stat-key": [{"key": "mem|guest_demand"}, {"statKey": {"key": "cpu|usage_average"}}]},
+        [{"key": "cpu|usage_average"}],
+    ],
+    ids=["no-stat-key", "stat-key-not-a-list", "rows-without-key", "rows-are-strings",
+         "some-rows-unreadable", "body-is-a-list"],
+)
+def test_an_unrecognised_statkeys_shape_is_undetermined_not_no_keys(answer):
+    """An answer we cannot read is not the resource saying it has no keys (review M7)."""
+    from vmware_aria.ops.resources import get_resource_metrics
+
+    client = _client({"values": []}, answer)
+    result = get_resource_metrics(client, VM, ["cpu|usage_average"])
+
+    entry = _missing(result)["cpu|usage_average"]
+    assert entry["reason"] == "undetermined", entry
+    assert "statkeys" in entry["detail"]
+    assert result["stat_keys_on_resource"] is None
+
+
+@pytest.mark.unit
 def test_a_complete_answer_costs_no_extra_call():
     from vmware_aria.ops.resources import get_resource_metrics
 
@@ -158,6 +205,63 @@ def test_a_short_ranking_says_how_many_candidates_reported():
 
     assert result["returned"] == 3
     assert "3 of 9" in result["hint"]
+
+
+def _group(rid: str, data: list) -> dict:
+    return {"groupKey": rid, "resourceStats": [{"resourceId": rid, "stat": {"data": data}}]}
+
+
+@pytest.mark.unit
+def test_groups_with_no_points_are_left_out_not_ranked():
+    """2026-09-13 review: an empty-data group became a row with value None."""
+    from vmware_aria.ops.resources import get_top_consumers
+
+    groups = {"resourceStatGroups": [
+        _group("vm-0", [5.0]), _group("vm-1", []), _group("vm-2", [3.0]),
+        _group("vm-3", [1.0]), {"groupKey": "vm-4", "resourceStats": []},
+    ]}
+    client = MagicMock(name="AriaClient")
+    client.get.side_effect = [_candidates(9), groups]
+    result = get_top_consumers(client, metric_key="cpu|usage_average", top_n=10)
+
+    assert [r["id"] for r in result["items"]] == ["vm-0", "vm-2", "vm-3"]
+    assert all(r["value"] is not None for r in result["items"])
+    assert result["returned"] == len(result["items"]) == 3
+    assert result["excluded_no_data"] == 2
+    assert result["truncated"] is False
+    assert "3 of 9" in result["hint"]
+    assert "6" in result["hint"], "the hint says how many were left out"
+
+
+@pytest.mark.unit
+def test_a_full_ranking_with_a_no_data_group_does_not_claim_completeness():
+    """top_n groups came back but one had no points: resources below it may still have data."""
+    from vmware_aria.ops.resources import get_top_consumers
+
+    groups = {"resourceStatGroups": [_group("vm-0", [5.0]), _group("vm-1", [4.0]), _group("vm-2", [])]}
+    client = MagicMock(name="AriaClient")
+    client.get.side_effect = [_candidates(9), groups]
+    result = get_top_consumers(client, metric_key="cpu|usage_average", top_n=3)
+
+    assert result["returned"] == 2
+    assert result["excluded_no_data"] == 1
+    assert result["truncated"] is True, "a slot went to a no-data row, so the next one down is unseen"
+    assert "top_n" in result["hint"]
+    assert "2 of 9" not in result["hint"], "it is not known that only 2 of 9 have data"
+
+
+@pytest.mark.unit
+def test_a_full_ranking_with_data_everywhere_counts_nothing_excluded():
+    from vmware_aria.ops.resources import get_top_consumers
+
+    groups = {"resourceStatGroups": [_group(f"vm-{i}", [float(i)]) for i in range(3)]}
+    client = MagicMock(name="AriaClient")
+    client.get.side_effect = [_candidates(9), groups]
+    result = get_top_consumers(client, metric_key="cpu|usage_average", top_n=3)
+
+    assert result["returned"] == 3
+    assert result["excluded_no_data"] == 0
+    assert result["truncated"] is True
 
 
 @pytest.mark.unit

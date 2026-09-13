@@ -345,8 +345,25 @@ def _parse_stat_series(data: dict) -> dict[str, list[dict]]:
     return result
 
 
+#: At most this many ``similar_keys`` per missing metric.
+_MAX_SIMILAR_KEYS = 10
+
+#: A statKey longer than this is not offered as a suggestion. Real keys are
+#: short (the longest of the 1,690 VM and host keys 8.18.7 defines is well
+#: under 100 characters); a suggestion is something to pass back verbatim, so
+#: a truncated one would be a key that does not exist.
+_MAX_SUGGESTED_KEY_LEN = 200
+
+
 def _resource_stat_keys(client: AriaClient, resource_id: str) -> tuple[list[str] | None, str | None]:
-    """The stat keys a resource reports, or ``(None, why it could not be read)``."""
+    """The stat keys a resource reports, or ``(None, why it could not be read)``.
+
+    Only a ``stat-key`` list whose every row carries a string ``key`` is read
+    as the resource's keys. A row in any other form means the body is not the
+    shape this understands, and a partial or empty read of it would be
+    reported as "this resource never reports that key" — a confident answer
+    from an unread body (形态 #1). Those cases return ``None`` instead.
+    """
     path = f"/resources/{resource_id}/statkeys"
     try:
         data = client.get(path)
@@ -356,7 +373,26 @@ def _resource_stat_keys(client: AriaClient, resource_id: str) -> tuple[list[str]
     rows = data.get("stat-key") if isinstance(data, dict) else None
     if not isinstance(rows, list):
         return None, f"GET {path} answered without a 'stat-key' list"
-    return [r["key"] for r in rows if isinstance(r, dict) and isinstance(r.get("key"), str)], None
+    keys = [r["key"] for r in rows if isinstance(r, dict) and isinstance(r.get("key"), str)]
+    if len(keys) != len(rows):
+        return None, (
+            f"GET {path} answered with {len(rows) - len(keys)} of {len(rows)} "
+            f"'stat-key' rows in an unrecognised form (no string 'key')"
+        )
+    return keys, None
+
+
+def _similar_keys(available: list[str], key: str) -> tuple[list[str], int]:
+    """Keys in ``key``'s group to suggest, and how many were withheld as unsafe.
+
+    A key is offered only if sanitizing it changes nothing and it fits
+    ``_MAX_SUGGESTED_KEY_LEN``: control characters or an oversized string
+    cannot be passed back as a real key, and must not reach the agent verbatim.
+    """
+    group = key.split("|", 1)[0] + "|"
+    in_group = sorted({k for k in available if k.startswith(group)})
+    safe = [k for k in in_group if sanitize(k, max_len=_MAX_SUGGESTED_KEY_LEN) == k]
+    return safe[:_MAX_SIMILAR_KEYS], len(in_group) - len(safe)
 
 
 def _explain_missing(
@@ -384,17 +420,22 @@ def _explain_missing(
                 "Widen hours, or check its collector with list_collector_groups."
             )))
         else:
-            group = key.split("|", 1)[0] + "|"
-            similar = sorted(k for k in available if k.startswith(group))[:10]
-            entries.append(_missing(key, "not_collected_for_resource", (
+            similar, withheld = _similar_keys(available, key)
+            detail = (
                 f"This resource has never reported this key ({len(available)} keys "
                 f"reported). Try one of similar_keys."
-            ), similar))
+            )
+            if withheld:
+                detail += (
+                    f" {withheld} key(s) in the same group were omitted: they contain "
+                    f"control characters or exceed {_MAX_SUGGESTED_KEY_LEN} characters."
+                )
+            entries.append(_missing(key, "not_collected_for_resource", detail, similar))
     return entries, len(available)
 
 
 def _missing(key: str, reason: str, detail: str, similar: list[str] | None = None) -> dict:
-    return {"metric_key": key, "reason": reason, "detail": detail, "similar_keys": similar or []}
+    return {"metric_key": sanitize(key), "reason": reason, "detail": detail, "similar_keys": similar or []}
 
 
 # ---------------------------------------------------------------------------
@@ -582,8 +623,10 @@ def get_top_consumers(
     }
     data = client.get("/resources/stats/topn", params=params)
 
+    groups = data.get("resourceStatGroups", [])[:top_n]
     results = []
-    for group in data.get("resourceStatGroups", []):
+    excluded = 0
+    for group in groups:
         rid = group.get("groupKey", "")
         latest_value = None
         # Each resourceStats[] element is {resourceId, stat: {statKey,
@@ -592,6 +635,10 @@ def get_top_consumers(
             points = entry.get("stat", {}).get("data", [])
             if points:
                 latest_value = points[-1]
+        if latest_value is None:
+            # Listed with no points: not a zero, so not a rank.
+            excluded += 1
+            continue
         results.append(
             {
                 "id": sanitize(rid),
@@ -600,7 +647,19 @@ def get_top_consumers(
                 "value": latest_value,
             }
         )
-    envelope = paginated(results[:top_n], limit=top_n)
+    envelope = {**paginated(results, limit=top_n), "excluded_no_data": excluded}
+    if excluded and len(groups) >= top_n:
+        # Every slot the API gave was used, some by no-data rows, so the
+        # resources ranked just below are unseen — more may have data.
+        return {
+            **envelope,
+            "truncated": True,
+            "hint": (
+                f"{excluded} of the {len(groups)} resources the ranking returned had "
+                f"no points for '{metric_key}' and were left out, not ranked at zero. "
+                f"Others below them may have data: raise top_n to see them."
+            ),
+        }
     hint = _ranking_gap_hint(len(results), len(names), top_n, metric_key, resource_kind)
     return {**envelope, "hint": hint} if hint and not envelope["truncated"] else envelope
 
@@ -608,9 +667,11 @@ def get_top_consumers(
 def _ranking_gap_hint(ranked: int, candidates: int, top_n: int, metric_key: str, kind: str) -> str | None:
     """Explain a ranking shorter than both top_n and the candidate set.
 
-    Resources with no points for the key are simply left out of the topn
-    answer (live 8.18.7: an unknown key returns ``resourceStatGroups: []``), so
-    a short or empty ranking means "not reported", never "consuming nothing".
+    Resources with no points for the key are left out of the ranking — the
+    topn answer omits them (live 8.18.7: an unknown key returns
+    ``resourceStatGroups: []``), and a group it does list with empty data is
+    dropped by the caller — so a short or empty ranking means "not reported",
+    never "consuming nothing".
     """
     if ranked >= min(top_n, candidates):
         return None
@@ -623,6 +684,6 @@ def _ranking_gap_hint(ranked: int, candidates: int, top_n: int, metric_key: str,
         )
     return (
         f"Only {ranked} of {candidates} {kind} resources returned data for "
-        f"'{metric_key}' in the last hour; the others are absent from the ranking, "
-        f"not ranked at zero. get_resource_metrics on one of them says why."
+        f"'{metric_key}' in the last hour; the other {candidates - ranked} were left "
+        f"out of the ranking, not ranked at zero. get_resource_metrics on one of them says why."
     )

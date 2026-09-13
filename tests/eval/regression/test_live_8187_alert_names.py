@@ -265,6 +265,72 @@ def test_list_alerts_resource_not_returned_is_marked() -> None:
     assert "not returned" in result["resource_names_note"]
 
 
+def test_a_resolved_resource_with_no_name_is_explained() -> None:
+    """2026-09-13 review: resource_name null with resource_names_note also null."""
+    nameless = ACTIVE[0]["resourceId"]
+    row = RESOURCES[nameless]
+    resources = {**RESOURCES, nameless: {**row, "resourceKey": {**row["resourceKey"], "name": ""}}}
+    result = list_alerts(FakeAria(resources=resources))
+
+    item = next(r for r in result["items"] if r["resource_id"] == nameless)
+    assert item["resource_name"] is None
+    assert result["resource_names_note"], "every null resource_name has an explanation"
+    assert "no name" in result["resource_names_note"]
+    assert "not returned" not in result["resource_names_note"], "it was returned — just unnamed"
+
+
+class FilterIgnoringAria(FakeAria):
+    """/resources ignores resourceId and answers with a page of other resources."""
+
+    def get(self, path: str, params: dict | None = None, **kw: Any) -> dict:
+        if path == "/resources":
+            self.calls.append(("GET", path, dict(params or {})))
+            rows = [self.resources[i] for i in self.resources if i not in _as_list((params or {}).get("resourceId"))]
+            return {"pageInfo": {"totalCount": 999, "page": 0, "pageSize": 100}, "resourceList": rows}
+        return super().get(path, params, **kw)
+
+
+def test_an_ignored_id_filter_is_not_reported_as_deleted_resources() -> None:
+    """Rows nobody asked for mean the filter was ignored — absence then proves nothing."""
+    others = {f"other-{i}": {**next(iter(RESOURCES.values())), "identifier": f"other-{i}"} for i in range(3)}
+    result = list_alerts(FilterIgnoringAria(resources=others))
+
+    assert all(r["resource_name"] is None for r in result["items"])
+    note = result["resource_names_note"]
+    assert note
+    assert "deleted or stale" not in note, "the appliance did not say these resources are gone"
+    assert "could not be retrieved" in note
+
+
+def test_an_ignored_filter_that_still_returns_the_requested_rows_resolves() -> None:
+    """CONTROL: extra rows alongside every requested one — the names are still exact."""
+
+    class ExtraRows(FakeAria):
+        def get(self, path: str, params: dict | None = None, **kw: Any) -> dict:
+            answer = super().get(path, params, **kw)
+            if path == "/resources":
+                extra = {**next(iter(RESOURCES.values())), "identifier": "unrequested"}
+                return {**answer, "resourceList": [*answer["resourceList"], extra]}
+            return answer
+
+    result = list_alerts(ExtraRows())
+    assert result["resource_names_note"] is None
+    assert all(r["resource_name"] for r in result["items"])
+
+
+def test_a_symptom_with_no_definition_id_and_no_name_is_noted() -> None:
+    """2026-09-13 review: definition_lookup no_definition_id but symptom_definitions_note absent."""
+    body = {"contributingSymptoms": [{"alertId": "bare", "contributingSymptoms": {
+        "contributingSymptoms": [{"symptomId": "s-1", "symptomSetId": "set", "alertConditions": []}]
+    }}]}
+    client = FakeAria(alerts=[{**ACTIVE[0], "alertId": "bare"}], contrib={"bare": body})
+    result = get_alert(client, "bare")
+
+    assert [s["definition_lookup"] for s in result["symptoms"]] == ["no_definition_id"]
+    assert result["symptoms"][0]["name"] == ""
+    assert "no definition id" in result["symptom_definitions_note"]
+
+
 def test_list_alerts_with_no_alerts_makes_no_lookup() -> None:
     client = FakeAria(alerts=[])
     result = list_alerts(client)

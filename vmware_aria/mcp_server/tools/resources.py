@@ -147,7 +147,9 @@ def get_top_consumers(
     Returns a paginated envelope: items, returned, limit, total (null
     when the API reports no size), truncated, hint. Check truncated
     before calling this the complete set. Resources with no data for the key
-    are left out, not ranked at zero; hint says when that shortened the list.
+    are left out, not ranked at zero; excluded_no_data counts the ones the
+    ranking API listed with no points, and hint says how many were left out
+    when that shortened the list.
 
     Args:
         metric_key: Metric to rank by, e.g. cpu|usage_average,

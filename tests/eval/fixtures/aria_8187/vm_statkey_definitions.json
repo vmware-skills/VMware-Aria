@@ -1,0 +1,4151 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab), read-only GETs/queries",
+ "_note": "GET /adapterkinds/VMWARE/resourcekinds/VirtualMachine/statkeys — the stat keys the product defines for the kind (911), trimmed to key/name/unit. A defined key is not necessarily collected on every resource.",
+ "http_status": 200,
+ "body": {
+  "resourceTypeAttributes": [
+   {
+    "key": "Guest OS Services|mkInComingConnectionCount",
+    "name": "Guest OS Services|Number of Incoming Connections"
+   },
+   {
+    "key": "Guest OS Services|mkKnownServiceCount",
+    "name": "Guest OS Services|Number of OOTB Services"
+   },
+   {
+    "key": "Guest OS Services|mkOutGoingConnectionCount",
+    "name": "Guest OS Services|Number of Outgoing Connections"
+   },
+   {
+    "key": "Guest OS Services|mkServiceCount",
+    "name": "Guest OS Services|Total Number of Services"
+   },
+   {
+    "key": "Guest OS Services|mkUserDefinedServiceCount",
+    "name": "Guest OS Services|Number of User Defined Services"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|capacityRemainingPercentage",
+    "name": "Capacity Analytics Generated|Capacity Remaining Percentage",
+    "unit": "%"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|cpu|capacityRemaining",
+    "name": "Capacity Analytics Generated|CPU|Capacity Remaining",
+    "unit": "MHz"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|cpu|capacityRemainingPercentage",
+    "name": "Capacity Analytics Generated|CPU|Capacity Remaining Percentage",
+    "unit": "%"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|cpu|recommendedSize",
+    "name": "Capacity Analytics Generated|CPU|Recommended Size",
+    "unit": "MHz"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|cpu|timeRemaining",
+    "name": "Capacity Analytics Generated|CPU|Time Remaining",
+    "unit": "Day(s)"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|diskspace|capacityRemaining",
+    "name": "Capacity Analytics Generated|Disk Space|Capacity Remaining",
+    "unit": "GB"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|diskspace|capacityRemainingPercentage",
+    "name": "Capacity Analytics Generated|Disk Space|Capacity Remaining Percentage",
+    "unit": "%"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|diskspace|recommendedSize",
+    "name": "Capacity Analytics Generated|Disk Space|Recommended Size",
+    "unit": "GB"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|diskspace|timeRemaining",
+    "name": "Capacity Analytics Generated|Disk Space|Time Remaining",
+    "unit": "Day(s)"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|mem|capacityRemaining",
+    "name": "Capacity Analytics Generated|Memory|Capacity Remaining",
+    "unit": "KB"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|mem|capacityRemainingPercentage",
+    "name": "Capacity Analytics Generated|Memory|Capacity Remaining Percentage",
+    "unit": "%"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|mem|recommendedSize",
+    "name": "Capacity Analytics Generated|Memory|Recommended Size",
+    "unit": "KB"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|mem|timeRemaining",
+    "name": "Capacity Analytics Generated|Memory|Time Remaining",
+    "unit": "Day(s)"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|timeRemaining",
+    "name": "Capacity Analytics Generated|Time Remaining",
+    "unit": "Day(s)"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|timeRemainingWithCommit",
+    "name": "Capacity Analytics Generated|Time Remaining With Commit",
+    "unit": "Day(s)"
+   },
+   {
+    "key": "System Attributes|active_alarms",
+    "name": "VMware Aria Operations Generated|Self - Active Anomaly Count"
+   },
+   {
+    "key": "System Attributes|active_ki_alarms",
+    "name": "VMware Aria Operations Generated|Self - Active KPI Breach Count"
+   },
+   {
+    "key": "System Attributes|alert_count_critical",
+    "name": "VMware Aria Operations Generated|Alert Count Critical"
+   },
+   {
+    "key": "System Attributes|alert_count_immediate",
+    "name": "VMware Aria Operations Generated|Alert Count Immediate"
+   },
+   {
+    "key": "System Attributes|alert_count_info",
+    "name": "VMware Aria Operations Generated|Alert Count Info"
+   },
+   {
+    "key": "System Attributes|alert_count_warning",
+    "name": "VMware Aria Operations Generated|Alert Count Warning"
+   },
+   {
+    "key": "System Attributes|all_metrics",
+    "name": "VMware Aria Operations Generated|Self - Metric Count"
+   },
+   {
+    "key": "System Attributes|availability",
+    "name": "VMware Aria Operations Generated|Availability"
+   },
+   {
+    "key": "System Attributes|change_index",
+    "name": "VMware Aria Operations Generated|Self - Change Index"
+   },
+   {
+    "key": "System Attributes|child_active_alarms",
+    "name": "VMware Aria Operations Generated|Full Set - Active Anomaly Count"
+   },
+   {
+    "key": "System Attributes|child_active_ki_alarms",
+    "name": "VMware Aria Operations Generated|Full Set - Active KPI Breach Count"
+   },
+   {
+    "key": "System Attributes|child_all_metrics",
+    "name": "VMware Aria Operations Generated|Full Set - Metric Count"
+   },
+   {
+    "key": "System Attributes|child_ki_metrics",
+    "name": "VMware Aria Operations Generated|Full Set - KPI Count"
+   },
+   {
+    "key": "System Attributes|child_new_alarms",
+    "name": "VMware Aria Operations Generated|Full Set - New Anomaly Count"
+   },
+   {
+    "key": "System Attributes|child_new_ki_alarms",
+    "name": "VMware Aria Operations Generated|Full Set - New KPI Breach Count"
+   },
+   {
+    "key": "System Attributes|health",
+    "name": "VMware Aria Operations Generated|Self - Health Score"
+   },
+   {
+    "key": "System Attributes|ki_metrics",
+    "name": "VMware Aria Operations Generated|Self - KPI Count"
+   },
+   {
+    "key": "System Attributes|new_alarms",
+    "name": "VMware Aria Operations Generated|Self - New Anomaly Count"
+   },
+   {
+    "key": "System Attributes|new_ki_alarms",
+    "name": "VMware Aria Operations Generated|Self - New KPI Breach Count"
+   },
+   {
+    "key": "System Attributes|self_alert_count",
+    "name": "VMware Aria Operations Generated|Self - Alert Count"
+   },
+   {
+    "key": "System Attributes|total_alarms",
+    "name": "VMware Aria Operations Generated|Total Anomalies"
+   },
+   {
+    "key": "System Attributes|total_alert_count",
+    "name": "VMware Aria Operations Generated|Total Alert Count"
+   },
+   {
+    "key": "Telegraf Availability",
+    "name": "Telegraf Availability"
+   },
+   {
+    "key": "badge|alert_count_critical",
+    "name": "Badge|Alert Count Critical"
+   },
+   {
+    "key": "badge|alert_count_immediate",
+    "name": "Badge|Alert Count Immediate"
+   },
+   {
+    "key": "badge|alert_count_info",
+    "name": "Badge|Alert Count Info"
+   },
+   {
+    "key": "badge|alert_count_warning",
+    "name": "Badge|Alert Count Warning"
+   },
+   {
+    "key": "badge|anomaly",
+    "name": "Badge|Anomaly"
+   },
+   {
+    "key": "badge|capacityRemaining",
+    "name": "Badge|Capacity Remaining",
+    "unit": "%"
+   },
+   {
+    "key": "badge|capacityRemaining_whatif",
+    "name": "Badge|Capacity Remaining with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "badge|compliance",
+    "name": "Badge|Compliance",
+    "unit": "%"
+   },
+   {
+    "key": "badge|density",
+    "name": "Badge|Density"
+   },
+   {
+    "key": "badge|density_whatif",
+    "name": "Badge|Density with committed projects"
+   },
+   {
+    "key": "badge|efficiency",
+    "name": "Badge|Efficiency",
+    "unit": "%"
+   },
+   {
+    "key": "badge|efficiency_classic",
+    "name": "Badge|Legacy Efficiency"
+   },
+   {
+    "key": "badge|efficiency_state",
+    "name": "Badge|Efficiency State"
+   },
+   {
+    "key": "badge|fault",
+    "name": "Badge|Faults"
+   },
+   {
+    "key": "badge|health",
+    "name": "Badge|Health",
+    "unit": "%"
+   },
+   {
+    "key": "badge|health_classic",
+    "name": "Badge|Legacy Health"
+   },
+   {
+    "key": "badge|health_state",
+    "name": "Badge|Health State"
+   },
+   {
+    "key": "badge|risk",
+    "name": "Badge|Risk",
+    "unit": "%"
+   },
+   {
+    "key": "badge|risk_classic",
+    "name": "Badge|Legacy Risk"
+   },
+   {
+    "key": "badge|risk_state",
+    "name": "Badge|Risk State"
+   },
+   {
+    "key": "badge|stress",
+    "name": "Badge|Stress",
+    "unit": "%"
+   },
+   {
+    "key": "badge|stress_whatif",
+    "name": "Badge|Stress with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "badge|timeRemaining",
+    "name": "Badge|Time Remaining",
+    "unit": "%"
+   },
+   {
+    "key": "badge|timeRemaining_whatif",
+    "name": "Badge|Time Remaining with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "badge|waste",
+    "name": "Badge|Waste",
+    "unit": "%"
+   },
+   {
+    "key": "badge|workload",
+    "name": "Badge|Workload",
+    "unit": "%"
+   },
+   {
+    "key": "config|cpuAllocation|slotSize",
+    "name": "Configuration|CPU Resource Allocation|HA Slot Size"
+   },
+   {
+    "key": "config|hardware|disk_Space",
+    "name": "Configuration|Hardware|Disk Space",
+    "unit": "GB"
+   },
+   {
+    "key": "config|hardware|num_Cpu",
+    "name": "Configuration|Hardware|Number of CPUs",
+    "unit": "vCPUs"
+   },
+   {
+    "key": "config|hardware|thin_Enabled",
+    "name": "Configuration|Hardware|Thin Provisioned Disk"
+   },
+   {
+    "key": "config|memoryAllocation|slotSize",
+    "name": "Configuration|Memory Resource Allocation|HA Slot Size"
+   },
+   {
+    "key": "cost|additionalMTDCost",
+    "name": "Cost|Additional MTD Cost",
+    "unit": ""
+   },
+   {
+    "key": "cost|allocation|allocationBasedCpuMTDCost",
+    "name": "Cost|Allocation|Allocation Based CPU MTD Cost",
+    "unit": ""
+   },
+   {
+    "key": "cost|allocation|allocationBasedDailyCpuCost",
+    "name": "Cost|Allocation|Daily CPU Cost",
+    "unit": ""
+   },
+   {
+    "key": "cost|allocation|allocationBasedDailyMemoryCost",
+    "name": "Cost|Allocation|Daily Memory Cost",
+    "unit": ""
+   },
+   {
+    "key": "cost|allocation|allocationBasedDailyStorageCost",
+    "name": "Cost|Allocation|Daily Disk Space Cost",
+    "unit": ""
+   },
+   {
+    "key": "cost|allocation|allocationBasedMemoryMTDCost",
+    "name": "Cost|Allocation|Allocation Based Memory MTD Cost",
+    "unit": ""
+   },
+   {
+    "key": "cost|allocation|allocationBasedStorageMTDCost",
+    "name": "Cost|Allocation|Allocation Based Storage MTD Cost",
+    "unit": ""
+   },
+   {
+    "key": "cost|allocation|allocationBasedTotalCost",
+    "name": "Cost|Allocation|Monthly Projected Total Cost"
+   },
+   {
+    "key": "cost|allocation|allocationBasedTotalMTDCost",
+    "name": "Cost|Allocation|MTD Total Cost",
+    "unit": ""
+   },
+   {
+    "key": "cost|dailyAdditionalCost",
+    "name": "Cost|Daily Additional Cost",
+    "unit": ""
+   },
+   {
+    "key": "cost|demandBasedCpuMTDCost",
+    "name": "Cost|Demand Based CPU MTD Cost",
+    "unit": ""
+   },
+   {
+    "key": "cost|demandBasedDailyCpuCost",
+    "name": "Cost|Demand Based Daily CPU Cost",
+    "unit": ""
+   },
+   {
+    "key": "cost|demandBasedDailyMemoryCost",
+    "name": "Cost|Demand Based Daily Memory Cost",
+    "unit": ""
+   },
+   {
+    "key": "cost|demandBasedDailyStorageCost",
+    "name": "Cost|Demand Based Daily Storage Cost",
+    "unit": ""
+   },
+   {
+    "key": "cost|demandBasedMemoryMTDCost",
+    "name": "Cost|Demand Based Memory MTD Cost",
+    "unit": ""
+   },
+   {
+    "key": "cost|demandBasedStorageMTDCost",
+    "name": "Cost|Demand Based Storage MTD Cost",
+    "unit": ""
+   },
+   {
+    "key": "cost|detailedAdditionalCost|cost",
+    "name": "Cost|Daily Tags and Custom Properties Cost|Monthly Projected Total Cost",
+    "unit": ""
+   },
+   {
+    "key": "cost|effectiveCpuMTDCost",
+    "name": "Cost|Effective CPU MTD Cost",
+    "unit": ""
+   },
+   {
+    "key": "cost|effectiveDailyCost",
+    "name": "Cost|Effective Daily Cost",
+    "unit": ""
+   },
+   {
+    "key": "cost|effectiveDailyCpuCost",
+    "name": "Cost|Effective Daily CPU Cost",
+    "unit": ""
+   },
+   {
+    "key": "cost|effectiveDailyMemoryCost",
+    "name": "Cost|Effective Daily Memory Cost",
+    "unit": ""
+   },
+   {
+    "key": "cost|effectiveDailyStorageCost",
+    "name": "Cost|Effective Daily Storage Cost",
+    "unit": ""
+   },
+   {
+    "key": "cost|effectiveMemoryMTDCost",
+    "name": "Cost|Effective Memory MTD Cost",
+    "unit": ""
+   },
+   {
+    "key": "cost|effectiveProjectedTotalCost",
+    "name": "Cost|Monthly Effective Projected Total Cost"
+   },
+   {
+    "key": "cost|effectiveStorageMTDCost",
+    "name": "Cost|Effective Storage MTD Cost",
+    "unit": ""
+   },
+   {
+    "key": "cost|effectiveTotalCost",
+    "name": "Cost|Effective MTD Cost",
+    "unit": ""
+   },
+   {
+    "key": "cost|monthlyProjectedCost",
+    "name": "Cost|Monthly Projected Total Cost"
+   },
+   {
+    "key": "cost|monthlyTotalCost",
+    "name": "Cost|MTD Total Cost",
+    "unit": ""
+   },
+   {
+    "key": "cost|potentialCostIncrease",
+    "name": "Cost|Potential Cost Increase",
+    "unit": ""
+   },
+   {
+    "key": "cost|reclaimableCost",
+    "name": "Cost|Potential Savings",
+    "unit": ""
+   },
+   {
+    "key": "cpu-alloc|actual.capacity",
+    "name": "CPU Allocation|Current Size",
+    "unit": "vCPUs"
+   },
+   {
+    "key": "cpu-alloc|actual.capacity.normalized",
+    "name": "CPU Allocation|Total Capacity",
+    "unit": "vCPUs"
+   },
+   {
+    "key": "cpu-alloc|actual.capacity.normalized_whatif",
+    "name": "CPU Allocation|Total Capacity with committed projects",
+    "unit": "vCPUs"
+   },
+   {
+    "key": "cpu-alloc|actual.capacity_whatif",
+    "name": "CPU Allocation|Current Size with committed projects",
+    "unit": "vCPUs"
+   },
+   {
+    "key": "cpu-alloc|capacity.provider.count",
+    "name": "CPU Allocation|Number of Capacity providers"
+   },
+   {
+    "key": "cpu-alloc|capacity.provider.count_whatif",
+    "name": "CPU Allocation|Number of Capacity providers with committed projects"
+   },
+   {
+    "key": "cpu-alloc|capacityRemaining",
+    "name": "CPU Allocation|Capacity Remaining",
+    "unit": "%"
+   },
+   {
+    "key": "cpu-alloc|capacityRemainingUsingConsumers",
+    "name": "CPU Allocation|Capacity Remaining using profile",
+    "unit": "vCPUs"
+   },
+   {
+    "key": "cpu-alloc|capacityRemainingUsingConsumers_average",
+    "name": "CPU Allocation|Capacity Remaining (Average consumer profile)"
+   },
+   {
+    "key": "cpu-alloc|capacityRemainingUsingConsumers_average_whatif",
+    "name": "CPU Allocation|Capacity Remaining with committed projects (Average consumer profile)"
+   },
+   {
+    "key": "cpu-alloc|capacityRemainingUsingConsumers_large",
+    "name": "CPU Allocation|Capacity Remaining (Large consumer profile)"
+   },
+   {
+    "key": "cpu-alloc|capacityRemainingUsingConsumers_medium",
+    "name": "CPU Allocation|Capacity Remaining (Medium consumer profile)"
+   },
+   {
+    "key": "cpu-alloc|capacityRemainingUsingConsumers_small",
+    "name": "CPU Allocation|Capacity Remaining (Small consumer profile)"
+   },
+   {
+    "key": "cpu-alloc|capacityRemainingUsingConsumers_whatif",
+    "name": "CPU Allocation|Capacity Remaining using profile with committed projects",
+    "unit": "vCPUs"
+   },
+   {
+    "key": "cpu-alloc|capacityRemainingValue",
+    "name": "CPU Allocation|Capacity Remaining Value",
+    "unit": "vCPUs"
+   },
+   {
+    "key": "cpu-alloc|capacityRemainingValue_whatif",
+    "name": "CPU Allocation|Capacity Remaining Value with committed projects",
+    "unit": "vCPUs"
+   },
+   {
+    "key": "cpu-alloc|capacityRemaining_min",
+    "name": "CPU Allocation|Capacity Remaining (Based on instantaneous peak)",
+    "unit": "%"
+   },
+   {
+    "key": "cpu-alloc|capacityRemaining_min_whatif",
+    "name": "CPU Allocation|Capacity Remaining with committed projects (Based on instantaneous peak)",
+    "unit": "%"
+   },
+   {
+    "key": "cpu-alloc|capacityRemaining_whatif",
+    "name": "CPU Allocation|Capacity Remaining with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "cpu-alloc|computed_demand",
+    "name": "CPU Allocation|System Computed Demand",
+    "unit": "vCPUs"
+   },
+   {
+    "key": "cpu-alloc|computed_demand_whatif",
+    "name": "CPU Allocation|System Computed Demand with committed projects",
+    "unit": "vCPUs"
+   },
+   {
+    "key": "cpu-alloc|consumer.count",
+    "name": "CPU Allocation|Number of Capacity consumers"
+   },
+   {
+    "key": "cpu-alloc|consumer.count.per.provider.count",
+    "name": "CPU Allocation|Consumer Provider ratio"
+   },
+   {
+    "key": "cpu-alloc|consumer.count.per.provider.count_whatif",
+    "name": "CPU Allocation|Consumer Provider ratio with committed projects"
+   },
+   {
+    "key": "cpu-alloc|consumer.count_whatif",
+    "name": "CPU Allocation|Number of Capacity consumers with committed projects"
+   },
+   {
+    "key": "cpu-alloc|density",
+    "name": "CPU Allocation|Density"
+   },
+   {
+    "key": "cpu-alloc|density_whatif",
+    "name": "CPU Allocation|Density with committed projects"
+   },
+   {
+    "key": "cpu-alloc|idle",
+    "name": "CPU Allocation|Is Idle"
+   },
+   {
+    "key": "cpu-alloc|idle_whatif",
+    "name": "CPU Allocation|Is Idle with committed projects"
+   },
+   {
+    "key": "cpu-alloc|isStress",
+    "name": "CPU Allocation|Is Stressed"
+   },
+   {
+    "key": "cpu-alloc|isStress_whatif",
+    "name": "CPU Allocation|Is Stressed with committed projects"
+   },
+   {
+    "key": "cpu-alloc|isWaste",
+    "name": "CPU Allocation|Has Reclaimable Capacity"
+   },
+   {
+    "key": "cpu-alloc|object.demand.with.size.recommendation",
+    "name": "CPU Allocation|Effective Demand (With peak usage)",
+    "unit": "vCPUs"
+   },
+   {
+    "key": "cpu-alloc|optimal.consumer.per.provider",
+    "name": "CPU Allocation|Optimal Consumer Provider ratio"
+   },
+   {
+    "key": "cpu-alloc|optimal.consumer.per.provider_whatif",
+    "name": "CPU Allocation|Optimal Consumer Provider ratio with committed projects"
+   },
+   {
+    "key": "cpu-alloc|oversized",
+    "name": "CPU Allocation|Is Oversized"
+   },
+   {
+    "key": "cpu-alloc|oversized_whatif",
+    "name": "CPU Allocation|Is Oversized with committed projects"
+   },
+   {
+    "key": "cpu-alloc|poweredOff",
+    "name": "CPU Allocation|Powered Off"
+   },
+   {
+    "key": "cpu-alloc|poweredOffTimePercent",
+    "name": "CPU Allocation|Powered Off Time Percent",
+    "unit": "%"
+   },
+   {
+    "key": "cpu-alloc|poweredOffTimePercent_whatif",
+    "name": "CPU Allocation|Powered Off Time Percent with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "cpu-alloc|poweredOff_whatif",
+    "name": "CPU Allocation|Powered Off with committed projects"
+   },
+   {
+    "key": "cpu-alloc|reason.for.waste",
+    "name": "CPU Allocation|Reason for Reclaimable Capacity"
+   },
+   {
+    "key": "cpu-alloc|size.recommendation",
+    "name": "CPU Allocation|Recommended Size",
+    "unit": "vCPUs"
+   },
+   {
+    "key": "cpu-alloc|size.recommendation_whatif",
+    "name": "CPU Allocation|Recommended Size with committed projects",
+    "unit": "vCPUs"
+   },
+   {
+    "key": "cpu-alloc|stress",
+    "name": "CPU Allocation|Stress",
+    "unit": "%"
+   },
+   {
+    "key": "cpu-alloc|stress_whatif",
+    "name": "CPU Allocation|Stress with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "cpu-alloc|timeRemaining",
+    "name": "CPU Allocation|Time Remaining",
+    "unit": "Day(s)"
+   },
+   {
+    "key": "cpu-alloc|timeRemaining_whatif",
+    "name": "CPU Allocation|Time Remaining with committed projects",
+    "unit": "Day(s)"
+   },
+   {
+    "key": "cpu-alloc|utilization.range",
+    "name": "CPU Allocation|Utilization Range"
+   },
+   {
+    "key": "cpu-alloc|waste",
+    "name": "CPU Allocation|Waste",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|20_sec_peak_costopPct",
+    "name": "CPU|Peak vCPU Co-Stop within collection cycle",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|20_sec_peak_iowaitPct",
+    "name": "CPU|Peak Other Wait within collection cycle",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|20_sec_peak_overlap",
+    "name": "CPU|Peak vCPU Overlap within collection cycle",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|20_sec_peak_overlap_summation",
+    "name": "CPU|(DEP) Peak vCPU Overlap within collection cycle",
+    "unit": "ms"
+   },
+   {
+    "key": "cpu|20_sec_peak_readyPct",
+    "name": "CPU|Peak vCPU Ready within collection cycle",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|20_sec_peak_swapwaitPct",
+    "name": "CPU|Peak vCPU Swap Wait within collection cycle",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|20_sec_peak_systemSummationPct",
+    "name": "CPU|Peak vCPU System within collection cycle",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|actual.capacity",
+    "name": "CPU|Current Size",
+    "unit": "MHz"
+   },
+   {
+    "key": "cpu|actual.capacity.normalized",
+    "name": "CPU|Total Capacity",
+    "unit": "MHz"
+   },
+   {
+    "key": "cpu|actual.capacity.normalized_whatif",
+    "name": "CPU|Total Capacity with committed projects",
+    "unit": "MHz"
+   },
+   {
+    "key": "cpu|actual.capacity_whatif",
+    "name": "CPU|Current Size with committed projects",
+    "unit": "MHz"
+   },
+   {
+    "key": "cpu|capacity.provider.count",
+    "name": "CPU|Number of Capacity providers"
+   },
+   {
+    "key": "cpu|capacity.provider.count_whatif",
+    "name": "CPU|Number of Capacity providers with committed projects"
+   },
+   {
+    "key": "cpu|capacityRemaining",
+    "name": "CPU|Capacity Remaining",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|capacityRemainingUsingConsumers",
+    "name": "CPU|Capacity Remaining using profile",
+    "unit": "MHz"
+   },
+   {
+    "key": "cpu|capacityRemainingUsingConsumers_average",
+    "name": "CPU|Capacity Remaining (Average consumer profile)"
+   },
+   {
+    "key": "cpu|capacityRemainingUsingConsumers_average_whatif",
+    "name": "CPU|Capacity Remaining with committed projects (Average consumer profile)"
+   },
+   {
+    "key": "cpu|capacityRemainingUsingConsumers_large",
+    "name": "CPU|Capacity Remaining (Large consumer profile)"
+   },
+   {
+    "key": "cpu|capacityRemainingUsingConsumers_medium",
+    "name": "CPU|Capacity Remaining (Medium consumer profile)"
+   },
+   {
+    "key": "cpu|capacityRemainingUsingConsumers_small",
+    "name": "CPU|Capacity Remaining (Small consumer profile)"
+   },
+   {
+    "key": "cpu|capacityRemainingUsingConsumers_whatif",
+    "name": "CPU|Capacity Remaining using profile with committed projects",
+    "unit": "MHz"
+   },
+   {
+    "key": "cpu|capacityRemainingValue",
+    "name": "CPU|Capacity Remaining Value",
+    "unit": "MHz"
+   },
+   {
+    "key": "cpu|capacityRemainingValue_whatif",
+    "name": "CPU|Capacity Remaining Value with committed projects",
+    "unit": "MHz"
+   },
+   {
+    "key": "cpu|capacityRemaining_min",
+    "name": "CPU|Capacity Remaining (Based on instantaneous peak)",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|capacityRemaining_min_whatif",
+    "name": "CPU|Capacity Remaining with committed projects (Based on instantaneous peak)",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|capacityRemaining_whatif",
+    "name": "CPU|Capacity Remaining with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|capacity_contention",
+    "name": "CPU|Overall CPU Contention",
+    "unit": "ms"
+   },
+   {
+    "key": "cpu|capacity_contentionPct",
+    "name": "CPU|Contention",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|capacity_demandEntitlementPct",
+    "name": "CPU|Capacity Demand Entitlement",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|computed_demand",
+    "name": "CPU|System Computed Demand",
+    "unit": "MHz"
+   },
+   {
+    "key": "cpu|computed_demand_whatif",
+    "name": "CPU|System Computed Demand with committed projects",
+    "unit": "MHz"
+   },
+   {
+    "key": "cpu|consumer.count",
+    "name": "CPU|Number of Capacity consumers"
+   },
+   {
+    "key": "cpu|consumer.count.per.provider.count",
+    "name": "CPU|Consumer Provider ratio"
+   },
+   {
+    "key": "cpu|consumer.count.per.provider.count_whatif",
+    "name": "CPU|Consumer Provider ratio with committed projects"
+   },
+   {
+    "key": "cpu|consumer.count_whatif",
+    "name": "CPU|Number of Capacity consumers with committed projects"
+   },
+   {
+    "key": "cpu|corecount_provisioned",
+    "name": "CPU|Provisioned vCPU(s)",
+    "unit": "vCPUs"
+   },
+   {
+    "key": "cpu|costopPct",
+    "name": "CPU|Co-stop",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|costop_summation",
+    "name": "CPU|Co-stop",
+    "unit": "ms"
+   },
+   {
+    "key": "cpu|demandEntitlementRatio_latest",
+    "name": "CPU|Demand-to-entitlement Ratio",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|demandOverCapacity",
+    "name": "CPU|Demand Over Capacity",
+    "unit": "MHz"
+   },
+   {
+    "key": "cpu|demandOverLimit",
+    "name": "CPU|Demand Over Limit",
+    "unit": "MHz"
+   },
+   {
+    "key": "cpu|demandPct",
+    "name": "CPU|Demand",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|demandmhz",
+    "name": "CPU|Demand",
+    "unit": "MHz"
+   },
+   {
+    "key": "cpu|density",
+    "name": "CPU|Density"
+   },
+   {
+    "key": "cpu|density_whatif",
+    "name": "CPU|Density with committed projects"
+   },
+   {
+    "key": "cpu|dynamic_entitlement",
+    "name": "CPU|Dynamic entitlement"
+   },
+   {
+    "key": "cpu|effective_limit",
+    "name": "CPU|Effective limit",
+    "unit": "MHz"
+   },
+   {
+    "key": "cpu|entitlement_latest",
+    "name": "CPU|Entitlement Latest"
+   },
+   {
+    "key": "cpu|estimated_entitlement",
+    "name": "CPU|Estimated entitlement",
+    "unit": "MHz"
+   },
+   {
+    "key": "cpu|extra_summation",
+    "name": "CPU|Extra",
+    "unit": "ms"
+   },
+   {
+    "key": "cpu|guaranteed_latest",
+    "name": "CPU|Guaranteed",
+    "unit": "ms"
+   },
+   {
+    "key": "cpu|host_demand_for_aggregation",
+    "name": "CPU|Host Demand For Aggregation"
+   },
+   {
+    "key": "cpu|idle",
+    "name": "CPU|Is Idle"
+   },
+   {
+    "key": "cpu|idlePct",
+    "name": "CPU|Idle",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|idle_summation",
+    "name": "CPU|Idle",
+    "unit": "ms"
+   },
+   {
+    "key": "cpu|idle_whatif",
+    "name": "CPU|Is Idle with committed projects"
+   },
+   {
+    "key": "cpu|iowait",
+    "name": "CPU|Other Wait",
+    "unit": "ms"
+   },
+   {
+    "key": "cpu|iowaitPct",
+    "name": "CPU|Other Wait",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|isStress",
+    "name": "CPU|Is Stressed"
+   },
+   {
+    "key": "cpu|isStress_whatif",
+    "name": "CPU|Is Stressed with committed projects"
+   },
+   {
+    "key": "cpu|isWaste",
+    "name": "CPU|Has Reclaimable Capacity"
+   },
+   {
+    "key": "cpu|latency_average",
+    "name": "CPU|Latency",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|maxlimited_summation",
+    "name": "CPU|Max Limited"
+   },
+   {
+    "key": "cpu|net_run",
+    "name": "CPU|Net Run",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|object.demand.with.size.recommendation",
+    "name": "CPU|Effective Demand (With peak usage)",
+    "unit": "MHz"
+   },
+   {
+    "key": "cpu|optimal.consumer.per.provider",
+    "name": "CPU|Optimal Consumer Provider ratio"
+   },
+   {
+    "key": "cpu|optimal.consumer.per.provider_whatif",
+    "name": "CPU|Optimal Consumer Provider ratio with committed projects"
+   },
+   {
+    "key": "cpu|overlap_summation",
+    "name": "CPU|(DEP) Overlap",
+    "unit": "ms"
+   },
+   {
+    "key": "cpu|oversized",
+    "name": "CPU|Is Oversized"
+   },
+   {
+    "key": "cpu|oversized_whatif",
+    "name": "CPU|Is Oversized with committed projects"
+   },
+   {
+    "key": "cpu|peak_vcpu_ready",
+    "name": "CPU|Highest vCPU Ready of all instances",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|peak_vcpu_usage",
+    "name": "CPU|Highest vCPU Usage of all instances",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|perCpuCoStopPct",
+    "name": "CPU|Normalized Co-stop",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|poweredOff",
+    "name": "CPU|Powered Off"
+   },
+   {
+    "key": "cpu|poweredOffTimePercent",
+    "name": "CPU|Powered Off Time Percent",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|poweredOffTimePercent_whatif",
+    "name": "CPU|Powered Off Time Percent with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|poweredOff_whatif",
+    "name": "CPU|Powered Off with committed projects"
+   },
+   {
+    "key": "cpu|readiness_average",
+    "name": "CPU|Readiness",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|readyPct",
+    "name": "CPU|Ready",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|ready_summation",
+    "name": "CPU|Ready",
+    "unit": "ms"
+   },
+   {
+    "key": "cpu|reason.for.waste",
+    "name": "CPU|Reason for Reclaimable Capacity"
+   },
+   {
+    "key": "cpu|run_summation",
+    "name": "CPU|Run",
+    "unit": "ms"
+   },
+   {
+    "key": "cpu|size.recommendation",
+    "name": "CPU|Recommended Size",
+    "unit": "vCPUs"
+   },
+   {
+    "key": "cpu|size.recommendation_whatif",
+    "name": "CPU|Recommended Size with committed projects",
+    "unit": "vCPUs"
+   },
+   {
+    "key": "cpu|stress",
+    "name": "CPU|Stress",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|stress_whatif",
+    "name": "CPU|Stress with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|swapwaitPct",
+    "name": "CPU|Swap wait",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|swapwait_summation",
+    "name": "CPU|Swap Wait",
+    "unit": "ms"
+   },
+   {
+    "key": "cpu|systemSummationPct",
+    "name": "CPU|System",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|system_summation",
+    "name": "CPU|System",
+    "unit": "ms"
+   },
+   {
+    "key": "cpu|timeRemaining",
+    "name": "CPU|Time Remaining",
+    "unit": "Day(s)"
+   },
+   {
+    "key": "cpu|timeRemaining_whatif",
+    "name": "CPU|Time Remaining with committed projects",
+    "unit": "Day(s)"
+   },
+   {
+    "key": "cpu|usage_average",
+    "name": "CPU|Usage",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|usagemhz_average",
+    "name": "CPU|Usage",
+    "unit": "MHz"
+   },
+   {
+    "key": "cpu|usagemhz_average_daily",
+    "name": "CPU|Usage average Daily",
+    "unit": "MHz"
+   },
+   {
+    "key": "cpu|usagemhz_average_mtd",
+    "name": "CPU|(DEP) Usage average MTD",
+    "unit": "MHz"
+   },
+   {
+    "key": "cpu|used_summation",
+    "name": "CPU|Used",
+    "unit": "ms"
+   },
+   {
+    "key": "cpu|utilization.range",
+    "name": "CPU|Utilization Range"
+   },
+   {
+    "key": "cpu|vcpu_usage_disparity",
+    "name": "CPU|vCPU Usage Disparity",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|vm_capacity_provisioned",
+    "name": "CPU|Total Capacity",
+    "unit": "MHz"
+   },
+   {
+    "key": "cpu|wait",
+    "name": "CPU|Total Wait",
+    "unit": "ms"
+   },
+   {
+    "key": "cpu|waitPct",
+    "name": "CPU|Wait",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|wait_summation",
+    "name": "CPU|Wait",
+    "unit": "ms"
+   },
+   {
+    "key": "cpu|waste",
+    "name": "CPU|Waste",
+    "unit": "%"
+   },
+   {
+    "key": "cpu|workload",
+    "name": "CPU|Workload",
+    "unit": "%"
+   },
+   {
+    "key": "datastore|commandsAveraged_average",
+    "name": "Datastore|Total IOPS"
+   },
+   {
+    "key": "datastore|demand",
+    "name": "Datastore|Demand"
+   },
+   {
+    "key": "datastore|demand_oio",
+    "name": "Datastore|Outstanding IO requests",
+    "unit": "OIOs"
+   },
+   {
+    "key": "datastore|maxObserved_NumberRead",
+    "name": "Datastore|(DEP) Max Observed Reads per second",
+    "unit": "IOPS"
+   },
+   {
+    "key": "datastore|maxObserved_NumberWrite",
+    "name": "Datastore|(DEP) Max Observed Writes per second",
+    "unit": "IOPS"
+   },
+   {
+    "key": "datastore|maxObserved_OIO",
+    "name": "Datastore|(DEP) Max Observed Number of Outstanding IO Operations",
+    "unit": "OIOs"
+   },
+   {
+    "key": "datastore|maxObserved_Read",
+    "name": "Datastore|(DEP) Max Observed Read Rate",
+    "unit": "KBps"
+   },
+   {
+    "key": "datastore|maxObserved_Write",
+    "name": "Datastore|(DEP) Max Observed Write Rate",
+    "unit": "KBps"
+   },
+   {
+    "key": "datastore|maxTotalLatency_latest",
+    "name": "Datastore|Highest Latency"
+   },
+   {
+    "key": "datastore|numberReadAveraged_average",
+    "name": "Datastore|Read IOPS"
+   },
+   {
+    "key": "datastore|numberWriteAveraged_average",
+    "name": "Datastore|Write IOPS"
+   },
+   {
+    "key": "datastore|oio",
+    "name": "Datastore|(DEP) Provisioned vCPU(s)"
+   },
+   {
+    "key": "datastore|read_average",
+    "name": "Datastore|Read Throughput",
+    "unit": "KBps"
+   },
+   {
+    "key": "datastore|totalLatency_average",
+    "name": "Datastore|Total Latency",
+    "unit": "ms"
+   },
+   {
+    "key": "datastore|totalLatency_max",
+    "name": "Datastore|Total Latency Max",
+    "unit": "ms"
+   },
+   {
+    "key": "datastore|totalReadLatency_average",
+    "name": "Datastore|Read Latency",
+    "unit": "ms"
+   },
+   {
+    "key": "datastore|totalWriteLatency_average",
+    "name": "Datastore|Write Latency",
+    "unit": "ms"
+   },
+   {
+    "key": "datastore|usage_average",
+    "name": "Datastore|Total Throughput",
+    "unit": "KBps"
+   },
+   {
+    "key": "datastore|used",
+    "name": "Datastore|Used Space"
+   },
+   {
+    "key": "datastore|write_average",
+    "name": "Datastore|Write Throughput",
+    "unit": "KBps"
+   },
+   {
+    "key": "diskspace-alloc|actual.capacity",
+    "name": "Disk Space Allocation|Current Size",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-alloc|actual.capacity.normalized",
+    "name": "Disk Space Allocation|Total Capacity",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-alloc|actual.capacity.normalized_whatif",
+    "name": "Disk Space Allocation|Total Capacity with committed projects",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-alloc|actual.capacity_whatif",
+    "name": "Disk Space Allocation|Current Size with committed projects",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-alloc|capacity.provider.count",
+    "name": "Disk Space Allocation|Number of Capacity providers"
+   },
+   {
+    "key": "diskspace-alloc|capacity.provider.count_whatif",
+    "name": "Disk Space Allocation|Number of Capacity providers with committed projects"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemaining",
+    "name": "Disk Space Allocation|Capacity Remaining",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemainingUsingConsumers",
+    "name": "Disk Space Allocation|Capacity Remaining using profile",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemainingUsingConsumers_average",
+    "name": "Disk Space Allocation|Capacity Remaining (Average consumer profile)"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemainingUsingConsumers_average_whatif",
+    "name": "Disk Space Allocation|Capacity Remaining with committed projects (Average consumer profile)"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemainingUsingConsumers_large",
+    "name": "Disk Space Allocation|Capacity Remaining (Large consumer profile)"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemainingUsingConsumers_medium",
+    "name": "Disk Space Allocation|Capacity Remaining (Medium consumer profile)"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemainingUsingConsumers_small",
+    "name": "Disk Space Allocation|Capacity Remaining (Small consumer profile)"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemainingUsingConsumers_whatif",
+    "name": "Disk Space Allocation|Capacity Remaining using profile with committed projects",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemainingValue",
+    "name": "Disk Space Allocation|Capacity Remaining Value",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemainingValue_whatif",
+    "name": "Disk Space Allocation|Capacity Remaining Value with committed projects",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemaining_min",
+    "name": "Disk Space Allocation|Capacity Remaining (Based on instantaneous peak)",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemaining_min_whatif",
+    "name": "Disk Space Allocation|Capacity Remaining with committed projects (Based on instantaneous peak)",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemaining_whatif",
+    "name": "Disk Space Allocation|Capacity Remaining with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace-alloc|computed_demand",
+    "name": "Disk Space Allocation|System Computed Demand",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-alloc|computed_demand_whatif",
+    "name": "Disk Space Allocation|System Computed Demand with committed projects",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-alloc|consumer.count",
+    "name": "Disk Space Allocation|Number of Capacity consumers"
+   },
+   {
+    "key": "diskspace-alloc|consumer.count.per.provider.count",
+    "name": "Disk Space Allocation|Consumer Provider ratio"
+   },
+   {
+    "key": "diskspace-alloc|consumer.count.per.provider.count_whatif",
+    "name": "Disk Space Allocation|Consumer Provider ratio with committed projects"
+   },
+   {
+    "key": "diskspace-alloc|consumer.count_whatif",
+    "name": "Disk Space Allocation|Number of Capacity consumers with committed projects"
+   },
+   {
+    "key": "diskspace-alloc|density",
+    "name": "Disk Space Allocation|Density"
+   },
+   {
+    "key": "diskspace-alloc|density_whatif",
+    "name": "Disk Space Allocation|Density with committed projects"
+   },
+   {
+    "key": "diskspace-alloc|idle",
+    "name": "Disk Space Allocation|Is Idle"
+   },
+   {
+    "key": "diskspace-alloc|idle_whatif",
+    "name": "Disk Space Allocation|Is Idle with committed projects"
+   },
+   {
+    "key": "diskspace-alloc|isStress",
+    "name": "Disk Space Allocation|Is Stressed"
+   },
+   {
+    "key": "diskspace-alloc|isStress_whatif",
+    "name": "Disk Space Allocation|Is Stressed with committed projects"
+   },
+   {
+    "key": "diskspace-alloc|isWaste",
+    "name": "Disk Space Allocation|Has Reclaimable Capacity"
+   },
+   {
+    "key": "diskspace-alloc|object.demand.with.size.recommendation",
+    "name": "Disk Space Allocation|Effective Demand (With peak usage)",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-alloc|optimal.consumer.per.provider",
+    "name": "Disk Space Allocation|Optimal Consumer Provider ratio"
+   },
+   {
+    "key": "diskspace-alloc|optimal.consumer.per.provider_whatif",
+    "name": "Disk Space Allocation|Optimal Consumer Provider ratio with committed projects"
+   },
+   {
+    "key": "diskspace-alloc|oversized",
+    "name": "Disk Space Allocation|Is Oversized"
+   },
+   {
+    "key": "diskspace-alloc|oversized_whatif",
+    "name": "Disk Space Allocation|Is Oversized with committed projects"
+   },
+   {
+    "key": "diskspace-alloc|poweredOff",
+    "name": "Disk Space Allocation|Powered Off"
+   },
+   {
+    "key": "diskspace-alloc|poweredOffTimePercent",
+    "name": "Disk Space Allocation|Powered Off Time Percent",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace-alloc|poweredOffTimePercent_whatif",
+    "name": "Disk Space Allocation|Powered Off Time Percent with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace-alloc|poweredOff_whatif",
+    "name": "Disk Space Allocation|Powered Off with committed projects"
+   },
+   {
+    "key": "diskspace-alloc|reason.for.waste",
+    "name": "Disk Space Allocation|Reason for Reclaimable Capacity"
+   },
+   {
+    "key": "diskspace-alloc|size.recommendation",
+    "name": "Disk Space Allocation|Recommended Size",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-alloc|size.recommendation_whatif",
+    "name": "Disk Space Allocation|Recommended Size with committed projects",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-alloc|stress",
+    "name": "Disk Space Allocation|Stress",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace-alloc|stress_whatif",
+    "name": "Disk Space Allocation|Stress with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace-alloc|timeRemaining",
+    "name": "Disk Space Allocation|Time Remaining",
+    "unit": "Day(s)"
+   },
+   {
+    "key": "diskspace-alloc|timeRemaining_whatif",
+    "name": "Disk Space Allocation|Time Remaining with committed projects",
+    "unit": "Day(s)"
+   },
+   {
+    "key": "diskspace-alloc|utilization.range",
+    "name": "Disk Space Allocation|Utilization Range"
+   },
+   {
+    "key": "diskspace-alloc|waste",
+    "name": "Disk Space Allocation|Waste",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace-total|actual.capacity",
+    "name": "Disk Space Usage on Datastore|Current Size",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-total|actual.capacity.normalized",
+    "name": "Disk Space Usage on Datastore|Total Capacity",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-total|actual.capacity.normalized_whatif",
+    "name": "Disk Space Usage on Datastore|Total Capacity with committed projects",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-total|actual.capacity_whatif",
+    "name": "Disk Space Usage on Datastore|Current Size with committed projects",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-total|capacity.provider.count",
+    "name": "Disk Space Usage on Datastore|Number of Capacity providers"
+   },
+   {
+    "key": "diskspace-total|capacity.provider.count_whatif",
+    "name": "Disk Space Usage on Datastore|Number of Capacity providers with committed projects"
+   },
+   {
+    "key": "diskspace-total|capacityRemaining",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace-total|capacityRemainingUsingConsumers",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining using profile",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-total|capacityRemainingUsingConsumers_average",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining (Average consumer profile)"
+   },
+   {
+    "key": "diskspace-total|capacityRemainingUsingConsumers_average_whatif",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining with committed projects (Average consumer profile)"
+   },
+   {
+    "key": "diskspace-total|capacityRemainingUsingConsumers_large",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining (Large consumer profile)"
+   },
+   {
+    "key": "diskspace-total|capacityRemainingUsingConsumers_medium",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining (Medium consumer profile)"
+   },
+   {
+    "key": "diskspace-total|capacityRemainingUsingConsumers_small",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining (Small consumer profile)"
+   },
+   {
+    "key": "diskspace-total|capacityRemainingUsingConsumers_whatif",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining using profile with committed projects",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-total|capacityRemainingValue",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining Value",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-total|capacityRemainingValue_whatif",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining Value with committed projects",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-total|capacityRemaining_min",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining (Based on instantaneous peak)",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace-total|capacityRemaining_min_whatif",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining with committed projects (Based on instantaneous peak)",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace-total|capacityRemaining_whatif",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace-total|computed_demand",
+    "name": "Disk Space Usage on Datastore|System Computed Demand",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-total|computed_demand_whatif",
+    "name": "Disk Space Usage on Datastore|System Computed Demand with committed projects",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-total|consumer.count",
+    "name": "Disk Space Usage on Datastore|Number of Capacity consumers"
+   },
+   {
+    "key": "diskspace-total|consumer.count.per.provider.count",
+    "name": "Disk Space Usage on Datastore|Consumer Provider ratio"
+   },
+   {
+    "key": "diskspace-total|consumer.count.per.provider.count_whatif",
+    "name": "Disk Space Usage on Datastore|Consumer Provider ratio with committed projects"
+   },
+   {
+    "key": "diskspace-total|consumer.count_whatif",
+    "name": "Disk Space Usage on Datastore|Number of Capacity consumers with committed projects"
+   },
+   {
+    "key": "diskspace-total|density",
+    "name": "Disk Space Usage on Datastore|Density"
+   },
+   {
+    "key": "diskspace-total|density_whatif",
+    "name": "Disk Space Usage on Datastore|Density with committed projects"
+   },
+   {
+    "key": "diskspace-total|idle",
+    "name": "Disk Space Usage on Datastore|Is Idle"
+   },
+   {
+    "key": "diskspace-total|idle_whatif",
+    "name": "Disk Space Usage on Datastore|Is Idle with committed projects"
+   },
+   {
+    "key": "diskspace-total|isStress",
+    "name": "Disk Space Usage on Datastore|Is Stressed"
+   },
+   {
+    "key": "diskspace-total|isStress_whatif",
+    "name": "Disk Space Usage on Datastore|Is Stressed with committed projects"
+   },
+   {
+    "key": "diskspace-total|isWaste",
+    "name": "Disk Space Usage on Datastore|Has Reclaimable Capacity"
+   },
+   {
+    "key": "diskspace-total|object.demand.with.size.recommendation",
+    "name": "Disk Space Usage on Datastore|Effective Demand (With peak usage)",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-total|optimal.consumer.per.provider",
+    "name": "Disk Space Usage on Datastore|Optimal Consumer Provider ratio"
+   },
+   {
+    "key": "diskspace-total|optimal.consumer.per.provider_whatif",
+    "name": "Disk Space Usage on Datastore|Optimal Consumer Provider ratio with committed projects"
+   },
+   {
+    "key": "diskspace-total|oversized",
+    "name": "Disk Space Usage on Datastore|Is Oversized"
+   },
+   {
+    "key": "diskspace-total|oversized_whatif",
+    "name": "Disk Space Usage on Datastore|Is Oversized with committed projects"
+   },
+   {
+    "key": "diskspace-total|poweredOff",
+    "name": "Disk Space Usage on Datastore|Powered Off"
+   },
+   {
+    "key": "diskspace-total|poweredOffTimePercent",
+    "name": "Disk Space Usage on Datastore|Powered Off Time Percent",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace-total|poweredOffTimePercent_whatif",
+    "name": "Disk Space Usage on Datastore|Powered Off Time Percent with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace-total|poweredOff_whatif",
+    "name": "Disk Space Usage on Datastore|Powered Off with committed projects"
+   },
+   {
+    "key": "diskspace-total|reason.for.waste",
+    "name": "Disk Space Usage on Datastore|Reason for Reclaimable Capacity"
+   },
+   {
+    "key": "diskspace-total|size.recommendation",
+    "name": "Disk Space Usage on Datastore|Recommended Size",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-total|size.recommendation_whatif",
+    "name": "Disk Space Usage on Datastore|Recommended Size with committed projects",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace-total|stress",
+    "name": "Disk Space Usage on Datastore|Stress",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace-total|stress_whatif",
+    "name": "Disk Space Usage on Datastore|Stress with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace-total|timeRemaining",
+    "name": "Disk Space Usage on Datastore|Time Remaining",
+    "unit": "Day(s)"
+   },
+   {
+    "key": "diskspace-total|timeRemaining_whatif",
+    "name": "Disk Space Usage on Datastore|Time Remaining with committed projects",
+    "unit": "Day(s)"
+   },
+   {
+    "key": "diskspace-total|utilization.range",
+    "name": "Disk Space Usage on Datastore|Utilization Range"
+   },
+   {
+    "key": "diskspace-total|waste",
+    "name": "Disk Space Usage on Datastore|Waste",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace-total|workload",
+    "name": "Disk Space Usage on Datastore|Workload",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace|activeNotShared",
+    "name": "Disk Space|Active not shared",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace|actual.capacity",
+    "name": "Disk Space|Current Size",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace|actual.capacity.normalized",
+    "name": "Disk Space|Total Capacity",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace|actual.capacity.normalized_whatif",
+    "name": "Disk Space|Total Capacity with committed projects",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace|actual.capacity_whatif",
+    "name": "Disk Space|Current Size with committed projects",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace|capacity.provider.count",
+    "name": "Disk Space|Number of Capacity providers"
+   },
+   {
+    "key": "diskspace|capacity.provider.count_whatif",
+    "name": "Disk Space|Number of Capacity providers with committed projects"
+   },
+   {
+    "key": "diskspace|capacityRemaining",
+    "name": "Disk Space|Capacity Remaining",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace|capacityRemainingUsingConsumers",
+    "name": "Disk Space|Capacity Remaining using profile",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace|capacityRemainingUsingConsumers_average",
+    "name": "Disk Space|Capacity Remaining (Average consumer profile)"
+   },
+   {
+    "key": "diskspace|capacityRemainingUsingConsumers_average_whatif",
+    "name": "Disk Space|Capacity Remaining with committed projects (Average consumer profile)"
+   },
+   {
+    "key": "diskspace|capacityRemainingUsingConsumers_large",
+    "name": "Disk Space|Capacity Remaining (Large consumer profile)"
+   },
+   {
+    "key": "diskspace|capacityRemainingUsingConsumers_medium",
+    "name": "Disk Space|Capacity Remaining (Medium consumer profile)"
+   },
+   {
+    "key": "diskspace|capacityRemainingUsingConsumers_small",
+    "name": "Disk Space|Capacity Remaining (Small consumer profile)"
+   },
+   {
+    "key": "diskspace|capacityRemainingUsingConsumers_whatif",
+    "name": "Disk Space|Capacity Remaining using profile with committed projects",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace|capacityRemainingValue",
+    "name": "Disk Space|Capacity Remaining Value",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace|capacityRemainingValue_whatif",
+    "name": "Disk Space|Capacity Remaining Value with committed projects",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace|capacityRemaining_min",
+    "name": "Disk Space|Capacity Remaining (Based on instantaneous peak)",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace|capacityRemaining_min_whatif",
+    "name": "Disk Space|Capacity Remaining with committed projects (Based on instantaneous peak)",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace|capacityRemaining_whatif",
+    "name": "Disk Space|Capacity Remaining with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace|computed_demand",
+    "name": "Disk Space|System Computed Demand",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace|computed_demand_whatif",
+    "name": "Disk Space|System Computed Demand with committed projects",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace|consumer.count",
+    "name": "Disk Space|Number of Capacity consumers"
+   },
+   {
+    "key": "diskspace|consumer.count.per.provider.count",
+    "name": "Disk Space|Consumer Provider ratio"
+   },
+   {
+    "key": "diskspace|consumer.count.per.provider.count_whatif",
+    "name": "Disk Space|Consumer Provider ratio with committed projects"
+   },
+   {
+    "key": "diskspace|consumer.count_whatif",
+    "name": "Disk Space|Number of Capacity consumers with committed projects"
+   },
+   {
+    "key": "diskspace|density",
+    "name": "Disk Space|Density"
+   },
+   {
+    "key": "diskspace|density_whatif",
+    "name": "Disk Space|Density with committed projects"
+   },
+   {
+    "key": "diskspace|diskused",
+    "name": "Disk Space|Virtual Disk Used",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace|idle",
+    "name": "Disk Space|Is Idle"
+   },
+   {
+    "key": "diskspace|idle_whatif",
+    "name": "Disk Space|Is Idle with committed projects"
+   },
+   {
+    "key": "diskspace|isStress",
+    "name": "Disk Space|Is Stressed"
+   },
+   {
+    "key": "diskspace|isStress_whatif",
+    "name": "Disk Space|Is Stressed with committed projects"
+   },
+   {
+    "key": "diskspace|isWaste",
+    "name": "Disk Space|Has Reclaimable Capacity"
+   },
+   {
+    "key": "diskspace|notshared",
+    "name": "Disk Space|Not Shared",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace|object.demand.with.size.recommendation",
+    "name": "Disk Space|Effective Demand (With peak usage)",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace|optimal.consumer.per.provider",
+    "name": "Disk Space|Optimal Consumer Provider ratio"
+   },
+   {
+    "key": "diskspace|optimal.consumer.per.provider_whatif",
+    "name": "Disk Space|Optimal Consumer Provider ratio with committed projects"
+   },
+   {
+    "key": "diskspace|oversized",
+    "name": "Disk Space|Is Oversized"
+   },
+   {
+    "key": "diskspace|oversized_whatif",
+    "name": "Disk Space|Is Oversized with committed projects"
+   },
+   {
+    "key": "diskspace|perDsUsed",
+    "name": "Disk Space|Virtual Machine used",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace|poweredOff",
+    "name": "Disk Space|Powered Off"
+   },
+   {
+    "key": "diskspace|poweredOffTimePercent",
+    "name": "Disk Space|Powered Off Time Percent",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace|poweredOffTimePercent_whatif",
+    "name": "Disk Space|Powered Off Time Percent with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace|poweredOff_whatif",
+    "name": "Disk Space|Powered Off with committed projects"
+   },
+   {
+    "key": "diskspace|provisioned",
+    "name": "Disk Space|Provisioned Space",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace|provisionedSpace",
+    "name": "Disk Space|Provisioned Space for VM",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace|reason.for.waste",
+    "name": "Disk Space|Reason for Reclaimable Capacity"
+   },
+   {
+    "key": "diskspace|size.recommendation",
+    "name": "Disk Space|Recommended Size",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace|size.recommendation_whatif",
+    "name": "Disk Space|Recommended Size with committed projects",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace|snapshot",
+    "name": "Disk Space|Snapshot Space",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace|snapshot|accessTime",
+    "name": "Disk Space|Snapshot|Access Time",
+    "unit": "ms"
+   },
+   {
+    "key": "diskspace|snapshot|used",
+    "name": "Disk Space|Snapshot|Virtual Machine used",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace|stress",
+    "name": "Disk Space|Stress",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace|stress_whatif",
+    "name": "Disk Space|Stress with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace|timeRemaining",
+    "name": "Disk Space|Time Remaining",
+    "unit": "Day(s)"
+   },
+   {
+    "key": "diskspace|timeRemaining_whatif",
+    "name": "Disk Space|Time Remaining with committed projects",
+    "unit": "Day(s)"
+   },
+   {
+    "key": "diskspace|usageWithoutOverhead",
+    "name": "Disk Space|Usage Without Overhead",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace|used",
+    "name": "Disk Space|Virtual Machine used",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace|utilization.range",
+    "name": "Disk Space|Utilization Range"
+   },
+   {
+    "key": "diskspace|vsanOverhead",
+    "name": "Disk Space|vSAN Overhead",
+    "unit": "GB"
+   },
+   {
+    "key": "diskspace|waste",
+    "name": "Disk Space|Waste",
+    "unit": "%"
+   },
+   {
+    "key": "diskspace|workload",
+    "name": "Disk Space|Workload",
+    "unit": "%"
+   },
+   {
+    "key": "disk|busResets_summation",
+    "name": "Physical Disk|Bus Resets"
+   },
+   {
+    "key": "disk|commandsAborted_summation",
+    "name": "Physical Disk|Commands Aborted"
+   },
+   {
+    "key": "disk|commandsAveraged_average",
+    "name": "Physical Disk|Total IOPS"
+   },
+   {
+    "key": "disk|diskdemand",
+    "name": "Physical Disk|Demand"
+   },
+   {
+    "key": "disk|diskoio",
+    "name": "Physical Disk|Number of Outstanding IO Operations"
+   },
+   {
+    "key": "disk|diskqueued",
+    "name": "Physical Disk|Queued Operations"
+   },
+   {
+    "key": "disk|maxTotalLatency_latest",
+    "name": "Physical Disk|Highest Latency"
+   },
+   {
+    "key": "disk|max_observed",
+    "name": "Physical Disk|(DEP) Max Observed OIO"
+   },
+   {
+    "key": "disk|numberReadAveraged_average",
+    "name": "Physical Disk|Read IOPS"
+   },
+   {
+    "key": "disk|numberWriteAveraged_average",
+    "name": "Physical Disk|Write IOPS"
+   },
+   {
+    "key": "disk|read_average",
+    "name": "Physical Disk|Read Throughput",
+    "unit": "KBps"
+   },
+   {
+    "key": "disk|scsiReservationConflicts_summation",
+    "name": "Physical Disk|SCSI Reservation Conflicts"
+   },
+   {
+    "key": "disk|sum_queued_oio",
+    "name": "Physical Disk|Total Queued Outstanding operations"
+   },
+   {
+    "key": "disk|totalLatency_average",
+    "name": "Physical Disk|Total Latency",
+    "unit": "ms"
+   },
+   {
+    "key": "disk|totalReadLatency_average",
+    "name": "Physical Disk|Read Latency",
+    "unit": "ms"
+   },
+   {
+    "key": "disk|totalWriteLatency_average",
+    "name": "Physical Disk|Write Latency",
+    "unit": "ms"
+   },
+   {
+    "key": "disk|usage_average",
+    "name": "Physical Disk|Total Throughput",
+    "unit": "KBps"
+   },
+   {
+    "key": "disk|usage_capacity",
+    "name": "Physical Disk|I/O Usage Capacity",
+    "unit": "%"
+   },
+   {
+    "key": "disk|write_average",
+    "name": "Physical Disk|Write Throughput",
+    "unit": "KBps"
+   },
+   {
+    "key": "guestfilesystem|capacity",
+    "name": "Guest File System|Partition Capacity",
+    "unit": "GB"
+   },
+   {
+    "key": "guestfilesystem|capacity_total",
+    "name": "Guest File System|Total Capacity",
+    "unit": "GB"
+   },
+   {
+    "key": "guestfilesystem|freespace",
+    "name": "Guest File System|Guest File System Free",
+    "unit": "GB"
+   },
+   {
+    "key": "guestfilesystem|freespace_total",
+    "name": "Guest File System|Total Guest File System Free",
+    "unit": "GB"
+   },
+   {
+    "key": "guestfilesystem|percentage",
+    "name": "Guest File System|Partition Utilization",
+    "unit": "%"
+   },
+   {
+    "key": "guestfilesystem|percentage_total",
+    "name": "Guest File System|Utilization",
+    "unit": "%"
+   },
+   {
+    "key": "guestfilesystem|usage",
+    "name": "Guest File System|Partition Utilization",
+    "unit": "GB"
+   },
+   {
+    "key": "guestfilesystem|usage_total",
+    "name": "Guest File System|Utilization",
+    "unit": "GB"
+   },
+   {
+    "key": "guest|20_sec_peak_contextSwapRate_latest",
+    "name": "Guest|Peak CPU Context Switch Rate within collection cycle"
+   },
+   {
+    "key": "guest|20_sec_peak_cpu_queue",
+    "name": "Guest|Peak vCPU Queue within collection cycle"
+   },
+   {
+    "key": "guest|20_sec_peak_disk_queue",
+    "name": "Guest|Peak Disk Queue within collection cycle"
+   },
+   {
+    "key": "guest|20_sec_peak_page.outRate_latest",
+    "name": "Guest|Peak Guest OS Page-out/rate within collection cycle"
+   },
+   {
+    "key": "guest|contextSwapRate_latest",
+    "name": "Guest|CPU Context Switch Rate"
+   },
+   {
+    "key": "guest|cpu_queue",
+    "name": "Guest|CPU Queue"
+   },
+   {
+    "key": "guest|disk_queue",
+    "name": "Guest|Disk Queue"
+   },
+   {
+    "key": "guest|disk_queue_latest",
+    "name": "Guest|Disk Queue Latest"
+   },
+   {
+    "key": "guest|hugePage.size_latest",
+    "name": "Guest|Huge Page Size",
+    "unit": "KB"
+   },
+   {
+    "key": "guest|hugePage.total_latest",
+    "name": "Guest|Total Huge Pages"
+   },
+   {
+    "key": "guest|mem.activeFileCache_latest",
+    "name": "Guest|Active File Cache Memory",
+    "unit": "KB"
+   },
+   {
+    "key": "guest|mem.free_latest",
+    "name": "Guest|Free Memory",
+    "unit": "KB"
+   },
+   {
+    "key": "guest|mem.needed_latest",
+    "name": "Guest|Needed Memory",
+    "unit": "KB"
+   },
+   {
+    "key": "guest|mem.physUsable_latest",
+    "name": "Guest|Physically Usable Memory",
+    "unit": "KB"
+   },
+   {
+    "key": "guest|page.inRate_latest",
+    "name": "Guest|Page In Rate per second"
+   },
+   {
+    "key": "guest|page.outRate_latest",
+    "name": "Guest|Page Out Rate per second"
+   },
+   {
+    "key": "guest|page.size_latest",
+    "name": "Guest|Page Size",
+    "unit": "KB"
+   },
+   {
+    "key": "guest|swap.spaceRemaining_latest",
+    "name": "Guest|Remaining Swap Space",
+    "unit": "KB"
+   },
+   {
+    "key": "guest|tools_running_status",
+    "name": "Guest|Tools Running Status",
+    "unit": "%"
+   },
+   {
+    "key": "guest|used_memory",
+    "name": "Guest|Used Memory",
+    "unit": "KB"
+   },
+   {
+    "key": "loginsight_generated|error_count",
+    "name": "Log Insight Generated|Error Count"
+   },
+   {
+    "key": "loginsight_generated|total_log_count",
+    "name": "Log Insight Generated|Total Log Count"
+   },
+   {
+    "key": "loginsight_generated|warning_count",
+    "name": "Log Insight Generated|Warning Count"
+   },
+   {
+    "key": "mem-alloc|actual.capacity",
+    "name": "Memory Allocation|Current Size",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-alloc|actual.capacity.normalized",
+    "name": "Memory Allocation|Total Capacity",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-alloc|actual.capacity.normalized_whatif",
+    "name": "Memory Allocation|Total Capacity with committed projects",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-alloc|actual.capacity_whatif",
+    "name": "Memory Allocation|Current Size with committed projects",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-alloc|capacity.provider.count",
+    "name": "Memory Allocation|Number of Capacity providers"
+   },
+   {
+    "key": "mem-alloc|capacity.provider.count_whatif",
+    "name": "Memory Allocation|Number of Capacity providers with committed projects"
+   },
+   {
+    "key": "mem-alloc|capacityRemaining",
+    "name": "Memory Allocation|Capacity Remaining",
+    "unit": "%"
+   },
+   {
+    "key": "mem-alloc|capacityRemainingUsingConsumers",
+    "name": "Memory Allocation|Capacity Remaining using profile",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-alloc|capacityRemainingUsingConsumers_average",
+    "name": "Memory Allocation|Capacity Remaining (Average consumer profile)"
+   },
+   {
+    "key": "mem-alloc|capacityRemainingUsingConsumers_average_whatif",
+    "name": "Memory Allocation|Capacity Remaining with committed projects (Average consumer profile)"
+   },
+   {
+    "key": "mem-alloc|capacityRemainingUsingConsumers_large",
+    "name": "Memory Allocation|Capacity Remaining (Large consumer profile)"
+   },
+   {
+    "key": "mem-alloc|capacityRemainingUsingConsumers_medium",
+    "name": "Memory Allocation|Capacity Remaining (Medium consumer profile)"
+   },
+   {
+    "key": "mem-alloc|capacityRemainingUsingConsumers_small",
+    "name": "Memory Allocation|Capacity Remaining (Small consumer profile)"
+   },
+   {
+    "key": "mem-alloc|capacityRemainingUsingConsumers_whatif",
+    "name": "Memory Allocation|Capacity Remaining using profile with committed projects",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-alloc|capacityRemainingValue",
+    "name": "Memory Allocation|Capacity Remaining Value",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-alloc|capacityRemainingValue_whatif",
+    "name": "Memory Allocation|Capacity Remaining Value with committed projects",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-alloc|capacityRemaining_min",
+    "name": "Memory Allocation|Capacity Remaining (Based on instantaneous peak)",
+    "unit": "%"
+   },
+   {
+    "key": "mem-alloc|capacityRemaining_min_whatif",
+    "name": "Memory Allocation|Capacity Remaining with committed projects (Based on instantaneous peak)",
+    "unit": "%"
+   },
+   {
+    "key": "mem-alloc|capacityRemaining_whatif",
+    "name": "Memory Allocation|Capacity Remaining with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "mem-alloc|computed_demand",
+    "name": "Memory Allocation|System Computed Demand",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-alloc|computed_demand_whatif",
+    "name": "Memory Allocation|System Computed Demand with committed projects",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-alloc|consumer.count",
+    "name": "Memory Allocation|Number of Capacity consumers"
+   },
+   {
+    "key": "mem-alloc|consumer.count.per.provider.count",
+    "name": "Memory Allocation|Consumer Provider ratio"
+   },
+   {
+    "key": "mem-alloc|consumer.count.per.provider.count_whatif",
+    "name": "Memory Allocation|Consumer Provider ratio with committed projects"
+   },
+   {
+    "key": "mem-alloc|consumer.count_whatif",
+    "name": "Memory Allocation|Number of Capacity consumers with committed projects"
+   },
+   {
+    "key": "mem-alloc|density",
+    "name": "Memory Allocation|Density"
+   },
+   {
+    "key": "mem-alloc|density_whatif",
+    "name": "Memory Allocation|Density with committed projects"
+   },
+   {
+    "key": "mem-alloc|idle",
+    "name": "Memory Allocation|Is Idle"
+   },
+   {
+    "key": "mem-alloc|idle_whatif",
+    "name": "Memory Allocation|Is Idle with committed projects"
+   },
+   {
+    "key": "mem-alloc|isStress",
+    "name": "Memory Allocation|Is Stressed"
+   },
+   {
+    "key": "mem-alloc|isStress_whatif",
+    "name": "Memory Allocation|Is Stressed with committed projects"
+   },
+   {
+    "key": "mem-alloc|isWaste",
+    "name": "Memory Allocation|Has Reclaimable Capacity"
+   },
+   {
+    "key": "mem-alloc|object.demand.with.size.recommendation",
+    "name": "Memory Allocation|Effective Demand (With peak usage)",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-alloc|optimal.consumer.per.provider",
+    "name": "Memory Allocation|Optimal Consumer Provider ratio"
+   },
+   {
+    "key": "mem-alloc|optimal.consumer.per.provider_whatif",
+    "name": "Memory Allocation|Optimal Consumer Provider ratio with committed projects"
+   },
+   {
+    "key": "mem-alloc|oversized",
+    "name": "Memory Allocation|Is Oversized"
+   },
+   {
+    "key": "mem-alloc|oversized_whatif",
+    "name": "Memory Allocation|Is Oversized with committed projects"
+   },
+   {
+    "key": "mem-alloc|poweredOff",
+    "name": "Memory Allocation|Powered Off"
+   },
+   {
+    "key": "mem-alloc|poweredOffTimePercent",
+    "name": "Memory Allocation|Powered Off Time Percent",
+    "unit": "%"
+   },
+   {
+    "key": "mem-alloc|poweredOffTimePercent_whatif",
+    "name": "Memory Allocation|Powered Off Time Percent with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "mem-alloc|poweredOff_whatif",
+    "name": "Memory Allocation|Powered Off with committed projects"
+   },
+   {
+    "key": "mem-alloc|reason.for.waste",
+    "name": "Memory Allocation|Reason for Reclaimable Capacity"
+   },
+   {
+    "key": "mem-alloc|size.recommendation",
+    "name": "Memory Allocation|Recommended Size",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-alloc|size.recommendation_whatif",
+    "name": "Memory Allocation|Recommended Size with committed projects",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-alloc|stress",
+    "name": "Memory Allocation|Stress",
+    "unit": "%"
+   },
+   {
+    "key": "mem-alloc|stress_whatif",
+    "name": "Memory Allocation|Stress with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "mem-alloc|timeRemaining",
+    "name": "Memory Allocation|Time Remaining",
+    "unit": "Day(s)"
+   },
+   {
+    "key": "mem-alloc|timeRemaining_whatif",
+    "name": "Memory Allocation|Time Remaining with committed projects",
+    "unit": "Day(s)"
+   },
+   {
+    "key": "mem-alloc|utilization.range",
+    "name": "Memory Allocation|Utilization Range"
+   },
+   {
+    "key": "mem-alloc|waste",
+    "name": "Memory Allocation|Waste",
+    "unit": "%"
+   },
+   {
+    "key": "mem-host|actual.capacity",
+    "name": "Memory Usage on Host|Current Size",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-host|actual.capacity.normalized",
+    "name": "Memory Usage on Host|Total Capacity",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-host|actual.capacity.normalized_whatif",
+    "name": "Memory Usage on Host|Total Capacity with committed projects",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-host|actual.capacity_whatif",
+    "name": "Memory Usage on Host|Current Size with committed projects",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-host|capacity.provider.count",
+    "name": "Memory Usage on Host|Number of Capacity providers"
+   },
+   {
+    "key": "mem-host|capacity.provider.count_whatif",
+    "name": "Memory Usage on Host|Number of Capacity providers with committed projects"
+   },
+   {
+    "key": "mem-host|capacityRemaining",
+    "name": "Memory Usage on Host|Capacity Remaining",
+    "unit": "%"
+   },
+   {
+    "key": "mem-host|capacityRemainingUsingConsumers",
+    "name": "Memory Usage on Host|Capacity Remaining using profile",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-host|capacityRemainingUsingConsumers_average",
+    "name": "Memory Usage on Host|Capacity Remaining (Average consumer profile)"
+   },
+   {
+    "key": "mem-host|capacityRemainingUsingConsumers_average_whatif",
+    "name": "Memory Usage on Host|Capacity Remaining with committed projects (Average consumer profile)"
+   },
+   {
+    "key": "mem-host|capacityRemainingUsingConsumers_large",
+    "name": "Memory Usage on Host|Capacity Remaining (Large consumer profile)"
+   },
+   {
+    "key": "mem-host|capacityRemainingUsingConsumers_medium",
+    "name": "Memory Usage on Host|Capacity Remaining (Medium consumer profile)"
+   },
+   {
+    "key": "mem-host|capacityRemainingUsingConsumers_small",
+    "name": "Memory Usage on Host|Capacity Remaining (Small consumer profile)"
+   },
+   {
+    "key": "mem-host|capacityRemainingUsingConsumers_whatif",
+    "name": "Memory Usage on Host|Capacity Remaining using profile with committed projects",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-host|capacityRemainingValue",
+    "name": "Memory Usage on Host|Capacity Remaining Value",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-host|capacityRemainingValue_whatif",
+    "name": "Memory Usage on Host|Capacity Remaining Value with committed projects",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-host|capacityRemaining_min",
+    "name": "Memory Usage on Host|Capacity Remaining (Based on instantaneous peak)",
+    "unit": "%"
+   },
+   {
+    "key": "mem-host|capacityRemaining_min_whatif",
+    "name": "Memory Usage on Host|Capacity Remaining with committed projects (Based on instantaneous peak)",
+    "unit": "%"
+   },
+   {
+    "key": "mem-host|capacityRemaining_whatif",
+    "name": "Memory Usage on Host|Capacity Remaining with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "mem-host|computed_demand",
+    "name": "Memory Usage on Host|System Computed Demand",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-host|computed_demand_whatif",
+    "name": "Memory Usage on Host|System Computed Demand with committed projects",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-host|consumer.count",
+    "name": "Memory Usage on Host|Number of Capacity consumers"
+   },
+   {
+    "key": "mem-host|consumer.count.per.provider.count",
+    "name": "Memory Usage on Host|Consumer Provider ratio"
+   },
+   {
+    "key": "mem-host|consumer.count.per.provider.count_whatif",
+    "name": "Memory Usage on Host|Consumer Provider ratio with committed projects"
+   },
+   {
+    "key": "mem-host|consumer.count_whatif",
+    "name": "Memory Usage on Host|Number of Capacity consumers with committed projects"
+   },
+   {
+    "key": "mem-host|density",
+    "name": "Memory Usage on Host|Density"
+   },
+   {
+    "key": "mem-host|density_whatif",
+    "name": "Memory Usage on Host|Density with committed projects"
+   },
+   {
+    "key": "mem-host|idle",
+    "name": "Memory Usage on Host|Is Idle"
+   },
+   {
+    "key": "mem-host|idle_whatif",
+    "name": "Memory Usage on Host|Is Idle with committed projects"
+   },
+   {
+    "key": "mem-host|isStress",
+    "name": "Memory Usage on Host|Is Stressed"
+   },
+   {
+    "key": "mem-host|isStress_whatif",
+    "name": "Memory Usage on Host|Is Stressed with committed projects"
+   },
+   {
+    "key": "mem-host|isWaste",
+    "name": "Memory Usage on Host|Has Reclaimable Capacity"
+   },
+   {
+    "key": "mem-host|object.demand.with.size.recommendation",
+    "name": "Memory Usage on Host|Effective Demand (With peak usage)",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-host|optimal.consumer.per.provider",
+    "name": "Memory Usage on Host|Optimal Consumer Provider ratio"
+   },
+   {
+    "key": "mem-host|optimal.consumer.per.provider_whatif",
+    "name": "Memory Usage on Host|Optimal Consumer Provider ratio with committed projects"
+   },
+   {
+    "key": "mem-host|oversized",
+    "name": "Memory Usage on Host|Is Oversized"
+   },
+   {
+    "key": "mem-host|oversized_whatif",
+    "name": "Memory Usage on Host|Is Oversized with committed projects"
+   },
+   {
+    "key": "mem-host|poweredOff",
+    "name": "Memory Usage on Host|Powered Off"
+   },
+   {
+    "key": "mem-host|poweredOffTimePercent",
+    "name": "Memory Usage on Host|Powered Off Time Percent",
+    "unit": "%"
+   },
+   {
+    "key": "mem-host|poweredOffTimePercent_whatif",
+    "name": "Memory Usage on Host|Powered Off Time Percent with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "mem-host|poweredOff_whatif",
+    "name": "Memory Usage on Host|Powered Off with committed projects"
+   },
+   {
+    "key": "mem-host|reason.for.waste",
+    "name": "Memory Usage on Host|Reason for Reclaimable Capacity"
+   },
+   {
+    "key": "mem-host|size.recommendation",
+    "name": "Memory Usage on Host|Recommended Size",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-host|size.recommendation_whatif",
+    "name": "Memory Usage on Host|Recommended Size with committed projects",
+    "unit": "KB"
+   },
+   {
+    "key": "mem-host|stress",
+    "name": "Memory Usage on Host|Stress",
+    "unit": "%"
+   },
+   {
+    "key": "mem-host|stress_whatif",
+    "name": "Memory Usage on Host|Stress with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "mem-host|timeRemaining",
+    "name": "Memory Usage on Host|Time Remaining",
+    "unit": "Day(s)"
+   },
+   {
+    "key": "mem-host|timeRemaining_whatif",
+    "name": "Memory Usage on Host|Time Remaining with committed projects",
+    "unit": "Day(s)"
+   },
+   {
+    "key": "mem-host|utilization.range",
+    "name": "Memory Usage on Host|Utilization Range"
+   },
+   {
+    "key": "mem-host|waste",
+    "name": "Memory Usage on Host|Waste",
+    "unit": "%"
+   },
+   {
+    "key": "mem-host|workload",
+    "name": "Memory Usage on Host|Workload",
+    "unit": "%"
+   },
+   {
+    "key": "mem|20_sec_peak_host_contentionPct",
+    "name": "Memory|Peak Contention within collection cycle",
+    "unit": "%"
+   },
+   {
+    "key": "mem|active_average",
+    "name": "Memory|Guest Active",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|activewrite_average",
+    "name": "Memory|Active Write",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|actual.capacity",
+    "name": "Memory|Current Size",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|actual.capacity.normalized",
+    "name": "Memory|Total Capacity",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|actual.capacity.normalized_whatif",
+    "name": "Memory|Total Capacity with committed projects",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|actual.capacity_whatif",
+    "name": "Memory|Current Size with committed projects",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|balloonPct",
+    "name": "Memory|Balloon",
+    "unit": "%"
+   },
+   {
+    "key": "mem|capacity.contention_average",
+    "name": "Memory|Capacity Contention"
+   },
+   {
+    "key": "mem|capacity.provider.count",
+    "name": "Memory|Number of Capacity providers"
+   },
+   {
+    "key": "mem|capacity.provider.count_whatif",
+    "name": "Memory|Number of Capacity providers with committed projects"
+   },
+   {
+    "key": "mem|capacityRemaining",
+    "name": "Memory|Capacity Remaining",
+    "unit": "%"
+   },
+   {
+    "key": "mem|capacityRemainingUsingConsumers",
+    "name": "Memory|Capacity Remaining using profile",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|capacityRemainingUsingConsumers_average",
+    "name": "Memory|Capacity Remaining (Average consumer profile)"
+   },
+   {
+    "key": "mem|capacityRemainingUsingConsumers_average_whatif",
+    "name": "Memory|Capacity Remaining with committed projects (Average consumer profile)"
+   },
+   {
+    "key": "mem|capacityRemainingUsingConsumers_large",
+    "name": "Memory|Capacity Remaining (Large consumer profile)"
+   },
+   {
+    "key": "mem|capacityRemainingUsingConsumers_medium",
+    "name": "Memory|Capacity Remaining (Medium consumer profile)"
+   },
+   {
+    "key": "mem|capacityRemainingUsingConsumers_small",
+    "name": "Memory|Capacity Remaining (Small consumer profile)"
+   },
+   {
+    "key": "mem|capacityRemainingUsingConsumers_whatif",
+    "name": "Memory|Capacity Remaining using profile with committed projects",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|capacityRemainingValue",
+    "name": "Memory|Capacity Remaining Value",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|capacityRemainingValue_whatif",
+    "name": "Memory|Capacity Remaining Value with committed projects",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|capacityRemaining_min",
+    "name": "Memory|Capacity Remaining (Based on instantaneous peak)",
+    "unit": "%"
+   },
+   {
+    "key": "mem|capacityRemaining_min_whatif",
+    "name": "Memory|Capacity Remaining with committed projects (Based on instantaneous peak)",
+    "unit": "%"
+   },
+   {
+    "key": "mem|capacityRemaining_whatif",
+    "name": "Memory|Capacity Remaining with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "mem|compressed_average",
+    "name": "Memory|Compressed",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|compressionRate_average",
+    "name": "Memory|Compression Rate",
+    "unit": "KBps"
+   },
+   {
+    "key": "mem|computed_demand",
+    "name": "Memory|System Computed Demand",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|computed_demand_whatif",
+    "name": "Memory|System Computed Demand with committed projects",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|consumedPct",
+    "name": "Memory|Consumed",
+    "unit": "%"
+   },
+   {
+    "key": "mem|consumed_average",
+    "name": "Memory|Consumed",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|consumed_average_daily",
+    "name": "Memory|Consumed average Daily",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|consumed_average_mtd",
+    "name": "Memory|(DEP) Consumed average MTD",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|consumer.count",
+    "name": "Memory|Number of Capacity consumers"
+   },
+   {
+    "key": "mem|consumer.count.per.provider.count",
+    "name": "Memory|Consumer Provider ratio"
+   },
+   {
+    "key": "mem|consumer.count.per.provider.count_whatif",
+    "name": "Memory|Consumer Provider ratio with committed projects"
+   },
+   {
+    "key": "mem|consumer.count_whatif",
+    "name": "Memory|Number of Capacity consumers with committed projects"
+   },
+   {
+    "key": "mem|decompressionRate_average",
+    "name": "Memory|Decompression Rate",
+    "unit": "KBps"
+   },
+   {
+    "key": "mem|demandOverCapacity",
+    "name": "Memory|Demand Over Capacity"
+   },
+   {
+    "key": "mem|demandOverLimit",
+    "name": "Memory|Demand Over Limit"
+   },
+   {
+    "key": "mem|density",
+    "name": "Memory|Density"
+   },
+   {
+    "key": "mem|density_whatif",
+    "name": "Memory|Density with committed projects"
+   },
+   {
+    "key": "mem|effective_limit",
+    "name": "Memory|Effective limit",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|entitlement_average",
+    "name": "Memory|Entitlement"
+   },
+   {
+    "key": "mem|estimated_entitlement",
+    "name": "Memory|Estimated entitlement"
+   },
+   {
+    "key": "mem|granted_average",
+    "name": "Memory|Granted",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|guest_activePct",
+    "name": "Memory|Guest Active Memory",
+    "unit": "%"
+   },
+   {
+    "key": "mem|guest_demand",
+    "name": "Memory|Guest Demand",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|guest_dynamic_entitlement",
+    "name": "Memory|Guest Dynamic Entitlement",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|guest_nonpageable_estimate",
+    "name": "Memory|Host Non Pageable Memory",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|guest_provisioned",
+    "name": "Memory|Total Capacity",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|guest_usage",
+    "name": "Memory|Guest Usage",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|host_active",
+    "name": "Memory|Host Active",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|host_contention",
+    "name": "Memory|Contention",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|host_contentionPct",
+    "name": "Memory|Contention",
+    "unit": "%"
+   },
+   {
+    "key": "mem|host_demand",
+    "name": "Memory|Host Demand",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|host_demand_for_aggregation",
+    "name": "Memory|Host Demand For Aggregation"
+   },
+   {
+    "key": "mem|host_demand_reservation",
+    "name": "Memory|Host Demand with Reservation",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|host_dynamic_entitlement",
+    "name": "Memory|Host Dynamic Entitlement",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|host_nonpageable_estimate",
+    "name": "Memory|Guest Non Pageable Memory",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|host_usage",
+    "name": "Memory|Host Usage",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|idle",
+    "name": "Memory|Is Idle"
+   },
+   {
+    "key": "mem|idle_whatif",
+    "name": "Memory|Is Idle with committed projects"
+   },
+   {
+    "key": "mem|isStress",
+    "name": "Memory|Is Stressed"
+   },
+   {
+    "key": "mem|isStress_whatif",
+    "name": "Memory|Is Stressed with committed projects"
+   },
+   {
+    "key": "mem|isWaste",
+    "name": "Memory|Has Reclaimable Capacity"
+   },
+   {
+    "key": "mem|latency_average",
+    "name": "Memory|Latency",
+    "unit": "%"
+   },
+   {
+    "key": "mem|llSwapInRate_average",
+    "name": "Memory|Swap In Rate from Host Cache"
+   },
+   {
+    "key": "mem|llSwapOutRate_average",
+    "name": "Memory|Swap Out Rate to Host Cache"
+   },
+   {
+    "key": "mem|llSwapUsed_average",
+    "name": "Memory|Swap Space Used in Host Cache"
+   },
+   {
+    "key": "mem|nonzero_active",
+    "name": "Memory|Non Zero Active",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|object.demand.with.size.recommendation",
+    "name": "Memory|Effective Demand (With peak usage)",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|optimal.consumer.per.provider",
+    "name": "Memory|Optimal Consumer Provider ratio"
+   },
+   {
+    "key": "mem|optimal.consumer.per.provider_whatif",
+    "name": "Memory|Optimal Consumer Provider ratio with committed projects"
+   },
+   {
+    "key": "mem|overheadMax_average",
+    "name": "Memory|Overhead Max",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|overheadTouched_average",
+    "name": "Memory|Overhead Touched"
+   },
+   {
+    "key": "mem|overhead_average",
+    "name": "Memory|Overhead",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|oversized",
+    "name": "Memory|Is Oversized"
+   },
+   {
+    "key": "mem|oversized_whatif",
+    "name": "Memory|Is Oversized with committed projects"
+   },
+   {
+    "key": "mem|poweredOff",
+    "name": "Memory|Powered Off"
+   },
+   {
+    "key": "mem|poweredOffTimePercent",
+    "name": "Memory|Powered Off Time Percent",
+    "unit": "%"
+   },
+   {
+    "key": "mem|poweredOffTimePercent_whatif",
+    "name": "Memory|Powered Off Time Percent with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "mem|poweredOff_whatif",
+    "name": "Memory|Powered Off with committed projects"
+   },
+   {
+    "key": "mem|reason.for.waste",
+    "name": "Memory|Reason for Reclaimable Capacity"
+   },
+   {
+    "key": "mem|reservation_used",
+    "name": "Memory|Reservation Used",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|shared_average",
+    "name": "Memory|Shared",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|size.recommendation",
+    "name": "Memory|Recommended Size",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|size.recommendation_whatif",
+    "name": "Memory|Recommended Size with committed projects",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|stress",
+    "name": "Memory|Stress",
+    "unit": "%"
+   },
+   {
+    "key": "mem|stress_whatif",
+    "name": "Memory|Stress with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "mem|swapinRate_average",
+    "name": "Memory|Swap In Rate",
+    "unit": "KBps"
+   },
+   {
+    "key": "mem|swapin_average",
+    "name": "Memory|Swap In",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|swapoutRate_average",
+    "name": "Memory|Swap Out Rate",
+    "unit": "KBps"
+   },
+   {
+    "key": "mem|swapout_average",
+    "name": "Memory|Swap Out",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|swapped_average",
+    "name": "Memory|Swapped",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|swaptarget_average",
+    "name": "Memory|Swap Target",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|timeRemaining",
+    "name": "Memory|Time Remaining",
+    "unit": "Day(s)"
+   },
+   {
+    "key": "mem|timeRemaining_whatif",
+    "name": "Memory|Time Remaining with committed projects",
+    "unit": "Day(s)"
+   },
+   {
+    "key": "mem|usage_average",
+    "name": "Memory|Usage",
+    "unit": "%"
+   },
+   {
+    "key": "mem|utilization.range",
+    "name": "Memory|Utilization Range"
+   },
+   {
+    "key": "mem|vmMemoryDemand",
+    "name": "Memory|Utilization",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|vmmemctl_average",
+    "name": "Memory|Balloon",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|vmmemctltarget_average",
+    "name": "Memory|Balloon Target",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|waste",
+    "name": "Memory|Waste",
+    "unit": "%"
+   },
+   {
+    "key": "mem|wasteValue50PctInGB",
+    "name": "Memory|50% of Reclaimable Memory Capacity",
+    "unit": "GB"
+   },
+   {
+    "key": "mem|workload",
+    "name": "Memory|Workload",
+    "unit": "%"
+   },
+   {
+    "key": "mem|zero_average",
+    "name": "Memory|Zero",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|zipSaved_latest",
+    "name": "Memory|Zip Saved",
+    "unit": "KB"
+   },
+   {
+    "key": "mem|zipped_latest",
+    "name": "Memory|Zipped",
+    "unit": "KB"
+   },
+   {
+    "key": "net|20_sec_peak_packetsPerSec",
+    "name": "Network|Peak Network Packet per second within collection cycle"
+   },
+   {
+    "key": "net|20_sec_peak_usage_average",
+    "name": "Network|Peak Usage Rate within collection cycle",
+    "unit": "KBps"
+   },
+   {
+    "key": "net|broadcastRx_summation",
+    "name": "Network|Broadcast Packets Received"
+   },
+   {
+    "key": "net|broadcastRx_summation_sum",
+    "name": "Network|Total Broadcast Packets Received"
+   },
+   {
+    "key": "net|broadcastTx_summation",
+    "name": "Network|Broadcast Packets Transmitted"
+   },
+   {
+    "key": "net|broadcastTx_summation_sum",
+    "name": "Network|Total Broadcast Packets Transmitted"
+   },
+   {
+    "key": "net|bytesRx_average",
+    "name": "Network|bytesRx",
+    "unit": "KBps"
+   },
+   {
+    "key": "net|bytesTx_average",
+    "name": "Network|bytesTx",
+    "unit": "KBps"
+   },
+   {
+    "key": "net|demand",
+    "name": "Network|Demand",
+    "unit": "%"
+   },
+   {
+    "key": "net|dropped",
+    "name": "Network|Packets Dropped"
+   },
+   {
+    "key": "net|droppedPct",
+    "name": "Network|Packets Dropped",
+    "unit": "%"
+   },
+   {
+    "key": "net|droppedRx_summation",
+    "name": "Network|Received Packets Dropped"
+   },
+   {
+    "key": "net|droppedRx_summation_sum",
+    "name": "Network|Total Received Packets Dropped"
+   },
+   {
+    "key": "net|droppedTxPct_max",
+    "name": "Network|Peak Transmitted Packet Dropped within collection cycle",
+    "unit": "%"
+   },
+   {
+    "key": "net|droppedTx_summation",
+    "name": "Network|Transmitted Packets Dropped"
+   },
+   {
+    "key": "net|droppedTx_summation_sum",
+    "name": "Network|Total Transmitted Packets Dropped"
+   },
+   {
+    "key": "net|dropped_sum",
+    "name": "Network|Total Packets Dropped"
+   },
+   {
+    "key": "net|host_maxObserved_KBps",
+    "name": "Network|(DEP) VM to Host Max Observed Throughput",
+    "unit": "KBps"
+   },
+   {
+    "key": "net|host_maxObserved_Rx_KBps",
+    "name": "Network|(DEP) VM to Host Max Observed Received Throughput",
+    "unit": "KBps"
+   },
+   {
+    "key": "net|host_maxObserved_Tx_KBps",
+    "name": "Network|(DEP) VM to Host Max Observed Transmitted Throughput",
+    "unit": "KBps"
+   },
+   {
+    "key": "net|host_received_average",
+    "name": "Network|VM to Host Data Receive Rate",
+    "unit": "KBps"
+   },
+   {
+    "key": "net|host_transmitted_average",
+    "name": "Network|VM to Host Data Transmit Rate",
+    "unit": "KBps"
+   },
+   {
+    "key": "net|host_usage_average",
+    "name": "Network|VM to Host Usage Rate",
+    "unit": "KBps"
+   },
+   {
+    "key": "net|maxObserved_KBps",
+    "name": "Network|(DEP) Max Observed Throughput",
+    "unit": "KBps"
+   },
+   {
+    "key": "net|maxObserved_Rx_KBps",
+    "name": "Network|(DEP) Max Observed Received Throughput",
+    "unit": "KBps"
+   },
+   {
+    "key": "net|maxObserved_Tx_KBps",
+    "name": "Network|(DEP) Max Observed Transmitted Throughput",
+    "unit": "KBps"
+   },
+   {
+    "key": "net|multicastRx_summation",
+    "name": "Network|Multicast Packets Received"
+   },
+   {
+    "key": "net|multicastRx_summation_sum",
+    "name": "Network|Total Multicast Packets Received"
+   },
+   {
+    "key": "net|multicastTx_summation",
+    "name": "Network|Multicast Packets Transmitted"
+   },
+   {
+    "key": "net|multicastTx_summation_sum",
+    "name": "Network|Total Multicast Packets Transmitted"
+   },
+   {
+    "key": "net|packetsPerSec",
+    "name": "Network|Packets per second"
+   },
+   {
+    "key": "net|packetsRxPerSec",
+    "name": "Network|Packets Received per second"
+   },
+   {
+    "key": "net|packetsRx_summation",
+    "name": "Network|Packets Received"
+   },
+   {
+    "key": "net|packetsRx_summation_sum",
+    "name": "Network|Total Packets Received"
+   },
+   {
+    "key": "net|packetsTxPerSec",
+    "name": "Network|Packets Transmitted per second"
+   },
+   {
+    "key": "net|packetsTx_summation",
+    "name": "Network|Packets Transmitted"
+   },
+   {
+    "key": "net|packetsTx_summation_sum",
+    "name": "Network|Total Packets Transmitted"
+   },
+   {
+    "key": "net|receive_demand_average",
+    "name": "Network|Data Receive Demand Rate",
+    "unit": "KBps"
+   },
+   {
+    "key": "net|received_average",
+    "name": "Network|Data Receive Rate",
+    "unit": "KBps"
+   },
+   {
+    "key": "net|transmit_demand_average",
+    "name": "Network|Data Transmit Demand Rate",
+    "unit": "KBps"
+   },
+   {
+    "key": "net|transmitted_average",
+    "name": "Network|Data Transmit Rate",
+    "unit": "KBps"
+   },
+   {
+    "key": "net|usage_average",
+    "name": "Network|Usage Rate",
+    "unit": "KBps"
+   },
+   {
+    "key": "net|usage_capacity",
+    "name": "Network|I/O Usage Capacity",
+    "unit": "%"
+   },
+   {
+    "key": "others|chain_length",
+    "name": "General|Chain Length"
+   },
+   {
+    "key": "others|guest_customization",
+    "name": "General|Guest Customization"
+   },
+   {
+    "key": "others|memorymb",
+    "name": "General|Memory",
+    "unit": "MB"
+   },
+   {
+    "key": "others|noofcpus",
+    "name": "General|Number of CPUs"
+   },
+   {
+    "key": "others|snapshot_size",
+    "name": "General|Snapshot Size",
+    "unit": "bytes"
+   },
+   {
+    "key": "others|storage",
+    "name": "General|Storage",
+    "unit": "GB"
+   },
+   {
+    "key": "performance|number_of_kpis_breached",
+    "name": "Performance|Service Level Indicator"
+   },
+   {
+    "key": "ping|latency|avg",
+    "name": "Ping Statistics|Latency|Average",
+    "unit": "ms"
+   },
+   {
+    "key": "ping|latency|max",
+    "name": "Ping Statistics|Latency|Maximum",
+    "unit": "ms"
+   },
+   {
+    "key": "ping|latency|min",
+    "name": "Ping Statistics|Latency|Minimum",
+    "unit": "ms"
+   },
+   {
+    "key": "ping|latency|std_dev",
+    "name": "Ping Statistics|Latency|Standard Deviation",
+    "unit": "ms"
+   },
+   {
+    "key": "ping|packet_loss|avg",
+    "name": "Ping Statistics|Packet Loss|Average",
+    "unit": "%"
+   },
+   {
+    "key": "ping|packet_loss|max",
+    "name": "Ping Statistics|Packet Loss|Maximum",
+    "unit": "%"
+   },
+   {
+    "key": "ping|packet_loss|min",
+    "name": "Ping Statistics|Packet Loss|Minimum",
+    "unit": "%"
+   },
+   {
+    "key": "ping|packet_loss|std_dev",
+    "name": "Ping Statistics|Packet Loss|Standard Deviation",
+    "unit": "%"
+   },
+   {
+    "key": "ping|peak_latency",
+    "name": "Ping Statistics|Peak Latency",
+    "unit": "ms"
+   },
+   {
+    "key": "ping|peak_packet_loss",
+    "name": "Ping Statistics|Peak Packet Loss",
+    "unit": "%"
+   },
+   {
+    "key": "power|energy_summation",
+    "name": "Power|(DEP) Energy (Joule)"
+   },
+   {
+    "key": "power|energy_summation_sum",
+    "name": "Power|Total Energy Consumed in the collection period",
+    "unit": "Wh"
+   },
+   {
+    "key": "power|energy_summation_sum_hourly",
+    "name": "Power|Total Power Consumed By VM(Hourly)",
+    "unit": "Wh"
+   },
+   {
+    "key": "power|power_average",
+    "name": "Power|Current Power Consumption Rate (Watt)"
+   },
+   {
+    "key": "rescpu|actav15_latest",
+    "name": "CPU Utilization for Resources|CPU Active (15 min. average)",
+    "unit": "%"
+   },
+   {
+    "key": "rescpu|actav1_latest",
+    "name": "CPU Utilization for Resources|CPU Active (1 min. average)",
+    "unit": "%"
+   },
+   {
+    "key": "rescpu|actav5_latest",
+    "name": "CPU Utilization for Resources|CPU Active (5 min. average)",
+    "unit": "%"
+   },
+   {
+    "key": "rescpu|actpk15_latest",
+    "name": "CPU Utilization for Resources|CPU Active (15 min. peak)",
+    "unit": "%"
+   },
+   {
+    "key": "rescpu|actpk1_latest",
+    "name": "CPU Utilization for Resources|CPU Active (1 min. peak)",
+    "unit": "%"
+   },
+   {
+    "key": "rescpu|actpk5_latest",
+    "name": "CPU Utilization for Resources|CPU Active (5 min. peak)",
+    "unit": "%"
+   },
+   {
+    "key": "rescpu|maxLimited15_latest",
+    "name": "CPU Utilization for Resources|CPU Throttled (15 min. average)",
+    "unit": "%"
+   },
+   {
+    "key": "rescpu|maxLimited1_latest",
+    "name": "CPU Utilization for Resources|CPU Throttled (1 min. average)",
+    "unit": "%"
+   },
+   {
+    "key": "rescpu|maxLimited5_latest",
+    "name": "CPU Utilization for Resources|CPU Throttled (5 min. average)",
+    "unit": "%"
+   },
+   {
+    "key": "rescpu|runav15_latest",
+    "name": "CPU Utilization for Resources|CPU Running (15 min. average)",
+    "unit": "%"
+   },
+   {
+    "key": "rescpu|runav1_latest",
+    "name": "CPU Utilization for Resources|CPU Running (1 min. average)",
+    "unit": "%"
+   },
+   {
+    "key": "rescpu|runav5_latest",
+    "name": "CPU Utilization for Resources|CPU Running (5 min. average)",
+    "unit": "%"
+   },
+   {
+    "key": "rescpu|runpk15_latest",
+    "name": "CPU Utilization for Resources|CPU Running (15 min. peak)",
+    "unit": "%"
+   },
+   {
+    "key": "rescpu|runpk1_latest",
+    "name": "CPU Utilization for Resources|CPU Running (1 min. peak)",
+    "unit": "%"
+   },
+   {
+    "key": "rescpu|runpk5_latest",
+    "name": "CPU Utilization for Resources|CPU Running (5 min. peak)",
+    "unit": "%"
+   },
+   {
+    "key": "rescpu|sampleCount_latest",
+    "name": "CPU Utilization for Resources|Group CPU Sample Count"
+   },
+   {
+    "key": "rescpu|samplePeriod_latest",
+    "name": "CPU Utilization for Resources|Group CPU Sample Period",
+    "unit": "ms"
+   },
+   {
+    "key": "storage_profiles|actualusage",
+    "name": "Storage Profile|Actual Usage",
+    "unit": "MB"
+   },
+   {
+    "key": "storage_profiles|usage",
+    "name": "Storage Profile|Configured",
+    "unit": "MB"
+   },
+   {
+    "key": "storage|commandsAveraged_average",
+    "name": "Storage|Commands per second"
+   },
+   {
+    "key": "storage|contention",
+    "name": "Storage|Contention percentage"
+   },
+   {
+    "key": "storage|demandKBps",
+    "name": "Storage|Demand",
+    "unit": "KBps"
+   },
+   {
+    "key": "storage|numberReadAveraged_average",
+    "name": "Storage|Reads per second"
+   },
+   {
+    "key": "storage|numberWriteAveraged_average",
+    "name": "Storage|Writes per second"
+   },
+   {
+    "key": "storage|read_average",
+    "name": "Storage|Read Rate",
+    "unit": "KBps"
+   },
+   {
+    "key": "storage|totalLatency_average",
+    "name": "Storage|Total Latency",
+    "unit": "ms"
+   },
+   {
+    "key": "storage|totalReadLatency_average",
+    "name": "Storage|Read Latency",
+    "unit": "ms"
+   },
+   {
+    "key": "storage|totalWriteLatency_average",
+    "name": "Storage|Write Latency",
+    "unit": "ms"
+   },
+   {
+    "key": "storage|usage_average",
+    "name": "Storage|Total Usage",
+    "unit": "KBps"
+   },
+   {
+    "key": "storage|write_average",
+    "name": "Storage|Write Rate",
+    "unit": "KBps"
+   },
+   {
+    "key": "summary|availability_kpi",
+    "name": "Summary|Availability",
+    "unit": "%"
+   },
+   {
+    "key": "summary|capacity.provider.count",
+    "name": "Summary|Number of Capacity providers"
+   },
+   {
+    "key": "summary|capacity.provider.count_whatif",
+    "name": "Summary|Number of Capacity providers with committed projects"
+   },
+   {
+    "key": "summary|capacityRemainingUsingConsumers",
+    "name": "Summary|Capacity Remaining using profile"
+   },
+   {
+    "key": "summary|capacityRemainingUsingConsumers_average",
+    "name": "Summary|Capacity Remaining (Average consumer profile)"
+   },
+   {
+    "key": "summary|capacityRemainingUsingConsumers_average_whatif",
+    "name": "Summary|Capacity Remaining with committed projects (Average consumer profile)"
+   },
+   {
+    "key": "summary|capacityRemainingUsingConsumers_large",
+    "name": "Summary|Capacity Remaining (Large consumer profile)"
+   },
+   {
+    "key": "summary|capacityRemainingUsingConsumers_medium",
+    "name": "Summary|Capacity Remaining (Medium consumer profile)"
+   },
+   {
+    "key": "summary|capacityRemainingUsingConsumers_small",
+    "name": "Summary|Capacity Remaining (Small consumer profile)"
+   },
+   {
+    "key": "summary|capacityRemainingUsingConsumers_whatif",
+    "name": "Summary|Capacity Remaining using profile with committed projects"
+   },
+   {
+    "key": "summary|capacityRemainingValue",
+    "name": "Summary|Capacity Remaining Value"
+   },
+   {
+    "key": "summary|capacityRemainingValue_whatif",
+    "name": "Summary|Capacity Remaining Value with committed projects"
+   },
+   {
+    "key": "summary|capacityRemaining_min",
+    "name": "Summary|Capacity Remaining (Based on instantaneous peak)",
+    "unit": "%"
+   },
+   {
+    "key": "summary|capacityRemaining_min_whatif",
+    "name": "Summary|Capacity Remaining with committed projects (Based on instantaneous peak)",
+    "unit": "%"
+   },
+   {
+    "key": "summary|consumer.count",
+    "name": "Summary|Number of Capacity consumers"
+   },
+   {
+    "key": "summary|consumer.count.per.provider.count",
+    "name": "Summary|Consumer Provider ratio"
+   },
+   {
+    "key": "summary|consumer.count.per.provider.count_whatif",
+    "name": "Summary|Consumer Provider ratio with committed projects"
+   },
+   {
+    "key": "summary|consumer.count_whatif",
+    "name": "Summary|Number of Capacity consumers with committed projects"
+   },
+   {
+    "key": "summary|cpu_shares",
+    "name": "Summary|CPU Shares"
+   },
+   {
+    "key": "summary|desktop_status",
+    "name": "Summary|Desktop Status"
+   },
+   {
+    "key": "summary|idle",
+    "name": "Summary|Reclaimable Idle"
+   },
+   {
+    "key": "summary|idle_whatif",
+    "name": "Summary|Is Idle with committed projects"
+   },
+   {
+    "key": "summary|isStress",
+    "name": "Summary|Is Stressed"
+   },
+   {
+    "key": "summary|isStress_whatif",
+    "name": "Summary|Is Stressed with committed projects"
+   },
+   {
+    "key": "summary|isWaste",
+    "name": "Summary|Has Reclaimable Capacity"
+   },
+   {
+    "key": "summary|mem_shares",
+    "name": "Summary|Memory Shares"
+   },
+   {
+    "key": "summary|metering|additional",
+    "name": "Summary|Metering|Additional price"
+   },
+   {
+    "key": "summary|metering|additionalMtd",
+    "name": "Summary|Metering|Month to Date Additional Price",
+    "unit": ""
+   },
+   {
+    "key": "summary|metering|cpu",
+    "name": "Summary|Metering|CPU price"
+   },
+   {
+    "key": "summary|metering|cpuMtd",
+    "name": "Summary|Metering|Month to Date CPU Price",
+    "unit": ""
+   },
+   {
+    "key": "summary|metering|customProperties|price",
+    "name": "Summary|Metering|CAS Custom Properties|Price"
+   },
+   {
+    "key": "summary|metering|details|instance|price",
+    "name": "Summary|Metering|Details|Instance|Price"
+   },
+   {
+    "key": "summary|metering|details|instance|usage",
+    "name": "Summary|Metering|Details|Instance|Usage"
+   },
+   {
+    "key": "summary|metering|details|price",
+    "name": "Summary|Metering|Details|Price"
+   },
+   {
+    "key": "summary|metering|details|usage",
+    "name": "Summary|Metering|Details|Usage"
+   },
+   {
+    "key": "summary|metering|memory",
+    "name": "Summary|Metering|Memory price"
+   },
+   {
+    "key": "summary|metering|memoryMtd",
+    "name": "Summary|Metering|Month to Date Memory Price",
+    "unit": ""
+   },
+   {
+    "key": "summary|metering|metadata|price",
+    "name": "Summary|Metering|vCD Metadata|Price"
+   },
+   {
+    "key": "summary|metering|partialPrice",
+    "name": "Summary|Metering|Partial price"
+   },
+   {
+    "key": "summary|metering|sizingPolicy",
+    "name": "Summary|Metering|Sizing Policy price"
+   },
+   {
+    "key": "summary|metering|storage",
+    "name": "Summary|Metering|Storage price"
+   },
+   {
+    "key": "summary|metering|storageMtd",
+    "name": "Summary|Metering|Month to Date Storage Price",
+    "unit": ""
+   },
+   {
+    "key": "summary|metering|value",
+    "name": "Summary|Metering|Total price"
+   },
+   {
+    "key": "summary|metering|valueMtd",
+    "name": "Summary|Metering|Month to Date Total Cost",
+    "unit": ""
+   },
+   {
+    "key": "summary|metering|vmTags|price",
+    "name": "Summary|Metering|vSphere Tags|Price"
+   },
+   {
+    "key": "summary|number_datastore",
+    "name": "Summary|Number of Datastores"
+   },
+   {
+    "key": "summary|number_network",
+    "name": "Summary|Number of Networks"
+   },
+   {
+    "key": "summary|optimal.consumer.per.provider",
+    "name": "Summary|Optimal Consumer Provider ratio"
+   },
+   {
+    "key": "summary|optimal.consumer.per.provider_whatif",
+    "name": "Summary|Optimal Consumer Provider ratio with committed projects"
+   },
+   {
+    "key": "summary|oversized",
+    "name": "Summary|Is Oversized"
+   },
+   {
+    "key": "summary|oversized_whatif",
+    "name": "Summary|Is Oversized with committed projects"
+   },
+   {
+    "key": "summary|oversized|memory",
+    "name": "Summary|Oversized|Memory",
+    "unit": "KB"
+   },
+   {
+    "key": "summary|oversized|potentialMemConsumed",
+    "name": "Summary|Oversized|Potential Memory",
+    "unit": "GB"
+   },
+   {
+    "key": "summary|oversized|vcpus",
+    "name": "Summary|Oversized|Virtual CPUs"
+   },
+   {
+    "key": "summary|poweredOff",
+    "name": "Summary|Reclaimable Powered Off"
+   },
+   {
+    "key": "summary|poweredOffTimePercent",
+    "name": "Summary|Powered Off Time Percent",
+    "unit": "%"
+   },
+   {
+    "key": "summary|poweredOffTimePercent_whatif",
+    "name": "Summary|Powered Off Time Percent with committed projects",
+    "unit": "%"
+   },
+   {
+    "key": "summary|poweredOff_whatif",
+    "name": "Summary|Powered Off with committed projects"
+   },
+   {
+    "key": "summary|running",
+    "name": "Summary|Running"
+   },
+   {
+    "key": "summary|snapshotSpace",
+    "name": "Summary|Reclaimable Snapshot Space",
+    "unit": "GB"
+   },
+   {
+    "key": "summary|snapshot_count",
+    "name": "Summary|Number of Snapshots"
+   },
+   {
+    "key": "summary|snapshot_space_used",
+    "name": "Summary|Snapshot Space",
+    "unit": "GB"
+   },
+   {
+    "key": "summary|timeRemaining",
+    "name": "Summary|Time Remaining",
+    "unit": "Day(s)"
+   },
+   {
+    "key": "summary|timeRemaining_whatif",
+    "name": "Summary|Time Remaining with committed projects",
+    "unit": "Day(s)"
+   },
+   {
+    "key": "summary|undersized",
+    "name": "Summary|Is Undersized"
+   },
+   {
+    "key": "summary|undersized|memory",
+    "name": "Summary|Undersized|Memory",
+    "unit": "KB"
+   },
+   {
+    "key": "summary|undersized|potentialCpuUsage",
+    "name": "Summary|Undersized|Potential CPU Usage",
+    "unit": "GHz"
+   },
+   {
+    "key": "summary|undersized|potentialMemUsage",
+    "name": "Summary|Undersized|Potential Memory",
+    "unit": "GB"
+   },
+   {
+    "key": "summary|undersized|vcpus",
+    "name": "Summary|Undersized|Virtual CPUs"
+   },
+   {
+    "key": "summary|utilization.range",
+    "name": "Summary|Utilization Range"
+   },
+   {
+    "key": "summary|vmAgeHours",
+    "name": "Summary|VM age",
+    "unit": "Hour(s)"
+   },
+   {
+    "key": "summary|workload_indicator",
+    "name": "Summary|(DEP) Workload Indicator"
+   },
+   {
+    "key": "sys|heartbeat_latest",
+    "name": "System|Heartbeat Latest"
+   },
+   {
+    "key": "sys|heartbeat_summation",
+    "name": "System|Heartbeat"
+   },
+   {
+    "key": "sys|osUptime_latest",
+    "name": "System|OS Uptime",
+    "unit": "Second(s)"
+   },
+   {
+    "key": "sys|poweredOn",
+    "name": "System|Powered ON"
+   },
+   {
+    "key": "sys|productString",
+    "name": "System|Product String"
+   },
+   {
+    "key": "sys|uptime_latest",
+    "name": "System|Uptime",
+    "unit": "Second(s)"
+   },
+   {
+    "key": "sys|vmotionEnabled",
+    "name": "System|vMotion Enabled"
+   },
+   {
+    "key": "virtualDisk|20_sec_peak_numberReadAveraged_average",
+    "name": "Virtual Disk|Peak Read IOPS"
+   },
+   {
+    "key": "virtualDisk|20_sec_peak_numberWriteAveraged_average",
+    "name": "Virtual Disk|Peak Write IOPS"
+   },
+   {
+    "key": "virtualDisk|20_sec_peak_read_average",
+    "name": "Virtual Disk|Peak Read Throughput",
+    "unit": "KBps"
+   },
+   {
+    "key": "virtualDisk|20_sec_peak_totalLatency_average",
+    "name": "Virtual Disk|Peak Latency within collection cycle",
+    "unit": "ms"
+   },
+   {
+    "key": "virtualDisk|20_sec_peak_write_average",
+    "name": "Virtual Disk|Peak Write Throughput",
+    "unit": "KBps"
+   },
+   {
+    "key": "virtualDisk|actualUsage",
+    "name": "Virtual Disk|Used Disk Space",
+    "unit": "GB"
+   },
+   {
+    "key": "virtualDisk|busResets_summation",
+    "name": "Virtual Disk|Bus Resets"
+   },
+   {
+    "key": "virtualDisk|commandsAborted_summation",
+    "name": "Virtual Disk|Commands Aborted"
+   },
+   {
+    "key": "virtualDisk|commandsAveraged_average",
+    "name": "Virtual Disk|Total IOPS"
+   },
+   {
+    "key": "virtualDisk|iopsPerGB",
+    "name": "Virtual Disk|IOPS per GB"
+   },
+   {
+    "key": "virtualDisk|largeSeeks_latest",
+    "name": "Virtual Disk|Number of Large Seeks"
+   },
+   {
+    "key": "virtualDisk|mediumSeeks_latest",
+    "name": "Virtual Disk|Number of Medium Seeks"
+   },
+   {
+    "key": "virtualDisk|numberReadAveraged_average",
+    "name": "Virtual Disk|Read IOPS"
+   },
+   {
+    "key": "virtualDisk|numberWriteAveraged_average",
+    "name": "Virtual Disk|Write IOPS"
+   },
+   {
+    "key": "virtualDisk|peak_vDisk_iops",
+    "name": "Virtual Disk|Highest IOPS of all instances"
+   },
+   {
+    "key": "virtualDisk|peak_vDisk_readLatency",
+    "name": "Virtual Disk|Highest Read Latency of all instances",
+    "unit": "ms"
+   },
+   {
+    "key": "virtualDisk|peak_vDisk_throughput",
+    "name": "Virtual Disk|Highest Throughput of all instances",
+    "unit": "KBps"
+   },
+   {
+    "key": "virtualDisk|peak_vDisk_writeLatency",
+    "name": "Virtual Disk|Highest Write Latency of all instances",
+    "unit": "ms"
+   },
+   {
+    "key": "virtualDisk|readIOSize_latest",
+    "name": "Virtual Disk|Average Read request size",
+    "unit": "bytes"
+   },
+   {
+    "key": "virtualDisk|readLatencyUS_latest",
+    "name": "Virtual Disk|Read Latency (microseconds)"
+   },
+   {
+    "key": "virtualDisk|readLoadMetric_latest",
+    "name": "Virtual Disk|Read Load"
+   },
+   {
+    "key": "virtualDisk|readOIO_latest",
+    "name": "Virtual Disk|Outstanding Read Requests"
+   },
+   {
+    "key": "virtualDisk|read_average",
+    "name": "Virtual Disk|Read Throughput",
+    "unit": "KBps"
+   },
+   {
+    "key": "virtualDisk|smallSeeks_latest",
+    "name": "Virtual Disk|Number of Small Seeks"
+   },
+   {
+    "key": "virtualDisk|totalLatency",
+    "name": "Virtual Disk|Total Latency",
+    "unit": "ms"
+   },
+   {
+    "key": "virtualDisk|totalReadLatency_average",
+    "name": "Virtual Disk|Read Latency",
+    "unit": "ms"
+   },
+   {
+    "key": "virtualDisk|totalWriteLatency_average",
+    "name": "Virtual Disk|Write Latency",
+    "unit": "ms"
+   },
+   {
+    "key": "virtualDisk|usage",
+    "name": "Virtual Disk|Total Throughput",
+    "unit": "KBps"
+   },
+   {
+    "key": "virtualDisk|vDiskOIO",
+    "name": "Virtual Disk|Outstanding IO requests",
+    "unit": "OIOs"
+   },
+   {
+    "key": "virtualDisk|writeIOSize_latest",
+    "name": "Virtual Disk|Average Write request size",
+    "unit": "bytes"
+   },
+   {
+    "key": "virtualDisk|writeLatencyUS_latest",
+    "name": "Virtual Disk|Write Latency (microseconds)"
+   },
+   {
+    "key": "virtualDisk|writeLoadMetric_latest",
+    "name": "Virtual Disk|Write Load"
+   },
+   {
+    "key": "virtualDisk|writeOIO_latest",
+    "name": "Virtual Disk|Outstanding Write Requests"
+   },
+   {
+    "key": "virtualDisk|write_average",
+    "name": "Virtual Disk|Write Throughput",
+    "unit": "KBps"
+   },
+   {
+    "key": "vmop|vmotion|total_failures",
+    "name": "Number of VM Operations|vMotion|vMotion Failures"
+   },
+   {
+    "key": "vmop|vmotion|total_successes",
+    "name": "Number of VM Operations|vMotion|Total vMotions"
+   }
+  ]
+ }
+}

@@ -31,9 +31,9 @@ def list_alerts(
     Returns alert summaries: name, criticality, status, impact, resource_id,
     resource_name, resource_kind, timestamps, and control state. resource_name
     and resource_kind are resolved in one batched lookup per page; they are
-    null when that failed or the resource no longer exists, and the envelope's
-    resource_names_note (null when every name resolved) then says which —
-    null means unknown, not "no resource".
+    null when that failed, the resource no longer exists, or Aria holds no name
+    for it, and the envelope's resource_names_note (null when every name
+    resolved) then says which — null means unknown, not "no resource".
 
     Returns a paginated envelope: items, returned, limit, total (null
     when the API reports no size), truncated, hint, next_offset. Check

@@ -99,8 +99,13 @@ def _fetch_by_ids(
     appliance family has a recorded habit of ignoring a filter parameter
     (``/symptoms?alertId=`` returns all 81 symptoms on 8.18.7), and keying by
     the row's own id is what keeps an ignored filter from attaching a name to
-    the wrong alert. Rows for ids nobody asked for are dropped only to keep the
-    map small — that part is not load-bearing.
+    the wrong alert. Rows for ids nobody asked for are dropped.
+
+    Those rows are also evidence. A response carrying any row that was not
+    asked for (or a row with no id) did not apply the filter, so the requested
+    ids it omits were never looked up — they may be on a page we did not get.
+    Reporting them as "not returned by the appliance (deleted or stale)" would
+    state as fact something the answer does not say, so they count as failed.
 
     Args:
         fetch: Performs one request for a batch of ids. Callers pass a lambda
@@ -133,10 +138,23 @@ def _fetch_by_ids(
             failed.update(batch)
             continue
         wanted = set(batch)
+        filter_ignored = False
         for row in rows:
             row_id = row.get(id_key) if isinstance(row, dict) else None
             if row_id is not None and str(row_id) in wanted:
                 found[str(row_id)] = row
+            else:
+                filter_ignored = True
+        if filter_ignored:
+            unanswered = [i for i in batch if i not in found]
+            if unanswered:
+                _log.warning(
+                    "Batched lookup answered '%s' with rows that were not requested — "
+                    "the id filter was ignored; %d ids left unresolved, not reported as missing",
+                    container,
+                    len(unanswered),
+                )
+                failed.update(unanswered)
     return found, failed
 
 
@@ -146,13 +164,24 @@ def _lookup_outcome(item_id: str, found: dict[str, dict], failed: set[str]) -> s
     return _LOOKUP_FAILED if item_id in failed else _LOOKUP_NOT_FOUND
 
 
-def _unresolved_note(what: str, failed: int, not_found: int, consequence: str) -> str | None:
-    """Explain unresolved lookups, or ``None`` when every one resolved."""
+def _unresolved_note(
+    what: str, failed: int, not_found: int, consequence: str, extra: tuple[str, ...] = ()
+) -> str | None:
+    """Explain unresolved lookups, or ``None`` when every one resolved.
+
+    ``extra`` carries already-worded reasons a value is unknown that are not a
+    failed or missing lookup (a resolved row with no name, a symptom with no
+    definition id to look up); empty strings are skipped.
+    """
     parts = []
     if failed:
-        parts.append(f"{failed} {what} could not be retrieved (the lookup failed — retry)")
+        parts.append(
+            f"{failed} {what} could not be retrieved (the lookup failed, or the "
+            f"appliance ignored the id filter — retry)"
+        )
     if not_found:
         parts.append(f"{not_found} {what} were not returned by the appliance (deleted or stale)")
+    parts.extend(p for p in extra if p)
     if not parts:
         return None
     return "; ".join(parts) + f". {consequence}"
@@ -173,8 +202,10 @@ def _resolve_alert_resources(
 
     Returns:
         ``({resource_id: {"name", "kind"}}, note)``. Resources that did not
-        resolve are absent from the map; ``note`` says how many and why, and is
-        ``None`` when all resolved (or no alert named a resource).
+        resolve are absent from the map, and a resolved one Aria holds no name
+        for maps to ``name: None``; ``note`` says how many of each and why, so
+        every null ``resource_name`` has an explanation. It is ``None`` when all
+        resolved with a name (or no alert named a resource).
     """
     resource_ids = [str(a.get("resourceId") or "") for a in alerts]
     found, failed = _fetch_by_ids(
@@ -195,10 +226,15 @@ def _resolve_alert_resources(
         }
     unique = set(filter(None, resource_ids))
     outcomes = [_lookup_outcome(rid, found, failed) for rid in unique]
+    nameless = sum(1 for entry in names.values() if entry["name"] is None)
     note = _unresolved_note(
         "affected resource(s)",
         failed=outcomes.count(_LOOKUP_FAILED),
         not_found=outcomes.count(_LOOKUP_NOT_FOUND),
+        extra=(
+            f"{nameless} affected resource(s) were returned with no name in Aria Operations"
+            if nameless else "",
+        ),
         consequence=(
             "Their rows carry resource_name null, which means the name is "
             "unknown — not that the alert has no resource. Resolve one with "
@@ -584,10 +620,17 @@ def _summarize_with_definitions(client: AriaClient, leaves: list[dict]) -> tuple
 
     unique_needy = {_definition_id(s) for s in needy}
     outcomes = [_lookup_outcome(i, found, failed) for i in unique_needy]
+    # A symptom lands on no_definition_id only when it lacks a name or a
+    # severity and has no id to look either up by — also an unknown, not a blank.
+    no_id = sum(1 for s in summaries if s["definition_lookup"] == _LOOKUP_NO_ID)
     note = _unresolved_note(
         "symptom definition(s)",
         failed=outcomes.count(_LOOKUP_FAILED),
         not_found=outcomes.count(_LOOKUP_NOT_FOUND),
+        extra=(
+            f"{no_id} symptom(s) carry no definition id, so their missing name or "
+            f"severity could not be looked up" if no_id else "",
+        ),
         consequence=(
             "Symptoms whose definition_lookup is not 'resolved' may show an "
             "empty name or severity — that means unknown, not blank. Their "
