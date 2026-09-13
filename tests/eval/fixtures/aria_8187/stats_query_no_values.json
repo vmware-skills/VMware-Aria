@@ -1,0 +1,8 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab), read-only GETs/queries",
+ "_note": "Same POST for mem|guest_demand (a key the VM has) over a window in the year 2000: identical to a request for a nonexistent key",
+ "http_status": 200,
+ "body": {
+  "values": []
+ }
+}

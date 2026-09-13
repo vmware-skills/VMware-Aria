@@ -15,6 +15,7 @@ Base URL pattern: https://<aria-host>/suite-api/api/
 from __future__ import annotations
 
 import logging
+import re
 import time
 from typing import Any
 
@@ -42,6 +43,16 @@ _RETRY_DELAY_SEC = 2.0
 _LIVENESS_TTL_SEC = 30.0
 
 
+#: The next step other callers are given when a call fails. Kept separate from
+#: the diagnosis so the doctor can print the diagnosis without it: a doctor
+#: report that says "run the doctor" is a loop, not a remedy (2026-09-13).
+_DOCTOR_POINTER = "Run 'vmware-aria doctor' if every call to this target fails."
+_DOCTOR_THEN = "Then run 'vmware-aria doctor'."
+
+#: A dotted version inside a release name: "VMware Aria Operations 8.18.7".
+_DOTTED_VERSION = re.compile(r"\d+(?:\.\d+)+")
+
+
 #: Sentinel for "the version probe has not run yet". ``None`` already means
 #: "probed and could not read it", and collapsing the two would re-probe an
 #: unreadable appliance on every single 404.
@@ -54,6 +65,11 @@ class AriaApiError(Exception):
     Carries a teaching message (status + path + how to fix) so end users see an
     actionable line instead of a raw httpx traceback. ``status_code`` is None
     for transport/timeout failures (no HTTP response was received).
+
+    ``body`` is the parsed JSON response body when there was one (``None`` for
+    no response or a non-JSON page): the 503 from node status carries
+    ``systemTime`` and the health check needs it. ``diagnosis`` is the message
+    without the "run the doctor" next step, for the doctor to print.
     """
 
     def __init__(
@@ -63,11 +79,60 @@ class AriaApiError(Exception):
         status_code: int | None = None,
         method: str | None = None,
         path: str | None = None,
+        body: Any = None,
+        diagnosis: str | None = None,
     ) -> None:
         super().__init__(message)
         self.status_code = status_code
         self.method = method
         self.path = path
+        self.body = body
+        self.diagnosis = diagnosis if diagnosis is not None else message
+
+
+class NotSuiteApiError(ConnectionError):
+    """Token acquisition answered 200 without a token: not a suite-api endpoint.
+
+    A ``ConnectionError`` as before, with the doctor-free ``diagnosis`` beside
+    the message other callers receive.
+    """
+
+    def __init__(self, message: str, *, diagnosis: str) -> None:
+        super().__init__(message)
+        self.diagnosis = diagnosis
+
+
+def _json_body(resp: httpx.Response) -> Any:
+    """The parsed JSON body of an error response, or ``None`` if it has none."""
+    if not resp.content:
+        return None
+    try:
+        return resp.json()
+    except ValueError:
+        return None
+
+
+def parse_release_info(data: Any) -> dict[str, Any]:
+    """Read the product identity out of a ``GET /versions/current`` body.
+
+    Live 8.18.7 (2026-09-13) answers ``releaseName: "VMware Aria Operations
+    8.18.7"`` plus ``major: 1, minor: 77`` — and those two are the *API*
+    version, not the product's, so they are never read. The version is the
+    dotted number inside ``releaseName``; with none there every field is
+    ``None`` rather than a guess (踩坑 #36).
+    """
+    release = data.get("releaseName") if isinstance(data, dict) else None
+    release = release.strip() if isinstance(release, str) else ""
+    match = _DOTTED_VERSION.search(release)
+    version = match.group() if match else None
+    build = data.get("buildNumber") if isinstance(data, dict) else None
+    return {
+        "release_name": release or None,
+        "product_name": release[: match.start()].strip() or None if match else None,
+        "product_version": version,
+        "product_line": f"{version.split('.')[0]}.x" if version else None,
+        "build_number": build if isinstance(build, int) else None,
+    }
 
 
 def _hint_for_status(status_code: int) -> str:
@@ -202,33 +267,41 @@ class AriaClient:
                 )
             else:
                 hint = _hint_for_status(status)
-            raise AriaApiError(
+            head = (
                 f"Aria Operations authentication failed: POST "
-                f"/auth/token/acquire returned HTTP {status}. {hint} "
-                f"Then run 'vmware-aria doctor'. "
-                f"Configured host: {self._target.host}",
+                f"/auth/token/acquire returned HTTP {status}. {hint}"
+            )
+            host = f"Configured host: {self._target.host}"
+            raise AriaApiError(
+                f"{head} {_DOCTOR_THEN} {host}",
                 status_code=status,
                 method="POST",
                 path="/auth/token/acquire",
+                body=_json_body(exc.response),
+                diagnosis=f"{head} {host}",
             ) from exc
         except (httpx.TimeoutException, httpx.TransportError) as exc:
+            head = f"Aria Operations authentication could not connect. {_transport_hint(exc)}"
+            host = f"Configured host: {self._target.host}"
             raise AriaApiError(
-                f"Aria Operations authentication could not connect. "
-                f"{_transport_hint(exc)} Then run 'vmware-aria doctor'. "
-                f"Configured host: {self._target.host}",
+                f"{head} {_DOCTOR_THEN} {host}",
                 method="POST",
                 path="/auth/token/acquire",
+                diagnosis=f"{head} {host}",
             ) from exc
         data = resp.json()
 
         token = data.get("token")
         if not token:
-            raise ConnectionError(
+            diagnosis = (
                 f"Aria Operations token acquisition to {self._target.host} "
                 f"succeeded but the response carried no 'token' field — the host "
                 f"is most likely not an Aria Operations suite-api endpoint. "
                 f"Verify 'host' and 'port' for this target in "
-                f"~/.vmware-aria/config.yaml, then run 'vmware-aria doctor'."
+                f"~/.vmware-aria/config.yaml"
+            )
+            raise NotSuiteApiError(
+                f"{diagnosis}, then run 'vmware-aria doctor'.", diagnosis=f"{diagnosis}."
             )
 
         # `validity` is an epoch timestamp in MILLISECONDS (when the token
@@ -297,13 +370,13 @@ class AriaClient:
                     attempt += 1
                     time.sleep(_RETRY_DELAY_SEC)
                     continue
+                head = f"Aria Operations request could not connect. {_transport_hint(exc)}"
+                tail = f"Configured host: {self._target.host}. Failing call: {method} {path}"
                 raise AriaApiError(
-                    f"Aria Operations request could not connect. "
-                    f"{_transport_hint(exc)} Then run 'vmware-aria doctor'. "
-                    f"Configured host: {self._target.host}. "
-                    f"Failing call: {method} {path}",
+                    f"{head} {_DOCTOR_THEN} {tail}",
                     method=method,
                     path=path,
+                    diagnosis=f"{head} {tail}",
                 ) from exc
 
             if resp.status_code in (401, 403) and not reauthed:
@@ -332,14 +405,15 @@ class AriaClient:
                     explained = version_remedy(requires, self.product_version())
                     if explained:
                         hint = explained
+                head = f"Aria Operations returned HTTP {resp.status_code}. {hint}"
+                tail = f"Failing call: {method} {path}"
                 raise AriaApiError(
-                    f"Aria Operations returned HTTP {resp.status_code}. "
-                    f"{hint} "
-                    f"Run 'vmware-aria doctor' if every call to this target "
-                    f"fails. Failing call: {method} {path}",
+                    f"{head} {_DOCTOR_POINTER} {tail}",
                     status_code=resp.status_code,
                     method=method,
                     path=path,
+                    body=_json_body(resp),
+                    diagnosis=f"{head} {tail}",
                 )
             return resp
 
@@ -400,34 +474,25 @@ class AriaClient:
         * **It must cache its failure too.** Otherwise a target that cannot
           answer is re-probed on every subsequent 404.
 
-        Field names are NOT verified against a live appliance. Neither endpoint
-        below has been replayed from this skill, so rather than guess one key
-        and be silently wrong, this tries several plausible ones and returns
-        ``None`` when none parse. ``None`` is a supported answer here — it
-        routes to the "could not read the version" wording, which asserts
-        nothing about the operator's build. Guessing a key and reading garbage
-        would instead produce a confident, wrong version claim (踩坑 #36).
+        Verified on a live 8.18.7 (2026-09-13): ``/versions/current`` answers
+        even while node status is 503, with ``releaseName: "VMware Aria
+        Operations 8.18.7"``. The whole release name used to be returned, and
+        ``parse_version`` reads from the front, so every version-floor 404 on
+        that appliance said the version "could not be read". The dotted number
+        is extracted by :func:`parse_release_info`; ``None`` still means
+        unreadable and routes to wording that asserts nothing about the build.
+        ``/deployment/node/status`` is no longer tried — NodeStatus has no
+        version field.
         """
         if self._product_version is not _UNPROBED:
             return self._product_version
 
         self._product_version = None  # cache the failure before probing
-        for path in ("/versions/current", "/deployment/node/status"):
-            try:
-                data = self._request("GET", path, retries=0).json()
-            except Exception:  # noqa: BLE001 — unreadable is a supported answer
-                continue
-            if not isinstance(data, dict):
-                continue
-            for key in ("releaseName", "version", "productVersion", "humanlyReadableAdvancedVersion"):
-                value = data.get(key)
-                if isinstance(value, dict):  # {"major": 8, "minor": 6, ...}
-                    parts = [value.get(k) for k in ("major", "minor", "patch")]
-                    nums = [str(x) for x in parts if isinstance(x, int)]
-                    value = ".".join(nums) if nums else None
-                if isinstance(value, str) and value.strip():
-                    self._product_version = value.strip()
-                    return self._product_version
+        try:
+            data = self._request("GET", "/versions/current", retries=0).json()
+        except Exception:  # noqa: BLE001 — unreadable is a supported answer
+            return self._product_version
+        self._product_version = parse_release_info(data)["product_version"]
         return self._product_version
 
     @property
@@ -471,13 +536,13 @@ class AriaClient:
                     attempt += 1
                     time.sleep(_RETRY_DELAY_SEC)
                     continue
+                head = f"Aria Operations request could not connect. {_transport_hint(exc)}"
+                tail = f"Configured host: {self._target.host}. Failing call: {method} {url}"
                 raise AriaApiError(
-                    f"Aria Operations request could not connect. "
-                    f"{_transport_hint(exc)} Then run 'vmware-aria doctor'. "
-                    f"Configured host: {self._target.host}. "
-                    f"Failing call: {method} {url}",
+                    f"{head} {_DOCTOR_THEN} {tail}",
                     method=method,
                     path=url,
+                    diagnosis=f"{head} {tail}",
                 ) from exc
 
             if resp.status_code in _TRANSIENT_STATUS and attempt < 1:
@@ -493,6 +558,7 @@ class AriaClient:
                     status_code=resp.status_code,
                     method=method,
                     path=url,
+                    body=_json_body(resp),
                 )
             return resp.json() if resp.content else {}
 

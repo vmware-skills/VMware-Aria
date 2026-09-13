@@ -1,0 +1,15 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab), read-only GETs/queries",
+ "_note": "GET /versions/current, answered 200 while node status was 503. major/minor are the API version, not the product version",
+ "http_status": 200,
+ "body": {
+  "releaseName": "VMware Aria Operations 8.18.7",
+  "major": 1,
+  "minor": 77,
+  "minorMinor": 0,
+  "buildNumber": 25423534,
+  "releasedDate": 1782518400707,
+  "humanlyReadableReleaseDate": "Saturday, June 27, 2026 at 12:00:00 AM Coordinated Universal Time",
+  "description": null
+ }
+}

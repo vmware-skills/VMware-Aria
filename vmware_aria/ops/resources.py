@@ -10,6 +10,8 @@ from typing import TYPE_CHECKING, Any
 
 from vmware_policy import paginated, sanitize
 
+from vmware_aria.connection import AriaApiError
+
 if TYPE_CHECKING:
     from vmware_aria.connection import AriaClient
 
@@ -260,7 +262,17 @@ def get_resource_metrics(
         interval_quantity: Number of interval_type units per data point.
 
     Returns:
-        Dict keyed by metric_key mapping to a list of {timestamp, value} points.
+        ``metrics``: metric key -> list of ``{timestamp_ms, value}`` points, only
+        for keys that returned at least one point. ``missing``: one entry per
+        requested key that did not, with ``reason`` —
+        ``not_collected_for_resource`` (the resource never reports that key;
+        ``similar_keys`` lists its keys in the same group),
+        ``no_data_in_window`` (it reports the key, no points in the window),
+        ``resource_reports_no_stat_keys``, or ``undetermined`` (the key list
+        could not be read) — and ``detail``. ``stat_keys_on_resource`` is how
+        many keys the resource reports (``None`` when not read: it is only read
+        when something is missing). Also ``resource_id``, ``window_begin_ms``,
+        ``window_end_ms``. A resource id that does not exist is a 404 and raises.
     """
     if not resource_id:
         raise ValueError(
@@ -299,8 +311,29 @@ def get_resource_metrics(
     # Pure query endpoint — idempotent, safe to retry transient gateway errors.
     data = client.post(f"/resources/{resource_id}/stats/query", json_data=payload, retries=1)
 
-    # Response nests stats under values[].stat-list.stat[] (hyphenated wire
-    # key; some renderings show statList — parse both defensively).
+    metrics = {key: points for key, points in _parse_stat_series(data).items() if points}
+    # A key that is not collected and a key with no points in the window both
+    # come back as simply absent — live 8.18.7 answers {"values": []} for
+    # either (2026-09-13). Only the resource's stat-key list tells them apart,
+    # so it is read on this path alone.
+    absent = [key for key in dict.fromkeys(metric_keys) if key not in metrics]
+    missing, key_count = _explain_missing(client, resource_id, absent) if absent else ([], None)
+    return {
+        "resource_id": resource_id,
+        "window_begin_ms": begin_time_ms,
+        "window_end_ms": end_time_ms,
+        "metrics": metrics,
+        "missing": missing,
+        "stat_keys_on_resource": key_count,
+    }
+
+
+def _parse_stat_series(data: dict) -> dict[str, list[dict]]:
+    """Map statKey -> points from a stats/query body.
+
+    Response nests stats under values[].stat-list.stat[] (hyphenated wire key;
+    some renderings show statList — parse both defensively).
+    """
     result: dict[str, list[dict]] = {}
     for value_entry in data.get("values", []):
         stat_container = value_entry.get("stat-list") or value_entry.get("statList") or {}
@@ -308,11 +341,60 @@ def get_resource_metrics(
             key = sanitize(stat.get("statKey", {}).get("key", ""))
             timestamps = stat.get("timestamps", [])
             values = stat.get("data", [])
-            result[key] = [
-                {"timestamp_ms": ts, "value": v}
-                for ts, v in zip(timestamps, values)
-            ]
+            result[key] = [{"timestamp_ms": ts, "value": v} for ts, v in zip(timestamps, values)]
     return result
+
+
+def _resource_stat_keys(client: AriaClient, resource_id: str) -> tuple[list[str] | None, str | None]:
+    """The stat keys a resource reports, or ``(None, why it could not be read)``."""
+    path = f"/resources/{resource_id}/statkeys"
+    try:
+        data = client.get(path)
+    except AriaApiError as exc:
+        status = f"HTTP {exc.status_code}" if exc.status_code is not None else "no HTTP response"
+        return None, f"GET {path} failed ({status})"
+    rows = data.get("stat-key") if isinstance(data, dict) else None
+    if not isinstance(rows, list):
+        return None, f"GET {path} answered without a 'stat-key' list"
+    return [r["key"] for r in rows if isinstance(r, dict) and isinstance(r.get("key"), str)], None
+
+
+def _explain_missing(
+    client: AriaClient, resource_id: str, keys: list[str]
+) -> tuple[list[dict], int | None]:
+    """Say, per requested key with no points, which kind of empty it is."""
+    available, error = _resource_stat_keys(client, resource_id)
+    if available is None:
+        detail = (
+            f"{error}, so a key this resource does not report cannot be told "
+            f"apart from one with no points in the window."
+        )
+        return [_missing(k, "undetermined", detail) for k in keys], None
+    have = set(available)
+    entries = []
+    for key in keys:
+        if not available:
+            entries.append(_missing(key, "resource_reports_no_stat_keys", (
+                "This resource reports no stat keys at all: it may be newly "
+                "discovered, not collected, or not the resource you meant."
+            )))
+        elif key in have:
+            entries.append(_missing(key, "no_data_in_window", (
+                "The resource reports this key but has no points in the window. "
+                "Widen hours, or check its collector with list_collector_groups."
+            )))
+        else:
+            group = key.split("|", 1)[0] + "|"
+            similar = sorted(k for k in available if k.startswith(group))[:10]
+            entries.append(_missing(key, "not_collected_for_resource", (
+                f"This resource has never reported this key ({len(available)} keys "
+                f"reported). Try one of similar_keys."
+            ), similar))
+    return entries, len(available)
+
+
+def _missing(key: str, reason: str, detail: str, similar: list[str] | None = None) -> dict:
+    return {"metric_key": key, "reason": reason, "detail": detail, "similar_keys": similar or []}
 
 
 # ---------------------------------------------------------------------------
@@ -463,7 +545,13 @@ def get_top_consumers(
     # consumer could fall outside the ranked set entirely.
     candidates = list_resources(client, resource_kind=resource_kind)["items"]
     if not candidates:
-        return paginated([], limit=top_n)
+        return {
+            **paginated([], limit=top_n),
+            "hint": (
+                f"No {resource_kind} resources were found, so nothing was ranked. "
+                f"Check the kind name with list_resources."
+            ),
+        }
     if len(candidates) > _TOPN_MAX_RESOURCE_IDS:
         _log.warning(
             "topn candidate set has %d resources but GET /resources/stats/topn "
@@ -512,4 +600,29 @@ def get_top_consumers(
                 "value": latest_value,
             }
         )
-    return paginated(results[:top_n], limit=top_n)
+    envelope = paginated(results[:top_n], limit=top_n)
+    hint = _ranking_gap_hint(len(results), len(names), top_n, metric_key, resource_kind)
+    return {**envelope, "hint": hint} if hint and not envelope["truncated"] else envelope
+
+
+def _ranking_gap_hint(ranked: int, candidates: int, top_n: int, metric_key: str, kind: str) -> str | None:
+    """Explain a ranking shorter than both top_n and the candidate set.
+
+    Resources with no points for the key are simply left out of the topn
+    answer (live 8.18.7: an unknown key returns ``resourceStatGroups: []``), so
+    a short or empty ranking means "not reported", never "consuming nothing".
+    """
+    if ranked >= min(top_n, candidates):
+        return None
+    if ranked == 0:
+        return (
+            f"None of the {candidates} {kind} resources returned data for "
+            f"'{metric_key}' in the last hour, so nothing was ranked — not a sign "
+            f"that nothing is consuming. Call get_resource_metrics on one of them: "
+            f"its 'missing' field says whether the key is not collected or had no points."
+        )
+    return (
+        f"Only {ranked} of {candidates} {kind} resources returned data for "
+        f"'{metric_key}' in the last hour; the others are absent from the ranking, "
+        f"not ranked at zero. get_resource_metrics on one of them says why."
+    )

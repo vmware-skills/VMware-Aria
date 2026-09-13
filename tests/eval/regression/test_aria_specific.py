@@ -64,7 +64,7 @@ def test_metrics_response_parses_stat_list_nesting() -> None:
         ]
     }
     result = get_resource_metrics(client, "res-1", ["cpu|usage_average"])
-    assert result["cpu|usage_average"] == [
+    assert result["metrics"]["cpu|usage_average"] == [
         {"timestamp_ms": 1000, "value": 1.5},
         {"timestamp_ms": 2000, "value": 2.5},
     ]

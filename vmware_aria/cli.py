@@ -333,7 +333,8 @@ def resource_top(
     from vmware_aria.ops.resources import get_top_consumers
 
     client, _ = _get_connection(target, config)
-    items = get_top_consumers(client, metric_key=metric, resource_kind=kind, top_n=top_n)["items"]
+    result = get_top_consumers(client, metric_key=metric, resource_kind=kind, top_n=top_n)
+    items = result["items"]
 
     table = Table(title=f"Top {top_n} by {metric}", show_lines=False)
     table.add_column("Rank", justify="right")
@@ -345,6 +346,8 @@ def resource_top(
         table.add_row(str(i), r["name"], str(r.get("value", "")), r.get("unit", ""))
 
     console.print(table)
+    if result["hint"]:
+        console.print(f"[yellow]{result['hint']}[/yellow]")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -668,16 +671,31 @@ def health_status(
     target: TargetOption = None,
     config: ConfigOption = None,
 ) -> None:
-    """Check Aria Operations platform health (all internal services)."""
+    """Check Aria Operations platform health: node, each service, and the release."""
     from vmware_aria.ops.health import get_aria_health
 
     client, _ = _get_connection(target, config)
     data = get_aria_health(client)
 
-    overall = "[green]ONLINE[/green]" if data["healthy"] else f"[red]{data['overall_status'] or 'OFFLINE'}[/red]"
-    console.print(f"\nAria Operations Platform: {overall}")
-    if data.get("details"):
-        console.print(f"Details: {data['details']}")
+    style = {"HEALTHY": "green", "DEGRADED": "yellow", "UNKNOWN": "yellow"}.get(data["assessment"], "red")
+    console.print(f"\nAria Operations Platform: [{style}]{data['assessment']}[/{style}]")
+    console.print(f"Node status: {data['overall_status'] or '(none)'}")
+    version = data["release_name"] or f"unknown ({data['version_error']})"
+    if data["product_line"]:
+        version += f" — {data['product_line']} line"
+    console.print(f"Version: {version}")
+    if data["services"] is None:
+        console.print(f"Services: not read ({data['services_error']})")
+    else:
+        table = Table(show_header=True, show_lines=False)
+        table.add_column("Service")
+        table.add_column("Health")
+        table.add_column("Details")
+        for svc in data["services"]:
+            svc_style = "green" if svc["health"] == "OK" else "red"
+            table.add_row(svc["name"], f"[{svc_style}]{svc['health']}[/{svc_style}]", svc["details"])
+        console.print(table)
+    console.print(f"Details: {data['details']}")
 
 
 @health_app.command("collectors")

@@ -13,6 +13,57 @@ from vmware_policy.fsperms import check_secret_file
 _log = logging.getLogger("vmware-aria.doctor")
 console = Console()
 
+#: A check that passed but deserves attention (e.g. a degraded platform that
+#: still answers). It does not fail the pre-flight.
+WARN = "warn"
+
+#: Platform assessment -> check status. DEGRADED/UNKNOWN answer, so they warn;
+#: only DOWN fails. See vmware_aria.ops.health.get_aria_health.
+_ASSESSMENT_STATUS = {"HEALTHY": True, "DEGRADED": WARN, "UNKNOWN": WARN, "DOWN": False}
+
+
+def _diagnosis(exc: Exception) -> str:
+    """The error text without its "run the doctor" next step.
+
+    Errors from the client end with a pointer to this command, which is right
+    for a tool call and a loop inside the doctor's own report (2026-09-13).
+    """
+    return str(getattr(exc, "diagnosis", None) or exc)
+
+
+def _platform_checks(name: str, client: object) -> list[tuple[str, object, str]]:
+    """Version and platform-health rows for one connected target.
+
+    The version comes from /versions/current, which answers during startup;
+    the old probe of /deployment/node/status printed FAIL whenever the node
+    was not fully ONLINE, and read a ``nodeType`` field NodeStatus never had.
+    """
+    from vmware_aria.connection import AriaApiError
+    from vmware_aria.ops.health import get_aria_health, read_product_version
+
+    rows: list[tuple[str, object, str]] = []
+    version = read_product_version(client)
+    if version["product_version"]:
+        line = f"{version['release_name']} ({version['product_line']} line"
+        build = version["build_number"]
+        rows.append((f"Aria version ({name})", True, line + (f", build {build})" if build else ")")))
+    else:
+        rows.append((f"Aria version ({name})", False, version["version_error"]))
+
+    try:
+        health = get_aria_health(client)
+    except AriaApiError as exc:
+        rows.append((f"Aria platform ({name})", False, _diagnosis(exc)))
+        return rows
+    detail = f"{health['assessment']} — {health['details']}"
+    failing = [
+        f"{s['name']}: {s['details']}" for s in health["services"] or [] if s["name"] in (health["services_not_ok"] or [])
+    ]
+    if failing:
+        detail += " " + "; ".join(failing)
+    rows.append((f"Aria platform ({name})", _ASSESSMENT_STATUS[health["assessment"]], detail))
+    return rows
+
 
 def run_doctor(
     config_path: Path | None = None,
@@ -26,7 +77,7 @@ def run_doctor(
         resolve_config_path,
     )
 
-    checks: list[tuple[str, bool, str]] = []
+    checks: list[tuple[str, object, str]] = []
 
     # ── 1. Config file exists ────────────────────────────────────────────────
     # Resolved exactly as the tools resolve it — including $VMWARE_ARIA_CONFIG,
@@ -105,29 +156,19 @@ def run_doctor(
                 )
             )
 
-    # ── 6 & 7. Aria Operations authentication + version ──────────────────────
+    # ── 6 & 7. Aria Operations authentication, version, platform health ─────
     if not skip_auth:
-        for name, target_cfg in config.targets.items():
+        for name in config.targets:
             try:
                 from vmware_aria.connection import ConnectionManager
 
                 mgr = ConnectionManager(config)
                 client = mgr.connect(name)
                 checks.append((f"Aria auth ({name})", True, "Token acquired"))
-
-                # Get Aria version
-                try:
-                    # Health probe: an error status is itself the answer —
-                    # skip the transient back-off so doctor stays snappy.
-                    version_info = client.get("/deployment/node/status", retries=0)
-                    node_type = version_info.get("nodeType", "unknown")
-                    checks.append((f"Aria node type ({name})", True, node_type))
-                except Exception as e:
-                    checks.append((f"Aria node info ({name})", False, str(e)))
-
+                checks.extend(_platform_checks(name, client))
                 mgr.disconnect(name)
             except Exception as e:
-                checks.append((f"Aria auth ({name})", False, str(e)))
+                checks.append((f"Aria auth ({name})", False, _diagnosis(e)))
 
     # ── 8. MCP server import check ───────────────────────────────────────────
     try:
@@ -140,10 +181,10 @@ def run_doctor(
         checks.append(("MCP server import", False, str(e)))
 
     _print_table(checks)
-    return all(passed for _, passed, _ in checks)
+    return all(passed is not False for _, passed, _ in checks)
 
 
-def _print_table(checks: list[tuple[str, bool, str]]) -> None:
+def _print_table(checks: list[tuple[str, object, str]]) -> None:
     """Render the doctor results as a Rich table."""
     table = Table(title="vmware-aria Doctor", show_header=True)
     table.add_column("Check", style="bold")
@@ -151,7 +192,10 @@ def _print_table(checks: list[tuple[str, bool, str]]) -> None:
     table.add_column("Detail")
 
     for name, passed, detail in checks:
-        status = "[green]PASS[/green]" if passed else "[red]FAIL[/red]"
+        if passed == WARN:
+            status = "[yellow]WARN[/yellow]"
+        else:
+            status = "[green]PASS[/green]" if passed else "[red]FAIL[/red]"
         table.add_row(name, status, detail)
 
     console.print(table)

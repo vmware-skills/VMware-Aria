@@ -79,11 +79,12 @@ def get_resource_metrics(
 ) -> dict:
     """[READ] Fetch time-series metric statistics for a resource.
 
-    Returns a dict keyed by metric key, each mapping to a list of
-    {timestamp_ms, value} points — not an envelope. Use this for history; for
-    a single current score use get_resource_health instead. A key the API has
-    no data for does not appear in the result at all, so check which keys came
-    back before reporting a metric as zero.
+    Returns metrics (metric key -> list of {timestamp_ms, value} points, only
+    keys with points) and missing (one entry per requested key with no points:
+    reason not_collected_for_resource with similar_keys to try,
+    no_data_in_window, resource_reports_no_stat_keys, or undetermined).
+    Never report a missing key as zero. Use this for history; for a single
+    current score use get_resource_health instead.
 
     Args:
         resource_id: The resource UUID.
@@ -145,7 +146,8 @@ def get_top_consumers(
 
     Returns a paginated envelope: items, returned, limit, total (null
     when the API reports no size), truncated, hint. Check truncated
-    before calling this the complete set.
+    before calling this the complete set. Resources with no data for the key
+    are left out, not ranked at zero; hint says when that shortened the list.
 
     Args:
         metric_key: Metric to rank by, e.g. cpu|usage_average,
