@@ -86,7 +86,7 @@ Password variable naming convention: `VMWARE_ARIA_<TARGET_UPPER>_PASSWORD`
 vmware-aria doctor
 ```
 
-Expected output: All checks PASS.
+Expected output: All checks PASS. WARN rows (an unreadable version, a DEGRADED or UNKNOWN platform) do not fail the doctor; FAIL rows do.
 
 ---
 
@@ -289,6 +289,16 @@ Verify:
 2. `auth_source` matches the authentication source name in Aria Ops
 3. The user account is not locked
 
+### "the body is not JSON" or "response carried no 'token' field"
+
+Aria Operations answered with a success status but not with suite-api JSON — a
+login page, an SSO redirect, or a proxy in front of the node answers like this.
+Every tool reports it as an error naming the method, path, HTTP status and
+content type (`NonJsonBodyError`) instead of a JSON decode traceback; during
+token acquisition it is reported as "most likely not an Aria Operations suite-api
+endpoint" (`NotSuiteApiError`). Check that `host` and `port` for the target reach
+the Aria Operations node itself.
+
 ### Self-signed certificate error
 
 Export the CA that signed the Aria Ops certificate as PEM and set
@@ -299,4 +309,4 @@ into the system trust store has no effect: the client uses the `certifi` bundle.
 
 ### Metrics return empty list
 
-The metric key may not apply to this resource kind, or collection has not started yet. The `missing` list in the output says which: `not_collected_for_resource` (try one of its `similar_keys`), `no_data_in_window`, `resource_reports_no_stat_keys`, or `undetermined`. You can also browse available metric keys in the Aria Ops UI: navigate to the resource → Metrics tab.
+The metric key may not apply to this resource kind, or collection has not started yet. The `missing` list in the output says which: `not_collected_for_resource` (try one of its `similar_keys`), `no_data_in_window`, `resource_reports_no_stat_keys`, or `undetermined` (the stat-key list could not be read or is in an unrecognised form). You can also browse available metric keys in the Aria Ops UI: navigate to the resource → Metrics tab.

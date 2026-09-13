@@ -27,6 +27,32 @@ The ops function, the MCP tool and the CLI `resource metrics` (which prints it a
 `reason` is `not_collected_for_resource`, `no_data_in_window`, `resource_reports_no_stat_keys` or
 `undetermined`. Code that read `result["<metric key>"]` must read `result["metrics"]["<metric key>"]`.
 
+**Other externally visible changes since v1.11.0 — check these if you script against the output:**
+
+1. **`get_aria_health` `healthy`** was `overall_status == "ONLINE"`; it is now `assessment == "HEALTHY"`, so an
+   ONLINE node with a service in ERROR or in an unrecognised state reads `false`.
+2. **`get_aria_health` `details`** is a composed sentence — node status, the assessment in words, `Not OK: …` and
+   `services_error`, with the node's own details (truncated to 300 characters) inside it — not the node's raw `details`.
+   On HTTP 503, `system_time_ms` now comes from the 503 body (it was `null`). The tool makes three GETs
+   (`/deployment/node/status`, `/deployment/node/services/info`, `/versions/current`) instead of one.
+3. **CLI `health status`** prints the assessment (HEALTHY / DEGRADED / DOWN / UNKNOWN) on its first line instead of
+   ONLINE / OFFLINE, then `Node status` and `Version` lines and a per-service table (or `Services: not read (…)`);
+   `Details` is always printed. Exit codes are unchanged.
+4. **`doctor`**: the "Aria node type" / "Aria node info" rows are gone. New rows: "Aria version" (PASS, or WARN when it
+   cannot be read) and "Aria platform" (PASS when HEALTHY, WARN when DEGRADED or UNKNOWN, FAIL when DOWN). WARN does
+   not fail the run. Exit status: a node answering 503 with one service down now exits 0 (was 1); an unreadable version
+   exits 0; every service in ERROR (DOWN) exits 1; an error after connecting is a FAIL on the platform row and exits 1.
+5. **CLI `capacity rightsizing` table**: after `VM Name` (unchanged), the columns `Status` / `Rec. CPU` / `Rec. Mem` /
+   `Rec. Disk` became `Power`, `Status`, `vCPU now→rec`, `Mem GiB now→rec`, `Disk GB`, `Act.`; a legend, per-VM
+   caveats and, when set, `properties_note` print under the table.
+6. **`get_top_consumers` `value`** is now the average of the window's points (last hour, 5-minute AVG rollup — what
+   Aria ranks by) instead of the last point, which made a correct ranking look unsorted; the last point is the new
+   `latest_value`. Items keep Aria's order, descending by `value`. Resources listed with no points are no longer rows;
+   the new `excluded_no_data` (always present) counts them.
+7. **A 2xx response whose body is not JSON** (a login page, an SSO redirect, a proxy) raises `NonJsonBodyError`
+   (a subclass of `AriaApiError`) with a teaching message in every tool, instead of a raw JSON decode error; during
+   token acquisition it raises `NotSuiteApiError`.
+
 - **Alerts named no resource.** Every `list_alerts` row was a bare UUID. Rows now carry
   `resource_name` and `resource_kind` from one batched `/resources` lookup per page, and the result
   carries `resource_names_note` when some could not be resolved (`null` name = unknown).
@@ -39,8 +65,9 @@ The ops function, the MCP tool and the CLI `resource metrics` (which prints it a
   `cpu_mhz_per_vcpu`, `recommended_vcpus`, `current_memory_kb`, `cpu_direction` and
   `memory_direction` (`oversized` / `undersized` / `right_sized` / `null`).
 - **Rightsizing called drift a resize.** A +3 MB memory recommendation on an 8 GiB VM read as
-  undersized. Memory within 1% (`MEMORY_DIRECTION_TOLERANCE`) is now `right_sized`, and CPU MHz
-  within 0.01 of a whole core rounds to that core.
+  undersized. Memory within 1% (`MEMORY_DIRECTION_TOLERANCE`) is now `right_sized`, and a CPU
+  recommendation at most 0.01 vCPU (1% of one core's MHz, `CPU_VCPU_ROUNDING_EPSILON`) above a whole number of cores
+  rounds to that number — float noise; a real fraction above it still rounds up.
 - **Rightsizing listed powered-off VMs and templates as if running.** Rows now carry `power_state`,
   `is_template`, `product_name`, `aria_verdict`, `actionable` (never true for a powered-off VM or a
   template) and `caveats` — including when `recommendedSize` disagrees with the engine's own
@@ -64,7 +91,31 @@ The ops function, the MCP tool and the CLI `resource metrics` (which prints it a
 - **`AriaApiError` gains `body` and `diagnosis`**: the parsed JSON error body (the health check reads
   the 503 body), and the message without the "run the doctor" step.
 - **`get_top_consumers` ranked silence.** Resources with no data for the key are left out rather
-  than ranked at zero, and `hint` says when that shortened the list.
+  than ranked at zero; `excluded_no_data` counts them, and `hint` says when that shortened the list. When they took
+  slots of a full `top_n`, the result is `truncated` and `hint` says to raise `top_n`.
+- **Rightsizing survives a failed property read.** If `POST /resources/properties/latest/query` fails, rows still come
+  back from stats with every property-derived field `null`, none actionable, one caveat per row starting "VM properties
+  could not be read", and the new top-level `properties_note` naming the failure (HTTP status or no HTTP response);
+  it is `null` when the read succeeded. `actionable` now requires the power state read as `Powered On` and the
+  template flag read as false — unknown is not running.
+- **Health says only what it observed.** An ONLINE node whose per-service breakdown was not read (including a reply with
+  no service objects) stays HEALTHY, and `details` says no service was checked individually; UNKNOWN now also covers a
+  service in a state other than OK or ERROR. An unreadable version or service list is reported in `version_error` /
+  `services_error`, not raised; `release_name` and `product_name` are sanitized.
+- **`doctor` warns on an unreadable version** (`Not read: …`) instead of failing, reports an error after connecting on
+  the "Aria platform" row instead of a contradictory "Aria auth FAIL", and always disconnects.
+- **`similar_keys` are safe to pass back.** Only keys that `sanitize()` leaves unchanged and at most 200 characters are
+  offered (at most 10), and `detail` says how many were omitted; `metric_key` is sanitized. A stat-key list with rows in
+  an unrecognised form gives `undetermined` ("N of M 'stat-key' rows in an unrecognised form"), never
+  `not_collected_for_resource` or `resource_reports_no_stat_keys`.
+- **Alert notes explain every unknown.** `resource_names_note` counts affected resources returned with no name in Aria
+  Operations, and when the `/resources` lookup ignores its id filter, the requested ids it left out are reported as
+  could not be retrieved (retry), not as deleted. `symptom_definitions_note` also counts symptoms with no definition
+  id, whose missing name or severity could not be looked up.
+- **Documented metric keys are checked.** A regression test fails if SKILL.md or the investigation protocol names a
+  metric key Aria Operations 8.18.7 does not define (fixtures captured from its statkey definitions). The CLI
+  reference's metric-key list now uses those definitions' names and units (`disk|usage_average` is disk throughput in
+  KBps, `net|usage_average` KBps; `cpu|demandmhz` replaces `cpu|demand_average`, which 8.18.7 does not define for VMs).
 
 ## v1.11.0 — trust a private CA instead of turning verification off
 

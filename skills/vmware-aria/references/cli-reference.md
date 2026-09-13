@@ -29,7 +29,7 @@ Options:
 4. Password env vars are set for each target
 5. Network TCP connectivity to port 443 for each target
 6. Aria Operations token acquisition (unless `--skip-auth`)
-7. Aria version from `GET /versions/current`, e.g. `VMware Aria Operations 8.18.7 (8.x line, build 25423534)` (FAIL when it cannot be read), and Aria platform health: PASS when HEALTHY, **WARN** when DEGRADED or UNKNOWN (the failed services are named), FAIL when DOWN
+7. Aria version from `GET /versions/current`, e.g. `VMware Aria Operations 8.18.7 (8.x line, build 25423534)` (**WARN** `Not read: …` when it cannot be read — an unreadable version says nothing about whether the target works), and Aria platform health: PASS when HEALTHY, **WARN** when DEGRADED or UNKNOWN (the failed services are named), FAIL when DOWN. Only a failure to connect is an auth FAIL: an error after the token was acquired is a FAIL on the "Aria platform" row (`Checks did not complete: …`). The doctor disconnects from each target either way
 8. MCP server module importable
 
 Error details in the doctor table do not tell you to run the doctor again.
@@ -89,13 +89,13 @@ Options:
   --target -t TEXT     Target name
 ```
 
-**Common metric keys**:
-- `cpu|usage_average` — CPU utilization percentage
-- `mem|usage_average` — Memory utilization percentage
-- `cpu|demand_average` — CPU demand (MHz)
-- `mem|workload` — Memory workload
-- `disk|usage_average` — Disk I/O usage
-- `net|usage_average` — Network usage
+**Common metric keys** (VirtualMachine names and units as Aria Operations 8.18.7 defines them; other resource kinds differ):
+- `cpu|usage_average` — CPU|Usage (%)
+- `mem|usage_average` — Memory|Usage (%)
+- `cpu|demandmhz` — CPU|Demand (MHz)
+- `mem|workload` — Memory|Workload (%)
+- `disk|usage_average` — Physical Disk|Total Throughput (KBps) — a throughput, not a utilization percentage
+- `net|usage_average` — Network|Usage Rate (KBps)
 
 **Output**: JSON object:
 
@@ -114,9 +114,12 @@ Options:
 ```
 
 `metrics` holds only keys that returned at least one point. Every other requested key is in `missing`, with `reason`:
-`not_collected_for_resource` (the resource never reports it; `similar_keys` lists up to 10 of its keys in the same group),
+`not_collected_for_resource` (the resource never reports it; `similar_keys` lists up to 10 of its keys in the same group,
+only keys that `sanitize()` leaves unchanged and that are at most 200 characters — when some were dropped, `detail` says
+`N key(s) in the same group were omitted: they contain control characters or exceed 200 characters.`),
 `no_data_in_window` (reported, but no points in the window), `resource_reports_no_stat_keys`, or `undetermined`
-(the resource's stat-key list could not be read). `stat_keys_on_resource` is `null` unless something is missing.
+(the resource's stat-key list could not be read, or some of its rows are in an unrecognised form — `detail` then says
+`N of M 'stat-key' rows in an unrecognised form`). `metric_key` is sanitized. `stat_keys_on_resource` is `null` unless something is missing.
 A missing key is not a zero. (Before this change the output was a bare object keyed by metric.)
 
 ### `vmware-aria resource health`
@@ -143,7 +146,7 @@ Options:
   --target -t TEXT  Target name
 ```
 
-**Output**: Table with rank, name, value, unit. Resources with no data for the metric in the last hour are left out, not ranked at zero; a yellow hint under the table says when that made the list shorter (or when no resources of that kind exist).
+**Output**: Table with rank, name, value, unit. `value` is the average of the metric's points over the last hour (5-minute AVG rollup) — the number Aria Operations ranks by — and rows keep Aria's order, descending by `value`. The MCP tool `get_top_consumers` also returns `latest_value`, the most recent point. Resources with no data for the metric in the last hour are left out, not ranked at zero; `excluded_no_data` (MCP) counts the ones the ranking listed with no points. A yellow hint under the table says when that made the list shorter (or when no resources of that kind exist). When no-data rows took slots of a full `--top`, the result is marked truncated and the hint says to raise top_n.
 
 ---
 
@@ -163,13 +166,13 @@ Options:
   --target -t TEXT          Target name
 ```
 
-**Output**: Table with ID, Name, Criticality, Status, Resource (name), Resource ID. Names and kinds come from one batched `GET /resources` lookup per page. A resource whose name could not be resolved prints as `?` — unknown, not "no resource" — and a yellow note under the table says how many failed or were not found.
+**Output**: Table with ID, Name, Criticality, Status, Resource (name), Resource ID. Names and kinds come from one batched `GET /resources` lookup per page. A resource whose name could not be resolved prints as `?` — unknown, not "no resource" — and a yellow note under the table says how many could not be retrieved, were not returned (deleted or stale), or were returned with no name in Aria Operations. If the lookup answers with rows that were not requested (the appliance ignored the id filter), requested ids it left out count as could not be retrieved — retry — not as deleted.
 
 ### `vmware-aria alert get`
 
 Get full alert details with contributing (triggered) symptoms. Recommendations are attached to the alert definition, not the alert. `get_alert` carries the resource ID only — resolve the name via `vmware-aria resource get <id>` or `alert list`.
 
-Symptoms that carry no name or severity themselves (all of them on Aria Operations 8.18.7) take both from their symptom definition, fetched in one batched `GET /symptomdefinitions` lookup. Each symptom has `definition_lookup`: `resolved`, `not_needed`, `not_found`, `failed`, or `no_definition_id`. A `symptom_definitions_note` key appears when some did not resolve; an empty name there means unknown.
+Symptoms that carry no name or severity themselves (all of them on Aria Operations 8.18.7) take both from their symptom definition, fetched in one batched `GET /symptomdefinitions` lookup. Each symptom has `definition_lookup`: `resolved`, `not_needed`, `not_found`, `failed`, or `no_definition_id`. A `symptom_definitions_note` key appears when some did not resolve, or when symptoms carry no definition id to look a missing name or severity up by; an empty name there means unknown.
 
 ```
 vmware-aria alert get <alert-id> [OPTIONS]
@@ -267,11 +270,13 @@ Options:
 
 **Output**: Table with VM name, power state (`template` for templates), sizing status, `vCPU now→rec`, `Mem GiB now→rec`, `Disk GB`, and `Act.` (actionable), from the `OnlineCapacityAnalytics|{cpu,mem,diskspace}|recommendedSize` metrics. Status `reclaimable` means the engine publishes 0 for the VM — that is not a recommendation of zero; `none published` means the VM either needs no resizing or was never scored, which the appliance does not distinguish.
 
-The raw recommendations are MHz (cpu), KB (memory) and GB (disk) — verified on Aria Operations 8.18.7. The table converts them: CPU MHz is divided by the VM's own MHz per vCPU (`cpu|speed` / `numCpu`) and rounded up, with MHz within 0.01 of a core counted as that core; memory is shown in GiB. Arrows mark direction against the current configuration: `↓` oversized, `↑` undersized, `=` right-sized. Memory within 1% of the configured size is right-sized. Disk has no direction.
+The raw recommendations are MHz (cpu), KB (memory) and GB (disk) — verified on Aria Operations 8.18.7. The table converts them: CPU MHz is divided by the VM's own MHz per vCPU (`cpu|speed` / `numCpu`) and rounded up — except that a result at most 0.01 vCPU (1% of one core's MHz) above a whole number of cores counts as that number, absorbing float noise between the engine's MHz and `cpu|speed`; a real fraction above that still rounds up (1.5 → 2). Memory is shown in GiB. Arrows mark direction against the current configuration: `↓` oversized, `↑` undersized, `=` right-sized. Memory within 1% of the configured size is right-sized. Disk has no direction.
 
-`Act.` is `yes` only for a powered-on VM that is not a template and whose CPU or memory is off its recommendation. Per-VM caveats print under the table: powered off, template, current size not published, disagreement between `recommendedSize` and the engine's own `summary|oversized|*` / `summary|undersized|*` statistics, and — for every reduction — check the vendor minimum size first (appliances cannot be identified reliably from the API).
+`Act.` is `yes` only when the power state was read as `Powered On`, the template flag was read as false, and CPU or memory is off its recommendation; an unknown power state or template flag is never taken as running. Per-VM caveats print under the table: powered off, template, power state / template flag not published, a power state other than `Powered On`, current size not published, disagreement between `recommendedSize` and the engine's own `summary|oversized|*` / `summary|undersized|*` statistics, and — for every reduction — check the vendor minimum size first (appliances cannot be identified reliably from the API).
 
-The MCP tool returns the same rows as JSON: `recommended_cpu` / `recommended_memory` / `recommended_diskspace` (raw), `recommended_units`, `sizing_status`, `current_vcpus`, `cpu_mhz_per_vcpu`, `recommended_vcpus`, `cpu_direction`, `current_memory_kb`, `memory_direction`, `power_state`, `is_template`, `product_name` (only when the VM publishes a vApp product), `aria_verdict`, `actionable`, `caveats`.
+The MCP tool returns the same rows as JSON: `recommended_cpu` / `recommended_memory` / `recommended_diskspace` (raw), `recommended_units`, `sizing_status`, `current_vcpus`, `cpu_mhz_per_vcpu`, `recommended_vcpus`, `cpu_direction`, `current_memory_kb`, `memory_direction`, `power_state`, `is_template`, `product_name` (only when the VM publishes a vApp product), `aria_verdict`, `actionable`, `caveats`, plus the top-level `properties_note`.
+
+If the bulk property read (`POST /resources/properties/latest/query`) fails, the rows still come back from the stats, but `power_state`, `is_template`, `current_vcpus`, `current_memory_kb`, `recommended_vcpus`, both directions and `product_name` are null — unknown, not unpublished — no row is actionable, and each row carries one caveat starting `VM properties could not be read`. `properties_note` (null when the read succeeded) names the failure — the HTTP status, or no HTTP response — and the CLI prints it in yellow under the table.
 
 ---
 
@@ -314,16 +319,18 @@ Check Aria Operations platform health: node, each service, and the release.
 vmware-aria health status [OPTIONS]
 ```
 
-**Output**: Console summary with the assessment, the node status, the version (e.g. `VMware Aria Operations 8.18.7 — 8.x line`), a per-service table (Service / Health / Details, from `GET /deployment/node/services/info`), and details.
+**Output**: Console summary with the assessment, the node status, the version (e.g. `VMware Aria Operations 8.18.7 — 8.x line`, or `unknown (<version_error>)`), a per-service table (Service / Health / Details, from `GET /deployment/node/services/info`) or `Services: not read (<reason>)`, and details (always printed).
 
 | Assessment | Meaning |
 |------------|---------|
-| `HEALTHY` | Node reports ONLINE and no service reports a failure |
-| `DEGRADED` | Some services OK, others ERROR — the platform still answers |
-| `DOWN` | No service reports OK |
-| `UNKNOWN` | Node not ONLINE and the per-service breakdown does not settle it |
+| `HEALTHY` | Node reports ONLINE and every listed service reports OK — or node reports ONLINE and the per-service breakdown was not read, in which case details say no service was checked individually |
+| `DEGRADED` | At least one service OK and at least one ERROR — the platform still answers |
+| `DOWN` | Every service reports ERROR |
+| `UNKNOWN` | The observations do not settle it: node not ONLINE and the breakdown not read; a service reports a state other than OK or ERROR (and it is not DEGRADED); or node not ONLINE while every service reports OK |
 
-The node status is OFFLINE (and `/deployment/node/status` answers HTTP 503) whenever any one service is not running, so OFFLINE alone is not an outage. On Aria Operations 8.18.7 a node with only `LOCATOR` not OK reads DEGRADED. The MCP tool `get_aria_health` returns `assessment`, `overall_status`, `healthy` (assessment is HEALTHY), `system_time_ms`, `services` (null when unreadable, with `services_error`), `services_not_ok`, `services_unrecognized`, `release_name`, `product_name`, `product_version`, `product_line`, `build_number`, `version_error`, and `details`.
+A services reply with no service objects in it counts as not read.
+
+The node status is OFFLINE (and `/deployment/node/status` answers HTTP 503) whenever any one service is not running, so OFFLINE alone is not an outage. On Aria Operations 8.18.7 a node with only `LOCATOR` not OK reads DEGRADED. The MCP tool `get_aria_health` returns `assessment`, `overall_status`, `healthy` (assessment is HEALTHY), `system_time_ms`, `services` (null when unreadable, with `services_error`), `services_not_ok`, `services_unrecognized`, `release_name`, `product_name`, `product_version`, `product_line`, `build_number`, `version_error`, and `details`. `details` is composed: the node status (with `(HTTP 503 at /deployment/node/status)` and the node's own details, up to 300 characters), the assessment in words, `Not OK: …` naming services in ERROR, and `services_error`. A version or service list that cannot be read — including a 2xx body that is not JSON — is reported in `version_error` / `services_error`, not raised; `release_name` and `product_name` are sanitized. A node-status failure other than HTTP 503 still raises.
 
 ### `vmware-aria health collectors`
 

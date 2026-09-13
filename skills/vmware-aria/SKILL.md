@@ -180,7 +180,7 @@ All MCP tools accept an optional `target` parameter to select which Aria Operati
 | | `get_resource` | Read | Get resource details with health, risk, efficiency badges |
 | | `get_resource_metrics` | Read | Fetch time-series metric stats; `missing` says why a key has no points |
 | | `get_resource_health` | Read | Get health badge score (0–100) |
-| | `get_top_consumers` | Read | Rank resources by CPU, memory, disk, or network usage |
+| | `get_top_consumers` | Read | Rank by last-hour average `value` (`latest_value` = newest point) |
 | Alerts | `list_alerts` | Read | List active alerts with criticality, resource ID, name and kind (`resource_name: null` = unknown, see `resource_names_note`) |
 | | `get_alert` | Read | Get alert details with contributing symptoms, named from their symptom definitions (recommendations live on the alert definition) |
 | | `investigate_alert` | Read | Resolve an alert to its confirmed affected resource in one call — returns both UUIDs explicitly labelled plus the vmware-monitor handoff |
@@ -194,7 +194,7 @@ All MCP tools accept an optional `target` parameter to select which Aria Operati
 | Capacity | `get_capacity_overview` | Read | Group-level remaining % + per-dimension headroom and days-until-full |
 | | `get_remaining_capacity` | Read | Remaining CPU, memory, disk before hitting limits |
 | | `get_time_remaining` | Read | Days until cluster capacity is exhausted |
-| | `list_rightsizing_recommendations` | Read | Per-VM recommended size (raw MHz/KB/GB; use `recommended_vcpus`), direction, power state, `actionable`, `caveats` |
+| | `list_rightsizing_recommendations` | Read | Per-VM recommended size (raw MHz/KB/GB; use `recommended_vcpus`), direction, power state, `actionable`, `caveats`, `properties_note` |
 | Reports | `list_report_definitions` | Read | List available report definition templates |
 | | `generate_report` | **Write** | Trigger report generation (async; returns report_id) |
 | | `list_reports` | Read | List generated reports, optionally by definition |
