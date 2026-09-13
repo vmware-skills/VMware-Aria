@@ -1,0 +1,941 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab, after the 8 -> 16 GB memory upgrade), read-only GETs/queries",
+ "_note": "GET /adapterkinds/vCenter Operations Adapter/resourcekinds/vC-Ops-Node/statkeys, trimmed to mem|/swap|/heap| keys. Units: GB for mem|/swap|, MB for heap sizes, % for NodeHeapMemoryRemaining.",
+ "http_status": 200,
+ "body": {
+  "resourceTypeAttributes": [
+   {
+    "key": "swap|capacityRemaining_whatif",
+    "name": "Swap|Capacity Remaining with committed projects",
+    "description": "Capacity Remaining with committed projects",
+    "unit": "%",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|utilization.range",
+    "name": "Heap Memory|Utilization Range",
+    "description": "Utilization Range",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|capacity.provider.count_whatif",
+    "name": "Heap Memory|Number of Capacity providers with committed projects",
+    "description": "Number of Capacity providers with committed projects",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|actual.capacity.normalized_whatif",
+    "name": "Heap Memory|Total Capacity with committed projects",
+    "description": "Total Capacity with committed projects",
+    "unit": "MB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|reason.for.waste",
+    "name": "Swap|Reason for Reclaimable Capacity",
+    "description": "Reason for Reclaimable Capacity",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|consumer.count.per.provider.count_whatif",
+    "name": "Heap Memory|Consumer Provider ratio with committed projects",
+    "description": "Consumer Provider ratio with committed projects",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|poweredOffTimePercent",
+    "name": "Heap Memory|Powered Off Time Percent",
+    "description": "Powered Off Time Percent",
+    "unit": "%",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|capacityRemainingUsingConsumers_average",
+    "name": "Heap Memory|Capacity Remaining (Average consumer profile)",
+    "description": "Capacity Remaining (Average consumer profile)",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|ComponentCommittedMemory|AdminUI",
+    "name": "Heap Memory|Components Committed Memory|vRealize Operations Admin UI",
+    "description": "vRealize Operations Manager Admin UI",
+    "unit": "MB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|stress_whatif",
+    "name": "Swap|Stress with committed projects",
+    "description": "Stress with committed projects",
+    "unit": "%",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|actual.capacity.normalized",
+    "name": "Heap Memory|Total Capacity",
+    "description": "Total Capacity",
+    "unit": "MB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|actual.capacity.normalized",
+    "name": "Swap|Total Capacity",
+    "description": "Total Capacity",
+    "unit": "GB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|consumer.count_whatif",
+    "name": "Heap Memory|Number of Capacity consumers with committed projects",
+    "description": "Number of Capacity consumers with committed projects",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|density",
+    "name": "Heap Memory|Density",
+    "description": "Density",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|size.recommendation",
+    "name": "Swap|Recommended Size",
+    "description": "Recommended Size",
+    "unit": "GB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|actual.capacity_whatif",
+    "name": "Heap Memory|Current Size with committed projects",
+    "description": "Current Size with committed projects",
+    "unit": "MB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|size.recommendation_whatif",
+    "name": "Heap Memory|Recommended Size with committed projects",
+    "description": "Recommended Size with committed projects",
+    "unit": "MB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|CommittedMemory",
+    "name": "Heap Memory|Committed memory",
+    "description": "Committed memory",
+    "unit": "MB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|capacityRemainingValue_whatif",
+    "name": "Swap|Capacity Remaining Value with committed projects",
+    "description": "Capacity Remaining Value with committed projects",
+    "unit": "GB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|computed_demand_whatif",
+    "name": "Swap|System Computed Demand with committed projects",
+    "description": "System Computed Demand with committed projects",
+    "unit": "GB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|stress",
+    "name": "Heap Memory|Stress",
+    "description": "Stress",
+    "unit": "%",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "mem|used",
+    "name": "Memory|Used",
+    "description": "Used",
+    "unit": "GB",
+    "rollupType": "AVG",
+    "dataType2": "INTEGER"
+   },
+   {
+    "key": "swap|consumer.count.per.provider.count",
+    "name": "Swap|Consumer Provider ratio",
+    "description": "Consumer Provider ratio",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|idle",
+    "name": "Heap Memory|Is Idle",
+    "description": "Is Idle",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|poweredOff_whatif",
+    "name": "Swap|Powered Off with committed projects",
+    "description": "Powered Off with committed projects",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|size.recommendation_whatif",
+    "name": "Swap|Recommended Size with committed projects",
+    "description": "Recommended Size with committed projects",
+    "unit": "GB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|MaxHeapSize",
+    "name": "Heap Memory|Max heap size",
+    "description": "Max heap size",
+    "unit": "MB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|ComponentCommittedMemory|Collector",
+    "name": "Heap Memory|Components Committed Memory|vRealize Operations Collector",
+    "description": "vRealize Operations Manager Collector",
+    "unit": "MB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|oversized",
+    "name": "Swap|Is Oversized",
+    "description": "Is Oversized",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|capacity.provider.count_whatif",
+    "name": "Swap|Number of Capacity providers with committed projects",
+    "description": "Number of Capacity providers with committed projects",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|capacityRemainingUsingConsumers_whatif",
+    "name": "Swap|Capacity Remaining using profile with committed projects",
+    "description": "Capacity Remaining using profile with committed projects",
+    "unit": "GB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|ComponentCommittedMemory|Analytics",
+    "name": "Heap Memory|Components Committed Memory|vRealize Operations Analytics",
+    "description": "vRealize Operations Manager Analytics",
+    "unit": "MB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|poweredOffTimePercent_whatif",
+    "name": "Heap Memory|Powered Off Time Percent with committed projects",
+    "description": "Powered Off Time Percent with committed projects",
+    "unit": "%",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|density",
+    "name": "Swap|Density",
+    "description": "Density",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|total",
+    "name": "Swap|Total",
+    "description": "Total",
+    "unit": "GB",
+    "rollupType": "AVG",
+    "dataType2": "INTEGER"
+   },
+   {
+    "key": "swap|actual.capacity_whatif",
+    "name": "Swap|Current Size with committed projects",
+    "description": "Current Size with committed projects",
+    "unit": "GB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|workload",
+    "name": "Heap Memory|Workload",
+    "description": "Demand over usable capacity. Where it is applicable, demand includes limit and contention",
+    "unit": "%",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|reason.for.waste",
+    "name": "Heap Memory|Reason for Reclaimable Capacity",
+    "description": "Reason for Reclaimable Capacity",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|capacityRemainingUsingConsumers_average_whatif",
+    "name": "Heap Memory|Capacity Remaining with committed projects (Average consumer profile)",
+    "description": "Capacity Remaining with committed projects (Average consumer profile)",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|poweredOff_whatif",
+    "name": "Heap Memory|Powered Off with committed projects",
+    "description": "Powered Off with committed projects",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "mem|total",
+    "name": "Memory|Total",
+    "description": "Total",
+    "unit": "GB",
+    "rollupType": "AVG",
+    "dataType2": "INTEGER"
+   },
+   {
+    "key": "swap|consumer.count",
+    "name": "Swap|Number of Capacity consumers",
+    "description": "Number of Capacity consumers",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|optimal.consumer.per.provider_whatif",
+    "name": "Heap Memory|Optimal Consumer Provider ratio with committed projects",
+    "description": "Optimal Consumer Provider ratio with committed projects",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|capacity.provider.count",
+    "name": "Heap Memory|Number of Capacity providers",
+    "description": "Number of Capacity providers",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "mem|demand_gb",
+    "name": "Memory|Estimated memory demand",
+    "description": "Estimated memory demand",
+    "unit": "GB",
+    "rollupType": "AVG",
+    "dataType2": "INTEGER"
+   },
+   {
+    "key": "heap|capacityRemainingValue",
+    "name": "Heap Memory|Capacity Remaining Value",
+    "description": "Capacity Remaining Value",
+    "unit": "MB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|optimal.consumer.per.provider",
+    "name": "Swap|Optimal Consumer Provider ratio",
+    "description": "Optimal Consumer Provider ratio",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|waste",
+    "name": "Swap|Waste",
+    "description": "Waste",
+    "unit": "%",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|optimal.consumer.per.provider",
+    "name": "Heap Memory|Optimal Consumer Provider ratio",
+    "description": "Optimal Consumer Provider ratio",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|idle_whatif",
+    "name": "Swap|Is Idle with committed projects",
+    "description": "Is Idle with committed projects",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|consumer.count_whatif",
+    "name": "Swap|Number of Capacity consumers with committed projects",
+    "description": "Number of Capacity consumers with committed projects",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|capacityRemainingUsingConsumers_whatif",
+    "name": "Heap Memory|Capacity Remaining using profile with committed projects",
+    "description": "Capacity Remaining using profile with committed projects",
+    "unit": "MB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|capacityRemainingUsingConsumers_large",
+    "name": "Heap Memory|Capacity Remaining (Large consumer profile)",
+    "description": "Capacity Remaining (Large consumer profile)",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|isStress",
+    "name": "Heap Memory|Is Stressed",
+    "description": "Is Stressed",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "mem|free",
+    "name": "Memory|Free",
+    "description": "The total amount of free memory in bytes. This value does not include memory consumed by system caches and buffers (see system.memory.actual.free).",
+    "unit": "GB",
+    "rollupType": "AVG",
+    "dataType2": "INTEGER"
+   },
+   {
+    "key": "swap|computed_demand",
+    "name": "Swap|System Computed Demand",
+    "description": "System Computed Demand",
+    "unit": "GB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|actual.capacity.normalized_whatif",
+    "name": "Swap|Total Capacity with committed projects",
+    "description": "Total Capacity with committed projects",
+    "unit": "GB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|waste",
+    "name": "Heap Memory|Waste",
+    "description": "Waste",
+    "unit": "%",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|computed_demand",
+    "name": "Heap Memory|System Computed Demand",
+    "description": "System Computed Demand",
+    "unit": "MB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|ComponentCommittedMemory|SuiteAPI",
+    "name": "Heap Memory|Components Committed Memory|vRealize Operations Suite API",
+    "description": "vRealize Operations Manager Suite API",
+    "unit": "MB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|capacityRemainingUsingConsumers_small",
+    "name": "Swap|Capacity Remaining (Small consumer profile)",
+    "description": "Capacity Remaining (Small consumer profile)",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|isStress_whatif",
+    "name": "Swap|Is Stressed with committed projects",
+    "description": "Is Stressed with committed projects",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|ComponentCommittedMemory|ProductUI",
+    "name": "Heap Memory|Components Committed Memory|vRealize Operations Product UI",
+    "description": "vRealize Operations Manager Product UI",
+    "unit": "MB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|capacity.provider.count",
+    "name": "Swap|Number of Capacity providers",
+    "description": "Number of Capacity providers",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|utilization.range",
+    "name": "Swap|Utilization Range",
+    "description": "Utilization Range",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|capacityRemaining_min_whatif",
+    "name": "Heap Memory|Capacity Remaining with committed projects (Based on instantaneous peak)",
+    "description": "Capacity Remaining with committed projects (Based on instantaneous peak)",
+    "unit": "%",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|used",
+    "name": "Swap|Used",
+    "description": "Used",
+    "unit": "GB",
+    "rollupType": "AVG",
+    "dataType2": "INTEGER"
+   },
+   {
+    "key": "heap|oversized_whatif",
+    "name": "Heap Memory|Is Oversized with committed projects",
+    "description": "Is Oversized with committed projects",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|stress",
+    "name": "Swap|Stress",
+    "description": "Stress",
+    "unit": "%",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|timeRemaining",
+    "name": "Swap|Time Remaining",
+    "description": "Time Remaining",
+    "unit": "Day(s)",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|actual.capacity",
+    "name": "Swap|Current Size",
+    "description": "Current Size",
+    "unit": "GB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|actual.capacity",
+    "name": "Heap Memory|Current Size",
+    "description": "Current Size",
+    "unit": "MB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|computed_demand_whatif",
+    "name": "Heap Memory|System Computed Demand with committed projects",
+    "description": "System Computed Demand with committed projects",
+    "unit": "MB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|isWaste",
+    "name": "Swap|Has Reclaimable Capacity",
+    "description": "Has Reclaimable Capacity",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|capacityRemaining",
+    "name": "Heap Memory|Capacity Remaining",
+    "description": "Capacity Remaining",
+    "unit": "%",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|isStress_whatif",
+    "name": "Heap Memory|Is Stressed with committed projects",
+    "description": "Is Stressed with committed projects",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|NodeHeapMemoryRemaining",
+    "name": "Heap Memory|Node Heap Memory Remaining",
+    "description": "Node Heap Memory Remaining",
+    "unit": "%",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|workload",
+    "name": "Swap|Workload",
+    "description": "Demand over usable capacity. Where it is applicable, demand includes limit and contention",
+    "unit": "%",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|poweredOffTimePercent",
+    "name": "Swap|Powered Off Time Percent",
+    "description": "Powered Off Time Percent",
+    "unit": "%",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|object.demand.with.size.recommendation",
+    "name": "Heap Memory|Effective Demand (With peak usage)",
+    "description": "Effective Demand (With peak usage)",
+    "unit": "MB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|poweredOff",
+    "name": "Swap|Powered Off",
+    "description": "Powered Off",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "mem|actualUsed",
+    "name": "Memory|Actual Used",
+    "description": "Actual used memory in bytes. It represents the difference between the total and the available memory. The available memory depends on the OS. For more details, please check system.actual.free.",
+    "unit": "GB",
+    "rollupType": "AVG",
+    "dataType2": "INTEGER"
+   },
+   {
+    "key": "swap|capacityRemainingValue",
+    "name": "Swap|Capacity Remaining Value",
+    "description": "Capacity Remaining Value",
+    "unit": "GB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|timeRemaining_whatif",
+    "name": "Swap|Time Remaining with committed projects",
+    "description": "Time Remaining with committed projects",
+    "unit": "Day(s)",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|object.demand.with.size.recommendation",
+    "name": "Swap|Effective Demand (With peak usage)",
+    "description": "Effective Demand (With peak usage)",
+    "unit": "GB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|capacityRemaining_min_whatif",
+    "name": "Swap|Capacity Remaining with committed projects (Based on instantaneous peak)",
+    "description": "Capacity Remaining with committed projects (Based on instantaneous peak)",
+    "unit": "%",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|isWaste",
+    "name": "Heap Memory|Has Reclaimable Capacity",
+    "description": "Has Reclaimable Capacity",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|capacityRemainingUsingConsumers",
+    "name": "Swap|Capacity Remaining using profile",
+    "description": "Capacity Remaining using profile",
+    "unit": "GB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|capacityRemaining_whatif",
+    "name": "Heap Memory|Capacity Remaining with committed projects",
+    "description": "Capacity Remaining with committed projects",
+    "unit": "%",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|timeRemaining_whatif",
+    "name": "Heap Memory|Time Remaining with committed projects",
+    "description": "Time Remaining with committed projects",
+    "unit": "Day(s)",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|idle",
+    "name": "Swap|Is Idle",
+    "description": "Is Idle",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|capacityRemainingUsingConsumers_average",
+    "name": "Swap|Capacity Remaining (Average consumer profile)",
+    "description": "Capacity Remaining (Average consumer profile)",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|poweredOff",
+    "name": "Heap Memory|Powered Off",
+    "description": "Powered Off",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|oversized_whatif",
+    "name": "Swap|Is Oversized with committed projects",
+    "description": "Is Oversized with committed projects",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|consumer.count.per.provider.count",
+    "name": "Heap Memory|Consumer Provider ratio",
+    "description": "Consumer Provider ratio",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|idle_whatif",
+    "name": "Heap Memory|Is Idle with committed projects",
+    "description": "Is Idle with committed projects",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|capacityRemaining",
+    "name": "Swap|Capacity Remaining",
+    "description": "Capacity Remaining",
+    "unit": "%",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|timeRemaining",
+    "name": "Heap Memory|Time Remaining",
+    "description": "Time Remaining",
+    "unit": "Day(s)",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|capacityRemainingUsingConsumers_medium",
+    "name": "Heap Memory|Capacity Remaining (Medium consumer profile)",
+    "description": "Capacity Remaining (Medium consumer profile)",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|size.recommendation",
+    "name": "Heap Memory|Recommended Size",
+    "description": "Recommended Size",
+    "unit": "MB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|oversized",
+    "name": "Heap Memory|Is Oversized",
+    "description": "Is Oversized",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|density_whatif",
+    "name": "Heap Memory|Density with committed projects",
+    "description": "Density with committed projects",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|poweredOffTimePercent_whatif",
+    "name": "Swap|Powered Off Time Percent with committed projects",
+    "description": "Powered Off Time Percent with committed projects",
+    "unit": "%",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|capacityRemainingUsingConsumers_small",
+    "name": "Heap Memory|Capacity Remaining (Small consumer profile)",
+    "description": "Capacity Remaining (Small consumer profile)",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|pageOut",
+    "name": "Swap|Page out",
+    "description": "Page out",
+    "unit": "MB",
+    "rollupType": "AVG",
+    "dataType2": "INTEGER"
+   },
+   {
+    "key": "heap|CurrentHeapSize",
+    "name": "Heap Memory|Current heap size",
+    "description": "Current heap size",
+    "unit": "MB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|ComponentCommittedMemory|CaSA",
+    "name": "Heap Memory|Components Committed Memory|vRealize Operations CaSA",
+    "description": "vRealize Operations Manager CaSA",
+    "unit": "MB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|consumer.count.per.provider.count_whatif",
+    "name": "Swap|Consumer Provider ratio with committed projects",
+    "description": "Consumer Provider ratio with committed projects",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|density_whatif",
+    "name": "Swap|Density with committed projects",
+    "description": "Density with committed projects",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|isStress",
+    "name": "Swap|Is Stressed",
+    "description": "Is Stressed",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|optimal.consumer.per.provider_whatif",
+    "name": "Swap|Optimal Consumer Provider ratio with committed projects",
+    "description": "Optimal Consumer Provider ratio with committed projects",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|capacityRemainingUsingConsumers_average_whatif",
+    "name": "Swap|Capacity Remaining with committed projects (Average consumer profile)",
+    "description": "Capacity Remaining with committed projects (Average consumer profile)",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|capacityRemaining_min",
+    "name": "Swap|Capacity Remaining (Based on instantaneous peak)",
+    "description": "Capacity Remaining (Based on instantaneous peak)",
+    "unit": "%",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "mem|actualFree",
+    "name": "Memory|Actual Free",
+    "description": "Actual free memory in bytes. It is calculated based on the OS. On Linux it consists of the free memory plus caches and buffers.",
+    "unit": "GB",
+    "rollupType": "AVG",
+    "dataType2": "INTEGER"
+   },
+   {
+    "key": "heap|stress_whatif",
+    "name": "Heap Memory|Stress with committed projects",
+    "description": "Stress with committed projects",
+    "unit": "%",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|capacityRemainingUsingConsumers_medium",
+    "name": "Swap|Capacity Remaining (Medium consumer profile)",
+    "description": "Capacity Remaining (Medium consumer profile)",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|capacityRemaining_min",
+    "name": "Heap Memory|Capacity Remaining (Based on instantaneous peak)",
+    "description": "Capacity Remaining (Based on instantaneous peak)",
+    "unit": "%",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|capacityRemainingUsingConsumers_large",
+    "name": "Swap|Capacity Remaining (Large consumer profile)",
+    "description": "Capacity Remaining (Large consumer profile)",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|capacityRemainingUsingConsumers",
+    "name": "Heap Memory|Capacity Remaining using profile",
+    "description": "Capacity Remaining using profile",
+    "unit": "MB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "heap|consumer.count",
+    "name": "Heap Memory|Number of Capacity consumers",
+    "description": "Number of Capacity consumers",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   },
+   {
+    "key": "swap|free",
+    "name": "Swap|Free",
+    "description": "Free",
+    "unit": "GB",
+    "rollupType": "AVG",
+    "dataType2": "INTEGER"
+   },
+   {
+    "key": "swap|pageIn",
+    "name": "Swap|Page in",
+    "description": "Page in",
+    "unit": "MB",
+    "rollupType": "AVG",
+    "dataType2": "INTEGER"
+   },
+   {
+    "key": "heap|capacityRemainingValue_whatif",
+    "name": "Heap Memory|Capacity Remaining Value with committed projects",
+    "description": "Capacity Remaining Value with committed projects",
+    "unit": "MB",
+    "rollupType": "AVG",
+    "dataType2": "FLOAT"
+   }
+  ]
+ }
+}

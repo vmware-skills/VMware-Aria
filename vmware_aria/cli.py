@@ -1011,3 +1011,5 @@ def fleet_promql(
 
 # resource keys / properties / relationships live in cli_catalog.py (registered on import).
 import vmware_aria.cli_catalog  # noqa: E402,F401
+# `health node` / `health adapters` live in cli_platform.py; importing it registers them.
+from vmware_aria import cli_platform  # noqa: F401

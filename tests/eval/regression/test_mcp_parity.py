@@ -22,9 +22,10 @@ import pytest
 # (fleet_certificate_list, fleet_password_account_list, fleet_domain_list,
 # findings_list, promql_query) → 33 total, 26 read, 7 write.
 # + 3 resource-catalog read tools (list_metric_keys, get_resource_properties,
-# get_resource_relationships) → 36 total, 29 read, 7 write.
-EXPECTED_TOOL_COUNT = 36
-EXPECTED_READ_COUNT = 29
+# get_resource_relationships) and 2 platform self-check reads
+# (get_aria_node_resources, list_adapters) → 38 total, 31 read, 7 write.
+EXPECTED_TOOL_COUNT = 38
+EXPECTED_READ_COUNT = 31
 EXPECTED_WRITE_COUNT = 7
 
 

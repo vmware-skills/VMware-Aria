@@ -1,0 +1,49 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab, after the 8 -> 16 GB memory upgrade), read-only GETs/queries",
+ "_note": "GET /resources?resourceKind=vC-Ops-Node&adapterKind=vCenter Operations Adapter, trimmed to identity fields.",
+ "http_status": 200,
+ "body": {
+  "pageInfo": {
+   "totalCount": 1,
+   "page": 0,
+   "pageSize": 1000
+  },
+  "resourceList": [
+   {
+    "identifier": "8369187c-bd97-4be1-8ba3-4ec74633090e",
+    "resourceKey": {
+     "name": "vRealize Operations Node-aria-ops-01",
+     "adapterKindKey": "vCenter Operations Adapter",
+     "resourceKindKey": "vC-Ops-Node",
+     "resourceIdentifiers": [
+      {
+       "identifierType": {
+        "name": "NODEHOST",
+        "dataType": "STRING",
+        "isPartOfUniqueness": false
+       },
+       "value": "192.0.2.210"
+      },
+      {
+       "identifierType": {
+        "name": "NODEID",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "f59d303c-0279-44bb-ac9c-05b2283e5b50"
+      }
+     ]
+    },
+    "resourceStatusStates": [
+     {
+      "adapterInstanceId": "b998e9bd-591d-4942-8a34-c11f19550372",
+      "resourceStatus": "DATA_RECEIVING",
+      "resourceState": "STARTED",
+      "statusMessage": ""
+     }
+    ],
+    "resourceHealth": "GREEN"
+   }
+  ]
+ }
+}

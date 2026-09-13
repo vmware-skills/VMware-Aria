@@ -1,0 +1,361 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab, after the 8 -> 16 GB memory upgrade), read-only GETs/queries",
+ "_note": "GET /adapters (unpaged: no pageInfo). 'new VC' is the adapter behind the 'Objects are not receiving data' alert.",
+ "http_status": 200,
+ "body": {
+  "adapterInstancesInfoDto": [
+   {
+    "resourceKey": {
+     "name": "Infrastructure Health Adapter - vRealize Operations Collector-aria-ops-01",
+     "adapterKindKey": "VMWARE_INFRA_HEALTH",
+     "resourceKindKey": "VMWARE_INFRA_HEALTH_INSTANCE",
+     "resourceIdentifiers": [
+      {
+       "identifierType": {
+        "name": "IS_SAAS",
+        "dataType": "STRING",
+        "isPartOfUniqueness": false
+       },
+       "value": ""
+      },
+      {
+       "identifierType": {
+        "name": "SDDC_MANAGER_BACKUP_JOB_RETENTION_PERIOD",
+        "dataType": "STRING",
+        "isPartOfUniqueness": false
+       },
+       "value": "7"
+      },
+      {
+       "identifierType": {
+        "name": "VCENTER_BACKUP_JOB_RETENTION_PERIOD",
+        "dataType": "STRING",
+        "isPartOfUniqueness": false
+       },
+       "value": "7"
+      }
+     ]
+    },
+    "collectorId": 1,
+    "monitoringInterval": 5,
+    "numberOfMetricsCollected": 4,
+    "numberOfResourcesCollected": 8,
+    "lastHeartbeat": 1789287196733,
+    "lastCollected": 1789287191637,
+    "messageFromAdapterInstance": "",
+    "links": [
+     {
+      "href": "/suite-api/api/adapters/20869e54-7009-489a-b3d1-a72a9e660c44",
+      "rel": "SELF",
+      "name": "linkToSelf"
+     },
+     {
+      "href": "/suite-api/api/credentials/",
+      "rel": "RELATED",
+      "name": "linkToCredential"
+     }
+    ],
+    "id": "20869e54-7009-489a-b3d1-a72a9e660c44"
+   },
+   {
+    "resourceKey": {
+     "name": "vRealizeOpsMgrAPI (vRealize Operations Collector-aria-ops-01)",
+     "adapterKindKey": "vRealizeOpsMgrAPI",
+     "resourceKindKey": "vRealizeOpsMgrAPI Adapter Instance",
+     "resourceIdentifiers": []
+    },
+    "collectorId": 1,
+    "monitoringInterval": 1,
+    "numberOfMetricsCollected": 0,
+    "numberOfResourcesCollected": 1,
+    "lastHeartbeat": 1789287196733,
+    "lastCollected": 1789287174847,
+    "messageFromAdapterInstance": "",
+    "links": [
+     {
+      "href": "/suite-api/api/adapters/389c5e89-ca66-49e9-8fd0-22925b4b7fcb",
+      "rel": "SELF",
+      "name": "linkToSelf"
+     },
+     {
+      "href": "/suite-api/api/credentials/",
+      "rel": "RELATED",
+      "name": "linkToCredential"
+     }
+    ],
+    "id": "389c5e89-ca66-49e9-8fd0-22925b4b7fcb"
+   },
+   {
+    "resourceKey": {
+     "name": "new VC",
+     "adapterKindKey": "VMWARE",
+     "resourceKindKey": "VMwareAdapter Instance",
+     "resourceIdentifiers": [
+      {
+       "identifierType": {
+        "name": "AUTODISCOVERY",
+        "dataType": "STRING",
+        "isPartOfUniqueness": false
+       },
+       "value": "true"
+      },
+      {
+       "identifierType": {
+        "name": "CLOUD_TYPE",
+        "dataType": "STRING",
+        "isPartOfUniqueness": false
+       },
+       "value": "PRIVATE_CLOUD"
+      },
+      {
+       "identifierType": {
+        "name": "DV_PORT_GROUP_DISABLED",
+        "dataType": "STRING",
+        "isPartOfUniqueness": false
+       },
+       "value": "false"
+      },
+      {
+       "identifierType": {
+        "name": "DVS_DISABLED",
+        "dataType": "STRING",
+        "isPartOfUniqueness": false
+       },
+       "value": "false"
+      },
+      {
+       "identifierType": {
+        "name": "ENABLE_ACTIONS",
+        "dataType": "STRING",
+        "isPartOfUniqueness": false
+       },
+       "value": "true"
+      },
+      {
+       "identifierType": {
+        "name": "GFS_SKIP_PATTERNS",
+        "dataType": "STRING",
+        "isPartOfUniqueness": false
+       },
+       "value": "docker/devicemapper/mnt"
+      },
+      {
+       "identifierType": {
+        "name": "IS_OPS_LITE",
+        "dataType": "STRING",
+        "isPartOfUniqueness": false
+       },
+       "value": ""
+      },
+      {
+       "identifierType": {
+        "name": "IS_REAL_TIME_MONITORING_ENABLED",
+        "dataType": "STRING",
+        "isPartOfUniqueness": false
+       },
+       "value": ""
+      },
+      {
+       "identifierType": {
+        "name": "PDRS_STATS_PROVIDER",
+        "dataType": "STRING",
+        "isPartOfUniqueness": false
+       },
+       "value": "false"
+      },
+      {
+       "identifierType": {
+        "name": "PROCESSCHANGEEVENTS",
+        "dataType": "STRING",
+        "isPartOfUniqueness": false
+       },
+       "value": "true"
+      },
+      {
+       "identifierType": {
+        "name": "VCURL",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "192.0.2.16"
+      },
+      {
+       "identifierType": {
+        "name": "VM_FOLDER_DISABLED",
+        "dataType": "STRING",
+        "isPartOfUniqueness": false
+       },
+       "value": "false"
+      },
+      {
+       "identifierType": {
+        "name": "VM_LIMIT",
+        "dataType": "STRING",
+        "isPartOfUniqueness": false
+       },
+       "value": "2000000000"
+      },
+      {
+       "identifierType": {
+        "name": "VMC_CONFIG_LIMITS_FILE_NAME",
+        "dataType": "STRING",
+        "isPartOfUniqueness": false
+       },
+       "value": ""
+      },
+      {
+       "identifierType": {
+        "name": "VMEntityVCID",
+        "dataType": "STRING",
+        "isPartOfUniqueness": false
+       },
+       "value": "21e8a2f1-5484-4205-96b6-612afce2bde5"
+      }
+     ]
+    },
+    "description": "",
+    "collectorId": 1,
+    "collectorGroupId": "207ab254-981a-4bac-80f9-f9ad5330afac",
+    "credentialInstanceId": "3fc01ee6-0bc6-4f0f-9308-6a4f0e437b9e",
+    "monitoringInterval": 5,
+    "numberOfMetricsCollected": 1382,
+    "numberOfResourcesCollected": 21,
+    "lastHeartbeat": 1789287196733,
+    "lastCollected": 1789287184216,
+    "messageFromAdapterInstance": "",
+    "links": [
+     {
+      "href": "/suite-api/api/adapters/431af8a8-18b5-4811-aff5-ac903aaf03f7",
+      "rel": "SELF",
+      "name": "linkToSelf"
+     },
+     {
+      "href": "/suite-api/api/credentials/3fc01ee6-0bc6-4f0f-9308-6a4f0e437b9e",
+      "rel": "RELATED",
+      "name": "linkToCredential"
+     }
+    ],
+    "id": "431af8a8-18b5-4811-aff5-ac903aaf03f7"
+   },
+   {
+    "resourceKey": {
+     "name": "vRealize Operations Adapter - aria-ops-01",
+     "adapterKindKey": "vCenter Operations Adapter",
+     "resourceKindKey": "vCenter Operations Adapter Instance",
+     "resourceIdentifiers": [
+      {
+       "identifierType": {
+        "name": "ClusterId",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "aria-ops-01"
+      },
+      {
+       "identifierType": {
+        "name": "COLLECTORID",
+        "dataType": "STRING",
+        "isPartOfUniqueness": false
+       },
+       "value": "1"
+      },
+      {
+       "identifierType": {
+        "name": "NODEID",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "f59d303c-0279-44bb-ac9c-05b2283e5b50"
+      }
+     ]
+    },
+    "collectorId": 1,
+    "monitoringInterval": 5,
+    "numberOfMetricsCollected": 3233,
+    "numberOfResourcesCollected": 14,
+    "lastHeartbeat": 1789287196733,
+    "lastCollected": 1789287184233,
+    "messageFromAdapterInstance": "",
+    "links": [
+     {
+      "href": "/suite-api/api/adapters/b998e9bd-591d-4942-8a34-c11f19550372",
+      "rel": "SELF",
+      "name": "linkToSelf"
+     },
+     {
+      "href": "/suite-api/api/credentials/",
+      "rel": "RELATED",
+      "name": "linkToCredential"
+     }
+    ],
+    "id": "b998e9bd-591d-4942-8a34-c11f19550372"
+   },
+   {
+    "resourceKey": {
+     "name": "Container",
+     "adapterKindKey": "Container",
+     "resourceKindKey": "ContainerAdapterInstance",
+     "resourceIdentifiers": [
+      {
+       "identifierType": {
+        "name": "ClusterId",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "aria-ops-01"
+      }
+     ]
+    },
+    "collectorId": 1,
+    "collectorGroupId": "207ab254-981a-4bac-80f9-f9ad5330afac",
+    "monitoringInterval": 5,
+    "numberOfMetricsCollected": 0,
+    "numberOfResourcesCollected": 38,
+    "lastHeartbeat": 1789287196733,
+    "lastCollected": 1789287174847,
+    "messageFromAdapterInstance": "",
+    "links": [
+     {
+      "href": "/suite-api/api/adapters/38fd7b14-53ad-4680-a152-8a59f8b3ed5e",
+      "rel": "SELF",
+      "name": "linkToSelf"
+     },
+     {
+      "href": "/suite-api/api/credentials/",
+      "rel": "RELATED",
+      "name": "linkToCredential"
+     }
+    ],
+    "id": "38fd7b14-53ad-4680-a152-8a59f8b3ed5e"
+   },
+   {
+    "resourceKey": {
+     "name": "VCF Diagnostics Adapter Instance",
+     "adapterKindKey": "DiagnosticsAdapter",
+     "resourceKindKey": "DiagnosticsAdapterInstance",
+     "resourceIdentifiers": []
+    },
+    "collectorId": 1,
+    "monitoringInterval": 5,
+    "numberOfMetricsCollected": 0,
+    "numberOfResourcesCollected": 4,
+    "lastHeartbeat": 1789287196733,
+    "lastCollected": 1789287180982,
+    "messageFromAdapterInstance": "",
+    "links": [
+     {
+      "href": "/suite-api/api/adapters/d060f122-300f-4beb-a46c-6f13b6daf11a",
+      "rel": "SELF",
+      "name": "linkToSelf"
+     },
+     {
+      "href": "/suite-api/api/credentials/",
+      "rel": "RELATED",
+      "name": "linkToCredential"
+     }
+    ],
+    "id": "d060f122-300f-4beb-a46c-6f13b6daf11a"
+   }
+  ]
+ }
+}

@@ -1,0 +1,81 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab, after the 8 -> 16 GB memory upgrade), read-only GETs/queries",
+ "_note": "GET /resources/{node id}/statkeys, trimmed to mem|/swap|/heap| keys.",
+ "http_status": 200,
+ "body": {
+  "stat-key": [
+   {
+    "key": "heap|CurrentHeapSize"
+   },
+   {
+    "key": "heap|NodeHeapMemoryRemaining"
+   },
+   {
+    "key": "mem|actualFree"
+   },
+   {
+    "key": "mem|actualUsed"
+   },
+   {
+    "key": "mem|demand_gb"
+   },
+   {
+    "key": "mem|free"
+   },
+   {
+    "key": "mem|total"
+   },
+   {
+    "key": "mem|used"
+   },
+   {
+    "key": "swap|free"
+   },
+   {
+    "key": "swap|pageIn"
+   },
+   {
+    "key": "swap|pageOut"
+   },
+   {
+    "key": "swap|total"
+   },
+   {
+    "key": "swap|used"
+   },
+   {
+    "key": "heap|ComponentCommittedMemory|AdminUI"
+   },
+   {
+    "key": "heap|MaxHeapSize"
+   },
+   {
+    "key": "heap|CommittedMemory"
+   },
+   {
+    "key": "heap|ComponentCommittedMemory|CaSA"
+   },
+   {
+    "key": "heap|ComponentCommittedMemory|Analytics"
+   },
+   {
+    "key": "heap|ComponentCommittedMemory|ProductUI"
+   },
+   {
+    "key": "heap|ComponentCommittedMemory|Collector"
+   },
+   {
+    "key": "heap|ComponentCommittedMemory|SuiteAPI"
+   },
+   {
+    "key": "heap|workload"
+   },
+   {
+    "key": "swap|workload"
+   },
+   {
+    "key": "swap|computed_demand"
+   }
+  ]
+ }
+}

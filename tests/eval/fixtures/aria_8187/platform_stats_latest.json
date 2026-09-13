@@ -1,0 +1,386 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab, after the 8 -> 16 GB memory upgrade), read-only GETs/queries",
+ "_note": "GET /resources/stats/latest for the node and the watchdog (two calls merged into one values[] list, which is the multi-resource shape), trimmed to the keys above.",
+ "http_status": 200,
+ "body": {
+  "values": [
+   {
+    "resourceId": "8369187c-bd97-4be1-8ba3-4ec74633090e",
+    "stat-list": {
+     "stat": [
+      {
+       "timestamps": [
+        1789287176350
+       ],
+       "statKey": {
+        "key": "swap|pageOut"
+       },
+       "data": [
+        0.0
+       ]
+      },
+      {
+       "timestamps": [
+        1789287176350
+       ],
+       "statKey": {
+        "key": "swap|workload"
+       },
+       "data": [
+        0.0
+       ]
+      },
+      {
+       "timestamps": [
+        1789286880464
+       ],
+       "statKey": {
+        "key": "heap|CurrentHeapSize"
+       },
+       "data": [
+        1853.0
+       ]
+      },
+      {
+       "timestamps": [
+        1789286880464
+       ],
+       "statKey": {
+        "key": "heap|NodeHeapMemoryRemaining"
+       },
+       "data": [
+        81.43844604492188
+       ]
+      },
+      {
+       "timestamps": [
+        1789287176350
+       ],
+       "statKey": {
+        "key": "mem|used"
+       },
+       "data": [
+        11.222049713134766
+       ]
+      },
+      {
+       "timestamps": [
+        1789287176350
+       ],
+       "statKey": {
+        "key": "mem|actualUsed"
+       },
+       "data": [
+        8.90139389038086
+       ]
+      },
+      {
+       "timestamps": [
+        1789287176350
+       ],
+       "statKey": {
+        "key": "mem|demand_gb"
+       },
+       "data": [
+        8.90139389038086
+       ]
+      },
+      {
+       "timestamps": [
+        1789287176350
+       ],
+       "statKey": {
+        "key": "swap|free"
+       },
+       "data": [
+        3.9999961853027344
+       ]
+      },
+      {
+       "timestamps": [
+        1789286880464
+       ],
+       "statKey": {
+        "key": "heap|ComponentCommittedMemory|CaSA"
+       },
+       "data": [
+        146.0
+       ]
+      },
+      {
+       "timestamps": [
+        1789286880464
+       ],
+       "statKey": {
+        "key": "heap|ComponentCommittedMemory|AdminUI"
+       },
+       "data": [
+        146.0
+       ]
+      },
+      {
+       "timestamps": [
+        1789286880464
+       ],
+       "statKey": {
+        "key": "heap|MaxHeapSize"
+       },
+       "data": [
+        9983.0
+       ]
+      },
+      {
+       "timestamps": [
+        1789287176350
+       ],
+       "statKey": {
+        "key": "swap|pageIn"
+       },
+       "data": [
+        0.0
+       ]
+      },
+      {
+       "timestamps": [
+        1789287176350
+       ],
+       "statKey": {
+        "key": "swap|used"
+       },
+       "data": [
+        0.0
+       ]
+      },
+      {
+       "timestamps": [
+        1789286880464
+       ],
+       "statKey": {
+        "key": "heap|CommittedMemory"
+       },
+       "data": [
+        6380.0
+       ]
+      },
+      {
+       "timestamps": [
+        1789287176350
+       ],
+       "statKey": {
+        "key": "heap|workload"
+       },
+       "data": [
+        18.561553955078125
+       ]
+      },
+      {
+       "timestamps": [
+        1789286880464
+       ],
+       "statKey": {
+        "key": "heap|ComponentCommittedMemory|Analytics"
+       },
+       "data": [
+        5040.0
+       ]
+      },
+      {
+       "timestamps": [
+        1789287176350
+       ],
+       "statKey": {
+        "key": "swap|computed_demand"
+       },
+       "data": [
+        0.0
+       ]
+      },
+      {
+       "timestamps": [
+        1789287176350
+       ],
+       "statKey": {
+        "key": "mem|free"
+       },
+       "data": [
+        4.392192840576172
+       ]
+      },
+      {
+       "timestamps": [
+        1789286880464
+       ],
+       "statKey": {
+        "key": "heap|ComponentCommittedMemory|ProductUI"
+       },
+       "data": [
+        180.0
+       ]
+      },
+      {
+       "timestamps": [
+        1789287176350
+       ],
+       "statKey": {
+        "key": "swap|total"
+       },
+       "data": [
+        3.9999961853027344
+       ]
+      },
+      {
+       "timestamps": [
+        1789287176350
+       ],
+       "statKey": {
+        "key": "mem|actualFree"
+       },
+       "data": [
+        6.712848663330078
+       ]
+      },
+      {
+       "timestamps": [
+        1789286880464
+       ],
+       "statKey": {
+        "key": "heap|ComponentCommittedMemory|Collector"
+       },
+       "data": [
+        401.0
+       ]
+      },
+      {
+       "timestamps": [
+        1789287176350
+       ],
+       "statKey": {
+        "key": "mem|total"
+       },
+       "data": [
+        15.614242553710938
+       ]
+      },
+      {
+       "timestamps": [
+        1789286880464
+       ],
+       "statKey": {
+        "key": "heap|ComponentCommittedMemory|SuiteAPI"
+       },
+       "data": [
+        613.0
+       ]
+      }
+     ]
+    }
+   },
+   {
+    "resourceId": "df7bd3fa-973e-4dfc-87e8-da668e7af260",
+    "stat-list": {
+     "stat": [
+      {
+       "timestamps": [
+        1789286949524
+       ],
+       "statKey": {
+        "key": "Service:collector|Restarts"
+       },
+       "data": [
+        0.0
+       ]
+      },
+      {
+       "timestamps": [
+        1789286949524
+       ],
+       "statKey": {
+        "key": "Service:ntp|Restarts"
+       },
+       "data": [
+        0.0
+       ]
+      },
+      {
+       "timestamps": [
+        1789286949524
+       ],
+       "statKey": {
+        "key": "Service:vpostgres-repl|Restarts"
+       },
+       "data": [
+        0.0
+       ]
+      },
+      {
+       "timestamps": [
+        1789286949524
+       ],
+       "statKey": {
+        "key": "Service:vpostgres|Restarts"
+       },
+       "data": [
+        0.0
+       ]
+      },
+      {
+       "timestamps": [
+        1789286949524
+       ],
+       "statKey": {
+        "key": "Service:vmware-vcops-web|Restarts"
+       },
+       "data": [
+        0.0
+       ]
+      },
+      {
+       "timestamps": [
+        1789286949524
+       ],
+       "statKey": {
+        "key": "Service:vmware-casa|Restarts"
+       },
+       "data": [
+        0.0
+       ]
+      },
+      {
+       "timestamps": [
+        1789286949524
+       ],
+       "statKey": {
+        "key": "Service:api|Restarts"
+       },
+       "data": [
+        0.0
+       ]
+      },
+      {
+       "timestamps": [
+        1789286949524
+       ],
+       "statKey": {
+        "key": "Service:gemfire|Restarts"
+       },
+       "data": [
+        0.0
+       ]
+      },
+      {
+       "timestamps": [
+        1789286949524
+       ],
+       "statKey": {
+        "key": "Service:analytics|Restarts"
+       },
+       "data": [
+        0.0
+       ]
+      }
+     ]
+    }
+   }
+  ]
+ }
+}
