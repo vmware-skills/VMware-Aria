@@ -437,14 +437,18 @@ def test_rightsizing_keys_have_no_demand_segment() -> None:
     client.post.return_value = {"values": []}
     list_rightsizing_recommendations(client, resource_id="vm-1")
 
-    body = client.post.call_args.kwargs["json_data"]
-    assert body["statKey"] == [
+    body = next(
+        c.kwargs["json_data"] for c in client.post.call_args_list
+        if c.args and c.args[0] == "/resources/stats/query"
+    )  # the page also issues one bulk properties query; select the stats one
+    assert [k for k in body["statKey"] if k.endswith("|recommendedSize")] == [
         "OnlineCapacityAnalytics|cpu|recommendedSize",
         "OnlineCapacityAnalytics|mem|recommendedSize",
         # Broadcom's Capacity Analytics list names three keys on the VM; the
         # third was missing here until 2026-09-07.
         "OnlineCapacityAnalytics|diskspace|recommendedSize",
     ]
+    assert not [k for k in body["statKey"] if "|demand|" in k]
     assert body["resourceId"] == ["vm-1"]
 
 
@@ -825,7 +829,10 @@ def test_rightsizing_asks_for_a_day_wide_window() -> None:
     client = _rightsizing_client({"OnlineCapacityAnalytics|cpu|recommendedSize": 2.0})
     list_rightsizing_recommendations(client, resource_id="vm-1")
 
-    body = client.post.call_args.kwargs["json_data"]
+    body = next(
+        c.kwargs["json_data"] for c in client.post.call_args_list
+        if c.args and c.args[0] == "/resources/stats/query"
+    )  # the page also issues one bulk properties query; select the stats one
     assert body["end"] - body["begin"] == 25 * 3_600_000, (
         "the rightsizing stats window must span 25 hours"
     )
