@@ -1,7 +1,7 @@
 """MCP server wrapping VMware Aria Operations monitoring and capacity planning.
 
 This module exposes VMware Aria Operations management tools via the Model
-Context Protocol (MCP) using stdio transport.  The 33 tools are split by
+Context Protocol (MCP) using stdio transport.  The 36 tools are split by
 domain across ``vmware_aria/mcp_server/tools/*.py``; each module registers its tools onto
 the shared ``mcp`` instance defined in ``vmware_aria/mcp_server/_shared.py``.  Importing
 those modules below is what performs the registration.
@@ -20,6 +20,9 @@ Tool categories
 * **Resource** (5 tools, read-only): list_resources, get_resource,
   get_resource_metrics, get_resource_health, get_top_consumers
   — ``vmware_aria/mcp_server/tools/resources.py``
+
+* **Resource catalog** (3 tools, read-only): list_metric_keys,
+  get_resource_properties, get_resource_relationships — ``tools/catalog.py``
 
 * **Alerts** (5 tools, 3 read + 2 write): list_alerts, get_alert,
   list_alert_definitions (read, ``tools/alerts.py``); acknowledge_alert,
@@ -86,6 +89,7 @@ from vmware_aria.mcp_server.tools import (  # noqa: F401  (imported for registra
     alerts,
     anomaly,
     capacity,
+    catalog,
     fleet,
     health,
     reports,
@@ -114,6 +118,11 @@ from vmware_aria.mcp_server.tools.capacity import (  # noqa: F401
     get_remaining_capacity,
     get_time_remaining,
     list_rightsizing_recommendations,
+)
+from vmware_aria.mcp_server.tools.catalog import (  # noqa: F401
+    get_resource_properties,
+    get_resource_relationships,
+    list_metric_keys,
 )
 from vmware_aria.mcp_server.tools.fleet import (  # noqa: F401
     findings_list,
@@ -153,6 +162,9 @@ __all__ = [
     "get_resource_metrics",
     "get_resource_health",
     "get_top_consumers",
+    "list_metric_keys",
+    "get_resource_properties",
+    "get_resource_relationships",
     "list_alerts",
     "get_alert",
     "list_alert_definitions",

@@ -1,0 +1,35 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab), read-only GETs/queries",
+ "_note": "GET /resources/{id}/relationships/PARENT for host 192.168.60.15 12adc0ff-f9ff-4a43-b0e1-22664a058376; rows trimmed to identifier/resourceKey/status (badges, links, identifiers dropped). Measured: ALL == PARENT | CHILD, disjoint.",
+ "http_status": 200,
+ "body": {
+  "pageInfo": {
+   "totalCount": 2,
+   "page": 0,
+   "pageSize": 1000
+  },
+  "relationshipType": "PARENT",
+  "resourceList": [
+   {
+    "identifier": "8281c4a5-8477-4fb0-8f3a-9f78b98f535d",
+    "resourceKey": {
+     "name": "PoweredOn:new VC",
+     "adapterKindKey": "VMWARE",
+     "resourceKindKey": "VM Entity Status"
+    },
+    "resourceStatusStates": [],
+    "relatedResources": []
+   },
+   {
+    "identifier": "d676277b-969b-4aa4-a6e9-ee0c2ed4f268",
+    "resourceKey": {
+     "name": "home",
+     "adapterKindKey": "VMWARE",
+     "resourceKindKey": "Datacenter"
+    },
+    "resourceStatusStates": [],
+    "relatedResources": []
+   }
+  ]
+ }
+}

@@ -1,0 +1,55 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab), read-only GETs/queries",
+ "_note": "GET /resources/{id}/relationships for VM test-llm f654322a-50c3-4a9a-937c-2d4bae8a2b36; rows trimmed to identifier/resourceKey/status (badges, links, identifiers dropped). Measured: ALL == PARENT | CHILD, disjoint.",
+ "http_status": 200,
+ "body": {
+  "pageInfo": {
+   "totalCount": 4,
+   "page": 0,
+   "pageSize": 1000
+  },
+  "relationshipType": "ALL",
+  "resourceList": [
+   {
+    "identifier": "12adc0ff-f9ff-4a43-b0e1-22664a058376",
+    "resourceKey": {
+     "name": "192.168.60.15",
+     "adapterKindKey": "VMWARE",
+     "resourceKindKey": "HostSystem"
+    },
+    "resourceStatusStates": [],
+    "relatedResources": []
+   },
+   {
+    "identifier": "3ad7800f-1c52-483a-862e-af0bcd3cc647",
+    "resourceKey": {
+     "name": "datastore1",
+     "adapterKindKey": "VMWARE",
+     "resourceKindKey": "Datastore"
+    },
+    "resourceStatusStates": [],
+    "relatedResources": []
+   },
+   {
+    "identifier": "8281c4a5-8477-4fb0-8f3a-9f78b98f535d",
+    "resourceKey": {
+     "name": "PoweredOn:new VC",
+     "adapterKindKey": "VMWARE",
+     "resourceKindKey": "VM Entity Status"
+    },
+    "resourceStatusStates": [],
+    "relatedResources": []
+   },
+   {
+    "identifier": "b55f1a6d-f9b1-477e-8755-893f44f5e529",
+    "resourceKey": {
+     "name": "Discovered virtual machine",
+     "adapterKindKey": "VMWARE",
+     "resourceKindKey": "VMFolder"
+    },
+    "resourceStatusStates": [],
+    "relatedResources": []
+   }
+  ]
+ }
+}

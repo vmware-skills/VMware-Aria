@@ -1,0 +1,266 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab), read-only GETs/queries",
+ "_note": "GET /resources/{id}/properties for VM test-llm f654322a-50c3-4a9a-937c-2d4bae8a2b36 (64 properties, untrimmed). page/pageSize query params are ignored by this endpoint.",
+ "http_status": 200,
+ "body": {
+  "resourceId": "f654322a-50c3-4a9a-937c-2d4bae8a2b36",
+  "property": [
+   {
+    "name": "config|extraConfig|vcpu_hotadd",
+    "value": "false"
+   },
+   {
+    "name": "virtualDisk:scsi0:0|label",
+    "value": "Hard disk 1"
+   },
+   {
+    "name": "config|numVMDKs",
+    "value": "1.0"
+   },
+   {
+    "name": "cpu|limit",
+    "value": "-1.0"
+   },
+   {
+    "name": "summary|MOID",
+    "value": "vm-2001"
+   },
+   {
+    "name": "summary|config|type",
+    "value": "default"
+   },
+   {
+    "name": "config|hardware|numSockets",
+    "value": "2.0"
+   },
+   {
+    "name": "summary|UUID",
+    "value": "52fc5d3a-3c26-59ab-ef55-eb1206178afc"
+   },
+   {
+    "name": "virtualDisk:scsi0:0|datastore",
+    "value": "datastore1"
+   },
+   {
+    "name": "config|extraConfig|mem_hotadd",
+    "value": "false"
+   },
+   {
+    "name": "config|numVMDKsOnly",
+    "value": "1.0"
+   },
+   {
+    "name": "mem|guestOSMemNotCollecting",
+    "value": "0.0"
+   },
+   {
+    "name": "summary|config|isSrmPlaceholder",
+    "value": "false"
+   },
+   {
+    "name": "config|memoryAllocation|limit",
+    "value": "-1.0"
+   },
+   {
+    "name": "diskspace|snapshot|snapshotAge",
+    "value": "-1.0"
+   },
+   {
+    "name": "mem|host_limit",
+    "value": "-1.0"
+   },
+   {
+    "name": "config|version",
+    "value": "vmx-21"
+   },
+   {
+    "name": "summary|guest|guestFamily",
+    "value": "linuxGuest"
+   },
+   {
+    "name": "virtualDisk:scsi0:0|provisioning_type",
+    "value": "Thick Provision Lazy Zeroed"
+   },
+   {
+    "name": "net:4000|ip_address",
+    "value": "192.168.60.236"
+   },
+   {
+    "name": "config|cpuAllocation|shares|shares",
+    "value": "2000.0"
+   },
+   {
+    "name": "config|hardware|numCpu",
+    "value": "2.0"
+   },
+   {
+    "name": "System Properties|resource_kind_type",
+    "value": "GENERAL"
+   },
+   {
+    "name": "config|hardware|memoryKB",
+    "value": "1.6777216E7"
+   },
+   {
+    "name": "summary|runtime|connectionState",
+    "value": "connected"
+   },
+   {
+    "name": "runtime|memoryCap",
+    "value": "1.6777216E7"
+   },
+   {
+    "name": "summary|smbiosUUID",
+    "value": "564d166c-5c7d-f8d5-37f1-11d9bcab1724"
+   },
+   {
+    "name": "config|name",
+    "value": "test-llm"
+   },
+   {
+    "name": "config|hardware|diskSpace",
+    "value": "50.0"
+   },
+   {
+    "name": "summary|parentVcenter",
+    "value": "new VC"
+   },
+   {
+    "name": "config|numRDMs",
+    "value": "0.0"
+   },
+   {
+    "name": "summary|guest|ipAddress",
+    "value": "192.168.60.236"
+   },
+   {
+    "name": "summary|guest|toolsRunningStatus",
+    "value": "Guest Tools Running"
+   },
+   {
+    "name": "summary|guest|hostName",
+    "value": "test-llm"
+   },
+   {
+    "name": "cpu|speed",
+    "value": "5.606386922E9"
+   },
+   {
+    "name": "config|memoryAllocation|reservation",
+    "value": "0.0"
+   },
+   {
+    "name": "summary|guest|fullName",
+    "value": "Ubuntu Linux (64-bit)"
+   },
+   {
+    "name": "virtualDisk:scsi0:0|isRDM",
+    "value": "false"
+   },
+   {
+    "name": "summary|runtime|isIdle",
+    "value": "0.0"
+   },
+   {
+    "name": "summary|parentFolder",
+    "value": "Discovered virtual machine"
+   },
+   {
+    "name": "summary|parentHost",
+    "value": "192.168.60.15"
+   },
+   {
+    "name": "config|createDate",
+    "value": "1.785546464032E12"
+   },
+   {
+    "name": "cpu|reservation",
+    "value": "0.0"
+   },
+   {
+    "name": "config|cpuAllocation|limit",
+    "value": "-1.0"
+   },
+   {
+    "name": "config|extraConfig|vcpu_hotremove",
+    "value": "false"
+   },
+   {
+    "name": "config|memoryAllocation|shares|shares",
+    "value": "163840.0"
+   },
+   {
+    "name": "config|hardware|numCoresPerSocket",
+    "value": "1.0"
+   },
+   {
+    "name": "summary|folder",
+    "value": "Discovered virtual machine"
+   },
+   {
+    "name": "System Properties|resource_kind_subtype",
+    "value": "GENERAL"
+   },
+   {
+    "name": "summary|guest|toolsVersionStatus2",
+    "value": "Guest Tools Unmanaged"
+   },
+   {
+    "name": "virtualDisk:scsi0:0|configuredGB",
+    "value": "50.0"
+   },
+   {
+    "name": "summary|parentCluster",
+    "value": ""
+   },
+   {
+    "name": "summary|tag",
+    "value": "none"
+   },
+   {
+    "name": "summary|guest|toolsVersion",
+    "value": "13.0.0"
+   },
+   {
+    "name": "summary|datastore",
+    "value": "datastore1"
+   },
+   {
+    "name": "summary|runtime|powerState",
+    "value": "Powered On"
+   },
+   {
+    "name": "summary|config|isTemplate",
+    "value": "false"
+   },
+   {
+    "name": "config|guestFullName",
+    "value": "Ubuntu Linux (64-bit)"
+   },
+   {
+    "name": "summary|parentDatacenter",
+    "value": "home"
+   },
+   {
+    "name": "config|disk_consolidation_needed",
+    "value": "false"
+   },
+   {
+    "name": "config|cpuAllocation|reservation",
+    "value": "0.0"
+   },
+   {
+    "name": "net:4000|mac_address",
+    "value": "00:0c:29:ab:17:24"
+   },
+   {
+    "name": "summary|tagJson",
+    "value": "none"
+   },
+   {
+    "name": "summary|config|numEthernetCards",
+    "value": "1.0"
+   }
+  ]
+ }
+}

@@ -1,0 +1,5062 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab), read-only GETs/queries",
+ "_note": "GET /adapterkinds/VMWARE/resourcekinds/VirtualMachine/statkeys after the restart: 911 definitions trimmed to key/name/unit/instanceType. unit is absent on 413 of them.",
+ "http_status": 200,
+ "body": {
+  "resourceTypeAttributes": [
+   {
+    "key": "others|snapshot_size",
+    "name": "General|Snapshot Size",
+    "unit": "bytes",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|cpu_shares",
+    "name": "Summary|CPU Shares",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "disk|totalLatency_average",
+    "name": "Physical Disk|Total Latency",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "others|guest_customization",
+    "name": "General|Guest Customization",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|capacityRemainingUsingConsumers",
+    "name": "Memory Usage on Host|Capacity Remaining using profile",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|waste",
+    "name": "Badge|Waste",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|isStress",
+    "name": "Memory Usage on Host|Is Stressed",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|capacityRemainingValue",
+    "name": "Summary|Capacity Remaining Value",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|poweredOffTimePercent",
+    "name": "Summary|Powered Off Time Percent",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|actual.capacity_whatif",
+    "name": "Memory Usage on Host|Current Size with committed projects",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|timeRemaining",
+    "name": "Capacity Analytics Generated|Time Remaining",
+    "unit": "Day(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "rescpu|actav15_latest",
+    "name": "CPU Utilization for Resources|CPU Active (15 min. average)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|effectiveDailyCpuCost",
+    "name": "Cost|Effective Daily CPU Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|vcpu_usage_disparity",
+    "name": "CPU|vCPU Usage Disparity",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|capacityRemainingUsingConsumers_large",
+    "name": "CPU Allocation|Capacity Remaining (Large consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|timeRemaining",
+    "name": "Badge|Time Remaining",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "storage_profiles|usage",
+    "name": "Storage Profile|Configured",
+    "unit": "MB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "System Attributes|alert_count_critical",
+    "name": "VMware Aria Operations Generated|Alert Count Critical",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|droppedRx_summation",
+    "name": "Network|Received Packets Dropped",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|diskused",
+    "name": "Disk Space|Virtual Disk Used",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|capacityRemaining_min",
+    "name": "Memory Usage on Host|Capacity Remaining (Based on instantaneous peak)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|utilization.range",
+    "name": "Memory Allocation|Utilization Range",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|poweredOff",
+    "name": "Disk Space|Powered Off",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|metering|additionalMtd",
+    "name": "Summary|Metering|Month to Date Additional Price",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|oversized|vcpus",
+    "name": "Summary|Oversized|Virtual CPUs",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|20_sec_peak_usage_average",
+    "name": "Network|Peak Usage Rate within collection cycle",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|timeRemainingWithCommit",
+    "name": "Capacity Analytics Generated|Time Remaining With Commit",
+    "unit": "Day(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|smallSeeks_latest",
+    "name": "Virtual Disk|Number of Small Seeks",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|capacityRemainingUsingConsumers_large",
+    "name": "Disk Space|Capacity Remaining (Large consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|snapshotSpace",
+    "name": "Summary|Reclaimable Snapshot Space",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|capacityRemainingValue_whatif",
+    "name": "Memory|Capacity Remaining Value with committed projects",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|cpu|capacityRemaining",
+    "name": "Capacity Analytics Generated|CPU|Capacity Remaining",
+    "unit": "MHz",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|alert_count_info",
+    "name": "Badge|Alert Count Info",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "datastore|maxObserved_Write",
+    "name": "Datastore|(DEP) Max Observed Write Rate",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|consumer.count",
+    "name": "Disk Space|Number of Capacity consumers",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|size.recommendation",
+    "name": "Memory Allocation|Recommended Size",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemainingValue_whatif",
+    "name": "Disk Space Allocation|Capacity Remaining Value with committed projects",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|actual.capacity.normalized",
+    "name": "Disk Space Allocation|Total Capacity",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|density",
+    "name": "Memory|Density",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|poweredOff",
+    "name": "Memory Usage on Host|Powered Off",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|size.recommendation",
+    "name": "Disk Space Allocation|Recommended Size",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|capacityRemaining_whatif",
+    "name": "CPU Allocation|Capacity Remaining with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "System Attributes|child_new_ki_alarms",
+    "name": "VMware Aria Operations Generated|Full Set - New KPI Breach Count",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "storage|totalReadLatency_average",
+    "name": "Storage|Read Latency",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|timeRemaining_whatif",
+    "name": "Memory|Time Remaining with committed projects",
+    "unit": "Day(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|capacityRemainingUsingConsumers",
+    "name": "Memory|Capacity Remaining using profile",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "config|hardware|thin_Enabled",
+    "name": "Configuration|Hardware|Thin Provisioned Disk",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|poweredOff_whatif",
+    "name": "CPU|Powered Off with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "ping|latency|std_dev",
+    "name": "Ping Statistics|Latency|Standard Deviation",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|actualUsage",
+    "name": "Virtual Disk|Used Disk Space",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "disk|busResets_summation",
+    "name": "Physical Disk|Bus Resets",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|idle_whatif",
+    "name": "Disk Space|Is Idle with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|isWaste",
+    "name": "CPU|Has Reclaimable Capacity",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|density",
+    "name": "Disk Space|Density",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|actual.capacity_whatif",
+    "name": "Memory Allocation|Current Size with committed projects",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|optimal.consumer.per.provider_whatif",
+    "name": "CPU|Optimal Consumer Provider ratio with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|capacity.provider.count",
+    "name": "Memory|Number of Capacity providers",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|capacityRemainingUsingConsumers_medium",
+    "name": "Memory|Capacity Remaining (Medium consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|timeRemaining",
+    "name": "Disk Space Allocation|Time Remaining",
+    "unit": "Day(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|stress_whatif",
+    "name": "Disk Space|Stress with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|idle",
+    "name": "Disk Space Usage on Datastore|Is Idle",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|capacity.contention_average",
+    "name": "Memory|Capacity Contention",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|optimal.consumer.per.provider",
+    "name": "CPU Allocation|Optimal Consumer Provider ratio",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|demandBasedDailyStorageCost",
+    "name": "Cost|Demand Based Daily Storage Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guestfilesystem|capacity",
+    "name": "Guest File System|Partition Capacity",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|stress_whatif",
+    "name": "Memory|Stress with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|risk",
+    "name": "Badge|Risk",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|optimal.consumer.per.provider_whatif",
+    "name": "Disk Space Usage on Datastore|Optimal Consumer Provider ratio with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|capacityRemaining_whatif",
+    "name": "Badge|Capacity Remaining with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|ready_summation",
+    "name": "CPU|Ready",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|vmmemctltarget_average",
+    "name": "Memory|Balloon Target",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "rescpu|samplePeriod_latest",
+    "name": "CPU Utilization for Resources|Group CPU Sample Period",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|actual.capacity_whatif",
+    "name": "Disk Space Allocation|Current Size with committed projects",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|swapoutRate_average",
+    "name": "Memory|Swap Out Rate",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|droppedTxPct_max",
+    "name": "Network|Peak Transmitted Packet Dropped within collection cycle",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guest|used_memory",
+    "name": "Guest|Used Memory",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "datastore|oio",
+    "name": "Datastore|(DEP) Provisioned vCPU(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|peak_vcpu_ready",
+    "name": "CPU|Highest vCPU Ready of all instances",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|capacityRemainingUsingConsumers_average",
+    "name": "Memory Usage on Host|Capacity Remaining (Average consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "datastore|totalLatency_average",
+    "name": "Datastore|Total Latency",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|poweredOffTimePercent",
+    "name": "Memory|Powered Off Time Percent",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|capacityRemainingUsingConsumers_large",
+    "name": "Memory Allocation|Capacity Remaining (Large consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|optimal.consumer.per.provider",
+    "name": "Disk Space|Optimal Consumer Provider ratio",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|capacityRemaining",
+    "name": "Memory|Capacity Remaining",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "System Attributes|child_new_alarms",
+    "name": "VMware Aria Operations Generated|Full Set - New Anomaly Count",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|stress",
+    "name": "Memory Usage on Host|Stress",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|waste",
+    "name": "Memory Usage on Host|Waste",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "Guest OS Services|mkOutGoingConnectionCount",
+    "name": "Guest OS Services|Number of Outgoing Connections",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|capacityRemainingUsingConsumers_average_whatif",
+    "name": "Memory Allocation|Capacity Remaining with committed projects (Average consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|reason.for.waste",
+    "name": "Disk Space Allocation|Reason for Reclaimable Capacity",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|desktop_status",
+    "name": "Summary|Desktop Status",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|capacityRemainingUsingConsumers",
+    "name": "CPU|Capacity Remaining using profile",
+    "unit": "MHz",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|writeLoadMetric_latest",
+    "name": "Virtual Disk|Write Load",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|actual.capacity_whatif",
+    "name": "Disk Space|Current Size with committed projects",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|isStress_whatif",
+    "name": "CPU Allocation|Is Stressed with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|diskspace|recommendedSize",
+    "name": "Capacity Analytics Generated|Disk Space|Recommended Size",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "System Attributes|child_active_ki_alarms",
+    "name": "VMware Aria Operations Generated|Full Set - Active KPI Breach Count",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|consumer.count",
+    "name": "CPU|Number of Capacity consumers",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|iowaitPct",
+    "name": "CPU|Other Wait",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "datastore|maxObserved_OIO",
+    "name": "Datastore|(DEP) Max Observed Number of Outstanding IO Operations",
+    "unit": "OIOs",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|host_transmitted_average",
+    "name": "Network|VM to Host Data Transmit Rate",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|dropped_sum",
+    "name": "Network|Total Packets Dropped",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|usage_average",
+    "name": "Network|Usage Rate",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "sys|vmotionEnabled",
+    "name": "System|vMotion Enabled",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "Guest OS Services|mkUserDefinedServiceCount",
+    "name": "Guest OS Services|Number of User Defined Services",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|metering|details|instance|usage",
+    "name": "Summary|Metering|Details|Instance|Usage",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|capacityRemaining_min",
+    "name": "CPU Allocation|Capacity Remaining (Based on instantaneous peak)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guest|20_sec_peak_cpu_queue",
+    "name": "Guest|Peak vCPU Queue within collection cycle",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|host_maxObserved_Tx_KBps",
+    "name": "Network|(DEP) VM to Host Max Observed Transmitted Throughput",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|poweredOff",
+    "name": "Disk Space Allocation|Powered Off",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|efficiency_state",
+    "name": "Badge|Efficiency State",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|capacityRemainingUsingConsumers_average",
+    "name": "Disk Space|Capacity Remaining (Average consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|capacityRemaining",
+    "name": "Badge|Capacity Remaining",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|capacityRemainingUsingConsumers_average",
+    "name": "CPU|Capacity Remaining (Average consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|swaptarget_average",
+    "name": "Memory|Swap Target",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|capacityRemainingUsingConsumers_small",
+    "name": "Disk Space|Capacity Remaining (Small consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|poweredOff_whatif",
+    "name": "CPU Allocation|Powered Off with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|size.recommendation",
+    "name": "Disk Space|Recommended Size",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|optimal.consumer.per.provider",
+    "name": "Summary|Optimal Consumer Provider ratio",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|actual.capacity",
+    "name": "CPU Allocation|Current Size",
+    "unit": "vCPUs",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|timeRemaining",
+    "name": "Disk Space Usage on Datastore|Time Remaining",
+    "unit": "Day(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|consumer.count.per.provider.count_whatif",
+    "name": "Memory Usage on Host|Consumer Provider ratio with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|size.recommendation_whatif",
+    "name": "Disk Space Usage on Datastore|Recommended Size with committed projects",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "others|storage",
+    "name": "General|Storage",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|usagemhz_average_mtd",
+    "name": "CPU|(DEP) Usage average MTD",
+    "unit": "MHz",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|demandOverCapacity",
+    "name": "CPU|Demand Over Capacity",
+    "unit": "MHz",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|usagemhz_average",
+    "name": "CPU|Usage",
+    "unit": "MHz",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|computed_demand",
+    "name": "Disk Space|System Computed Demand",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|droppedPct",
+    "name": "Network|Packets Dropped",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "loginsight_generated|error_count",
+    "name": "Log Insight Generated|Error Count",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|demandOverLimit",
+    "name": "Memory|Demand Over Limit",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|isStress",
+    "name": "Memory|Is Stressed",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|capacity.provider.count_whatif",
+    "name": "Disk Space|Number of Capacity providers with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|peak_vcpu_usage",
+    "name": "CPU|Highest vCPU Usage of all instances",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|demandEntitlementRatio_latest",
+    "name": "CPU|Demand-to-entitlement Ratio",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "System Attributes|new_ki_alarms",
+    "name": "VMware Aria Operations Generated|Self - New KPI Breach Count",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|capacityRemaining_min",
+    "name": "CPU|Capacity Remaining (Based on instantaneous peak)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "storage|demandKBps",
+    "name": "Storage|Demand",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|capacityRemaining_min_whatif",
+    "name": "CPU|Capacity Remaining with committed projects (Based on instantaneous peak)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|mem|recommendedSize",
+    "name": "Capacity Analytics Generated|Memory|Recommended Size",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "System Attributes|availability",
+    "name": "VMware Aria Operations Generated|Availability",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "System Attributes|self_alert_count",
+    "name": "VMware Aria Operations Generated|Self - Alert Count",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|consumer.count.per.provider.count_whatif",
+    "name": "Summary|Consumer Provider ratio with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|size.recommendation",
+    "name": "CPU Allocation|Recommended Size",
+    "unit": "vCPUs",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|broadcastRx_summation",
+    "name": "Network|Broadcast Packets Received",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|capacityRemainingUsingConsumers_medium",
+    "name": "Memory Allocation|Capacity Remaining (Medium consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|timeRemaining_whatif",
+    "name": "Disk Space|Time Remaining with committed projects",
+    "unit": "Day(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|broadcastTx_summation",
+    "name": "Network|Broadcast Packets Transmitted",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guest|mem.activeFileCache_latest",
+    "name": "Guest|Active File Cache Memory",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|reason.for.waste",
+    "name": "CPU Allocation|Reason for Reclaimable Capacity",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|density_whatif",
+    "name": "Disk Space Usage on Datastore|Density with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|health_state",
+    "name": "Badge|Health State",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|density_whatif",
+    "name": "Disk Space Allocation|Density with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "datastore|maxObserved_NumberWrite",
+    "name": "Datastore|(DEP) Max Observed Writes per second",
+    "unit": "IOPS",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|object.demand.with.size.recommendation",
+    "name": "CPU|Effective Demand (With peak usage)",
+    "unit": "MHz",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|stress_whatif",
+    "name": "Memory Allocation|Stress with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|capacity.provider.count",
+    "name": "Disk Space Usage on Datastore|Number of Capacity providers",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|consumer.count.per.provider.count",
+    "name": "Memory|Consumer Provider ratio",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|density_whatif",
+    "name": "Memory|Density with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|isStress_whatif",
+    "name": "Memory|Is Stressed with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|computed_demand",
+    "name": "CPU Allocation|System Computed Demand",
+    "unit": "vCPUs",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|dailyAdditionalCost",
+    "name": "Cost|Daily Additional Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|20_sec_peak_totalLatency_average",
+    "name": "Virtual Disk|Peak Latency within collection cycle",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|consumer.count",
+    "name": "Memory|Number of Capacity consumers",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|stress_whatif",
+    "name": "CPU Allocation|Stress with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|stress_whatif",
+    "name": "CPU|Stress with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|host_demand_for_aggregation",
+    "name": "CPU|Host Demand For Aggregation",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|consumer.count_whatif",
+    "name": "Disk Space Allocation|Number of Capacity consumers with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|read_average",
+    "name": "Virtual Disk|Read Throughput",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "loginsight_generated|total_log_count",
+    "name": "Log Insight Generated|Total Log Count",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|capacityRemainingValue_whatif",
+    "name": "Memory Allocation|Capacity Remaining Value with committed projects",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|capacityRemainingUsingConsumers_medium",
+    "name": "Summary|Capacity Remaining (Medium consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|poweredOff",
+    "name": "CPU Allocation|Powered Off",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|balloonPct",
+    "name": "Memory|Balloon",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|isStress",
+    "name": "Memory Allocation|Is Stressed",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|consumer.count",
+    "name": "Memory Allocation|Number of Capacity consumers",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|snapshot_space_used",
+    "name": "Summary|Snapshot Space",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|poweredOffTimePercent",
+    "name": "Memory Usage on Host|Powered Off Time Percent",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "rescpu|actav5_latest",
+    "name": "CPU Utilization for Resources|CPU Active (5 min. average)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "sys|heartbeat_summation",
+    "name": "System|Heartbeat",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|overheadTouched_average",
+    "name": "Memory|Overhead Touched",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "rescpu|runpk5_latest",
+    "name": "CPU Utilization for Resources|CPU Running (5 min. peak)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guest|mem.free_latest",
+    "name": "Guest|Free Memory",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|totalReadLatency_average",
+    "name": "Virtual Disk|Read Latency",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guest|tools_running_status",
+    "name": "Guest|Tools Running Status",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|capacityRemaining",
+    "name": "Memory Allocation|Capacity Remaining",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guestfilesystem|usage",
+    "name": "Guest File System|Partition Utilization",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemaining_min_whatif",
+    "name": "Disk Space Allocation|Capacity Remaining with committed projects (Based on instantaneous peak)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|host_maxObserved_KBps",
+    "name": "Network|(DEP) VM to Host Max Observed Throughput",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|isStress",
+    "name": "CPU|Is Stressed",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "disk|scsiReservationConflicts_summation",
+    "name": "Physical Disk|SCSI Reservation Conflicts",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|poweredOff_whatif",
+    "name": "Memory|Powered Off with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|vsanOverhead",
+    "name": "Disk Space|vSAN Overhead",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|density",
+    "name": "Badge|Density",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "datastore|totalReadLatency_average",
+    "name": "Datastore|Read Latency",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|metering|cpuMtd",
+    "name": "Summary|Metering|Month to Date CPU Price",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|optimal.consumer.per.provider_whatif",
+    "name": "CPU Allocation|Optimal Consumer Provider ratio with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|costopPct",
+    "name": "CPU|Co-stop",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|fault",
+    "name": "Badge|Faults",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|timeRemaining",
+    "name": "CPU|Time Remaining",
+    "unit": "Day(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|timeRemaining",
+    "name": "Memory|Time Remaining",
+    "unit": "Day(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|granted_average",
+    "name": "Memory|Granted",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|poweredOff",
+    "name": "Memory Allocation|Powered Off",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guestfilesystem|freespace",
+    "name": "Guest File System|Guest File System Free",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|poweredOffTimePercent",
+    "name": "Disk Space|Powered Off Time Percent",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|oversized",
+    "name": "Disk Space Usage on Datastore|Is Oversized",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|20_sec_peak_numberReadAveraged_average",
+    "name": "Virtual Disk|Peak Read IOPS",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|capacityRemainingUsingConsumers_medium",
+    "name": "CPU|Capacity Remaining (Medium consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "storage|numberWriteAveraged_average",
+    "name": "Storage|Writes per second",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|utilization.range",
+    "name": "Summary|Utilization Range",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|consumer.count.per.provider.count",
+    "name": "Disk Space|Consumer Provider ratio",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|poweredOff_whatif",
+    "name": "Disk Space Usage on Datastore|Powered Off with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|effectiveMemoryMTDCost",
+    "name": "Cost|Effective Memory MTD Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|effective_limit",
+    "name": "CPU|Effective limit",
+    "unit": "MHz",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|capacityRemaining_whatif",
+    "name": "Memory|Capacity Remaining with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|peak_vDisk_throughput",
+    "name": "Virtual Disk|Highest Throughput of all instances",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|risk_classic",
+    "name": "Badge|Legacy Risk",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|actual.capacity.normalized_whatif",
+    "name": "Disk Space Allocation|Total Capacity with committed projects",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|capacityRemainingValue",
+    "name": "Memory|Capacity Remaining Value",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|largeSeeks_latest",
+    "name": "Virtual Disk|Number of Large Seeks",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "rescpu|runpk1_latest",
+    "name": "CPU Utilization for Resources|CPU Running (1 min. peak)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|demand",
+    "name": "Network|Demand",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|capacityRemainingUsingConsumers_small",
+    "name": "Summary|Capacity Remaining (Small consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|consumer.count.per.provider.count_whatif",
+    "name": "CPU|Consumer Provider ratio with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "Guest OS Services|mkServiceCount",
+    "name": "Guest OS Services|Total Number of Services",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "System Attributes|all_metrics",
+    "name": "VMware Aria Operations Generated|Self - Metric Count",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|capacity_contention",
+    "name": "CPU|Overall CPU Contention",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|packetsTx_summation_sum",
+    "name": "Network|Total Packets Transmitted",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|additionalMTDCost",
+    "name": "Cost|Additional MTD Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|poweredOffTimePercent",
+    "name": "CPU|Powered Off Time Percent",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|optimal.consumer.per.provider",
+    "name": "Memory Allocation|Optimal Consumer Provider ratio",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|health_classic",
+    "name": "Badge|Legacy Health",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemainingUsingConsumers_medium",
+    "name": "Disk Space Allocation|Capacity Remaining (Medium consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|consumer.count_whatif",
+    "name": "Disk Space Usage on Datastore|Number of Capacity consumers with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|utilization.range",
+    "name": "Disk Space Usage on Datastore|Utilization Range",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|capacityRemainingUsingConsumers_small",
+    "name": "CPU Allocation|Capacity Remaining (Small consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|density",
+    "name": "Memory Usage on Host|Density",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "System Attributes|alert_count_info",
+    "name": "VMware Aria Operations Generated|Alert Count Info",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|capacityRemainingUsingConsumers_average_whatif",
+    "name": "Summary|Capacity Remaining with committed projects (Average consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|object.demand.with.size.recommendation",
+    "name": "Memory Allocation|Effective Demand (With peak usage)",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|estimated_entitlement",
+    "name": "CPU|Estimated entitlement",
+    "unit": "MHz",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|idle",
+    "name": "Disk Space Allocation|Is Idle",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|host_contention",
+    "name": "Memory|Contention",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|actual.capacity.normalized_whatif",
+    "name": "Disk Space Usage on Datastore|Total Capacity with committed projects",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guest|mem.needed_latest",
+    "name": "Guest|Needed Memory",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|capacityRemainingUsingConsumers_average",
+    "name": "Summary|Capacity Remaining (Average consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|stress",
+    "name": "CPU|Stress",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|waste",
+    "name": "Memory Allocation|Waste",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemainingUsingConsumers_average_whatif",
+    "name": "Disk Space Allocation|Capacity Remaining with committed projects (Average consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|timeRemaining_whatif",
+    "name": "CPU|Time Remaining with committed projects",
+    "unit": "Day(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|wait",
+    "name": "CPU|Total Wait",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|capacity.provider.count",
+    "name": "CPU Allocation|Number of Capacity providers",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guestfilesystem|percentage",
+    "name": "Guest File System|Partition Utilization",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|efficiency",
+    "name": "Badge|Efficiency",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "config|memoryAllocation|slotSize",
+    "name": "Configuration|Memory Resource Allocation|HA Slot Size",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guest|disk_queue_latest",
+    "name": "Guest|Disk Queue Latest",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|wasteValue50PctInGB",
+    "name": "Memory|50% of Reclaimable Memory Capacity",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|actual.capacity.normalized",
+    "name": "Disk Space|Total Capacity",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemainingUsingConsumers_small",
+    "name": "Disk Space Allocation|Capacity Remaining (Small consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "disk|diskqueued",
+    "name": "Physical Disk|Queued Operations",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "System Attributes|active_ki_alarms",
+    "name": "VMware Aria Operations Generated|Self - Active KPI Breach Count",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|computed_demand_whatif",
+    "name": "CPU|System Computed Demand with committed projects",
+    "unit": "MHz",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|maxObserved_Rx_KBps",
+    "name": "Network|(DEP) Max Observed Received Throughput",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|busResets_summation",
+    "name": "Virtual Disk|Bus Resets",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|isStress_whatif",
+    "name": "Memory Allocation|Is Stressed with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|capacityRemaining_whatif",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|llSwapInRate_average",
+    "name": "Memory|Swap In Rate from Host Cache",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemaining_min",
+    "name": "Disk Space Allocation|Capacity Remaining (Based on instantaneous peak)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|actual.capacity.normalized_whatif",
+    "name": "Disk Space|Total Capacity with committed projects",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "loginsight_generated|warning_count",
+    "name": "Log Insight Generated|Warning Count",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|capacityRemainingValue_whatif",
+    "name": "Memory Usage on Host|Capacity Remaining Value with committed projects",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|consumer.count.per.provider.count_whatif",
+    "name": "Disk Space Allocation|Consumer Provider ratio with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|oversized_whatif",
+    "name": "Summary|Is Oversized with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|idle",
+    "name": "CPU|Is Idle",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|capacity.provider.count",
+    "name": "Disk Space|Number of Capacity providers",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "System Attributes|total_alarms",
+    "name": "VMware Aria Operations Generated|Total Anomalies",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "disk|diskoio",
+    "name": "Physical Disk|Number of Outstanding IO Operations",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|isStress",
+    "name": "Disk Space Allocation|Is Stressed",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|used",
+    "name": "Disk Space|Virtual Machine used",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|idle",
+    "name": "Memory Allocation|Is Idle",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "datastore|commandsAveraged_average",
+    "name": "Datastore|Total IOPS",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|timeRemaining_whatif",
+    "name": "Memory Usage on Host|Time Remaining with committed projects",
+    "unit": "Day(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|density_whatif",
+    "name": "Disk Space|Density with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|consumer.count_whatif",
+    "name": "Summary|Number of Capacity consumers with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|multicastRx_summation",
+    "name": "Network|Multicast Packets Received",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|computed_demand_whatif",
+    "name": "CPU Allocation|System Computed Demand with committed projects",
+    "unit": "vCPUs",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|poweredOffTimePercent_whatif",
+    "name": "Disk Space Usage on Datastore|Powered Off Time Percent with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|risk_state",
+    "name": "Badge|Risk State",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|system_summation",
+    "name": "CPU|System",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|consumer.count.per.provider.count",
+    "name": "Disk Space Allocation|Consumer Provider ratio",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|actual.capacity",
+    "name": "CPU|Current Size",
+    "unit": "MHz",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|actual.capacity_whatif",
+    "name": "CPU Allocation|Current Size with committed projects",
+    "unit": "vCPUs",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|poweredOffTimePercent_whatif",
+    "name": "Memory Usage on Host|Powered Off Time Percent with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|oversized_whatif",
+    "name": "Memory Allocation|Is Oversized with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|stress",
+    "name": "Memory|Stress",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|capacityRemainingUsingConsumers_average_whatif",
+    "name": "CPU Allocation|Capacity Remaining with committed projects (Average consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|broadcastRx_summation_sum",
+    "name": "Network|Total Broadcast Packets Received",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|object.demand.with.size.recommendation",
+    "name": "Memory|Effective Demand (With peak usage)",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|workload",
+    "name": "Badge|Workload",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "System Attributes|alert_count_warning",
+    "name": "VMware Aria Operations Generated|Alert Count Warning",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|actual.capacity_whatif",
+    "name": "Disk Space Usage on Datastore|Current Size with committed projects",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guest|20_sec_peak_page.outRate_latest",
+    "name": "Guest|Peak Guest OS Page-out/rate within collection cycle",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|size.recommendation_whatif",
+    "name": "Memory|Recommended Size with committed projects",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|mem|capacityRemainingPercentage",
+    "name": "Capacity Analytics Generated|Memory|Capacity Remaining Percentage",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|computed_demand_whatif",
+    "name": "Memory Usage on Host|System Computed Demand with committed projects",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|detailedAdditionalCost|cost",
+    "name": "Cost|Daily Tags and Custom Properties Cost|Monthly Projected Total Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|guaranteed_latest",
+    "name": "CPU|Guaranteed",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|capacityRemainingValue_whatif",
+    "name": "CPU Allocation|Capacity Remaining Value with committed projects",
+    "unit": "vCPUs",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "Telegraf Availability",
+    "name": "Telegraf Availability",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|object.demand.with.size.recommendation",
+    "name": "CPU Allocation|Effective Demand (With peak usage)",
+    "unit": "vCPUs",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "rescpu|maxLimited15_latest",
+    "name": "CPU Utilization for Resources|CPU Throttled (15 min. average)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|consumer.count.per.provider.count_whatif",
+    "name": "Disk Space Usage on Datastore|Consumer Provider ratio with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "ping|peak_packet_loss",
+    "name": "Ping Statistics|Peak Packet Loss",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|20_sec_peak_overlap",
+    "name": "CPU|Peak vCPU Overlap within collection cycle",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|metering|cpu",
+    "name": "Summary|Metering|CPU price",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|object.demand.with.size.recommendation",
+    "name": "Disk Space Allocation|Effective Demand (With peak usage)",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|timeRemaining",
+    "name": "Summary|Time Remaining",
+    "unit": "Day(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|oversized",
+    "name": "Memory Allocation|Is Oversized",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|timeRemaining",
+    "name": "CPU Allocation|Time Remaining",
+    "unit": "Day(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|capacityRemainingUsingConsumers_average_whatif",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining with committed projects (Average consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|capacity.provider.count",
+    "name": "CPU|Number of Capacity providers",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|undersized",
+    "name": "Summary|Is Undersized",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|stress",
+    "name": "Disk Space|Stress",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|reason.for.waste",
+    "name": "Memory Usage on Host|Reason for Reclaimable Capacity",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "storage_profiles|actualusage",
+    "name": "Storage Profile|Actual Usage",
+    "unit": "MB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|availability_kpi",
+    "name": "Summary|Availability",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "Guest OS Services|mkInComingConnectionCount",
+    "name": "Guest OS Services|Number of Incoming Connections",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|capacity_demandEntitlementPct",
+    "name": "CPU|Capacity Demand Entitlement",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|running",
+    "name": "Summary|Running",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|actual.capacity.normalized",
+    "name": "Memory Usage on Host|Total Capacity",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "others|noofcpus",
+    "name": "General|Number of CPUs",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|capacityRemaining_min_whatif",
+    "name": "CPU Allocation|Capacity Remaining with committed projects (Based on instantaneous peak)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|undersized|potentialCpuUsage",
+    "name": "Summary|Undersized|Potential CPU Usage",
+    "unit": "GHz",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|snapshot|accessTime",
+    "name": "Disk Space|Snapshot|Access Time",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|object.demand.with.size.recommendation",
+    "name": "Memory Usage on Host|Effective Demand (With peak usage)",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|anomaly",
+    "name": "Badge|Anomaly",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|computed_demand_whatif",
+    "name": "Memory Allocation|System Computed Demand with committed projects",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|actual.capacity.normalized_whatif",
+    "name": "Memory|Total Capacity with committed projects",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|allocation|allocationBasedStorageMTDCost",
+    "name": "Cost|Allocation|Allocation Based Storage MTD Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|utilization.range",
+    "name": "CPU|Utilization Range",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|capacityRemainingUsingConsumers_medium",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining (Medium consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|capacityRemaining",
+    "name": "CPU|Capacity Remaining",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|poweredOff",
+    "name": "Summary|Reclaimable Powered Off",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|receive_demand_average",
+    "name": "Network|Data Receive Demand Rate",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|commandsAveraged_average",
+    "name": "Virtual Disk|Total IOPS",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|capacityRemainingUsingConsumers_average_whatif",
+    "name": "Memory Usage on Host|Capacity Remaining with committed projects (Average consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|capacityRemainingValue",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining Value",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|llSwapOutRate_average",
+    "name": "Memory|Swap Out Rate to Host Cache",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|packetsRxPerSec",
+    "name": "Network|Packets Received per second",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|timeRemaining",
+    "name": "Disk Space|Time Remaining",
+    "unit": "Day(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|actual.capacity",
+    "name": "Memory Usage on Host|Current Size",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guest|20_sec_peak_contextSwapRate_latest",
+    "name": "Guest|Peak CPU Context Switch Rate within collection cycle",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|maxObserved_KBps",
+    "name": "Network|(DEP) Max Observed Throughput",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|undersized|potentialMemUsage",
+    "name": "Summary|Undersized|Potential Memory",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|capacityRemaining_min_whatif",
+    "name": "Memory|Capacity Remaining with committed projects (Based on instantaneous peak)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|monthlyProjectedCost",
+    "name": "Cost|Monthly Projected Total Cost",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "System Attributes|alert_count_immediate",
+    "name": "VMware Aria Operations Generated|Alert Count Immediate",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|metering|details|price",
+    "name": "Summary|Metering|Details|Price",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|capacityRemainingValue",
+    "name": "CPU Allocation|Capacity Remaining Value",
+    "unit": "vCPUs",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|consumer.count_whatif",
+    "name": "Memory Usage on Host|Number of Capacity consumers with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|host_usage_average",
+    "name": "Network|VM to Host Usage Rate",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "ping|packet_loss|avg",
+    "name": "Ping Statistics|Packet Loss|Average",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|20_sec_peak_numberWriteAveraged_average",
+    "name": "Virtual Disk|Peak Write IOPS",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|optimal.consumer.per.provider",
+    "name": "CPU|Optimal Consumer Provider ratio",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemainingValue",
+    "name": "Disk Space Allocation|Capacity Remaining Value",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|consumer.count.per.provider.count_whatif",
+    "name": "Memory Allocation|Consumer Provider ratio with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|monthlyTotalCost",
+    "name": "Cost|MTD Total Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "rescpu|actpk5_latest",
+    "name": "CPU Utilization for Resources|CPU Active (5 min. peak)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|stress",
+    "name": "CPU Allocation|Stress",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|numberWriteAveraged_average",
+    "name": "Virtual Disk|Write IOPS",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|optimal.consumer.per.provider_whatif",
+    "name": "Disk Space Allocation|Optimal Consumer Provider ratio with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|capacityRemainingValue",
+    "name": "Disk Space|Capacity Remaining Value",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|capacity.provider.count",
+    "name": "Memory Usage on Host|Number of Capacity providers",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|packetsTx_summation",
+    "name": "Network|Packets Transmitted",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "System Attributes|child_all_metrics",
+    "name": "VMware Aria Operations Generated|Full Set - Metric Count",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|idle_summation",
+    "name": "CPU|Idle",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|writeLatencyUS_latest",
+    "name": "Virtual Disk|Write Latency (microseconds)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|poweredOff_whatif",
+    "name": "Disk Space Allocation|Powered Off with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|size.recommendation_whatif",
+    "name": "Memory Usage on Host|Recommended Size with committed projects",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|effectiveTotalCost",
+    "name": "Cost|Effective MTD Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|oversized_whatif",
+    "name": "Disk Space Allocation|Is Oversized with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|capacityRemainingUsingConsumers_large",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining (Large consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|timeRemaining",
+    "name": "Memory Usage on Host|Time Remaining",
+    "unit": "Day(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|run_summation",
+    "name": "CPU|Run",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|stress_whatif",
+    "name": "Badge|Stress with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|20_sec_peak_systemSummationPct",
+    "name": "CPU|Peak vCPU System within collection cycle",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|capacityRemaining_min_whatif",
+    "name": "Memory Allocation|Capacity Remaining with committed projects (Based on instantaneous peak)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|capacityRemainingUsingConsumers",
+    "name": "Memory Allocation|Capacity Remaining using profile",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guestfilesystem|usage_total",
+    "name": "Guest File System|Utilization",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|diskspace|timeRemaining",
+    "name": "Capacity Analytics Generated|Disk Space|Time Remaining",
+    "unit": "Day(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|capacity.provider.count_whatif",
+    "name": "Disk Space Usage on Datastore|Number of Capacity providers with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|consumed_average_mtd",
+    "name": "Memory|(DEP) Consumed average MTD",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|20_sec_peak_costopPct",
+    "name": "CPU|Peak vCPU Co-Stop within collection cycle",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|usage_average",
+    "name": "Memory|Usage",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|cpu|capacityRemainingPercentage",
+    "name": "Capacity Analytics Generated|CPU|Capacity Remaining Percentage",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "vmop|vmotion|total_successes",
+    "name": "Number of VM Operations|vMotion|Total vMotions",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guest|page.size_latest",
+    "name": "Guest|Page Size",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|dropped",
+    "name": "Network|Packets Dropped",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|consumedPct",
+    "name": "Memory|Consumed",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|workload",
+    "name": "Disk Space|Workload",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|actual.capacity.normalized",
+    "name": "Memory|Total Capacity",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|number_datastore",
+    "name": "Summary|Number of Datastores",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|capacityRemaining_whatif",
+    "name": "CPU|Capacity Remaining with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|oversized_whatif",
+    "name": "Memory|Is Oversized with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|capacity.provider.count_whatif",
+    "name": "Memory Allocation|Number of Capacity providers with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|allocation|allocationBasedTotalMTDCost",
+    "name": "Cost|Allocation|MTD Total Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|idle_whatif",
+    "name": "Disk Space Allocation|Is Idle with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|capacityRemainingUsingConsumers_medium",
+    "name": "CPU Allocation|Capacity Remaining (Medium consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|idle_whatif",
+    "name": "CPU|Is Idle with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "storage|commandsAveraged_average",
+    "name": "Storage|Commands per second",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "rescpu|actpk1_latest",
+    "name": "CPU Utilization for Resources|CPU Active (1 min. peak)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "ping|latency|avg",
+    "name": "Ping Statistics|Latency|Average",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|mem|timeRemaining",
+    "name": "Capacity Analytics Generated|Memory|Time Remaining",
+    "unit": "Day(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|capacityRemainingValue_whatif",
+    "name": "Summary|Capacity Remaining Value with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|usage",
+    "name": "Virtual Disk|Total Throughput",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|capacityRemainingUsingConsumers_average",
+    "name": "CPU Allocation|Capacity Remaining (Average consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|consumer.count.per.provider.count_whatif",
+    "name": "Memory|Consumer Provider ratio with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|bytesTx_average",
+    "name": "Network|bytesTx",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "ping|packet_loss|std_dev",
+    "name": "Ping Statistics|Packet Loss|Standard Deviation",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|capacityRemainingValue",
+    "name": "Memory Usage on Host|Capacity Remaining Value",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|guest_dynamic_entitlement",
+    "name": "Memory|Guest Dynamic Entitlement",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|poweredOff",
+    "name": "CPU|Powered Off",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|capacityRemainingUsingConsumers_whatif",
+    "name": "Memory Allocation|Capacity Remaining using profile with committed projects",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|metering|metadata|price",
+    "name": "Summary|Metering|vCD Metadata|Price",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|swapped_average",
+    "name": "Memory|Swapped",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|utilization.range",
+    "name": "CPU Allocation|Utilization Range",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|capacityRemaining",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|undersized|vcpus",
+    "name": "Summary|Undersized|Virtual CPUs",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|compliance",
+    "name": "Badge|Compliance",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|20_sec_peak_iowaitPct",
+    "name": "CPU|Peak Other Wait within collection cycle",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|metering|partialPrice",
+    "name": "Summary|Metering|Partial price",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|waste",
+    "name": "Disk Space Allocation|Waste",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|demandOverLimit",
+    "name": "CPU|Demand Over Limit",
+    "unit": "MHz",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|entitlement_latest",
+    "name": "CPU|Entitlement Latest",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|host_dynamic_entitlement",
+    "name": "Memory|Host Dynamic Entitlement",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|poweredOffTimePercent_whatif",
+    "name": "Memory|Powered Off Time Percent with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|efficiency_classic",
+    "name": "Badge|Legacy Efficiency",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemainingUsingConsumers_whatif",
+    "name": "Disk Space Allocation|Capacity Remaining using profile with committed projects",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|capacityRemaining_min_whatif",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining with committed projects (Based on instantaneous peak)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|isStress",
+    "name": "CPU Allocation|Is Stressed",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "disk|usage_capacity",
+    "name": "Physical Disk|I/O Usage Capacity",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|consumer.count.per.provider.count_whatif",
+    "name": "CPU Allocation|Consumer Provider ratio with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|alert_count_immediate",
+    "name": "Badge|Alert Count Immediate",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|snapshot",
+    "name": "Disk Space|Snapshot Space",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|droppedTx_summation",
+    "name": "Network|Transmitted Packets Dropped",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "sys|poweredOn",
+    "name": "System|Powered ON",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|capacityRemainingUsingConsumers_average",
+    "name": "Memory Allocation|Capacity Remaining (Average consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|usagemhz_average_daily",
+    "name": "CPU|Usage average Daily",
+    "unit": "MHz",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|capacityRemainingUsingConsumers",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining using profile",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|perCpuCoStopPct",
+    "name": "CPU|Normalized Co-stop",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|waste",
+    "name": "Disk Space|Waste",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|allocation|allocationBasedMemoryMTDCost",
+    "name": "Cost|Allocation|Allocation Based Memory MTD Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|peak_vDisk_writeLatency",
+    "name": "Virtual Disk|Highest Write Latency of all instances",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemaining",
+    "name": "Disk Space Allocation|Capacity Remaining",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|estimated_entitlement",
+    "name": "Memory|Estimated entitlement",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|vm_capacity_provisioned",
+    "name": "CPU|Total Capacity",
+    "unit": "MHz",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|workload_indicator",
+    "name": "Summary|(DEP) Workload Indicator",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|iopsPerGB",
+    "name": "Virtual Disk|IOPS per GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|computed_demand",
+    "name": "Memory Usage on Host|System Computed Demand",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|20_sec_peak_write_average",
+    "name": "Virtual Disk|Peak Write Throughput",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|oversized_whatif",
+    "name": "CPU|Is Oversized with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|dynamic_entitlement",
+    "name": "CPU|Dynamic entitlement",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|poweredOff",
+    "name": "Disk Space Usage on Datastore|Powered Off",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|metering|storageMtd",
+    "name": "Summary|Metering|Month to Date Storage Price",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|entitlement_average",
+    "name": "Memory|Entitlement",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|capacityRemainingUsingConsumers_average",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining (Average consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "config|cpuAllocation|slotSize",
+    "name": "Configuration|CPU Resource Allocation|HA Slot Size",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "others|chain_length",
+    "name": "General|Chain Length",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guest|page.outRate_latest",
+    "name": "Guest|Page Out Rate per second",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|isStress_whatif",
+    "name": "Memory Usage on Host|Is Stressed with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "System Attributes|health",
+    "name": "VMware Aria Operations Generated|Self - Health Score",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|reservation_used",
+    "name": "Memory|Reservation Used",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|oversized_whatif",
+    "name": "Disk Space|Is Oversized with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|capacityRemaining_min",
+    "name": "Summary|Capacity Remaining (Based on instantaneous peak)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|demandBasedCpuMTDCost",
+    "name": "Cost|Demand Based CPU MTD Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|consumer.count",
+    "name": "Summary|Number of Capacity consumers",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "power|power_average",
+    "name": "Power|Current Power Consumption Rate (Watt)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|host_usage",
+    "name": "Memory|Host Usage",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "disk|numberReadAveraged_average",
+    "name": "Physical Disk|Read IOPS",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|capacityRemaining_whatif",
+    "name": "Memory Usage on Host|Capacity Remaining with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|waste",
+    "name": "CPU|Waste",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|oversized",
+    "name": "CPU Allocation|Is Oversized",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "ping|latency|min",
+    "name": "Ping Statistics|Latency|Minimum",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "sys|uptime_latest",
+    "name": "System|Uptime",
+    "unit": "Second(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|maxlimited_summation",
+    "name": "CPU|Max Limited",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|isStress",
+    "name": "Disk Space Usage on Datastore|Is Stressed",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|capacityRemainingUsingConsumers_small",
+    "name": "Memory|Capacity Remaining (Small consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|consumer.count_whatif",
+    "name": "Memory|Number of Capacity consumers with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "datastore|maxTotalLatency_latest",
+    "name": "Datastore|Highest Latency",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|actual.capacity_whatif",
+    "name": "CPU|Current Size with committed projects",
+    "unit": "MHz",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|mediumSeeks_latest",
+    "name": "Virtual Disk|Number of Medium Seeks",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|effectiveStorageMTDCost",
+    "name": "Cost|Effective Storage MTD Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|consumer.count.per.provider.count_whatif",
+    "name": "Disk Space|Consumer Provider ratio with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|workload",
+    "name": "Disk Space Usage on Datastore|Workload",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|received_average",
+    "name": "Network|Data Receive Rate",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|overlap_summation",
+    "name": "CPU|(DEP) Overlap",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|effective_limit",
+    "name": "Memory|Effective limit",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|oversized_whatif",
+    "name": "Memory Usage on Host|Is Oversized with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "ping|packet_loss|min",
+    "name": "Ping Statistics|Packet Loss|Minimum",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|metering|details|usage",
+    "name": "Summary|Metering|Details|Usage",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|actual.capacity_whatif",
+    "name": "Memory|Current Size with committed projects",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "disk|totalReadLatency_average",
+    "name": "Physical Disk|Read Latency",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|multicastTx_summation_sum",
+    "name": "Network|Total Multicast Packets Transmitted",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|usage_capacity",
+    "name": "Network|I/O Usage Capacity",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|metering|memory",
+    "name": "Summary|Metering|Memory price",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|actual.capacity.normalized",
+    "name": "Memory Allocation|Total Capacity",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|poweredOffTimePercent_whatif",
+    "name": "Disk Space|Powered Off Time Percent with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|timeRemaining_whatif",
+    "name": "Memory Allocation|Time Remaining with committed projects",
+    "unit": "Day(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "power|energy_summation",
+    "name": "Power|(DEP) Energy (Joule)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "rescpu|actpk15_latest",
+    "name": "CPU Utilization for Resources|CPU Active (15 min. peak)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "ping|latency|max",
+    "name": "Ping Statistics|Latency|Maximum",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|size.recommendation_whatif",
+    "name": "Disk Space Allocation|Recommended Size with committed projects",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|stress_whatif",
+    "name": "Disk Space Usage on Datastore|Stress with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|workload",
+    "name": "Memory Usage on Host|Workload",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|allocation|allocationBasedDailyStorageCost",
+    "name": "Cost|Allocation|Daily Disk Space Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|potentialCostIncrease",
+    "name": "Cost|Potential Cost Increase",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|reason.for.waste",
+    "name": "Memory|Reason for Reclaimable Capacity",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|actual.capacity.normalized_whatif",
+    "name": "Memory Usage on Host|Total Capacity with committed projects",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|stress_whatif",
+    "name": "Memory Usage on Host|Stress with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|capacityRemaining_min",
+    "name": "Disk Space|Capacity Remaining (Based on instantaneous peak)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemainingUsingConsumers",
+    "name": "Disk Space Allocation|Capacity Remaining using profile",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|readiness_average",
+    "name": "CPU|Readiness",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|object.demand.with.size.recommendation",
+    "name": "Disk Space Usage on Datastore|Effective Demand (With peak usage)",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "Guest OS Services|mkKnownServiceCount",
+    "name": "Guest OS Services|Number of OOTB Services",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|computed_demand_whatif",
+    "name": "Disk Space Allocation|System Computed Demand with committed projects",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "rescpu|runpk15_latest",
+    "name": "CPU Utilization for Resources|CPU Running (15 min. peak)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "disk|diskdemand",
+    "name": "Physical Disk|Demand",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|guest_provisioned",
+    "name": "Memory|Total Capacity",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|oversized",
+    "name": "Disk Space Allocation|Is Oversized",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|mem_shares",
+    "name": "Summary|Memory Shares",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|consumed_average",
+    "name": "Memory|Consumed",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|demandPct",
+    "name": "CPU|Demand",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|diskspace|capacityRemaining",
+    "name": "Capacity Analytics Generated|Disk Space|Capacity Remaining",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "storage|numberReadAveraged_average",
+    "name": "Storage|Reads per second",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|host_active",
+    "name": "Memory|Host Active",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|compressionRate_average",
+    "name": "Memory|Compression Rate",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|isWaste",
+    "name": "CPU Allocation|Has Reclaimable Capacity",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|idle_whatif",
+    "name": "Memory Usage on Host|Is Idle with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|isStress_whatif",
+    "name": "Disk Space Usage on Datastore|Is Stressed with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|idle",
+    "name": "Memory|Is Idle",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|perDsUsed",
+    "name": "Disk Space|Virtual Machine used",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|size.recommendation_whatif",
+    "name": "Memory Allocation|Recommended Size with committed projects",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|metering|storage",
+    "name": "Summary|Metering|Storage price",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|utilization.range",
+    "name": "Memory|Utilization Range",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|size.recommendation_whatif",
+    "name": "CPU|Recommended Size with committed projects",
+    "unit": "vCPUs",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "datastore|demand_oio",
+    "name": "Datastore|Outstanding IO requests",
+    "unit": "OIOs",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guest|hugePage.total_latest",
+    "name": "Guest|Total Huge Pages",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|actual.capacity",
+    "name": "Memory Allocation|Current Size",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|stress",
+    "name": "Memory Allocation|Stress",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|consumer.count.per.provider.count",
+    "name": "Memory Usage on Host|Consumer Provider ratio",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "sys|osUptime_latest",
+    "name": "System|OS Uptime",
+    "unit": "Second(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|commandsAborted_summation",
+    "name": "Virtual Disk|Commands Aborted",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|numberReadAveraged_average",
+    "name": "Virtual Disk|Read IOPS",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "datastore|maxObserved_NumberRead",
+    "name": "Datastore|(DEP) Max Observed Reads per second",
+    "unit": "IOPS",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|isWaste",
+    "name": "Disk Space Allocation|Has Reclaimable Capacity",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|host_nonpageable_estimate",
+    "name": "Memory|Guest Non Pageable Memory",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|demandmhz",
+    "name": "CPU|Demand",
+    "unit": "MHz",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|guest_demand",
+    "name": "Memory|Guest Demand",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|oversized",
+    "name": "CPU|Is Oversized",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|reason.for.waste",
+    "name": "CPU|Reason for Reclaimable Capacity",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|density",
+    "name": "Disk Space Usage on Datastore|Density",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|idle",
+    "name": "Disk Space|Is Idle",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|allocation|allocationBasedDailyCpuCost",
+    "name": "Cost|Allocation|Daily CPU Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "System Attributes|child_active_alarms",
+    "name": "VMware Aria Operations Generated|Full Set - Active Anomaly Count",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|isWaste",
+    "name": "Disk Space Usage on Datastore|Has Reclaimable Capacity",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "disk|maxTotalLatency_latest",
+    "name": "Physical Disk|Highest Latency",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guestfilesystem|freespace_total",
+    "name": "Guest File System|Total Guest File System Free",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|capacityRemainingUsingConsumers",
+    "name": "Disk Space|Capacity Remaining using profile",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|capacityRemainingUsingConsumers_whatif",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining using profile with committed projects",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|utilization.range",
+    "name": "Memory Usage on Host|Utilization Range",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|optimal.consumer.per.provider_whatif",
+    "name": "Memory|Optimal Consumer Provider ratio with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|zipSaved_latest",
+    "name": "Memory|Zip Saved",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|capacityRemainingValue",
+    "name": "Memory Allocation|Capacity Remaining Value",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|stress_whatif",
+    "name": "Disk Space Allocation|Stress with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|idle_whatif",
+    "name": "Summary|Is Idle with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|peak_vDisk_readLatency",
+    "name": "Virtual Disk|Highest Read Latency of all instances",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|host_demand",
+    "name": "Memory|Host Demand",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|stress",
+    "name": "Disk Space Usage on Datastore|Stress",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|swapin_average",
+    "name": "Memory|Swap In",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|computed_demand",
+    "name": "Memory Allocation|System Computed Demand",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|reclaimableCost",
+    "name": "Cost|Potential Savings",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|writeIOSize_latest",
+    "name": "Virtual Disk|Average Write request size",
+    "unit": "bytes",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|idle",
+    "name": "Memory Usage on Host|Is Idle",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|capacity.provider.count_whatif",
+    "name": "Disk Space Allocation|Number of Capacity providers with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|consumed_average_daily",
+    "name": "Memory|Consumed average Daily",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|zipped_latest",
+    "name": "Memory|Zipped",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|vDiskOIO",
+    "name": "Virtual Disk|Outstanding IO requests",
+    "unit": "OIOs",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "storage|contention",
+    "name": "Storage|Contention percentage",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|capacity.provider.count",
+    "name": "Summary|Number of Capacity providers",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "System Attributes|child_ki_metrics",
+    "name": "VMware Aria Operations Generated|Full Set - KPI Count",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|capacityRemaining_whatif",
+    "name": "Disk Space|Capacity Remaining with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|usageWithoutOverhead",
+    "name": "Disk Space|Usage Without Overhead",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|demandOverCapacity",
+    "name": "Memory|Demand Over Capacity",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|idle_whatif",
+    "name": "Disk Space Usage on Datastore|Is Idle with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|poweredOff",
+    "name": "Memory|Powered Off",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|size.recommendation_whatif",
+    "name": "CPU Allocation|Recommended Size with committed projects",
+    "unit": "vCPUs",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|capacityRemainingValue",
+    "name": "CPU|Capacity Remaining Value",
+    "unit": "MHz",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "datastore|demand",
+    "name": "Datastore|Demand",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|oversized",
+    "name": "Summary|Is Oversized",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|capacityRemainingUsingConsumers_large",
+    "name": "Summary|Capacity Remaining (Large consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|corecount_provisioned",
+    "name": "CPU|Provisioned vCPU(s)",
+    "unit": "vCPUs",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|undersized|memory",
+    "name": "Summary|Undersized|Memory",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|capacityRemainingUsingConsumers",
+    "name": "Summary|Capacity Remaining using profile",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|oversized",
+    "name": "Disk Space|Is Oversized",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|capacityRemainingUsingConsumers_large",
+    "name": "Memory Usage on Host|Capacity Remaining (Large consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|zero_average",
+    "name": "Memory|Zero",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|metering|customProperties|price",
+    "name": "Summary|Metering|CAS Custom Properties|Price",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|waitPct",
+    "name": "CPU|Wait",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|capacityRemainingUsingConsumers_average_whatif",
+    "name": "Disk Space|Capacity Remaining with committed projects (Average consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|effectiveProjectedTotalCost",
+    "name": "Cost|Monthly Effective Projected Total Cost",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|effectiveDailyStorageCost",
+    "name": "Cost|Effective Daily Storage Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|consumer.count.per.provider.count",
+    "name": "CPU Allocation|Consumer Provider ratio",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|diskspace|capacityRemainingPercentage",
+    "name": "Capacity Analytics Generated|Disk Space|Capacity Remaining Percentage",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|multicastTx_summation",
+    "name": "Network|Multicast Packets Transmitted",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|capacity.provider.count_whatif",
+    "name": "Memory Usage on Host|Number of Capacity providers with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|capacityRemainingUsingConsumers_small",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining (Small consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|poweredOffTimePercent",
+    "name": "CPU Allocation|Powered Off Time Percent",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|oversized_whatif",
+    "name": "Disk Space Usage on Datastore|Is Oversized with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|actual.capacity",
+    "name": "Disk Space|Current Size",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|health",
+    "name": "Badge|Health",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|compressed_average",
+    "name": "Memory|Compressed",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|decompressionRate_average",
+    "name": "Memory|Decompression Rate",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guest|page.inRate_latest",
+    "name": "Guest|Page In Rate per second",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|reason.for.waste",
+    "name": "Disk Space|Reason for Reclaimable Capacity",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|consumer.count.per.provider.count",
+    "name": "CPU|Consumer Provider ratio",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|net_run",
+    "name": "CPU|Net Run",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|capacityRemainingUsingConsumers_average_whatif",
+    "name": "Memory|Capacity Remaining with committed projects (Average consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "rescpu|runav1_latest",
+    "name": "CPU Utilization for Resources|CPU Running (1 min. average)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|activeNotShared",
+    "name": "Disk Space|Active not shared",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|totalLatency",
+    "name": "Virtual Disk|Total Latency",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|idle",
+    "name": "CPU Allocation|Is Idle",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|systemSummationPct",
+    "name": "CPU|System",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|consumer.count_whatif",
+    "name": "Memory Allocation|Number of Capacity consumers with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|capacity.provider.count_whatif",
+    "name": "CPU|Number of Capacity providers with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|oversized|memory",
+    "name": "Summary|Oversized|Memory",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "System Attributes|change_index",
+    "name": "VMware Aria Operations Generated|Self - Change Index",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|poweredOff_whatif",
+    "name": "Disk Space|Powered Off with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|reason.for.waste",
+    "name": "Disk Space Usage on Datastore|Reason for Reclaimable Capacity",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|effectiveDailyCost",
+    "name": "Cost|Effective Daily Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|cpu|timeRemaining",
+    "name": "Capacity Analytics Generated|CPU|Time Remaining",
+    "unit": "Day(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|computed_demand",
+    "name": "Memory|System Computed Demand",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|llSwapUsed_average",
+    "name": "Memory|Swap Space Used in Host Cache",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "disk|sum_queued_oio",
+    "name": "Physical Disk|Total Queued Outstanding operations",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|readyPct",
+    "name": "CPU|Ready",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "storage|totalLatency_average",
+    "name": "Storage|Total Latency",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|density",
+    "name": "CPU Allocation|Density",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|active_average",
+    "name": "Memory|Guest Active",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|capacityRemainingPercentage",
+    "name": "Capacity Analytics Generated|Capacity Remaining Percentage",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "rescpu|maxLimited5_latest",
+    "name": "CPU Utilization for Resources|CPU Throttled (5 min. average)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|guest_usage",
+    "name": "Memory|Guest Usage",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|timeRemaining_whatif",
+    "name": "Disk Space Usage on Datastore|Time Remaining with committed projects",
+    "unit": "Day(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|metering|memoryMtd",
+    "name": "Summary|Metering|Month to Date Memory Price",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|capacityRemainingUsingConsumers_average_whatif",
+    "name": "CPU|Capacity Remaining with committed projects (Average consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|swapwaitPct",
+    "name": "CPU|Swap wait",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|swapwait_summation",
+    "name": "CPU|Swap Wait",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|overhead_average",
+    "name": "Memory|Overhead",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|idle",
+    "name": "Summary|Reclaimable Idle",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|20_sec_peak_read_average",
+    "name": "Virtual Disk|Peak Read Throughput",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|cpu|recommendedSize",
+    "name": "Capacity Analytics Generated|CPU|Recommended Size",
+    "unit": "MHz",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|computed_demand_whatif",
+    "name": "Memory|System Computed Demand with committed projects",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "storage|write_average",
+    "name": "Storage|Write Rate",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|snapshot_count",
+    "name": "Summary|Number of Snapshots",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|isStress",
+    "name": "Disk Space|Is Stressed",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|density_whatif",
+    "name": "CPU|Density with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|totalWriteLatency_average",
+    "name": "Virtual Disk|Write Latency",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|workload",
+    "name": "Memory|Workload",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|latency_average",
+    "name": "CPU|Latency",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|bytesRx_average",
+    "name": "Network|bytesRx",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "datastore|maxObserved_Read",
+    "name": "Datastore|(DEP) Max Observed Read Rate",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|consumer.count.per.provider.count",
+    "name": "Disk Space Usage on Datastore|Consumer Provider ratio",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|poweredOffTimePercent",
+    "name": "Disk Space Usage on Datastore|Powered Off Time Percent",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|swapinRate_average",
+    "name": "Memory|Swap In Rate",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "System Attributes|new_alarms",
+    "name": "VMware Aria Operations Generated|Self - New Anomaly Count",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "datastore|read_average",
+    "name": "Datastore|Read Throughput",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|idle_whatif",
+    "name": "Memory|Is Idle with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|capacityRemainingUsingConsumers_small",
+    "name": "Memory Allocation|Capacity Remaining (Small consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|timeRemaining_whatif",
+    "name": "CPU Allocation|Time Remaining with committed projects",
+    "unit": "Day(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|peak_vDisk_iops",
+    "name": "Virtual Disk|Highest IOPS of all instances",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|20_sec_peak_readyPct",
+    "name": "CPU|Peak vCPU Ready within collection cycle",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|demandBasedMemoryMTDCost",
+    "name": "Cost|Demand Based Memory MTD Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|droppedRx_summation_sum",
+    "name": "Network|Total Received Packets Dropped",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|optimal.consumer.per.provider_whatif",
+    "name": "Memory Allocation|Optimal Consumer Provider ratio with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|optimal.consumer.per.provider_whatif",
+    "name": "Memory Usage on Host|Optimal Consumer Provider ratio with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|capacity.provider.count_whatif",
+    "name": "Summary|Number of Capacity providers with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|demandBasedDailyMemoryCost",
+    "name": "Cost|Demand Based Daily Memory Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|consumer.count",
+    "name": "Disk Space Allocation|Number of Capacity consumers",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|capacityRemaining",
+    "name": "Disk Space|Capacity Remaining",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "OnlineCapacityAnalytics|mem|capacityRemaining",
+    "name": "Capacity Analytics Generated|Memory|Capacity Remaining",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|idlePct",
+    "name": "CPU|Idle",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|poweredOffTimePercent_whatif",
+    "name": "Summary|Powered Off Time Percent with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|readOIO_latest",
+    "name": "Virtual Disk|Outstanding Read Requests",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|latency_average",
+    "name": "Memory|Latency",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|capacityRemaining_min_whatif",
+    "name": "Summary|Capacity Remaining with committed projects (Based on instantaneous peak)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "disk|usage_average",
+    "name": "Physical Disk|Total Throughput",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "rescpu|sampleCount_latest",
+    "name": "CPU Utilization for Resources|Group CPU Sample Count",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|transmit_demand_average",
+    "name": "Network|Data Transmit Demand Rate",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "System Attributes|ki_metrics",
+    "name": "VMware Aria Operations Generated|Self - KPI Count",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|guest_activePct",
+    "name": "Memory|Guest Active Memory",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|idle_whatif",
+    "name": "CPU Allocation|Is Idle with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|waste",
+    "name": "Memory|Waste",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemainingUsingConsumers_large",
+    "name": "Disk Space Allocation|Capacity Remaining (Large consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|notshared",
+    "name": "Disk Space|Not Shared",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|capacityRemainingUsingConsumers_whatif",
+    "name": "CPU Allocation|Capacity Remaining using profile with committed projects",
+    "unit": "vCPUs",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guest|contextSwapRate_latest",
+    "name": "Guest|CPU Context Switch Rate",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|packetsRx_summation",
+    "name": "Network|Packets Received",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|actual.capacity.normalized",
+    "name": "CPU Allocation|Total Capacity",
+    "unit": "vCPUs",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|packetsRx_summation_sum",
+    "name": "Network|Total Packets Received",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|write_average",
+    "name": "Virtual Disk|Write Throughput",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|oversized_whatif",
+    "name": "CPU Allocation|Is Oversized with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|isWaste",
+    "name": "Memory|Has Reclaimable Capacity",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|actual.capacity",
+    "name": "Memory|Current Size",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|poweredOffTimePercent_whatif",
+    "name": "Disk Space Allocation|Powered Off Time Percent with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|stress",
+    "name": "Disk Space Allocation|Stress",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guest|cpu_queue",
+    "name": "Guest|CPU Queue",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|swapout_average",
+    "name": "Memory|Swap Out",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|host_contentionPct",
+    "name": "Memory|Contention",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "sys|productString",
+    "name": "System|Product String",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|oversized",
+    "name": "Memory|Is Oversized",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|host_received_average",
+    "name": "Network|VM to Host Data Receive Rate",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|computed_demand_whatif",
+    "name": "Disk Space|System Computed Demand with committed projects",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|droppedTx_summation_sum",
+    "name": "Network|Total Transmitted Packets Dropped",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|transmitted_average",
+    "name": "Network|Data Transmit Rate",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "rescpu|runav15_latest",
+    "name": "CPU Utilization for Resources|CPU Running (15 min. average)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guest|mem.physUsable_latest",
+    "name": "Guest|Physically Usable Memory",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|capacityRemainingUsingConsumers_average",
+    "name": "Memory|Capacity Remaining (Average consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|activewrite_average",
+    "name": "Memory|Active Write",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|vmMemoryDemand",
+    "name": "Memory|Utilization",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|maxObserved_Tx_KBps",
+    "name": "Network|(DEP) Max Observed Transmitted Throughput",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "performance|number_of_kpis_breached",
+    "name": "Performance|Service Level Indicator",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "rescpu|maxLimited1_latest",
+    "name": "CPU Utilization for Resources|CPU Throttled (1 min. average)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|metering|value",
+    "name": "Summary|Metering|Total price",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|provisionedSpace",
+    "name": "Disk Space|Provisioned Space for VM",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|metering|vmTags|price",
+    "name": "Summary|Metering|vSphere Tags|Price",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|number_network",
+    "name": "Summary|Number of Networks",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|capacityRemainingValue_whatif",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining Value with committed projects",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "storage|totalWriteLatency_average",
+    "name": "Storage|Write Latency",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|utilization.range",
+    "name": "Disk Space|Utilization Range",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|size.recommendation",
+    "name": "Disk Space Usage on Datastore|Recommended Size",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|capacityRemainingValue_whatif",
+    "name": "Disk Space|Capacity Remaining Value with committed projects",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|capacityRemainingUsingConsumers_medium",
+    "name": "Memory Usage on Host|Capacity Remaining (Medium consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|oversized|potentialMemConsumed",
+    "name": "Summary|Oversized|Potential Memory",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guest|20_sec_peak_disk_queue",
+    "name": "Guest|Peak Disk Queue within collection cycle",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|broadcastTx_summation_sum",
+    "name": "Network|Total Broadcast Packets Transmitted",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|metering|valueMtd",
+    "name": "Summary|Metering|Month to Date Total Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|poweredOffTimePercent_whatif",
+    "name": "CPU Allocation|Powered Off Time Percent with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|optimal.consumer.per.provider",
+    "name": "Disk Space Allocation|Optimal Consumer Provider ratio",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|capacityRemaining_min",
+    "name": "Memory Allocation|Capacity Remaining (Based on instantaneous peak)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|capacityRemainingUsingConsumers_small",
+    "name": "Memory Usage on Host|Capacity Remaining (Small consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|20_sec_peak_host_contentionPct",
+    "name": "Memory|Peak Contention within collection cycle",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|timeRemaining_whatif",
+    "name": "Summary|Time Remaining with committed projects",
+    "unit": "Day(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|isWaste",
+    "name": "Disk Space|Has Reclaimable Capacity",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|isWaste",
+    "name": "Memory Allocation|Has Reclaimable Capacity",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|density_whatif",
+    "name": "Memory Usage on Host|Density with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|actual.capacity.normalized_whatif",
+    "name": "CPU Allocation|Total Capacity with committed projects",
+    "unit": "vCPUs",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|provisioned",
+    "name": "Disk Space|Provisioned Space",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|computed_demand_whatif",
+    "name": "Disk Space Usage on Datastore|System Computed Demand with committed projects",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemaining_whatif",
+    "name": "Disk Space Allocation|Capacity Remaining with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|poweredOffTimePercent_whatif",
+    "name": "Memory Allocation|Powered Off Time Percent with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "datastore|used",
+    "name": "Datastore|Used Space",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "power|energy_summation_sum",
+    "name": "Power|Total Energy Consumed in the collection period",
+    "unit": "Wh",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|actual.capacity",
+    "name": "Disk Space Usage on Datastore|Current Size",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|readIOSize_latest",
+    "name": "Virtual Disk|Average Read request size",
+    "unit": "bytes",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "disk|read_average",
+    "name": "Physical Disk|Read Throughput",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|capacity.provider.count_whatif",
+    "name": "Memory|Number of Capacity providers with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|allocation|allocationBasedDailyMemoryCost",
+    "name": "Cost|Allocation|Daily Memory Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guestfilesystem|capacity_total",
+    "name": "Guest File System|Total Capacity",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|vmmemctl_average",
+    "name": "Memory|Balloon",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|poweredOff_whatif",
+    "name": "Memory Allocation|Powered Off with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|effectiveDailyMemoryCost",
+    "name": "Cost|Effective Daily Memory Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|density_whatif",
+    "name": "Badge|Density with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|capacityRemaining_min_whatif",
+    "name": "Disk Space|Capacity Remaining with committed projects (Based on instantaneous peak)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|demandBasedDailyCpuCost",
+    "name": "Cost|Demand Based Daily CPU Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|consumer.count",
+    "name": "Disk Space Usage on Datastore|Number of Capacity consumers",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|capacityRemainingUsingConsumers_large",
+    "name": "Memory|Capacity Remaining (Large consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "System Attributes|total_alert_count",
+    "name": "VMware Aria Operations Generated|Total Alert Count",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|utilization.range",
+    "name": "Disk Space Allocation|Utilization Range",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|size.recommendation",
+    "name": "Memory|Recommended Size",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|demandBasedStorageMTDCost",
+    "name": "Cost|Demand Based Storage MTD Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|consumer.count.per.provider.count",
+    "name": "Memory Allocation|Consumer Provider ratio",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|capacityRemainingUsingConsumers_medium",
+    "name": "Disk Space|Capacity Remaining (Medium consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|object.demand.with.size.recommendation",
+    "name": "Disk Space|Effective Demand (With peak usage)",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "datastore|usage_average",
+    "name": "Datastore|Total Throughput",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "disk|commandsAveraged_average",
+    "name": "Physical Disk|Total IOPS",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|allocation|allocationBasedTotalCost",
+    "name": "Cost|Allocation|Monthly Projected Total Cost",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|isWaste",
+    "name": "Summary|Has Reclaimable Capacity",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|20_sec_peak_packetsPerSec",
+    "name": "Network|Peak Network Packet per second within collection cycle",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|density_whatif",
+    "name": "Memory Allocation|Density with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|oversized",
+    "name": "Memory Usage on Host|Is Oversized",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|isStress_whatif",
+    "name": "Disk Space|Is Stressed with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "disk|max_observed",
+    "name": "Physical Disk|(DEP) Max Observed OIO",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|isWaste",
+    "name": "Memory Usage on Host|Has Reclaimable Capacity",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|vmAgeHours",
+    "name": "Summary|VM age",
+    "unit": "Hour(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|workload",
+    "name": "CPU|Workload",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|host_demand_for_aggregation",
+    "name": "Memory|Host Demand For Aggregation",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "System Attributes|active_alarms",
+    "name": "VMware Aria Operations Generated|Self - Active Anomaly Count",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|consumer.count.per.provider.count",
+    "name": "Summary|Consumer Provider ratio",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|effectiveCpuMTDCost",
+    "name": "Cost|Effective CPU MTD Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cost|allocation|allocationBasedCpuMTDCost",
+    "name": "Cost|Allocation|Allocation Based CPU MTD Cost",
+    "unit": "",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guest|disk_queue",
+    "name": "Guest|Disk Queue",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|capacityRemainingValue_whatif",
+    "name": "CPU|Capacity Remaining Value with committed projects",
+    "unit": "MHz",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|isStress_whatif",
+    "name": "Summary|Is Stressed with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "disk|numberWriteAveraged_average",
+    "name": "Physical Disk|Write IOPS",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|metering|details|instance|price",
+    "name": "Summary|Metering|Details|Instance|Price",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|readLatencyUS_latest",
+    "name": "Virtual Disk|Read Latency (microseconds)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|capacity.provider.count",
+    "name": "Memory Allocation|Number of Capacity providers",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|20_sec_peak_swapwaitPct",
+    "name": "CPU|Peak vCPU Swap Wait within collection cycle",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|density",
+    "name": "Disk Space Allocation|Density",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|capacityRemainingUsingConsumers_large",
+    "name": "CPU|Capacity Remaining (Large consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|multicastRx_summation_sum",
+    "name": "Network|Total Multicast Packets Received",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|optimal.consumer.per.provider_whatif",
+    "name": "Disk Space|Optimal Consumer Provider ratio with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|isStress_whatif",
+    "name": "CPU|Is Stressed with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|optimal.consumer.per.provider",
+    "name": "Memory Usage on Host|Optimal Consumer Provider ratio",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|guest_nonpageable_estimate",
+    "name": "Memory|Host Non Pageable Memory",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|size.recommendation",
+    "name": "Memory Usage on Host|Recommended Size",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "ping|peak_latency",
+    "name": "Ping Statistics|Peak Latency",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|capacityRemaining",
+    "name": "CPU Allocation|Capacity Remaining",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|capacityRemainingUsingConsumers_whatif",
+    "name": "Summary|Capacity Remaining using profile with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "datastore|numberReadAveraged_average",
+    "name": "Datastore|Read IOPS",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "others|memorymb",
+    "name": "General|Memory",
+    "unit": "MB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|metering|additional",
+    "name": "Summary|Metering|Additional price",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|capacityRemaining",
+    "name": "Memory Usage on Host|Capacity Remaining",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "rescpu|actav1_latest",
+    "name": "CPU Utilization for Resources|CPU Active (1 min. average)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|poweredOffTimePercent_whatif",
+    "name": "CPU|Powered Off Time Percent with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|actual.capacity.normalized_whatif",
+    "name": "Memory Allocation|Total Capacity with committed projects",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|density",
+    "name": "Memory Allocation|Density",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|capacityRemainingUsingConsumers_whatif",
+    "name": "Memory Usage on Host|Capacity Remaining using profile with committed projects",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "storage|read_average",
+    "name": "Storage|Read Rate",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|used_summation",
+    "name": "CPU|Used",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|extra_summation",
+    "name": "CPU|Extra",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|poweredOff_whatif",
+    "name": "Summary|Powered Off with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "disk|totalWriteLatency_average",
+    "name": "Physical Disk|Write Latency",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|actual.capacity.normalized",
+    "name": "CPU|Total Capacity",
+    "unit": "MHz",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|usage_average",
+    "name": "CPU|Usage",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "datastore|totalWriteLatency_average",
+    "name": "Datastore|Write Latency",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|capacityRemaining_min_whatif",
+    "name": "Memory Usage on Host|Capacity Remaining with committed projects (Based on instantaneous peak)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|consumer.count",
+    "name": "Memory Usage on Host|Number of Capacity consumers",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "disk|commandsAborted_summation",
+    "name": "Physical Disk|Commands Aborted",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|capacityRemainingUsingConsumers_whatif",
+    "name": "Memory|Capacity Remaining using profile with committed projects",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|costop_summation",
+    "name": "CPU|Co-stop",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guest|swap.spaceRemaining_latest",
+    "name": "Guest|Remaining Swap Space",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "power|energy_summation_sum_hourly",
+    "name": "Power|Total Power Consumed By VM(Hourly)",
+    "unit": "Wh",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|density",
+    "name": "CPU|Density",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "ping|packet_loss|max",
+    "name": "Ping Statistics|Packet Loss|Maximum",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|capacity.provider.count_whatif",
+    "name": "CPU Allocation|Number of Capacity providers with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "datastore|totalLatency_max",
+    "name": "Datastore|Total Latency Max",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|poweredOffTimePercent",
+    "name": "Disk Space Allocation|Powered Off Time Percent",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|writeOIO_latest",
+    "name": "Virtual Disk|Outstanding Write Requests",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|alert_count_critical",
+    "name": "Badge|Alert Count Critical",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|waste",
+    "name": "CPU Allocation|Waste",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|host_maxObserved_Rx_KBps",
+    "name": "Network|(DEP) VM to Host Max Observed Received Throughput",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|consumer.count",
+    "name": "CPU Allocation|Number of Capacity consumers",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|iowait",
+    "name": "CPU|Other Wait",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "vmop|vmotion|total_failures",
+    "name": "Number of VM Operations|vMotion|vMotion Failures",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|timeRemaining",
+    "name": "Memory Allocation|Time Remaining",
+    "unit": "Day(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|actual.capacity.normalized_whatif",
+    "name": "CPU|Total Capacity with committed projects",
+    "unit": "MHz",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|capacityRemaining_whatif",
+    "name": "Memory Allocation|Capacity Remaining with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "datastore|numberWriteAveraged_average",
+    "name": "Datastore|Write IOPS",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "rescpu|runav5_latest",
+    "name": "CPU Utilization for Resources|CPU Running (5 min. average)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|capacityRemainingUsingConsumers_average",
+    "name": "Disk Space Allocation|Capacity Remaining (Average consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|capacityRemaining_min",
+    "name": "Memory|Capacity Remaining (Based on instantaneous peak)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|isStress_whatif",
+    "name": "Disk Space Allocation|Is Stressed with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|optimal.consumer.per.provider",
+    "name": "Disk Space Usage on Datastore|Optimal Consumer Provider ratio",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|capacity_contentionPct",
+    "name": "CPU|Contention",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|size.recommendation_whatif",
+    "name": "Disk Space|Recommended Size with committed projects",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|consumer.count_whatif",
+    "name": "CPU|Number of Capacity consumers with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|capacityRemaining_min",
+    "name": "Disk Space Usage on Datastore|Capacity Remaining (Based on instantaneous peak)",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "virtualDisk|readLoadMetric_latest",
+    "name": "Virtual Disk|Read Load",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "datastore|write_average",
+    "name": "Datastore|Write Throughput",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|computed_demand",
+    "name": "Disk Space Allocation|System Computed Demand",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|timeRemaining_whatif",
+    "name": "Disk Space Allocation|Time Remaining with committed projects",
+    "unit": "Day(s)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|idle_whatif",
+    "name": "Memory Allocation|Is Idle with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "disk|write_average",
+    "name": "Physical Disk|Write Throughput",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|timeRemaining_whatif",
+    "name": "Badge|Time Remaining with committed projects",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-host|poweredOff_whatif",
+    "name": "Memory Usage on Host|Powered Off with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|consumer.count_whatif",
+    "name": "Disk Space|Number of Capacity consumers with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|overheadMax_average",
+    "name": "Memory|Overhead Max",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "config|hardware|disk_Space",
+    "name": "Configuration|Hardware|Disk Space",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|metering|sizingPolicy",
+    "name": "Summary|Metering|Sizing Policy price",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|capacityRemainingUsingConsumers",
+    "name": "CPU Allocation|Capacity Remaining using profile",
+    "unit": "vCPUs",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|optimal.consumer.per.provider",
+    "name": "Memory|Optimal Consumer Provider ratio",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guest|hugePage.size_latest",
+    "name": "Guest|Huge Page Size",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "config|hardware|num_Cpu",
+    "name": "Configuration|Hardware|Number of CPUs",
+    "unit": "vCPUs",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|poweredOffTimePercent",
+    "name": "Memory Allocation|Powered Off Time Percent",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem-alloc|reason.for.waste",
+    "name": "Memory Allocation|Reason for Reclaimable Capacity",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|stress",
+    "name": "Badge|Stress",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|capacityRemainingUsingConsumers_whatif",
+    "name": "Disk Space|Capacity Remaining using profile with committed projects",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|nonzero_active",
+    "name": "Memory|Non Zero Active",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|capacityRemainingUsingConsumers_small",
+    "name": "CPU|Capacity Remaining (Small consumer profile)",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|actual.capacity.normalized",
+    "name": "Disk Space Usage on Datastore|Total Capacity",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|consumer.count_whatif",
+    "name": "CPU Allocation|Number of Capacity consumers with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|shared_average",
+    "name": "Memory|Shared",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|actual.capacity",
+    "name": "Disk Space Allocation|Current Size",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|waste",
+    "name": "Disk Space Usage on Datastore|Waste",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "storage|usage_average",
+    "name": "Storage|Total Usage",
+    "unit": "KBps",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-total|computed_demand",
+    "name": "Disk Space Usage on Datastore|System Computed Demand",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "sys|heartbeat_latest",
+    "name": "System|Heartbeat Latest",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "guestfilesystem|percentage_total",
+    "name": "Guest File System|Utilization",
+    "unit": "%",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|size.recommendation",
+    "name": "CPU|Recommended Size",
+    "unit": "vCPUs",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|isStress",
+    "name": "Summary|Is Stressed",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "summary|optimal.consumer.per.provider_whatif",
+    "name": "Summary|Optimal Consumer Provider ratio with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|computed_demand",
+    "name": "CPU|System Computed Demand",
+    "unit": "MHz",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|packetsPerSec",
+    "name": "Network|Packets per second",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "mem|host_demand_reservation",
+    "name": "Memory|Host Demand with Reservation",
+    "unit": "KB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "badge|alert_count_warning",
+    "name": "Badge|Alert Count Warning",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace-alloc|capacity.provider.count",
+    "name": "Disk Space Allocation|Number of Capacity providers",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|wait_summation",
+    "name": "CPU|Wait",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "net|packetsTxPerSec",
+    "name": "Network|Packets Transmitted per second",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "diskspace|snapshot|used",
+    "name": "Disk Space|Snapshot|Virtual Machine used",
+    "unit": "GB",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu-alloc|density_whatif",
+    "name": "CPU Allocation|Density with committed projects",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|capacityRemainingUsingConsumers_whatif",
+    "name": "CPU|Capacity Remaining using profile with committed projects",
+    "unit": "MHz",
+    "instanceType": "INSTANCED"
+   },
+   {
+    "key": "cpu|20_sec_peak_overlap_summation",
+    "name": "CPU|(DEP) Peak vCPU Overlap within collection cycle",
+    "unit": "ms",
+    "instanceType": "INSTANCED"
+   }
+  ]
+ }
+}
