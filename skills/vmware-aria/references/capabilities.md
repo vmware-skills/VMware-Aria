@@ -135,18 +135,27 @@ size. It is never inferred:
 CLI commands unwrap `items` and print the rows; the envelope is the MCP/library
 contract.
 
+Reading rules for an agent:
+
+- **Rows live under `items`.** An empty `items` with `returned: 0` means the query genuinely matched nothing — report that, not a tool failure.
+- **`truncated: true` means more rows exist.** Never describe it as the complete set; say it is partial or re-query with a higher `limit` or a narrower filter, as `hint` says.
+- **`truncated: false` means the answer is complete.**
+- **`total: null` means the API reported no collection size**, so a page filled exactly to the limit is flagged truncated conservatively; a follow-up with a larger limit settles it.
+- **`list_anomalies`**: `limit` bounds the answer, not the scan — the environment is ranked in full and the worst `limit` objects returned. Only VMs with a non-zero count are returned, so a short list is not evidence of a clean environment. With `scan_complete: true`, `total` is the number of anomalous objects; with `scan_complete: false` the scan hit its cap, `total` is the VM count, and a `note` says the ranking is partial.
+
 ---
 
 ## Aria Operations / VCF Operations Version Compatibility
 
 | Feature | Minimum Version |
 |---------|----------------|
-| VCF Operations 9.1 (VCF 9.1) | ✅ Full — Aria Operations rebranded as VCF Operations in VCF 9. |
-| VCF Operations 9.0 (VCF 9.0) | ✅ Full — suite-api endpoints unchanged. |
+| VCF Operations 9.1 (VCF 9.1) | ✅ All tools; PromQL uses the 9.1 VODAP service (base path inferred, not yet verified on real hardware). Aria Operations was rebranded VCF Operations in VCF 9. |
+| VCF Operations 9.0 (VCF 9.0) | ✅ suite-api tools plus fleet certificates / passwords / domains and diagnostic findings |
+| Aria Operations 8.x | ✅ suite-api tools. Fleet, findings and PromQL are 9.0+: on 8.x they return a "requires VCF Operations 9.0 or newer" error naming the version the appliance reports |
 | Token authentication | 6.6+ |
 | Resource metrics stats query | 6.7+ |
 | Rightsizing recommendations | 7.0+ |
 | Anomaly detection | 7.5+ |
 | Suite API v2 paths used | 8.0+ |
 
-**Recommended**: Aria Operations 8.x (vROps 8.x). All endpoints verified against Aria Operations 8.6.
+Endpoints are checked against the vROps 8.6 and VCF Operations 9.1 API indexes in `tests/eval/spec/`. Live-verified on Aria Operations 8.18.7 (2026-09): resources, metrics, alerts and symptoms, rightsizing, health, doctor.

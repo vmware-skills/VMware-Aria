@@ -252,6 +252,23 @@ whitespace are handled correctly).
 
 To run the agent read-only, give it a read-only Aria service account (RBAC).
 
+## Architecture
+
+```
+User (natural language)
+  |
+AI Agent (Claude Code / Goose / Cursor)
+  | reads SKILL.md
+vmware-aria CLI or MCP server (stdio transport)
+  | Aria Operations Suite API (REST/JSON over HTTPS)
+  | POST /suite-api/api/auth/token/acquire → vRealizeOpsToken
+Aria Operations Manager
+  |
+VMs / Hosts / Clusters / Datastores / Alerts / Capacity
+```
+
+The MCP server uses stdio transport (local only, no network listener). Connections to Aria Ops use HTTPS on port 443 with vRealizeOpsToken authentication (6-hour sliding token validity, auto-refreshed).
+
 ## Security Notes
 
 > **Disclaimer**: This is a community-maintained open-source project and is **not affiliated with, endorsed by, or sponsored by VMware, Inc. or Broadcom Inc.** "VMware" and "Aria" are trademarks of Broadcom.

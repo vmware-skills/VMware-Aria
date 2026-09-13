@@ -25,11 +25,10 @@ compatibility: >
 
 > **Disclaimer**: This is a community-maintained open-source project and is **not affiliated with, endorsed by, or sponsored by VMware, Inc. or Broadcom Inc.** "VMware" and "Aria" are trademarks of Broadcom. Source code is publicly auditable at [github.com/vmware-skills/VMware-Aria](https://github.com/vmware-skills/VMware-Aria) under the MIT license.
 
-VMware Aria Operations (vRealize Operations / VCF Operations 9.1) AI-assisted monitoring — 33 MCP tools for resources, alerts, alert definitions, capacity planning, anomaly detection, report automation, platform health, and VCF 9.1 fleet certificates/passwords/domains, diagnostic findings, and real-time PromQL metrics.
+VMware Aria Operations (vRealize Operations 8.x, VCF Operations 9.x) AI-assisted monitoring — 33 MCP tools for resources, alerts, alert definitions, capacity planning, anomaly detection, report automation, platform health, and VCF 9.1 fleet certificates/passwords/domains, diagnostic findings, and real-time PromQL metrics.
 
-> Domain-focused monitoring skill for Aria Operations 8.x / vRealize Operations 8.x.
-> **Companion skills**: [vmware-nsx](https://github.com/vmware-skills/VMware-NSX) (networking), [vmware-aiops](https://github.com/vmware-skills/VMware-AIops) (VM lifecycle), [vmware-monitor](https://github.com/vmware-skills/VMware-Monitor) (read-only vSphere), [vmware-avi](https://github.com/vmware-skills/VMware-AVI) (AVI/ALB/AKO), [vmware-harden](https://github.com/vmware-skills/VMware-Harden) (compliance baselines).
-> | [vmware-pilot](../vmware-pilot/SKILL.md) (workflow orchestration) | [vmware-policy](../vmware-policy/SKILL.md) (audit/policy)
+> **Know the version first**: `vmware-aria health status` (MCP `get_aria_health`) names the product line. Fleet, findings and PromQL exist only on VCF Operations 9.0+ (PromQL uses the 9.1 VODAP service); on 8.x they return a "requires 9.0 or newer" error, not data.
+> **Companion skills**: vmware-monitor (real-time vSphere), vmware-aiops (VM lifecycle), vmware-nsx (networking), vmware-avi (AVI/ALB/AKO), vmware-harden (compliance), vmware-pilot (approval workflows), vmware-policy (audit/policy).
 
 ## What This Skill Does
 
@@ -56,35 +55,13 @@ vmware-aria doctor
 
 ## When to Use This Skill
 
-**Performance monitoring (daily proactive checks):**
-- Check VM contention: CPU Ready %, Memory Balloon, Swap usage
-- Fetch time-series metrics for any resource (CPU, memory, disk, network)
-- Find top consumers by CPU/memory/disk/network
-- Check per-resource anomaly counts and risk badge scores
+- **Performance**: VM contention (CPU Ready, balloon, swap), time-series metrics, top consumers, anomaly counts and risk badges
+- **Alerts**: list, investigate, acknowledge or cancel alerts; list, create, enable/disable or delete alert definitions (post-RCA)
+- **Capacity**: cluster headroom, time until full, VM rightsizing
+- **Reports**: generate, poll, download and delete reports
+- **Platform**: is Aria Operations itself healthy (DEGRADED vs DOWN, which service), which version and product line, collector groups
 
-**Alert management:**
-- List, investigate, acknowledge, or cancel active alerts
-- List or filter alert definitions (templates)
-- Create new alert definitions from symptom definitions (post-RCA)
-- Enable or disable alert definitions; delete obsolete ones
-
-**Capacity planning:**
-- Cluster capacity remaining (CPU, memory, disk headroom)
-- Time-until-full prediction per cluster
-- Right-sizing: find over-provisioned or under-utilized VMs
-- Capacity overview with Aria's built-in recommendations
-
-**Report automation:**
-- Generate scheduled or on-demand reports (capacity, performance, SLA)
-- Poll report status until COMPLETED; get PDF/CSV download URL
-- Delete generated reports after download
-
-**Use companion skills for**:
-- VM lifecycle: create, clone, snapshot, power → `vmware-aiops`
-- NSX networking: segments, gateways, NAT, routing → `vmware-nsx`
-- vSphere inventory, real-time alarms, events → `vmware-monitor`
-- Storage: iSCSI, vSAN, datastores → `vmware-storage`
-- Load balancing, AVI/ALB, AKO, Ingress → `vmware-avi`
+For VM changes, NSX, vSphere alarms, storage or load balancing, route with the table below.
 
 ## Related Skills — Skill Routing
 
@@ -113,26 +90,19 @@ vmware-aria doctor
    - >5% = warning, >10% = problem, >20% = critical
 3. Check memory pressure → `vmware-aria resource metrics <vm-id> --metrics 'mem|balloonPct,mem|swapped_average' --hours 24`
    - Balloon >0 = ESXi reclaiming memory; Swap >0 = severe — act immediately
+   - If a key comes back under `missing` instead of `metrics`, it is not a zero: `not_collected_for_resource` means a wrong key for this resource (use `similar_keys`), `no_data_in_window` means widen `--hours`
 4. List active CRITICAL/IMMEDIATE alerts → `vmware-aria alert list --criticality CRITICAL`
 5. Check anomaly counts → `vmware-aria anomaly list`
 6. Cross-validate against the [investigation protocol](references/investigation-protocol.md) before reporting any "root cause" — high consumption is rarely the root, usually a downstream symptom
-
-### Investigate High CPU Alert
-
-1. List active CRITICAL alerts → `vmware-aria alert list --criticality CRITICAL`
-2. Get alert details + symptoms → `vmware-aria alert get <alert-id>`
-3. Find top CPU consumers → `vmware-aria resource top --metric 'cpu|usage_average'`
-4. Fetch 24h CPU metrics for the hot VM → `vmware-aria resource metrics <vm-id> --metrics 'cpu|usage_average' --hours 24`
-5. Check risk badge → `vmware-aria anomaly risk <vm-id>`
-6. Acknowledge the alert → `vmware-aria alert acknowledge <alert-id>`
 
 ### Capacity Planning
 
 1. List clusters → `vmware-aria resource list --kind ClusterComputeResource`
 2. Get remaining capacity → `vmware-aria capacity remaining <cluster-id>`
 3. Predict time until full → `vmware-aria capacity time-remaining <cluster-id>`
-4. Get capacity overview with recommendations → `vmware-aria capacity overview <cluster-id>`
-5. Find rightsizing candidates → `vmware-aria capacity rightsizing`
+4. Get capacity overview → `vmware-aria capacity overview <cluster-id>`
+5. Find rightsizing candidates → `vmware-aria capacity rightsizing` — act only on rows with `Act. yes`; read each VM's caveats and the vendor minimum size before reducing
+   - If a yellow `properties_note` prints under the table, the VM property read failed: power state and current size are unknown and no row is actionable — retry, do not resize from it
 
 ### Post-Incident: Create Detection Alert (RCA Follow-up)
 
@@ -151,15 +121,6 @@ After resolving an incident, create an early-warning alert to prevent recurrence
 4. Download via the returned `download_url` (PDF) or `csv_url`
 5. Clean up → `vmware-aria report delete <report-id>`
 
-### Multi-Target Operations
-
-All commands accept `--target <name>` to operate against a specific Aria Ops instance:
-
-```bash
-vmware-aria alert list --target prod
-vmware-aria resource top --target lab
-```
-
 ## Usage Mode
 
 | Scenario | Recommended | Why |
@@ -169,6 +130,8 @@ vmware-aria resource top --target lab
 | Automated pipelines | **MCP** | Type-safe parameters, structured output |
 
 Running vmware-aria with a local or small model? See [`references/agent-guardrails.md`](references/agent-guardrails.md) for tool-calling guardrails (alert-to-resource correlation and Aria data fidelity).
+
+Every command accepts `--target <name>` (every MCP tool `target`) to pick the Aria Operations instance.
 
 ## MCP Tools (33 — 26 read, 7 write)
 
@@ -214,26 +177,7 @@ All MCP tools accept an optional `target` parameter to select which Aria Operati
 
 ### List results are envelopes — read `truncated` before you summarise
 
-Every list-returning tool above (`list_resources`, `get_top_consumers`, `list_alerts`, `list_alert_definitions`, `list_symptom_definitions`, `list_rightsizing_recommendations`, `list_report_definitions`, `list_reports`, `list_anomalies`, `list_collector_groups`) returns an object, not a bare array:
-
-```json
-{
-  "items":     [ ... ],
-  "returned":  50,
-  "limit":     50,
-  "total":     213,
-  "truncated": true,
-  "hint":      "Showing 50 of 213. Raise limit or narrow the query with a filter to see the rest."
-}
-```
-
-Rules:
-
-- **Rows live under `items`.** An empty `items` with `returned: 0` means the query genuinely matched nothing — report that, do not report a tool failure.
-- **`truncated: true` means more rows exist.** Never describe such a result as the complete set; either say it is a partial view or re-query with a higher `limit` or a narrower filter, as `hint` instructs.
-- **`truncated: false` means the answer is complete** — safe to summarise as the whole picture.
-- **`total: null` means the API reported no collection size**, so a page filled exactly to the limit is flagged truncated conservatively. It may in fact be complete; a follow-up query with a larger limit settles it.
-- **`list_anomalies` also carries `scanned`, `vm_total` and `scan_complete`** — `limit` bounds the answer, not the scan: the environment is ranked in full and the worst `limit` objects are returned. It returns only VMs with a non-zero anomaly count, so a short list is not evidence that the environment is clean; check `truncated`. With `scan_complete: true`, `total` is the number of anomalous objects found. With `scan_complete: false` the scan hit its cap, `total` is the environment's VM count, and a `note` says the ranking is partial.
+List tools return `{items, returned, limit, total, truncated, hint}`, not a bare array. Rows are under `items`; `truncated: true` means more rows exist — never call it the complete set; `total: null` means the API gave no size. Full rules, per-tool `total` sources and `list_anomalies`' scan fields: [`references/capabilities.md`](references/capabilities.md#list-result-envelope).
 
 ## CLI Quick Reference
 
@@ -330,62 +274,16 @@ Variable names follow the pattern `VMWARE_ARIA_<TARGET_NAME_UPPER>_PASSWORD` whe
 
 `uvx` re-resolves dependencies from PyPI on every launch. Behind a corporate TLS-intercepting proxy whose CA is not in uv's bundled cert store, the handshake fails. Use the v1.5.15+ recommended single-command form `vmware-aria mcp` (after `uv tool install vmware-aria==1.12.0` — no network on launch), or set `UV_NATIVE_TLS=true` to make uv use the system cert store.
 
-## Safety
-
-- **Read-heavy**: 26 of 33 tools are read-only
-- **Audit logging**: Write operations logged to `~/.vmware/audit.db` (SQLite WAL, via vmware-policy) with timestamp, user, target, operation, and result
-- **Token expiry handling**: vRealizeOpsToken re-acquired automatically 60 seconds before expiry (6-hour sliding validity, extended on each call)
-- **Prompt injection defense**: API text values sanitized via `_sanitize()` — strips control characters, truncates to 500 chars
-- **Credential safety**: Passwords loaded only from environment variables (`.env` file), never from `config.yaml`
-- **TLS verification**: On by default (`verify_ssl: true`). For a private CA set `SSL_CERT_FILE` to its PEM rather than disabling verification; `verify_ssl: false` is for isolated labs only (see `references/setup-guide.md`)
-- **Input validation**: resource_id and alert_id validated before API calls; criticality values validated against known enum
-
-## Setup
-
-```bash
-uv tool install vmware-aria==1.12.0
-mkdir -p ~/.vmware-aria
-cp config.example.yaml ~/.vmware-aria/config.yaml
-# Edit config.yaml with your Aria Operations host details
-
-# Add to ~/.vmware-aria/.env (create if missing, chmod 600):
-# VMWARE_ARIA_PROD_PASSWORD=<your-password>
-chmod 600 ~/.vmware-aria/.env
-
-vmware-aria doctor
-```
-
-> All tools are automatically audited via vmware-policy. Audit logs: `vmware-audit log --last 20`
-
-> Full setup guide with multi-target config, MCP server setup, and Docker: see `references/setup-guide.md`
-
-## Architecture
-
-```
-User (natural language)
-  |
-AI Agent (Claude Code / Goose / Cursor)
-  | reads SKILL.md
-vmware-aria CLI or MCP server (stdio transport)
-  | Aria Operations Suite API (REST/JSON over HTTPS)
-  | POST /suite-api/api/auth/token/acquire → vRealizeOpsToken
-Aria Operations Manager
-  |
-VMs / Hosts / Clusters / Datastores / Alerts / Capacity
-```
-
-The MCP server uses stdio transport (local only, no network listener). Connections to Aria Ops use HTTPS on port 443 with vRealizeOpsToken authentication (6-hour sliding token validity, auto-refreshed).
-
 ## Audit & Safety
 
-All operations are automatically audited via vmware-policy (`@vmware_tool` decorator):
-- Every tool call logged to `~/.vmware/audit.db` (SQLite, framework-agnostic)
-- Policy rules enforced via `~/.vmware/rules.yaml` (deny rules, maintenance windows, risk levels)
-- Risk classification: each tool tagged as low/medium/high/critical
-- View recent operations: `vmware-audit log --last 20`
-- View denied operations: `vmware-audit log --status denied`
+1. **Source code**: [github.com/vmware-skills/VMware-Aria](https://github.com/vmware-skills/VMware-Aria) (MIT).
+2. **Config and credentials**: `config.yaml` holds hosts and usernames only; passwords live in `~/.vmware-aria/.env` (chmod 600) as `VMWARE_ARIA_<TARGET>_PASSWORD` and are never logged.
+3. **No webhooks**: no outbound calls besides the Aria Operations REST API over HTTPS 443; the MCP server is local stdio.
+4. **TLS**: verification on by default; for a private CA set `SSL_CERT_FILE` rather than `verify_ssl: false` (isolated labs only).
+5. **Prompt-injection defense**: API text is sanitized (control characters stripped, length capped) before it reaches the agent.
+6. **Least privilege**: use an Aria Operations account with read-only roles unless the write tools (alert acknowledge/cancel, alert definitions, reports) are needed.
 
-vmware-policy is automatically installed as a dependency — no manual setup needed.
+Every tool call goes through vmware-policy (`@vmware_tool`): audited to `~/.vmware/audit.db`, subject to `~/.vmware/rules.yaml` deny rules and maintenance windows, each tool risk-tagged. View with `vmware-audit log --last 20` or `--status denied`. The suite-api token is re-acquired automatically before it expires. Setup, multiple targets, MCP clients and Docker: [`references/setup-guide.md`](references/setup-guide.md).
 
 ## License
 
