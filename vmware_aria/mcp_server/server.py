@@ -1,7 +1,7 @@
 """MCP server wrapping VMware Aria Operations monitoring and capacity planning.
 
 This module exposes VMware Aria Operations management tools via the Model
-Context Protocol (MCP) using stdio transport.  The 33 tools are split by
+Context Protocol (MCP) using stdio transport.  The 35 tools are split by
 domain across ``vmware_aria/mcp_server/tools/*.py``; each module registers its tools onto
 the shared ``mcp`` instance defined in ``vmware_aria/mcp_server/_shared.py``.  Importing
 those modules below is what performs the registration.
@@ -37,8 +37,8 @@ Tool categories
 * **Anomaly** (2 tools, read-only): list_anomalies, get_resource_riskbadge
   — ``tools/anomaly.py``
 
-* **Health** (2 tools, read-only): get_aria_health, list_collector_groups
-  — ``tools/health.py``
+* **Health** (4 tools, read-only): get_aria_health, list_collector_groups,
+  get_aria_node_resources, list_adapters — ``tools/health.py``
 
 * **Fleet / PromQL** (5 tools, read-only, VCF Operations 9.1):
   fleet_certificate_list, fleet_password_account_list, fleet_domain_list,
@@ -124,6 +124,8 @@ from vmware_aria.mcp_server.tools.fleet import (  # noqa: F401
 )
 from vmware_aria.mcp_server.tools.health import (  # noqa: F401
     get_aria_health,
+    get_aria_node_resources,
+    list_adapters,
     list_collector_groups,
 )
 from vmware_aria.mcp_server.tools.reports import (  # noqa: F401
@@ -171,6 +173,8 @@ __all__ = [
     "get_resource_riskbadge",
     "get_aria_health",
     "list_collector_groups",
+    "get_aria_node_resources",
+    "list_adapters",
     "fleet_certificate_list",
     "fleet_password_account_list",
     "fleet_domain_list",

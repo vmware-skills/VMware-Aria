@@ -1,0 +1,55 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab, after the 8 -> 16 GB memory upgrade), read-only GETs/queries",
+ "_note": "GET /resources?resourceKind=vC-Ops-Watchdog&adapterKind=vCenter Operations Adapter, trimmed to identity fields.",
+ "http_status": 200,
+ "body": {
+  "pageInfo": {
+   "totalCount": 1,
+   "page": 0,
+   "pageSize": 1000
+  },
+  "resourceList": [
+   {
+    "identifier": "df7bd3fa-973e-4dfc-87e8-da668e7af260",
+    "resourceKey": {
+     "name": "vRealize Operations Watchdog-aria-ops-01",
+     "adapterKindKey": "vCenter Operations Adapter",
+     "resourceKindKey": "vC-Ops-Watchdog",
+     "resourceIdentifiers": [
+      {
+       "identifierType": {
+        "name": "NODEHOST",
+        "dataType": "STRING",
+        "isPartOfUniqueness": false
+       },
+       "value": "/192.0.2.210"
+      },
+      {
+       "identifierType": {
+        "name": "NODEID",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "f59d303c-0279-44bb-ac9c-05b2283e5b50"
+      }
+     ]
+    },
+    "resourceStatusStates": [
+     {
+      "adapterInstanceId": "b998e9bd-591d-4942-8a34-c11f19550372",
+      "resourceStatus": "DATA_RECEIVING",
+      "resourceState": "STARTED",
+      "statusMessage": ""
+     },
+     {
+      "adapterInstanceId": "389c5e89-ca66-49e9-8fd0-22925b4b7fcb",
+      "resourceStatus": "DATA_RECEIVING",
+      "resourceState": "STARTED",
+      "statusMessage": ""
+     }
+    ],
+    "resourceHealth": "GREEN"
+   }
+  ]
+ }
+}

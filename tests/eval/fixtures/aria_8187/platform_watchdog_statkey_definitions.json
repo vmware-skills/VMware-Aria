@@ -1,0 +1,16 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab, after the 8 -> 16 GB memory upgrade), read-only GETs/queries",
+ "_note": "GET /adapterkinds/vCenter Operations Adapter/resourcekinds/vC-Ops-Watchdog/statkeys, trimmed to Restarts. The definition is the uninstanced 'Service|Restarts'; resources report 'Service:<name>|Restarts'. It carries no unit.",
+ "http_status": 200,
+ "body": {
+  "resourceTypeAttributes": [
+   {
+    "key": "Service|Restarts",
+    "name": "Service|Restarts",
+    "description": "Number of times the process has been unresponsive and been restarted by Watchdog.",
+    "rollupType": "AVG",
+    "dataType2": "INTEGER"
+   }
+  ]
+ }
+}

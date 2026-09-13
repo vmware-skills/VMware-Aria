@@ -1,0 +1,36 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab, after the 8 -> 16 GB memory upgrade), read-only GETs/queries",
+ "_note": "GET /resources/{watchdog id}/statkeys, trimmed to Service:<name>|Restarts keys.",
+ "http_status": 200,
+ "body": {
+  "stat-key": [
+   {
+    "key": "Service:analytics|Restarts"
+   },
+   {
+    "key": "Service:api|Restarts"
+   },
+   {
+    "key": "Service:collector|Restarts"
+   },
+   {
+    "key": "Service:gemfire|Restarts"
+   },
+   {
+    "key": "Service:ntp|Restarts"
+   },
+   {
+    "key": "Service:vmware-casa|Restarts"
+   },
+   {
+    "key": "Service:vmware-vcops-web|Restarts"
+   },
+   {
+    "key": "Service:vpostgres|Restarts"
+   },
+   {
+    "key": "Service:vpostgres-repl|Restarts"
+   }
+  ]
+ }
+}

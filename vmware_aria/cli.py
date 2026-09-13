@@ -1007,3 +1007,7 @@ def fleet_promql(
     client, _ = _get_connection(target, config)
     result = run_promql_query(client, query=query, time=at_time, source_id=source_id, limit=limit)
     _json_output(result)
+
+
+# `health node` / `health adapters` live in cli_platform.py; importing it registers them.
+from vmware_aria import cli_platform  # noqa: F401

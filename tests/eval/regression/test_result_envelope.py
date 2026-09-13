@@ -65,6 +65,7 @@ def _all_list_results() -> dict[str, dict]:
     from vmware_aria.ops.anomaly import list_anomalies
     from vmware_aria.ops.capacity import list_rightsizing_recommendations
     from vmware_aria.ops.health import list_collector_groups
+    from vmware_aria.ops.platform import list_adapters
     from vmware_aria.ops.reports import list_report_definitions, list_reports
     from vmware_aria.ops.resources import get_top_consumers, list_resources
 
@@ -108,6 +109,10 @@ def _all_list_results() -> dict[str, dict]:
     results["list_collector_groups"] = list_collector_groups(c)
 
     c = _client()
+    c.get.return_value = {"adapterInstancesInfoDto": [{"id": "ai-1", "resourceKey": {"name": "a"}}]}
+    results["list_adapters"] = list_adapters(c)
+
+    c = _client()
     c.get.return_value = {"reportDefinitions": [{"id": "rd-1", "name": "r"}]}
     results["list_report_definitions"] = list_report_definitions(c)
 
@@ -123,9 +128,10 @@ TOOL_NAMES = sorted(ALL_RESULTS)
 
 
 def test_every_declared_list_tool_is_covered() -> None:
-    """SKILL.md declares these ten read tools as list-returning."""
+    """These eleven read tools are list-returning."""
     assert TOOL_NAMES == [
         "get_top_consumers",
+        "list_adapters",
         "list_alert_definitions",
         "list_alerts",
         "list_anomalies",
