@@ -1,0 +1,17 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab), read-only GETs",
+ "_note": "GET /recommendations?id=..&id=.. with the two space-containing ids of alertdefinition_adapter_childs_no_data.json",
+ "http_status": 200,
+ "body": {
+  "recommendations": [
+   {
+    "id": "Recommendation-df-vCenter Operations Adapter-ResourceIsDownRecommendation",
+    "description": "Check the status of the Object. Refer to the adapter documentation for details and troubleshooting steps"
+   },
+   {
+    "id": "Recommendation-df-vCenter Operations Adapter-AdapterInstanceDownRecommendation",
+    "description": "Verify that the adapter configuration and credentials are correct. Ensure that the remote endpoint of the data source is available and can be reached from the Collector where this adapter instance is running"
+   }
+  ]
+ }
+}

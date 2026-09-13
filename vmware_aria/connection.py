@@ -503,9 +503,18 @@ class AriaClient:
         )
         return _json_result(resp, "POST", path, self._target.host)
 
-    def put(self, path: str, json_data: dict[str, Any] | None = None) -> dict:
-        """PUT request. Returns parsed JSON response."""
-        resp = self._request("PUT", path, json_data=json_data)
+    def put(
+        self,
+        path: str,
+        json_data: dict[str, Any] | None = None,
+        params: dict[str, Any] | None = None,
+    ) -> dict:
+        """PUT request. Returns parsed JSON response (``{}`` for an empty body).
+
+        ``params`` carries query parameters — ``PUT /resources/{id}/maintained``
+        takes its window as ``duration`` / ``end`` in the query, not the body.
+        """
+        resp = self._request("PUT", path, params=params, json_data=json_data)
         return _json_result(resp, "PUT", path, self._target.host)
 
     def product_version(self) -> str | None:

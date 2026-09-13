@@ -21,9 +21,13 @@ import pytest
 # 28 base tools + 5 read tools added for VCF Operations 9.1 fleet/findings/PromQL
 # (fleet_certificate_list, fleet_password_account_list, fleet_domain_list,
 # findings_list, promql_query) → 33 total, 26 read, 7 write.
-EXPECTED_TOOL_COUNT = 33
-EXPECTED_READ_COUNT = 26
-EXPECTED_WRITE_COUNT = 7
+# + maintenance and alert-workflow tools: 3 read (list_maintenance_schedules,
+# list_alert_notes, get_alert_recommendations) and 3 write
+# (start_resource_maintenance, end_resource_maintenance, add_alert_note)
+# → 39 total, 29 read, 10 write.
+EXPECTED_TOOL_COUNT = 39
+EXPECTED_READ_COUNT = 29
+EXPECTED_WRITE_COUNT = 10
 
 
 def _list_tools():

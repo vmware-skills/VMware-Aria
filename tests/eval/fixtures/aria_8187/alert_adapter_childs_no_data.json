@@ -1,0 +1,43 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab), read-only GETs",
+ "_note": "One row of GET /alerts?activeOnly=true — an IMMEDIATE alert whose definition's only state has severity AUTO, so the alert level never equals a state severity",
+ "http_status": 200,
+ "body": {
+  "alertId": "22740c26-90fd-4c11-a161-16912ef66804",
+  "resourceId": "431af8a8-18b5-4811-aff5-ac903aaf03f7",
+  "alertLevel": "IMMEDIATE",
+  "type": "20",
+  "subType": "18",
+  "status": "ACTIVE",
+  "startTimeUTC": 1789262469738,
+  "cancelTimeUTC": 0,
+  "updateTimeUTC": 1789262469738,
+  "suspendUntilTimeUTC": 0,
+  "controlState": "OPEN",
+  "alertDefinitionId": "AlertDefinition-vCenter Operations Adapter-AdapterChildsNoDataReceivingAlert",
+  "alertDefinitionName": "Objects are not receiving data from adapter instance",
+  "alertImpact": "HEALTH",
+  "links": [
+   {
+    "href": "/suite-api/api/alerts/22740c26-90fd-4c11-a161-16912ef66804",
+    "rel": "SELF",
+    "name": "linkToSelf"
+   },
+   {
+    "href": "/suite-api/api/resources/431af8a8-18b5-4811-aff5-ac903aaf03f7",
+    "rel": "RELATED",
+    "name": "alertOnResource"
+   },
+   {
+    "href": "/suite-api/api/auth/users/",
+    "rel": "RELATED",
+    "name": "ownerOfAlert"
+   },
+   {
+    "href": "/suite-api/api/alertdefinitions/AlertDefinition-vCenter%20Operations%20Adapter-AdapterChildsNoDataReceivingAlert",
+    "rel": "RELATED",
+    "name": "problemDefinitionForAlert"
+   }
+  ]
+ }
+}

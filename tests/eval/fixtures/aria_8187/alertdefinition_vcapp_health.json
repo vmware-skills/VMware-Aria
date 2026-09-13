@@ -1,0 +1,104 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab), read-only GETs",
+ "_note": "GET /alertdefinitions/AlertDefinition-VCAPPHealthStatus: one CRITICAL state with a 7-entry recommendationPriorityMap",
+ "http_status": 200,
+ "body": {
+  "id": "AlertDefinition-VCAPPHealthStatus",
+  "name": "vCenter app health is affected",
+  "description": "Triggered when VCenter app health is affected.",
+  "adapterKindKey": "VMWARE_INFRA_HEALTH",
+  "resourceKindKey": "VC_APP",
+  "waitCycles": 1,
+  "cancelCycles": 1,
+  "type": 15,
+  "subType": 18,
+  "states": [
+   {
+    "severity": "CRITICAL",
+    "base-symptom-set": {
+     "type": "SYMPTOM_SET_COMPOSITE",
+     "operator": "OR",
+     "symptom-sets": [
+      {
+       "type": "SYMPTOM_SET",
+       "relation": "SELF",
+       "symptomSetOperator": "OR",
+       "symptomDefinitionIds": [
+        "SymptomDefinition-vCenterDNSReverseStatus",
+        "SymptomDefinition-VCAPPDown",
+        "SymptomDefinition-vCenterAppNTPStatus",
+        "SymptomDefinition-vCenterAppCertificateExpirySymptom",
+        "SymptomDefinition-vCenterSSHSate",
+        "SymptomDefinition-vCenterDNSForwardStatus",
+        "SymptomDefinition-vCenterPasswordExpirySymptom"
+       ],
+       "alertConditions": []
+      },
+      {
+       "type": "SYMPTOM_SET",
+       "adapterKindKey": "VMWARE_INFRA_HEALTH",
+       "resourceKindKey": "VCENTER_APPLIANCE_HEALTH_SERVICES",
+       "relation": "DESCENDANT",
+       "aggregation": "ANY",
+       "symptomSetOperator": "OR",
+       "symptomDefinitionIds": [
+        "SymptomDefinition-vCenterApplianceHealthServiceDownSymptom"
+       ],
+       "alertConditions": []
+      },
+      {
+       "type": "SYMPTOM_SET",
+       "adapterKindKey": "VMWARE_INFRA_HEALTH",
+       "resourceKindKey": "VCENTER_HEALTH_SERVICES",
+       "relation": "DESCENDANT",
+       "aggregation": "ANY",
+       "symptomSetOperator": "OR",
+       "symptomDefinitionIds": [
+        "SymptomDefinition-vCenterServiceDownSymptom"
+       ],
+       "alertConditions": []
+      },
+      {
+       "type": "SYMPTOM_SET",
+       "adapterKindKey": "VMWARE_INFRA_HEALTH",
+       "resourceKindKey": "VCENTER_NTP_SERVER",
+       "relation": "DESCENDANT",
+       "aggregation": "ANY",
+       "symptomSetOperator": "OR",
+       "symptomDefinitionIds": [
+        "SymptomDefinition-vCenterNTPStatus"
+       ],
+       "alertConditions": []
+      },
+      {
+       "type": "SYMPTOM_SET",
+       "adapterKindKey": "VMWARE_INFRA_HEALTH",
+       "resourceKindKey": "VCENTER_BACKUP_JOB",
+       "relation": "DESCENDANT",
+       "aggregation": "ANY",
+       "symptomSetOperator": "OR",
+       "symptomDefinitionIds": [
+        "SymptomDefinition-vCenterBackupJobHealth"
+       ],
+       "alertConditions": []
+      }
+     ]
+    },
+    "impact": {
+     "impactType": "BADGE",
+     "detail": "health"
+    },
+    "recommendationPriorityMap": {
+     "Recommendation-df-vCenterNtpServerDownRecommendation": 6,
+     "Recommendation-df-AppAvailabilityRecommendation": 1,
+     "Recommendation-df-AppPasswordExpiryRecommendation": 4,
+     "Recommendation-df-AppConnectivityRecommendation": 2,
+     "Recommendation-df-AppCertificateExpiryRecommendation": 3,
+     "Recommendation-df-vCenterServiceDownRecommendation": 5,
+     "Recommendation-df-vCenterBackupJobFailRecommendation": 7
+    }
+   }
+  ],
+  "forVCDTenants": false
+ }
+}

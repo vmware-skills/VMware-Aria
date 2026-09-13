@@ -1,0 +1,14 @@
+{
+ "_captured": "2026-09-13, real Aria Operations 8.18.7 (home lab), read-only GETs",
+ "_note": "GET /recommendations/{unknown id}: the appliance's 404 body",
+ "http_status": 404,
+ "body": {
+  "error": "Aria Operations returned HTTP 404. Verify the id — list the parent collection first (e.g. `vmware-aria resource list`, or the list_resources / list_alerts tools) and copy an exact UUID. Run 'vmware-aria doctor' if every call to this target fails. Failing call: GET /recommendations/does-not-exist-xyz",
+  "status": 404,
+  "body": {
+   "message": "No such Recommendation - does-not-exist-xyz.",
+   "httpStatusCode": 404,
+   "apiErrorCode": 404
+  }
+ }
+}

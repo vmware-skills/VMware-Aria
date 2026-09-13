@@ -1007,3 +1007,8 @@ def fleet_promql(
     client, _ = _get_connection(target, config)
     result = run_promql_query(client, query=query, time=at_time, source_id=source_id, limit=limit)
     _json_output(result)
+
+
+# Maintenance and alert notes/recommendations register onto the apps above from
+# cli_workflow.py (keeps this file under its size limit). Must stay last.
+from vmware_aria import cli_workflow  # noqa: E402,F401
