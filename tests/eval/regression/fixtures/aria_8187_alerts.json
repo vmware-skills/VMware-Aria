@@ -1,0 +1,536 @@
+{
+ "_source": "Aria Operations 8.18.7 (home lab), captured 2026-09-13 read-only; links stripped, IPs replaced with TEST-NET; resourceIdentifiers emptied (VC URLs)",
+ "alerts_query": {
+  "pageInfo": {
+   "totalCount": 4,
+   "page": 0,
+   "pageSize": 500
+  },
+  "alerts": [
+   {
+    "alertId": "75c78296-0a15-43f8-ae65-663a1cab9a88",
+    "resourceId": "ef568146-b616-4130-9263-79fddb31b5f9",
+    "alertLevel": "IMMEDIATE",
+    "type": "15",
+    "subType": "19",
+    "status": "ACTIVE",
+    "startTimeUTC": 1789262785782,
+    "cancelTimeUTC": 0,
+    "updateTimeUTC": 1789262785782,
+    "suspendUntilTimeUTC": 0,
+    "controlState": "OPEN",
+    "alertDefinitionId": "AlertDefinition-vCenter Operations Adapter-GroupPopulationHealthDegraded",
+    "alertDefinitionName": "Group population health is degraded",
+    "alertImpact": "HEALTH"
+   },
+   {
+    "alertId": "8bbb1892-9819-4982-8bed-fbfe30fce1a4",
+    "resourceId": "31aa1b41-2ae3-479b-8e25-176016ad874e",
+    "alertLevel": "CRITICAL",
+    "type": "15",
+    "subType": "18",
+    "status": "ACTIVE",
+    "startTimeUTC": 1789262557450,
+    "cancelTimeUTC": 0,
+    "updateTimeUTC": 1789262557450,
+    "suspendUntilTimeUTC": 0,
+    "controlState": "OPEN",
+    "alertDefinitionId": "AlertDefinition-VCAPPHealthStatus",
+    "alertDefinitionName": "vCenter app health is affected",
+    "alertImpact": "HEALTH"
+   },
+   {
+    "alertId": "22740c26-90fd-4c11-a161-16912ef66804",
+    "resourceId": "431af8a8-18b5-4811-aff5-ac903aaf03f7",
+    "alertLevel": "IMMEDIATE",
+    "type": "20",
+    "subType": "18",
+    "status": "ACTIVE",
+    "startTimeUTC": 1789262469738,
+    "cancelTimeUTC": 0,
+    "updateTimeUTC": 1789262469738,
+    "suspendUntilTimeUTC": 0,
+    "controlState": "OPEN",
+    "alertDefinitionId": "AlertDefinition-vCenter Operations Adapter-AdapterChildsNoDataReceivingAlert",
+    "alertDefinitionName": "Objects are not receiving data from adapter instance",
+    "alertImpact": "HEALTH"
+   },
+   {
+    "alertId": "197607b3-9fbd-49a7-a1f7-bd6fe7da463a",
+    "resourceId": "d6c4efec-f60e-4f05-b91d-5be1afe4a9b6",
+    "alertLevel": "WARNING",
+    "type": "20",
+    "subType": "21",
+    "status": "ACTIVE",
+    "startTimeUTC": 1789260704525,
+    "cancelTimeUTC": 0,
+    "updateTimeUTC": 1789260704525,
+    "suspendUntilTimeUTC": 0,
+    "controlState": "OPEN",
+    "alertDefinitionId": "AlertDefinition-vCenter Operations Adapter-LicenseKeyExpiryFirstAlert",
+    "alertDefinitionName": "License will soon expire",
+    "alertImpact": "HEALTH"
+   }
+  ]
+ },
+ "contributing_symptoms_by_alert": {
+  "75c78296-0a15-43f8-ae65-663a1cab9a88": {
+   "contributingSymptoms": [
+    {
+     "alertId": "75c78296-0a15-43f8-ae65-663a1cab9a88",
+     "contributingSymptoms": {
+      "contributingSymptoms": [
+       {
+        "symptomId": "99361cdf-4591-4ac9-a6bc-bc5e3e92964e",
+        "symptomSetId": "92730035-8719-43af-95c2-9e235e3c624b",
+        "symptomDefinitionsIds": [
+         "SymptomDefinition-vCenter Operations Adapter-ResourceIsAGroup"
+        ],
+        "alertConditions": []
+       },
+       {
+        "symptomId": "c9f70f04-5af7-47a4-b98d-e9f52d6ebeb7",
+        "symptomSetId": "18062552-3cf3-4a52-8048-5855373f246e",
+        "symptomDefinitionsIds": [
+         "SymptomDefinition-vCenter Operations Adapter-GroupPopulationHealthYellow"
+        ],
+        "alertConditions": []
+       },
+       {
+        "symptomId": "ffaace77-06ef-4b5a-848b-5c99274e1d72",
+        "symptomSetId": "18062552-3cf3-4a52-8048-5855373f246e",
+        "symptomDefinitionsIds": [
+         "SymptomDefinition-vCenter Operations Adapter-GroupPopulationHealthOrange"
+        ],
+        "alertConditions": []
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "8bbb1892-9819-4982-8bed-fbfe30fce1a4": {
+   "contributingSymptoms": [
+    {
+     "alertId": "8bbb1892-9819-4982-8bed-fbfe30fce1a4",
+     "contributingSymptoms": {
+      "contributingSymptoms": [
+       {
+        "symptomId": "67021fad-ebe1-4e6d-859b-076ec7235f44",
+        "symptomSetId": "1f4e13f2-51b3-4bc9-932b-c910d8207add",
+        "symptomDefinitionsIds": [
+         "SymptomDefinition-vCenterApplianceHealthServiceDownSymptom"
+        ],
+        "alertConditions": []
+       },
+       {
+        "symptomId": "597315ee-274b-42cf-bfa7-30182e4a4a94",
+        "symptomSetId": "1f4e13f2-51b3-4bc9-932b-c910d8207add",
+        "symptomDefinitionsIds": [
+         "SymptomDefinition-vCenterApplianceHealthServiceDownSymptom"
+        ],
+        "alertConditions": []
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "22740c26-90fd-4c11-a161-16912ef66804": {
+   "contributingSymptoms": [
+    {
+     "alertId": "22740c26-90fd-4c11-a161-16912ef66804",
+     "contributingSymptoms": {
+      "contributingSymptoms": [
+       {
+        "symptomId": "bb406ff9-193a-4506-b6b3-7d79fdaf1c65",
+        "symptomSetId": "3f9158d2-dd80-45f2-98a8-896727bc39bf",
+        "symptomDefinitionsIds": [
+         "SymptomDefinition-vCenter Operations Adapter-AdapterInstanceResource"
+        ],
+        "alertConditions": []
+       },
+       {
+        "symptomId": "65b19e1c-62df-4a57-a978-9e9d18f82df5",
+        "symptomSetId": "3f9158d2-dd80-45f2-98a8-896727bc39bf",
+        "symptomDefinitionsIds": [
+         "SymptomDefinition-vCenter Operations Adapter-AdapterChildsNoDataReceivingSymptom"
+        ],
+        "alertConditions": []
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "197607b3-9fbd-49a7-a1f7-bd6fe7da463a": {
+   "contributingSymptoms": [
+    {
+     "alertId": "197607b3-9fbd-49a7-a1f7-bd6fe7da463a",
+     "contributingSymptoms": {
+      "contributingSymptoms": [
+       {
+        "symptomId": "ad2d3b16-6c80-43e6-a074-fc004476d42c",
+        "symptomSetId": "3e52ca62-b023-4fe1-a7e4-81ab955e1edb",
+        "symptomDefinitionsIds": [
+         "SymptomDefinition-vCenter Operations Adapter-LicenseKeyExpiryFirstNotice"
+        ],
+        "alertConditions": []
+       }
+      ]
+     }
+    }
+   ]
+  }
+ },
+ "symptom_definitions": {
+  "pageInfo": {
+   "totalCount": 7,
+   "page": 0,
+   "pageSize": 50
+  },
+  "symptomDefinitions": [
+   {
+    "id": "SymptomDefinition-vCenterApplianceHealthServiceDownSymptom",
+    "name": "vCenter appliance health service is down",
+    "adapterKindKey": "VMWARE_INFRA_HEALTH",
+    "resourceKindKey": "VCENTER_APPLIANCE_HEALTH_SERVICES",
+    "waitCycles": 1,
+    "cancelCycles": 1,
+    "state": {
+     "severity": "CRITICAL",
+     "condition": {
+      "type": "CONDITION_HT",
+      "key": "SERVICE|AVAILABILITY",
+      "operator": "NOT_EQ",
+      "value": "1.0",
+      "valueType": "NUMERIC",
+      "instanced": false,
+      "thresholdType": "STATIC"
+     }
+    }
+   },
+   {
+    "id": "SymptomDefinition-vCenter Operations Adapter-LicenseKeyExpiryFirstNotice",
+    "name": "License will soon expire",
+    "adapterKindKey": "Container",
+    "resourceKindKey": "Licensing",
+    "waitCycles": 1,
+    "cancelCycles": 1,
+    "state": {
+     "severity": "WARNING",
+     "condition": {
+      "type": "CONDITION_MESSAGE_EVENT",
+      "eventType": "NOTIFICATION",
+      "message": "License will expire soon.*",
+      "operator": "REGEX"
+     }
+    }
+   },
+   {
+    "id": "SymptomDefinition-vCenter Operations Adapter-AdapterInstanceResource",
+    "name": "Object is an adapter instance",
+    "adapterKindKey": "ALL",
+    "resourceKindKey": "All",
+    "waitCycles": 1,
+    "cancelCycles": 1,
+    "state": {
+     "severity": "INFORMATION",
+     "condition": {
+      "type": "CONDITION_PROPERTY_STRING",
+      "stringValue": "ADAPTER_INSTANCE",
+      "operator": "EQ",
+      "key": "System Properties|resource_kind_type",
+      "instanced": false,
+      "thresholdType": "STATIC"
+     }
+    }
+   },
+   {
+    "id": "SymptomDefinition-vCenter Operations Adapter-ResourceIsAGroup",
+    "name": "Object is a group",
+    "adapterKindKey": "ALL",
+    "resourceKindKey": "All",
+    "waitCycles": 1,
+    "cancelCycles": 1,
+    "state": {
+     "severity": "INFORMATION",
+     "condition": {
+      "type": "CONDITION_PROPERTY_STRING",
+      "stringValue": "GROUP",
+      "operator": "EQ",
+      "key": "System Properties|resource_kind_type",
+      "instanced": false,
+      "thresholdType": "STATIC"
+     }
+    }
+   },
+   {
+    "id": "SymptomDefinition-vCenter Operations Adapter-GroupPopulationHealthOrange",
+    "name": "Average Health of group members is moderately low",
+    "adapterKindKey": "ALL",
+    "resourceKindKey": "All",
+    "waitCycles": 1,
+    "cancelCycles": 1,
+    "state": {
+     "severity": "IMMEDIATE",
+     "condition": {
+      "type": "CONDITION_HT",
+      "key": "Health|populationAverage",
+      "operator": "LT_EQ",
+      "value": "50.0",
+      "valueType": "NUMERIC",
+      "instanced": false,
+      "thresholdType": "STATIC"
+     }
+    }
+   },
+   {
+    "id": "SymptomDefinition-vCenter Operations Adapter-GroupPopulationHealthYellow",
+    "name": "Average Health of group members is starting to get low",
+    "adapterKindKey": "ALL",
+    "resourceKindKey": "All",
+    "waitCycles": 1,
+    "cancelCycles": 1,
+    "state": {
+     "severity": "WARNING",
+     "condition": {
+      "type": "CONDITION_HT",
+      "key": "Health|populationAverage",
+      "operator": "LT_EQ",
+      "value": "75.0",
+      "valueType": "NUMERIC",
+      "instanced": false,
+      "thresholdType": "STATIC"
+     }
+    }
+   },
+   {
+    "id": "SymptomDefinition-vCenter Operations Adapter-AdapterChildsNoDataReceivingSymptom",
+    "name": "Objects are not receiving data from adapter instance",
+    "adapterKindKey": "ALL",
+    "resourceKindKey": "All",
+    "waitCycles": 3,
+    "cancelCycles": 1,
+    "state": {
+     "severity": "IMMEDIATE",
+     "condition": {
+      "type": "CONDITION_HT",
+      "key": "Instance Attributes|no_data_receiving_resource_count",
+      "operator": "GT",
+      "value": "0.0",
+      "valueType": "NUMERIC",
+      "instanced": false,
+      "thresholdType": "STATIC"
+     }
+    }
+   }
+  ]
+ },
+ "resources": {
+  "pageInfo": {
+   "totalCount": 4,
+   "page": 0,
+   "pageSize": 100
+  },
+  "resourceList": [
+   {
+    "creationTime": 1789261664628,
+    "resourceKey": {
+     "name": "vCenter-192.0.2.16",
+     "adapterKindKey": "VMWARE_INFRA_HEALTH",
+     "resourceKindKey": "VC_APP",
+     "resourceIdentifiers": []
+    },
+    "resourceStatusStates": [
+     {
+      "adapterInstanceId": "20869e54-7009-489a-b3d1-a72a9e660c44",
+      "resourceStatus": "DATA_RECEIVING",
+      "resourceState": "STARTED",
+      "statusMessage": ""
+     }
+    ],
+    "resourceHealth": "RED",
+    "resourceHealthValue": 25.0,
+    "dtEnabled": true,
+    "badges": [
+     {
+      "type": "HEALTH",
+      "color": "RED",
+      "score": 25.0
+     },
+     {
+      "type": "EFFICIENCY",
+      "color": "GREEN",
+      "score": 100.0
+     },
+     {
+      "type": "RISK",
+      "color": "GREEN",
+      "score": 0.0
+     }
+    ],
+    "relatedResources": [],
+    "identifier": "31aa1b41-2ae3-479b-8e25-176016ad874e"
+   },
+   {
+    "creationTime": 1789261267108,
+    "resourceKey": {
+     "name": "new VC",
+     "adapterKindKey": "VMWARE",
+     "resourceKindKey": "VMwareAdapter Instance",
+     "resourceIdentifiers": []
+    },
+    "credentialInstanceId": "3fc01ee6-0bc6-4f0f-9308-6a4f0e437b9e",
+    "resourceStatusStates": [
+     {
+      "adapterInstanceId": "20869e54-7009-489a-b3d1-a72a9e660c44",
+      "resourceStatus": "DATA_RECEIVING",
+      "resourceState": "STARTED",
+      "statusMessage": ""
+     },
+     {
+      "adapterInstanceId": "d060f122-300f-4beb-a46c-6f13b6daf11a",
+      "resourceStatus": "DATA_RECEIVING",
+      "resourceState": "STARTED",
+      "statusMessage": ""
+     },
+     {
+      "adapterInstanceId": "431af8a8-18b5-4811-aff5-ac903aaf03f7",
+      "resourceStatus": "DATA_RECEIVING",
+      "resourceState": "STARTED",
+      "statusMessage": ""
+     }
+    ],
+    "resourceHealth": "ORANGE",
+    "resourceHealthValue": 50.0,
+    "dtEnabled": true,
+    "monitoringInterval": 5,
+    "badges": [
+     {
+      "type": "HEALTH",
+      "color": "ORANGE",
+      "score": 50.0
+     },
+     {
+      "type": "TIME_REMAINING",
+      "color": "GREEN",
+      "score": 366.0
+     },
+     {
+      "type": "WORKLOAD",
+      "color": "GREEN",
+      "score": 60.92600445792324
+     },
+     {
+      "type": "EFFICIENCY",
+      "color": "GREEN",
+      "score": 100.0
+     },
+     {
+      "type": "RISK",
+      "color": "GREEN",
+      "score": 0.0
+     },
+     {
+      "type": "CAPACITY_REMAINING",
+      "color": "GREEN",
+      "score": 38.17663752305164
+     }
+    ],
+    "relatedResources": [],
+    "identifier": "431af8a8-18b5-4811-aff5-ac903aaf03f7"
+   },
+   {
+    "creationTime": 1789260703352,
+    "resourceKey": {
+     "name": "Unlicensed Group",
+     "adapterKindKey": "Container",
+     "resourceKindKey": "Licensing",
+     "resourceIdentifiers": []
+    },
+    "resourceStatusStates": [
+     {
+      "adapterInstanceId": "38fd7b14-53ad-4680-a152-8a59f8b3ed5e",
+      "resourceStatus": "DATA_RECEIVING",
+      "resourceState": "STARTED",
+      "statusMessage": ""
+     }
+    ],
+    "resourceHealth": "YELLOW",
+    "resourceHealthValue": 75.0,
+    "dtEnabled": true,
+    "monitoringInterval": 5,
+    "badges": [
+     {
+      "type": "HEALTH",
+      "color": "YELLOW",
+      "score": 75.0
+     },
+     {
+      "type": "WORKLOAD",
+      "color": "GREEN",
+      "score": 0.0
+     },
+     {
+      "type": "EFFICIENCY",
+      "color": "GREEN",
+      "score": 100.0
+     },
+     {
+      "type": "RISK",
+      "color": "GREEN",
+      "score": 0.0
+     }
+    ],
+    "relatedResources": [],
+    "identifier": "d6c4efec-f60e-4f05-b91d-5be1afe4a9b6"
+   },
+   {
+    "creationTime": 1789260812977,
+    "resourceKey": {
+     "name": "VMware Private Cloud",
+     "adapterKindKey": "Container",
+     "resourceKindKey": "VMware Cloud",
+     "resourceIdentifiers": []
+    },
+    "resourceStatusStates": [
+     {
+      "adapterInstanceId": "38fd7b14-53ad-4680-a152-8a59f8b3ed5e",
+      "resourceStatus": "DATA_RECEIVING",
+      "resourceState": "STARTED",
+      "statusMessage": ""
+     }
+    ],
+    "resourceHealth": "ORANGE",
+    "resourceHealthValue": 50.0,
+    "dtEnabled": true,
+    "monitoringInterval": 5,
+    "badges": [
+     {
+      "type": "HEALTH",
+      "color": "ORANGE",
+      "score": 50.0
+     },
+     {
+      "type": "WORKLOAD",
+      "color": "GREEN",
+      "score": 0.0
+     },
+     {
+      "type": "EFFICIENCY",
+      "color": "GREEN",
+      "score": 100.0
+     },
+     {
+      "type": "RISK",
+      "color": "GREEN",
+      "score": 0.0
+     }
+    ],
+    "relatedResources": [],
+    "identifier": "ef568146-b616-4130-9263-79fddb31b5f9"
+   }
+  ]
+ }
+}

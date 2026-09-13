@@ -7,6 +7,7 @@ All API responses pass through sanitize() to strip control characters.
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable, Iterable
 from typing import TYPE_CHECKING, Any
 
 from vmware_policy import paginated, sanitize
@@ -53,8 +54,160 @@ def _max_state_severity(states: list[dict]) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Batched id lookups — names the alert payloads do not carry
+# ---------------------------------------------------------------------------
+
+#: Ids per ``GET /resources?resourceId=..&resourceId=..`` request. A resource
+#: UUID costs ~48 characters of query string, so 100 keeps the URL near 5 KB —
+#: the same bound ``get_top_consumers`` uses against HTTP 414.
+_RESOURCE_ID_CHUNK = 100
+
+#: Ids per ``GET /symptomdefinitions?id=..&id=..`` request. Definition ids are
+#: long and URL-encode their spaces
+#: (``SymptomDefinition-vCenter%20Operations%20Adapter-...``, ~90 characters),
+#: so the chunk is half the resource one for the same URL length.
+_DEFINITION_ID_CHUNK = 50
+
+#: Per-row outcome of a batched lookup. "not_found" and "failed" are kept apart
+#: because they call for different actions: the appliance answered and does not
+#: have that id (deleted, or a stale reference), versus the request itself
+#: failing, where retrying may well work.
+_LOOKUP_RESOLVED = "resolved"
+_LOOKUP_NOT_FOUND = "not_found"
+_LOOKUP_FAILED = "failed"
+_LOOKUP_NOT_NEEDED = "not_needed"
+_LOOKUP_NO_ID = "no_definition_id"
+
+
+def _fetch_by_ids(
+    fetch: Callable[[list[str]], Any],
+    ids: Iterable[str],
+    container: str,
+    id_key: str,
+    chunk: int,
+) -> tuple[dict[str, dict], set[str]]:
+    """Fetch rows for ``ids`` from an id-filterable collection, in chunks.
+
+    Both collections this serves accept the id parameter repeated — confirmed
+    2026-09-13 on Aria Operations 8.18.7: seven definition ids in one
+    ``/symptomdefinitions`` request returned all seven, seven ``resourceId``
+    values in one ``/resources`` request returned all seven, and an unknown id
+    is silently omitted rather than reported. So the cost is
+    ``ceil(unique ids / chunk)`` requests, never one per row.
+
+    Rows are keyed by their own id rather than trusted positionally: this
+    appliance family has a recorded habit of ignoring a filter parameter
+    (``/symptoms?alertId=`` returns all 81 symptoms on 8.18.7), and keying by
+    the row's own id is what keeps an ignored filter from attaching a name to
+    the wrong alert. Rows for ids nobody asked for are dropped only to keep the
+    map small — that part is not load-bearing.
+
+    Args:
+        fetch: Performs one request for a batch of ids. Callers pass a lambda
+            around ``client.get`` with the literal path, so the spec
+            conformance scan still sees which endpoint is called.
+        ids: Ids to resolve; empty values and duplicates are dropped.
+        container: Response key holding the row list.
+        id_key: Row key holding each row's id.
+        chunk: Ids per request.
+
+    Returns:
+        ``(found, failed)``: rows by id, and the ids whose request failed or
+        answered in a shape this could not read. An id in neither was answered
+        for and not returned — "not found", which is not the same as "failed".
+    """
+    unique = list(dict.fromkeys(str(i) for i in ids if i))
+    found: dict[str, dict] = {}
+    failed: set[str] = set()
+    for start in range(0, len(unique), chunk):
+        batch = unique[start : start + chunk]
+        try:
+            data = fetch(batch)
+        except Exception as exc:
+            _log.warning("Batched lookup of %d ids failed: %s", len(batch), exc)
+            failed.update(batch)
+            continue
+        rows = data.get(container) if isinstance(data, dict) else None
+        if not isinstance(rows, list):
+            _log.warning("Batched lookup answered without a '%s' list; %d ids unresolved", container, len(batch))
+            failed.update(batch)
+            continue
+        wanted = set(batch)
+        for row in rows:
+            row_id = row.get(id_key) if isinstance(row, dict) else None
+            if row_id is not None and str(row_id) in wanted:
+                found[str(row_id)] = row
+    return found, failed
+
+
+def _lookup_outcome(item_id: str, found: dict[str, dict], failed: set[str]) -> str:
+    if item_id in found:
+        return _LOOKUP_RESOLVED
+    return _LOOKUP_FAILED if item_id in failed else _LOOKUP_NOT_FOUND
+
+
+def _unresolved_note(what: str, failed: int, not_found: int, consequence: str) -> str | None:
+    """Explain unresolved lookups, or ``None`` when every one resolved."""
+    parts = []
+    if failed:
+        parts.append(f"{failed} {what} could not be retrieved (the lookup failed — retry)")
+    if not_found:
+        parts.append(f"{not_found} {what} were not returned by the appliance (deleted or stale)")
+    if not parts:
+        return None
+    return "; ".join(parts) + f". {consequence}"
+
+
+# ---------------------------------------------------------------------------
 # list_alerts
 # ---------------------------------------------------------------------------
+
+
+def _resolve_alert_resources(
+    client: AriaClient, alerts: list[dict]
+) -> tuple[dict[str, dict], str | None]:
+    """Name and kind for each affected resource, one batched request per chunk.
+
+    The Alert model carries only ``resourceId``, so a page of alerts named no
+    object at all — 2026-09-13 on 8.18.7 every row read as a bare UUID.
+
+    Returns:
+        ``({resource_id: {"name", "kind"}}, note)``. Resources that did not
+        resolve are absent from the map; ``note`` says how many and why, and is
+        ``None`` when all resolved (or no alert named a resource).
+    """
+    resource_ids = [str(a.get("resourceId") or "") for a in alerts]
+    found, failed = _fetch_by_ids(
+        lambda batch: client.get(
+            "/resources", params={"resourceId": batch, "pageSize": _RESOURCE_ID_CHUNK}
+        ),
+        resource_ids,
+        container="resourceList",
+        id_key="identifier",
+        chunk=_RESOURCE_ID_CHUNK,
+    )
+    names: dict[str, dict] = {}
+    for rid, row in found.items():
+        key = row.get("resourceKey") if isinstance(row.get("resourceKey"), dict) else {}
+        names[rid] = {
+            "name": sanitize(str(key.get("name") or ""), max_len=300) or None,
+            "kind": sanitize(str(key.get("resourceKindKey") or "")) or None,
+        }
+    unique = set(filter(None, resource_ids))
+    outcomes = [_lookup_outcome(rid, found, failed) for rid in unique]
+    note = _unresolved_note(
+        "affected resource(s)",
+        failed=outcomes.count(_LOOKUP_FAILED),
+        not_found=outcomes.count(_LOOKUP_NOT_FOUND),
+        consequence=(
+            "Their rows carry resource_name null, which means the name is "
+            "unknown — not that the alert has no resource. Resolve one with "
+            "investigate_alert or get_resource(resource_id)."
+        ),
+    )
+    return names, note
+
+
 
 #: Server-side page requested from POST /alerts/query. The appliance may return
 #: fewer; nothing here depends on it returning exactly this many.
@@ -198,11 +351,12 @@ def list_alerts(
 
     fetched, total_count = _walk_alert_pages(client, query, offset + limit)
     items = paginate(fetched, limit, offset)
+    resources, resource_names_note = _resolve_alert_resources(client, items)
 
     # Alert model fields (2026-06-08 spec audit): criticality is `alertLevel`,
     # the display name is `alertDefinitionName`. There is no alertName,
-    # criticality, resourceName, or info field — resolve the resource name
-    # via get_resource(resourceId) when needed.
+    # criticality, resourceName, or info field — the resource name and kind
+    # come from the batched GET /resources lookup above.
     rows = [
         {
             "id": sanitize(a.get("alertId", "")),
@@ -211,6 +365,8 @@ def list_alerts(
             "status": sanitize(a.get("status", "")),
             "alert_impact": sanitize(a.get("alertImpact", "")),
             "resource_id": sanitize(a.get("resourceId", "")),
+            "resource_name": resources.get(str(a.get("resourceId") or ""), {}).get("name"),
+            "resource_kind": resources.get(str(a.get("resourceId") or ""), {}).get("kind"),
             "start_time_ms": a.get("startTimeUTC", None),
             "update_time_ms": a.get("updateTimeUTC", None),
             "alert_definition_id": sanitize(a.get("alertDefinitionId", "")),
@@ -224,6 +380,7 @@ def list_alerts(
         limit=limit,
         total=total_count,
         next_offset=next_offset(len(rows), limit, offset, total_count),
+        resource_names_note=resource_names_note,
     )
 
 
@@ -317,7 +474,42 @@ def _walk_symptoms(node: Any, depth: int = 0) -> tuple[list[dict], bool]:
     return [], not node or (depth > 0 and "alertId" in node)
 
 
-def _summarize_symptom(s: dict) -> dict:
+def _own_name(s: dict) -> str:
+    """The name a symptom instance carries itself, or ``""``."""
+    return str(s.get("name") or s.get("message") or "")
+
+
+def _own_severity(s: dict) -> str:
+    """The severity a symptom instance carries itself, or ``""``."""
+    conditions = [c for c in (s.get("alertConditions") or []) if isinstance(c, dict)]
+    return str(s.get("severity") or s.get("symptomCriticality") or _max_state_severity(conditions))
+
+
+def _definition_id(s: dict) -> str:
+    definition_ids = s.get("symptomDefinitionsIds") or []
+    return str(
+        s.get("symptomDefinitionId")
+        or (definition_ids[0] if isinstance(definition_ids, list) and definition_ids else "")
+    )
+
+
+def _definition_severity(definition: dict) -> str:
+    """Severity of a SymptomDefinition: ``state.severity``, or the max of ``states[]``.
+
+    8.18.7 answers with a single ``state`` object (``{"severity": "IMMEDIATE",
+    "condition": {...}}``) on all eleven definitions its ten alerts reference;
+    ``states[]`` is kept for the plural form other versions use on definitions.
+    """
+    state = definition.get("state")
+    if isinstance(state, dict) and state.get("severity"):
+        return str(state["severity"])
+    states = [x for x in (definition.get("states") or []) if isinstance(x, dict)]
+    return _max_state_severity(states)
+
+
+def _summarize_symptom(
+    s: dict, definition: dict | None = None, lookup: str = _LOOKUP_NOT_NEEDED
+) -> dict:
     """Project one triggered symptom onto summary fields.
 
     Reads both wire vocabularies. The 9.1 leaf carries none of severity /
@@ -326,18 +518,23 @@ def _summarize_symptom(s: dict) -> dict:
     only the older names left every field blank even once the nesting was
     followed. ``condition`` is the actual reason the symptom fired, which is
     the whole point of asking for symptoms.
+
+    On 8.18.7 even that is not enough: ``alertConditions`` is empty, so the
+    instance carries ids and nothing else, and all eight symptoms on four live
+    alerts came back with blank name and severity. Those two fields then come
+    from the symptom ``definition`` (fetched in one batch by the caller), and
+    ``definition_lookup`` records whether that happened — a blank name next to
+    ``"failed"`` is unknown, not nameless.
     """
     conditions = [c for c in (s.get("alertConditions") or []) if isinstance(c, dict)]
-    definition_ids = s.get("symptomDefinitionsIds") or []
     first_condition = conditions[0].get("condition") if conditions else None
     if not isinstance(first_condition, dict):
         first_condition = {}
+    definition = definition or {}
 
-    severity = s.get("severity") or s.get("symptomCriticality") or _max_state_severity(conditions)
-    name = s.get("name") or s.get("message") or first_condition.get("key") or ""
-    definition_id = s.get("symptomDefinitionId") or (
-        definition_ids[0] if isinstance(definition_ids, list) and definition_ids else ""
-    )
+    severity = _own_severity(s) or _definition_severity(definition)
+    name = _own_name(s) or definition.get("name") or first_condition.get("key") or ""
+    definition_id = _definition_id(s)
     condition = " ".join(
         str(first_condition.get(k) or "")
         for k in ("key", "operator", "settingValue")
@@ -350,28 +547,78 @@ def _summarize_symptom(s: dict) -> dict:
         "symptom_definition_id": sanitize(str(definition_id)),
         "resource_id": sanitize(str(s.get("resourceId") or "")),
         "condition": sanitize(condition, max_len=300),
+        "definition_lookup": lookup,
     }
 
 
-def _get_contributing_symptoms(client: AriaClient, alert_id: str) -> tuple[list[dict], str]:
+def _summarize_with_definitions(client: AriaClient, leaves: list[dict]) -> tuple[list[dict], str]:
+    """Summarize symptom leaves, naming the ones that carry no name or severity.
+
+    Only symptoms missing a name or severity are looked up, and their
+    definition ids are deduplicated into ``ceil(unique / chunk)`` requests —
+    one for any real alert — so a symptom count never becomes a request count.
+
+    Returns:
+        ``(symptoms, note)``; ``note`` is ``""`` when every lookup resolved.
+    """
+    needy = [s for s in leaves if _definition_id(s) and not (_own_name(s) and _own_severity(s))]
+    found, failed = _fetch_by_ids(
+        lambda batch: client.get(
+            "/symptomdefinitions", params={"id": batch, "pageSize": _DEFINITION_ID_CHUNK}
+        ),
+        [_definition_id(s) for s in needy],
+        container="symptomDefinitions",
+        id_key="id",
+        chunk=_DEFINITION_ID_CHUNK,
+    )
+    needy_ids = {id(s) for s in needy}
+    summaries = []
+    for s in leaves:
+        if id(s) in needy_ids:
+            def_id = _definition_id(s)
+            summaries.append(_summarize_symptom(s, found.get(def_id), _lookup_outcome(def_id, found, failed)))
+        elif _own_name(s) and _own_severity(s):
+            summaries.append(_summarize_symptom(s))
+        else:
+            summaries.append(_summarize_symptom(s, lookup=_LOOKUP_NO_ID))
+
+    unique_needy = {_definition_id(s) for s in needy}
+    outcomes = [_lookup_outcome(i, found, failed) for i in unique_needy]
+    note = _unresolved_note(
+        "symptom definition(s)",
+        failed=outcomes.count(_LOOKUP_FAILED),
+        not_found=outcomes.count(_LOOKUP_NOT_FOUND),
+        consequence=(
+            "Symptoms whose definition_lookup is not 'resolved' may show an "
+            "empty name or severity — that means unknown, not blank. Their "
+            "symptom_definition_id is still exact."
+        ),
+    )
+    return summaries, note or ""
+
+
+def _get_contributing_symptoms(client: AriaClient, alert_id: str) -> tuple[list[dict], str, str]:
     """Fetch triggered symptoms via GET /alerts/contributingsymptoms?id=<alertId>.
 
     The Alert model has no alertSymptomList — triggered symptoms come from this
-    separate endpoint (2026-06-08 spec audit). Returns ``(symptoms, note)``,
-    where a non-empty note says the empty list is unconfirmed. Failures still
-    degrade to an empty list (logged) so a symptoms hiccup never breaks
-    get_alert, but they no longer pass silently as "no symptoms".
+    separate endpoint (2026-06-08 spec audit). Returns ``(symptoms, note,
+    definitions_note)``, where a non-empty ``note`` says the empty list is
+    unconfirmed and a non-empty ``definitions_note`` says some symptoms could
+    not be named. Failures still degrade to an empty list (logged) so a
+    symptoms hiccup never breaks get_alert, but they no longer pass silently
+    as "no symptoms".
     """
     try:
         data = client.get("/alerts/contributingsymptoms", params={"id": alert_id})
     except Exception as exc:
         _log.warning("Could not fetch contributing symptoms for alert %s: %s", alert_id, exc)
-        return [], _SYMPTOMS_UNAVAILABLE_NOTE
+        return [], _SYMPTOMS_UNAVAILABLE_NOTE, ""
 
     rows, recognized = _walk_symptoms(data)
     if not recognized:
         _log.warning("Unrecognized contributing-symptoms shape for alert %s", alert_id)
-    return [_summarize_symptom(s) for s in rows], "" if recognized else _UNPARSED_SYMPTOMS_NOTE
+    symptoms, definitions_note = _summarize_with_definitions(client, rows)
+    return symptoms, "" if recognized else _UNPARSED_SYMPTOMS_NOTE, definitions_note
 
 
 def get_alert(client: AriaClient, alert_id: str) -> dict:
@@ -391,6 +638,13 @@ def get_alert(client: AriaClient, alert_id: str) -> dict:
         ``symptoms_note`` key is present only when the symptom list is empty
         for a reason other than the alert having no symptoms — an unrecognised
         response shape, or a lookup that failed.
+
+        Each symptom carries ``definition_lookup``: ``resolved`` (name and
+        severity came from its symptom definition), ``not_needed`` (the
+        instance named itself), ``not_found`` / ``failed`` (the definition
+        could not be read — an empty name or severity is then unknown), or
+        ``no_definition_id``. A ``symptom_definitions_note`` key is present
+        only when some definition did not resolve.
     """
     if not alert_id:
         raise ValueError(
@@ -400,7 +654,7 @@ def get_alert(client: AriaClient, alert_id: str) -> dict:
         )
 
     data = client.get(f"/alerts/{alert_id}")
-    symptoms, symptoms_note = _get_contributing_symptoms(client, alert_id)
+    symptoms, symptoms_note, definitions_note = _get_contributing_symptoms(client, alert_id)
     result = {
         "id": sanitize(data.get("alertId", "")),
         "name": sanitize(data.get("alertDefinitionName", ""), max_len=300),
@@ -418,6 +672,8 @@ def get_alert(client: AriaClient, alert_id: str) -> dict:
     }
     if symptoms_note:
         result["symptoms_note"] = symptoms_note
+    if definitions_note:
+        result["symptom_definitions_note"] = definitions_note
     return result
 
 

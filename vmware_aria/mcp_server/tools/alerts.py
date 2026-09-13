@@ -29,8 +29,11 @@ def list_alerts(
     """[READ] List alerts from Aria Operations.
 
     Returns alert summaries: name, criticality, status, impact, resource_id,
-    timestamps, and control state. The Alert model does not carry a resource
-    name — resolve it via get_resource(resource_id).
+    resource_name, resource_kind, timestamps, and control state. resource_name
+    and resource_kind are resolved in one batched lookup per page; they are
+    null when that failed or the resource no longer exists, and the envelope's
+    resource_names_note (null when every name resolved) then says which —
+    null means unknown, not "no resource".
 
     Returns a paginated envelope: items, returned, limit, total (null
     when the API reports no size), truncated, hint, next_offset. Check
@@ -63,7 +66,7 @@ def list_alerts(
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
 @vmware_tool(risk_level="low")
 def get_alert(alert_id: str, target: Optional[str] = None) -> dict:
-    """[READ] Get full details for one alert by UUID, including its contributing (triggered) symptoms. Use this after list_alerts to drill into a single alert; use list_alerts to discover or filter them. Returns one alert object: name, criticality, status, impact, resource_id, start/update/cancel timestamps, control state, and symptoms (each with the condition that triggered it). Gotcha: an empty symptoms list normally means the alert has no triggered symptoms, but if a "symptoms_note" key is present the list is UNKNOWN rather than empty — the response shape was unrecognised or the lookup failed, so do not tell the user the alert fired for no reason. The Alert model does not carry a resource name — resolve it via get_resource(resource_id), or call investigate_alert to do that correlation in one step. Recommendations hang off the alert definition, not the alert. To act on the alert afterwards, use acknowledge_alert or cancel_alert.
+    """[READ] Get full details for one alert by UUID, including its contributing (triggered) symptoms. Use this after list_alerts to drill into a single alert; use list_alerts to discover or filter them. Returns one alert object: name, criticality, status, impact, resource_id, start/update/cancel timestamps, control state, and symptoms (each with the condition that triggered it). Gotcha: an empty symptoms list normally means the alert has no triggered symptoms, but if a "symptoms_note" key is present the list is UNKNOWN rather than empty — the response shape was unrecognised or the lookup failed, so do not tell the user the alert fired for no reason. Symptom name and severity come from the symptom definition when the instance carries none; each symptom's definition_lookup says whether that worked (resolved / not_needed / not_found / failed / no_definition_id), and a "symptom_definitions_note" key appears when some did not — an empty name there is unknown, not blank. The Alert model does not carry a resource name — resolve it via get_resource(resource_id), or call investigate_alert to do that correlation in one step. Recommendations hang off the alert definition, not the alert. To act on the alert afterwards, use acknowledge_alert or cancel_alert.
 
     Args:
         alert_id: The alert UUID (from list_alerts).
@@ -166,7 +169,9 @@ def investigate_alert(alert_id: str, target: Optional[str] = None) -> dict:
     reads its resourceId, fetches that resource, and confirms the resource name
     and kind before suggesting anything downstream.
 
-    Returns five always-present keys: alert (Aria's values verbatim), resource
+    Returns five always-present keys: alert (Aria's values verbatim, with its
+    contributing symptoms named as in get_alert — check each symptom's
+    definition_lookup and symptom_definitions_note), resource
     (or null), correlation (both UUIDs labelled, plus confirmed name, kind and
     a confirmed flag), next_step (which vmware-monitor tool to call next, or
     null), and warnings (empty on success).
