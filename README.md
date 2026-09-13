@@ -25,8 +25,9 @@ AI-assisted monitoring and capacity planning for VMware Aria Operations (vRealiz
 | **Reports** | definitions, generate, list, get, delete | Read + 2 Write (5) |
 | **Anomaly** | list anomalies, risk badge | Read-only (2) |
 | **Health** | platform health, collector groups | Read-only (2) |
+| **Fleet / PromQL** (VCF Ops 9.1) | fleet certificates, password accounts, VCF domains, diagnostic findings, real-time PromQL query | Read-only (5) |
 
-**Total**: 28 tools — 21 read-only, 7 write
+**Total**: 33 tools — 26 read-only, 7 write
 
 ## Quick Start
 
@@ -87,7 +88,7 @@ pip install --no-index --find-links dist vmware-aria
 
 ```bash
 # List top CPU consumers
-vmware-aria resource top --metric cpu|usage_average --top 10
+vmware-aria resource top --metric 'cpu|usage_average' --top 10
 
 # Check active CRITICAL alerts
 vmware-aria alert list --criticality CRITICAL
@@ -96,7 +97,7 @@ vmware-aria alert list --criticality CRITICAL
 vmware-aria alert acknowledge <alert-id>
 
 # Fetch 4-hour CPU + memory metrics for a VM ("missing" says why a key has no points)
-vmware-aria resource metrics <vm-id> --metrics cpu|usage_average,mem|usage_average --hours 4
+vmware-aria resource metrics <vm-id> --metrics 'cpu|usage_average,mem|usage_average' --hours 4
 
 # Check cluster capacity
 vmware-aria capacity remaining <cluster-id>
@@ -173,14 +174,14 @@ VMs / Hosts / Clusters / Alerts / Capacity
 
 | Skill | Scope | Tools | Install |
 |-------|-------|:-----:|---------|
-| **[vmware-aiops](https://github.com/vmware-skills/VMware-AIops)** ⭐ entry point | VM lifecycle, deployment, guest ops, clusters | 49 | `uv tool install vmware-aiops` |
-| **[vmware-monitor](https://github.com/vmware-skills/VMware-Monitor)** | Read-only monitoring, alarms, events, VM info | 27 | `uv tool install vmware-monitor` |
+| **[vmware-aiops](https://github.com/vmware-skills/VMware-AIops)** ⭐ entry point | VM lifecycle, deployment, guest ops, clusters | 60 | `uv tool install vmware-aiops` |
+| **[vmware-monitor](https://github.com/vmware-skills/VMware-Monitor)** | Read-only monitoring, alarms, events, VM info | 32 | `uv tool install vmware-monitor` |
 | **[vmware-nsx](https://github.com/vmware-skills/VMware-NSX)** | NSX networking: segments, gateways, NAT, IPAM | 33 | `uv tool install vmware-nsx-mgmt` |
-| **[vmware-nsx-security](https://github.com/vmware-skills/VMware-NSX-Security)** | DFW microsegmentation, security groups, Traceflow | 21 | `uv tool install vmware-nsx-security` |
+| **[vmware-nsx-security](https://github.com/vmware-skills/VMware-NSX-Security)** | DFW microsegmentation, security groups, Traceflow | 22 | `uv tool install vmware-nsx-security` |
 | **[vmware-avi](https://github.com/vmware-skills/VMware-AVI)** | AVI / NSX ALB load balancing, AKO K8s operations | 28 | `uv tool install vmware-avi` |
-| **[vmware-storage](https://github.com/vmware-skills/VMware-Storage)** | Datastores, iSCSI, vSAN | 11 | `uv tool install vmware-storage` |
-| **[vmware-vks](https://github.com/vmware-skills/VMware-VKS)** | Tanzu Namespaces, TKC cluster lifecycle | 20 | `uv tool install vmware-vks` |
-| **[vmware-harden](https://github.com/vmware-skills/VMware-Harden)** | Compliance baselines, drift detection | 6 | `uv tool install vmware-harden` |
+| **[vmware-storage](https://github.com/vmware-skills/VMware-Storage)** | Datastores, iSCSI, vSAN | 12 | `uv tool install vmware-storage` |
+| **[vmware-vks](https://github.com/vmware-skills/VMware-VKS)** | Tanzu Namespaces, TKC cluster lifecycle | 23 | `uv tool install vmware-vks` |
+| **[vmware-harden](https://github.com/vmware-skills/VMware-Harden)** | Compliance baselines, drift detection | 8 | `uv tool install vmware-harden` |
 
 ## Security
 

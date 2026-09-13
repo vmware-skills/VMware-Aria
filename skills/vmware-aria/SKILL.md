@@ -108,10 +108,10 @@ vmware-aria doctor
 
 **Judgment**: don't chase the highest CPU consumer — chase the highest **contention** consumer. A VM at 90% CPU on a quiet host is healthy; a VM at 30% CPU but 15% Ready is starving. Key metrics: CPU Ready, Memory Balloon, Disk Latency.
 
-1. Find top CPU consumers → `vmware-aria resource top --metric cpu|usage_average --top 20` (this is the **starting set**, not the answer)
-2. Check CPU Ready on hot VMs → `vmware-aria resource metrics <vm-id> --metrics cpu.ready.summation --hours 24`
+1. Find top CPU consumers → `vmware-aria resource top --metric 'cpu|usage_average' --top 20` (this is the **starting set**, not the answer)
+2. Check CPU Ready on hot VMs → `vmware-aria resource metrics <vm-id> --metrics 'cpu|readyPct' --hours 24`
    - >5% = warning, >10% = problem, >20% = critical
-3. Check memory pressure → `vmware-aria resource metrics <vm-id> --metrics mem.balloon.average,mem.swapped.average --hours 24`
+3. Check memory pressure → `vmware-aria resource metrics <vm-id> --metrics 'mem|balloonPct,mem|swapped_average' --hours 24`
    - Balloon >0 = ESXi reclaiming memory; Swap >0 = severe — act immediately
 4. List active CRITICAL/IMMEDIATE alerts → `vmware-aria alert list --criticality CRITICAL`
 5. Check anomaly counts → `vmware-aria anomaly list`
@@ -121,8 +121,8 @@ vmware-aria doctor
 
 1. List active CRITICAL alerts → `vmware-aria alert list --criticality CRITICAL`
 2. Get alert details + symptoms → `vmware-aria alert get <alert-id>`
-3. Find top CPU consumers → `vmware-aria resource top --metric cpu|usage_average`
-4. Fetch 24h CPU metrics for the hot VM → `vmware-aria resource metrics <vm-id> --metrics cpu|usage_average --hours 24`
+3. Find top CPU consumers → `vmware-aria resource top --metric 'cpu|usage_average'`
+4. Fetch 24h CPU metrics for the hot VM → `vmware-aria resource metrics <vm-id> --metrics 'cpu|usage_average' --hours 24`
 5. Check risk badge → `vmware-aria anomaly risk <vm-id>`
 6. Acknowledge the alert → `vmware-aria alert acknowledge <alert-id>`
 
@@ -241,10 +241,10 @@ Rules:
 # Resources
 vmware-aria resource list [--kind VirtualMachine|HostSystem|ClusterComputeResource] [--name <filter>]
 vmware-aria resource get <resource-id>
-vmware-aria resource metrics <resource-id> --metrics cpu|usage_average,mem|usage_average --hours 4
-vmware-aria resource metrics <vm-id> --metrics cpu.ready.summation,mem.balloon.average --hours 24
+vmware-aria resource metrics <resource-id> --metrics 'cpu|usage_average,mem|usage_average' --hours 4
+vmware-aria resource metrics <vm-id> --metrics 'cpu|readyPct,mem|balloonPct' --hours 24
 vmware-aria resource health <resource-id>
-vmware-aria resource top --metric cpu|usage_average --kind VirtualMachine --top 10
+vmware-aria resource top --metric 'cpu|usage_average' --kind VirtualMachine --top 10
 
 # Alerts
 vmware-aria alert list [--criticality CRITICAL|IMMEDIATE|WARNING|INFORMATION]
@@ -284,19 +284,20 @@ vmware-aria doctor [--skip-auth]
 
 ### Key Metric Names (for `resource metrics` command)
 
-| Metric | API Key | What It Means |
-|--------|---------|--------------|
-| CPU Ready % | `cpu.ready.summation` | vCPU waiting for physical core; >5% = warning |
-| CPU Used | `cpu.used.summation` | Actual CPU execution time |
-| CPU Demand | `cpu.demand.average` | Total MHz requested by VM |
-| Memory Active | `mem.active.average` | Actively used by guest OS (sizing) |
-| Memory Consumed | `mem.consumed.average` | Footprint on host (capacity) |
-| Memory Balloon | `mem.balloon.average` | **>0 = ESXi reclaiming memory** |
-| Memory Swap | `mem.swapped.average` | **>0 = severe pressure** |
-| Disk Read Latency | `disk.read.average` | Read I/O latency ms |
-| Disk Write Latency | `disk.write.average` | Write I/O latency ms |
-| Net Received | `net.received.average` | Inbound network KB/s |
-| Net Transmitted | `net.transmitted.average` | Outbound network KB/s |
+| Metric | API Key | Unit | What It Means |
+|--------|---------|------|--------------|
+| CPU Ready | `cpu\|readyPct` | % | vCPU waiting for a physical core; >5% = warning |
+| CPU Usage | `cpu\|usagemhz_average` | MHz | CPU actually used |
+| CPU Demand | `cpu\|demandmhz` | MHz | CPU the VM requested |
+| Memory Consumed | `mem\|consumed_average` | KB | Footprint on host (capacity) |
+| Memory Balloon | `mem\|balloonPct` | % | **>0 = ESXi reclaiming memory** |
+| Memory Swapped | `mem\|swapped_average` | KB | **>0 = severe pressure** |
+| Memory Contention | `mem\|host_contentionPct` | % | Contention for host memory |
+| Disk Throughput | `virtualDisk\|read_average`, `virtualDisk\|write_average` | KBps | Read / write rate |
+| Disk Latency | `virtualDisk\|peak_vDisk_readLatency`, `virtualDisk\|peak_vDisk_writeLatency` | ms | Highest across the VM's virtual disks |
+| Network | `net\|received_average`, `net\|transmitted_average` | KBps | Receive / transmit rate |
+
+These are VirtualMachine keys and units as Aria Operations 8.18.7 defines them; other kinds differ (a host's `cpu|ready_summation` is ms). A key the resource does not report comes back under `missing` with `similar_keys`.
 
 > Full CLI reference with all options and output formats: see `references/cli-reference.md`
 

@@ -85,7 +85,8 @@ All requests carry `Authorization: vRealizeOpsToken <token>`.
 | `GET /suite-api/api/resources/{id}/statkeys` | get_resource_metrics (only when a requested key returned no points, to explain why) |
 | `POST /suite-api/api/resources/properties/latest/query` | list_rightsizing_recommendations (current vCPUs, memory, CPU speed, power state, template flag, product name) |
 | `GET /suite-api/api/resources/stats/topn` | get_top_consumers (resourceId list capped at 100) |
-| `GET /suite-api/api/resources/{id}/stats/latest` | capacity tools (OnlineCapacityAnalytics keys), list_anomalies (`System Attributes\|total_alarms`) |
+| `GET /suite-api/api/resources/{id}/stats/latest` | get_capacity_overview, get_remaining_capacity, get_time_remaining (OnlineCapacityAnalytics keys) |
+| `POST /suite-api/api/resources/stats/query` | list_rightsizing_recommendations (OnlineCapacityAnalytics recommendedSize keys), list_anomalies (`System Attributes\|total_alarms`) — one request for a resourceId array |
 | `POST /suite-api/api/alerts/query` | list_alerts (server-side status/criticality/resource filtering) |
 | `GET /suite-api/api/alerts/{id}` | get_alert, investigate_alert (alert-side leg; no dedicated endpoint — the tool composes the two existing reads) |
 | `GET /suite-api/api/alerts/contributingsymptoms?id={alertId}` | get_alert (triggered symptoms) |

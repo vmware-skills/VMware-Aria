@@ -20,6 +20,7 @@
 | **报表** | 模板、生成、列表、状态、删除 | 读+2写 (5) |
 | **异常** | 异常列表、风险评分 | 只读 (2) |
 | **健康** | 平台健康、采集器状态 | 只读 (2) |
+| **Fleet / PromQL**（VCF Ops 9.1） | Fleet 证书、密码账户、VCF 域、诊断发现、实时 PromQL 查询 | 只读 (5) |
 
 **共 33 个工具** — 26 只读、7 写操作
 
@@ -80,7 +81,7 @@ pip install --no-index --find-links dist vmware-aria
 
 ```bash
 # 查看 CPU 消耗排名前 10 的虚拟机
-vmware-aria resource top --metric cpu|usage_average --top 10
+vmware-aria resource top --metric 'cpu|usage_average' --top 10
 
 # 查看所有严重告警
 vmware-aria alert list --criticality CRITICAL
@@ -89,7 +90,7 @@ vmware-aria alert list --criticality CRITICAL
 vmware-aria alert acknowledge <alert-id>
 
 # 查询虚拟机 CPU 和内存指标（最近 4 小时；"missing" 说明某个指标为何没有数据点）
-vmware-aria resource metrics <vm-id> --metrics cpu|usage_average,mem|usage_average --hours 4
+vmware-aria resource metrics <vm-id> --metrics 'cpu|usage_average,mem|usage_average' --hours 4
 
 # 集群容量规划
 vmware-aria capacity remaining <cluster-id>
@@ -160,14 +161,14 @@ Token 为 6 小时滑动有效期（每次调用自动延长，官方规范行�
 
 | Skill | 功能范围 | 工具数 | 安装 |
 |-------|---------|:-----:|------|
-| **[vmware-aiops](https://github.com/vmware-skills/VMware-AIops)** ⭐ 入口 | VM 生命周期、部署、Guest 操作、集群管理 | 49 | `uv tool install vmware-aiops` |
-| **[vmware-monitor](https://github.com/vmware-skills/VMware-Monitor)** | 只读监控：告警、事件、VM 信息 | 27 | `uv tool install vmware-monitor` |
+| **[vmware-aiops](https://github.com/vmware-skills/VMware-AIops)** ⭐ 入口 | VM 生命周期、部署、Guest 操作、集群管理 | 60 | `uv tool install vmware-aiops` |
+| **[vmware-monitor](https://github.com/vmware-skills/VMware-Monitor)** | 只读监控：告警、事件、VM 信息 | 32 | `uv tool install vmware-monitor` |
 | **[vmware-nsx](https://github.com/vmware-skills/VMware-NSX)** | NSX 网络：Segment、网关、NAT、IPAM | 33 | `uv tool install vmware-nsx-mgmt` |
-| **[vmware-nsx-security](https://github.com/vmware-skills/VMware-NSX-Security)** | DFW 微分段、安全组、Traceflow | 21 | `uv tool install vmware-nsx-security` |
+| **[vmware-nsx-security](https://github.com/vmware-skills/VMware-NSX-Security)** | DFW 微分段、安全组、Traceflow | 22 | `uv tool install vmware-nsx-security` |
 | **[vmware-avi](https://github.com/vmware-skills/VMware-AVI)** | AVI / NSX ALB 负载均衡、AKO K8s 运维 | 28 | `uv tool install vmware-avi` |
-| **[vmware-storage](https://github.com/vmware-skills/VMware-Storage)** | 数据存储、iSCSI、vSAN | 11 | `uv tool install vmware-storage` |
-| **[vmware-vks](https://github.com/vmware-skills/VMware-VKS)** | Tanzu 命名空间、TKC 集群生命周期 | 20 | `uv tool install vmware-vks` |
-| **[vmware-harden](https://github.com/vmware-skills/VMware-Harden)** | 合规基线、Drift 检测 | 6 | `uv tool install vmware-harden` |
+| **[vmware-storage](https://github.com/vmware-skills/VMware-Storage)** | 数据存储、iSCSI、vSAN | 12 | `uv tool install vmware-storage` |
+| **[vmware-vks](https://github.com/vmware-skills/VMware-VKS)** | Tanzu 命名空间、TKC 集群生命周期 | 23 | `uv tool install vmware-vks` |
+| **[vmware-harden](https://github.com/vmware-skills/VMware-Harden)** | 合规基线、Drift 检测 | 8 | `uv tool install vmware-harden` |
 
 ## 安全性
 
