@@ -132,8 +132,10 @@ def _friendly_errors(fn):
     """Print expected operational errors as one red line instead of a traceback.
 
     AriaApiError already carries a teaching message (status + path + fix);
-    config problems surface as FileNotFoundError/KeyError/OSError. Anything
-    else is a real bug and keeps its traceback for debugging.
+    config problems surface as FileNotFoundError/KeyError/OSError; a rejected
+    argument is a ValueError raised by the ops layer with the remedy in its
+    message, reported as a usage error (exit 2). Anything else is a real bug
+    and keeps its traceback for debugging.
     """
 
     @functools.wraps(fn)
@@ -152,6 +154,9 @@ def _friendly_errors(fn):
         except (AriaApiError, FileNotFoundError, KeyError, OSError) as exc:
             console.print(f"[red]Error: {exc}[/red]")
             raise typer.Exit(1) from exc
+        except ValueError as exc:
+            console.print(f"[red]Error: {exc}[/red]")
+            raise typer.Exit(2) from exc
         finally:
             # Each command builds a fresh ConnectionManager via
             # _get_connection; release its auth token(s) so per-invocation
