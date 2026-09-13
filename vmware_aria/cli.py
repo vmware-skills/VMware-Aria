@@ -376,14 +376,20 @@ def alert_list(
     table.add_column("Name", style="bold")
     table.add_column("Criticality")
     table.add_column("Status")
+    table.add_column("Resource")
     table.add_column("Resource ID")
 
-    # Alert model has no resourceName — show resourceId (resolve names via
-    # `vmware-aria resource get <id>`).
+    # Alert model has no resourceName; list_alerts resolves it in one batched
+    # lookup. An unresolved name prints as "?" — unknown, not "no resource".
     for a in items:
-        table.add_row(a["id"][:36], a["name"][:60], a["criticality"], a["status"], a["resource_id"][:36])
+        resource = a.get("resource_name") or ("?" if a["resource_id"] else "")
+        table.add_row(
+            a["id"][:36], a["name"][:60], a["criticality"], a["status"], resource[:40], a["resource_id"][:36]
+        )
 
     console.print(table)
+    if _result.get("resource_names_note"):
+        console.print(f"[yellow]{_result['resource_names_note']}[/yellow]")
     _print_next_page(_result)
 
 

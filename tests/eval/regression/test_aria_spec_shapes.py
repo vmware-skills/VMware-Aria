@@ -240,12 +240,17 @@ def test_list_alerts_uses_alert_level_and_definition_name() -> None:
     from vmware_aria.ops.alerts import list_alerts
 
     client = _client()
-    client.post.return_value = {"alerts": [dict(_ALERT_WIRE)]}
-    results = list_alerts(client)["items"]
-    a = results[0]
+    # A resourceName on the wire is planted to prove it is never read: the
+    # Alert model has no such field. Since 2026-09-13 resource_name exists on
+    # the row, but it comes only from the batched GET /resources lookup — which
+    # this mock does not answer, so it must stay null and say so.
+    client.post.return_value = {"alerts": [dict(_ALERT_WIRE, resourceName="invented")]}
+    result = list_alerts(client)
+    a = result["items"][0]
     assert a["criticality"] == "CRITICAL", "criticality comes from alertLevel"
     assert a["name"] == "VM CPU contention", "name comes from alertDefinitionName"
-    assert "resource_name" not in a, "Alert model has no resourceName field"
+    assert a["resource_name"] is None, "Alert model has no resourceName field — never read it off the alert"
+    assert result["resource_names_note"], "an unresolved name must be explained, not silently null"
     assert "info" not in a, "Alert model has no info field"
     assert a["resource_id"] == "res-1"
 
