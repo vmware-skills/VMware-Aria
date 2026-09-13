@@ -144,7 +144,9 @@ def test_recommended_mhz_is_converted_to_vcpus_with_the_vms_own_core_speed(
     [
         ("Open-test", "oversized", "oversized"),  # 2 -> 1 vCPU, 32 -> 16 GiB
         ("test-llm", "right_sized", "oversized"),  # 2 -> 2 vCPU, 16 -> 8 GiB
-        ("vRealize-Operations", "oversized", "undersized"),  # 8 GiB -> 8391702 KB
+        # 8 GiB -> 8391702 KB is +0.04%: inside MEMORY_DIRECTION_TOLERANCE, not a resize.
+        ("vRealize-Operations", "oversized", "right_sized"),
+        ("vcsa", "oversized", "oversized"),  # 14 GiB -> 13.0 GiB (-7.4%) is a real one
         ("Hermers - TT", "oversized", "oversized"),
     ],
 )
@@ -281,9 +283,87 @@ def test_cli_table_shows_power_direction_and_caveats(monkeypatch: pytest.MonkeyP
     assert result.exit_code == 0, result.output
     assert "2→1 ↓" in result.output  # Open-test vCPU, oversized
     assert "32.0→16.0 ↓" in result.output  # Open-test memory GiB, oversized
-    assert "8.0→8.0 ↑" in result.output  # Aria appliance memory, undersized by ~3 MB
+    assert "8.0→8.0 =" in result.output  # Aria appliance memory: +3 MB is right-sized
     assert "↓ oversized" in result.output  # the legend
     assert "template" in result.output
     assert "Off" in result.output
     assert "vendor minimum" in result.output
     assert "MHz" not in result.output.split("Rightsizing (OnlineCapacityAnalytics recommendedSize)")[1].split("↓ oversized")[0]
+
+
+# ── tolerance: noise must not become a direction (found live, 2026-09-13) ──
+
+
+def _single_vm_row(recommended: dict[str, float], props: dict[str, object]) -> dict:
+    """One VM through the real code path, with appliance-shaped stats/properties replies."""
+    from vmware_aria.ops.capacity import list_rightsizing_recommendations
+
+    def reply(path: str, json_data: dict | None = None, **_kw) -> dict:
+        if path == STATS_PATH:
+            stats = [
+                {"statKey": {"key": f"OnlineCapacityAnalytics|{dim}|recommendedSize"}, "data": [v]}
+                for dim, v in recommended.items()
+            ]
+            return {"values": [{"resourceId": "vm-1", "stat-list": {"stat": stats}}]}
+        content = [
+            {"statKey": k, "data": [v]} if isinstance(v, float) else {"statKey": k, "values": [v]}
+            for k, v in props.items()
+        ]
+        return {"values": [{"resourceId": "vm-1", "property-contents": {"property-content": content}}]}
+
+    client = MagicMock()
+    client.post.side_effect = reply
+    return list_rightsizing_recommendations(client, resource_id="vm-1")["items"][0]
+
+
+def _props(num_cpu: float, mhz_per_vcpu: float, memory_kb: float) -> dict[str, object]:
+    return {
+        "config|hardware|numCpu": num_cpu,
+        "cpu|speed": num_cpu * mhz_per_vcpu * 1_000_000,
+        "config|hardware|memoryKB": memory_kb,
+        "summary|runtime|powerState": "Powered On",
+        "summary|config|isTemplate": "false",
+    }
+
+
+def test_a_memory_difference_of_a_few_megabytes_is_right_sized_and_not_actionable() -> None:
+    """Live 8.18.7: the Aria appliance, 8388608 KB configured, 8391656 KB recommended (+0.04%)."""
+    row = _single_vm_row(
+        {"cpu": 2 * 2803.193359375, "mem": 8391656.0}, _props(2.0, 2803.193359375, 8388608.0)
+    )
+    assert row["cpu_direction"] == "right_sized"
+    assert row["memory_direction"] == "right_sized"
+    assert row["actionable"] is False
+
+
+@pytest.mark.parametrize(
+    ("recommended_mhz", "mhz_per_vcpu"),
+    [
+        (2803.1934, 2803.1933),  # the coordinator's example (ratio 1 + 3.6e-8)
+        (2803.20, 2803.19),  # a bigger rounding gap (ratio 1 + 3.6e-6)
+        (2803.19, 2803.20),  # and the other side of it
+    ],
+)
+def test_float_noise_in_the_mhz_ratio_does_not_add_a_vcpu(recommended_mhz: float, mhz_per_vcpu: float) -> None:
+    row = _single_vm_row({"cpu": recommended_mhz, "mem": 16777216.0}, _props(2.0, mhz_per_vcpu, 16777216.0))
+    assert row["recommended_vcpus"] == 1
+    assert row["cpu_direction"] == "oversized"
+    assert row["memory_direction"] == "right_sized"
+    assert row["actionable"] is True
+
+
+def test_a_real_fraction_of_a_core_still_rounds_up() -> None:
+    """The epsilon absorbs noise, never demand: 1.5 cores of MHz is 2 vCPUs."""
+    row = _single_vm_row({"cpu": 1.5 * 2803.19, "mem": 16777216.0}, _props(2.0, 2803.19, 16777216.0))
+    assert row["recommended_vcpus"] == 2
+    assert row["cpu_direction"] == "right_sized"
+
+
+def test_a_real_memory_change_just_past_the_tolerance_still_has_a_direction() -> None:
+    from vmware_aria.ops.capacity import MEMORY_DIRECTION_TOLERANCE
+
+    current = 16777216.0
+    over = current * (1 + MEMORY_DIRECTION_TOLERANCE * 1.5)
+    row = _single_vm_row({"cpu": 2 * 2803.19, "mem": over}, _props(2.0, 2803.19, current))
+    assert row["memory_direction"] == "undersized"
+    assert row["actionable"] is True

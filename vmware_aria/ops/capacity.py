@@ -249,7 +249,11 @@ def list_rightsizing_recommendations(
     vCPUs) into ``recommended_vcpus``, rounded up. ``cpu_direction`` /
     ``memory_direction`` compare that against ``config|hardware|numCpu`` and
     ``config|hardware|memoryKB``: ``oversized`` / ``undersized`` / ``right_sized``,
-    or ``None`` when either side is not published. Disk carries no direction:
+    or ``None`` when either side is not published. Noise is not a direction:
+    MHz within ``CPU_VCPU_ROUNDING_EPSILON`` of a core rounds to that core, and
+    memory within ``MEMORY_DIRECTION_TOLERANCE`` (1%) of the configured size is
+    ``right_sized`` — so ``actionable`` cannot be triggered by drift (seen live:
+    +3 MB on 8 GiB read as undersized). Disk carries no direction:
     what baseline the engine sizes disk against is unverified, and a virtual
     disk cannot be shrunk in place.
 
@@ -373,6 +377,25 @@ _RIGHTSIZING_PROPERTY_KEYS = [
     _PROP_PRODUCT_NAME,
 ]
 
+#: A recommended MHz within this fraction of one vCPU above a whole core counts
+#: as that core. On 8.18.7 the engine publishes whole cores (all 10 live values
+#: were exact core multiples, off by < 1e-7 relative: its float32 MHz against the
+#: VM's Hz-precise ``cpu|speed``). 1% of a core (~28 MHz at 2.8 GHz) is ~10^5 times
+#: that noise, and a real fractional demand still rounds UP (1.5 cores -> 2).
+#: Without it, a ratio of 1.0000036 would ceil to 2 and read an oversized VM as
+#: right-sized.
+CPU_VCPU_ROUNDING_EPSILON = 0.01
+
+#: A memory recommendation within this fraction of the configured size is
+#: ``right_sized``. Live 8.18.7: the Aria appliance's recommendation moved
+#: 8391702 -> 8391681 -> 8391656 KB within one day against 8388608 configured
+#: (+0.04%) — drift, not a resize, yet it read as undersized and actionable. 1%
+#: leaves a 25x margin over that drift and a 7x margin under the smallest genuine
+#: change in the same estate (vcsa, -7.4%). The engine's own summary|*|memory
+#: rounds to whole GiB, so it cannot serve as the threshold (it calls +3 MB
+#: "undersized by 1 GiB").
+MEMORY_DIRECTION_TOLERANCE = 0.01
+
 _POWERED_ON = "Powered On"
 _POWERED_OFF = "Powered Off"
 
@@ -418,9 +441,14 @@ def _as_bool(value: object) -> bool | None:
     return {"true": True, "false": False}.get(text)
 
 
-def _direction(current: float | None, recommended: float | None) -> str | None:
+def _direction(
+    current: float | None, recommended: float | None, tolerance: float = 0.0
+) -> str | None:
+    """oversized / undersized / right_sized; within ``tolerance`` (relative) is right_sized."""
     if current is None or recommended is None:
         return None
+    if current > 0 and abs(recommended - current) <= tolerance * current:
+        return "right_sized"
     if recommended < current:
         return "oversized"
     if recommended > current:
@@ -435,9 +463,11 @@ def _cpu_sizing(props: dict, recommended_mhz: float | None) -> dict:
     mhz_per_vcpu = speed_hz / num_cpu / 1_000_000 if num_cpu and speed_hz else None
     recommended_vcpus = None
     if recommended_mhz is not None and mhz_per_vcpu:
-        # Round up: the engine's MHz is whole cores on 8.18.7, and a fraction
-        # left by float noise must never round a demand DOWN a core.
-        recommended_vcpus = max(1, math.ceil(recommended_mhz / mhz_per_vcpu - 1e-6))
+        # Round up — a real fraction of a core is demand — but first absorb the
+        # float noise between the engine's MHz and cpu|speed (see the constant).
+        recommended_vcpus = max(
+            1, math.ceil(recommended_mhz / mhz_per_vcpu - CPU_VCPU_ROUNDING_EPSILON)
+        )
     current_vcpus = int(num_cpu) if num_cpu is not None else None
     return {
         "current_vcpus": current_vcpus,
@@ -531,7 +561,9 @@ def _rightsizing_row(rid: str, name: str, stats: dict, props: dict) -> dict:
         "sizing_status": status,
         **_cpu_sizing(props, sized.get("cpu")),
         "current_memory_kb": current_memory_kb,
-        "memory_direction": _direction(current_memory_kb, sized.get("mem")),
+        "memory_direction": _direction(
+            current_memory_kb, sized.get("mem"), MEMORY_DIRECTION_TOLERANCE
+        ),
         "power_state": sanitize(str(power)) if power is not None else None,
         "is_template": _as_bool(props.get(_PROP_IS_TEMPLATE)),
         "product_name": sanitize(str(product)) if product else None,
