@@ -209,3 +209,64 @@ def test_cli_prints_the_not_settled_caveat(monkeypatch: pytest.MonkeyPatch):
     result = CliRunner().invoke(cli.app, ["capacity", "rightsizing", "--limit", "10"])
     assert result.exit_code == 0, result.output
     assert "not settled" in result.output
+
+
+# ── review, 2026-09-15 ─────────────────────────────────────────────────────
+
+
+def test_one_day_of_history_is_not_settled_it_is_unknown():
+    history = {
+        "swing": {"MIN": {MEM: [8389138.0], CPU: [2611.2001953125]}, "MAX": {MEM: [8389138.0], CPU: [2611.2001953125]}},
+        "settled": HISTORY["settled"],
+    }
+    _result, rows = _run(_Client(history=history))
+    assert rows["swing"]["recommendation_range"]["days_with_data"] == 1
+    assert rows["swing"]["recommendation_stable"] is None
+
+
+def test_a_memory_resize_is_not_settled_by_cpu_history_alone():
+    history = {
+        "swing": {"MIN": {CPU: [2611.2001953125] * 3}, "MAX": {CPU: [2611.2001953125] * 3}},
+        "settled": HISTORY["settled"],
+    }
+    _result, rows = _run(_Client(history=history))
+    assert rows["swing"]["memory_direction"] == "oversized"
+    assert rows["swing"]["recommendation_stable"] is None
+
+
+class _ShiftedMinClient(_Client):
+    """MIN stamps its day buckets a millisecond later than MAX."""
+
+    def post(self, path: str, json_data: dict | None = None, **kw) -> dict:
+        reply = super().post(path, json_data, **kw)
+        if path == STATS_PATH and (json_data or {}).get("rollUpType") == "MIN":
+            for entry in reply["values"]:
+                for stat in entry["stat-list"]["stat"]:
+                    stat["timestamps"] = [ts + 1 for ts in stat["timestamps"]]
+        return reply
+
+
+def test_days_are_counted_from_one_rollup_not_the_union():
+    _result, rows = _run(_ShiftedMinClient())
+    assert rows["swing"]["recommendation_range"]["days_with_data"] == 3
+
+
+class _MalformedHistoryClient(_Client):
+    def post(self, path: str, json_data: dict | None = None, **kw) -> dict:
+        if path == STATS_PATH and (json_data or {}).get("rollUpType") != "LATEST":
+            return {"values": [{"resourceId": "swing", "stat-list": {"stat": [{"statKey": MEM, "data": [1.0]}]}}]}
+        return super().post(path, json_data, **kw)
+
+
+def test_a_history_reply_in_an_unreadable_shape_does_not_fail_the_tool():
+    result, rows = _run(_MalformedHistoryClient())
+    assert set(rows) == {"swing", "settled"}
+    assert all(r["recommendation_stable"] is None for r in rows.values())
+    assert "could not read" in result["history_note"]
+
+
+@pytest.mark.parametrize(("low", "stable"), [(9_510_000.0, True), (9_490_000.0, False)])
+def test_the_five_percent_line_is_where_settled_ends(low, stable):
+    span = {"MIN": {MEM: [low, low], CPU: [2611.2001953125] * 2}, "MAX": {MEM: [10_000_000.0] * 2, CPU: [2611.2001953125] * 2}}
+    _result, rows = _run(_Client(history={"swing": span, "settled": span}))
+    assert rows["settled"]["recommendation_stable"] is stable

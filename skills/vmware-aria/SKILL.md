@@ -143,7 +143,7 @@ All MCP tools accept an optional `target` parameter to select which Aria Operati
 
 | Category | Tool | Type | Description |
 |----------|------|:----:|-------------|
-| Resource | `list_resources` | Read | List VMs, hosts, clusters by resource kind |
+| Resource | `list_resources` | Read | List VMs, hosts, clusters by resource kind (or `all`); `collection_status` finds objects not receiving data |
 | | `get_resource` | Read | Get resource details with health, risk, efficiency badges |
 | | `get_resource_metrics` | Read | Fetch time-series metric stats; `missing` says why a key has no points |
 | | `get_resource_health` | Read | Get health badge score (0–100) |
@@ -167,7 +167,7 @@ All MCP tools accept an optional `target` parameter to select which Aria Operati
 | Capacity | `get_capacity_overview` | Read | Group-level remaining % + per-dimension headroom and days-until-full |
 | | `get_remaining_capacity` | Read | Remaining CPU, memory, disk before hitting limits |
 | | `get_time_remaining` | Read | Days until cluster capacity is exhausted |
-| | `list_rightsizing_recommendations` | Read | Per-VM recommended size (raw MHz/KB/GB; use `recommended_vcpus`), direction, power state, `actionable`, `caveats`, `properties_note` |
+| | `list_rightsizing_recommendations` | Read | Per-VM recommended size (raw MHz/KB/GB; use `recommended_vcpus`), direction, power state, `recommendation_stable` / `recommendation_range` (7-day movement), `actionable`, `caveats`, `properties_note`, `history_note` |
 | Reports | `list_report_definitions` | Read | List available report definition templates |
 | | `generate_report` | **Write** | Trigger report generation (async; returns report_id) |
 | | `list_reports` | Read | List generated reports, optionally by definition |
