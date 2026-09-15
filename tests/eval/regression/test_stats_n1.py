@@ -105,15 +105,19 @@ def test_list_rightsizing_issues_one_bulk_stats_query_not_per_vm_loop() -> None:
     )
     results = list_rightsizing_recommendations(client, limit=50)["items"]
 
-    assert len(client._bulk_stats_posts()) == 1, (
-        "list_rightsizing_recommendations must fan out via exactly ONE bulk "
-        "POST /resources/stats/query"
+    # Three bulk queries for the page whatever the VM count: the latest values,
+    # and the daily MIN and MAX of the recommendation over the last week
+    # (2026-09-15). The property this pins is that the count does not grow
+    # with the VMs, not that it is one.
+    posts = client._bulk_stats_posts()
+    assert sorted(body["rollUpType"] for _, body in posts) == ["LATEST", "MAX", "MIN"], (
+        "list_rightsizing_recommendations must fan out via bulk "
+        "POST /resources/stats/query — one latest read and one per history rollup"
     )
     assert client._stats_latest_gets() == [], (
         "no per-VM GET /resources/{id}/stats/latest — that is the N+1 being removed"
     )
-    _, body = client._bulk_stats_posts()[0]
-    assert len(body["resourceId"]) == 50
+    assert all(len(body["resourceId"]) == 50 for _, body in posts)
     # Output shape preserved.
     assert results and len(results) == 50
     # Original fields preserved (2026-09-13 added units/direction/power fields beside them).

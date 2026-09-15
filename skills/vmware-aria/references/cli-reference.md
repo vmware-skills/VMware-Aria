@@ -46,15 +46,22 @@ List resources by kind.
 vmware-aria resource list [OPTIONS]
 
 Options:
-  --kind -k TEXT    Resource kind [default: VirtualMachine]
-                    Values: VirtualMachine, HostSystem, ClusterComputeResource,
-                            Datastore, Datacenter, ResourcePool
-  --limit -n INT    Max results [default: 50]
-  --name TEXT       Filter by name substring (case-insensitive)
-  --target -t TEXT  Target name
+  --kind -k TEXT             Resource kind [default: VirtualMachine]
+                             Values: VirtualMachine, HostSystem, ClusterComputeResource,
+                                     Datastore, Datacenter, ResourcePool, or all
+  --limit -n INT             Max results [default: 50]
+  --name TEXT                Filter by name substring (case-insensitive)
+  --collection-status TEXT   Keep objects with this data-collection status,
+                             e.g. NO_DATA_RECEIVING (case-insensitive)
+  --target -t TEXT           Target name
 ```
 
-**Output**: Table with Name, ID, Health (color + score), Status.
+**Output**: Table with Name (and Kind with `--kind all`), ID, Health (color + score), Aria state, and Collection.
+**Aria state** is Aria's lifecycle state for the object — `STARTED` for a powered-off VM too, so it is not a power state.
+**Collection** is whether data is arriving (`DATA_RECEIVING`, `NO_DATA_RECEIVING`, …; `—` when Aria reports none).
+To find the objects behind "Objects are not receiving data from adapter instance", run
+`vmware-aria resource list --kind all --collection-status NO_DATA_RECEIVING`.
+If the filter matches nothing, a yellow line names the statuses the listing did contain.
 
 ### `vmware-aria resource get`
 
@@ -396,7 +403,9 @@ The raw recommendations are MHz (cpu), KB (memory) and GB (disk) — verified on
 
 `Act.` is `yes` only when the power state was read as `Powered On`, the template flag was read as false, and CPU or memory is off its recommendation; an unknown power state or template flag is never taken as running. Per-VM caveats print under the table: powered off, template, power state / template flag not published, a power state other than `Powered On`, current size not published, disagreement between `recommendedSize` and the engine's own `summary|oversized|*` / `summary|undersized|*` statistics, and — for every reduction — check the vendor minimum size first (appliances cannot be identified reliably from the API).
 
-The MCP tool returns the same rows as JSON: `recommended_cpu` / `recommended_memory` / `recommended_diskspace` (raw), `recommended_units`, `sizing_status`, `current_vcpus`, `cpu_mhz_per_vcpu`, `recommended_vcpus`, `cpu_direction`, `current_memory_kb`, `memory_direction`, `power_state`, `is_template`, `product_name` (only when the VM publishes a vApp product), `aria_verdict`, `actionable`, `caveats`, plus the top-level `properties_note`.
+The MCP tool returns the same rows as JSON: `recommended_cpu` / `recommended_memory` / `recommended_diskspace` (raw), `recommended_units`, `sizing_status`, `current_vcpus`, `cpu_mhz_per_vcpu`, `recommended_vcpus`, `cpu_direction`, `current_memory_kb`, `memory_direction`, `power_state`, `is_template`, `product_name` (only when the VM publishes a vApp product), `aria_verdict`, `recommendation_range`, `recommendation_stable`, `actionable`, `caveats`, plus the top-level `properties_note` and `history_note`.
+
+Whether a recommendation has settled: two more bulk queries read each VM's daily low and high of the three `recommendedSize` keys over the last 7 days (`recommendation_range`: `window_days`, `days_with_data`, and `cpu_mhz` / `memory_kb` / `diskspace_gb` as `[low, high]`). If CPU or memory ranged by more than 5% of its high, `recommendation_stable` is false, `Act.` is `no`, and a caveat prints the range — for example `recommendation not settled: memory ranged 8.0–32.0 GiB over the last 3 day(s) of history`. The appliance may hold fewer days than the window, which `days_with_data` says. With no history returned, `recommendation_stable` is null. If the history read fails, `history_note` names the failure (the CLI prints it in yellow), both fields are null, and `Act.` is decided without them.
 
 If the bulk property read (`POST /resources/properties/latest/query`) fails, the rows still come back from the stats, but `power_state`, `is_template`, `current_vcpus`, `current_memory_kb`, `recommended_vcpus`, both directions and `product_name` are null — unknown, not unpublished — no row is actionable, and each row carries one caveat starting `VM properties could not be read`. `properties_note` (null when the read succeeded) names the failure — the HTTP status, or no HTTP response — and the CLI prints it in yellow under the table.
 
@@ -418,6 +427,7 @@ Options:
 ```
 
 **Output**: Table with resource name (or ID) and anomaly count; without `--resource-id`, only resources with non-zero counts are shown, sorted descending.
+Aria's key catalogue names `System Attributes|total_alarms` "Total Anomalies". It is not the alert count, which is a separate key, `System Attributes|total_alert_count` (verified on 8.18.7: vcsa read 5 anomalies with no alerts).
 
 ### `vmware-aria anomaly risk`
 
