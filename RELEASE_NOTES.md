@@ -1,4 +1,4 @@
-## Unreleased — which objects stopped reporting, and whether a recommendation has settled
+## v1.14.0 — which objects stopped reporting, and whether a recommendation has settled
 
 **`resource list` can say which objects stopped reporting.** With "Objects are not receiving data from adapter
 instance" active on a live 8.18.7, the listing showed every object as `STARTED`. That column is Aria's lifecycle
