@@ -22,7 +22,12 @@ _SHOWN_MAX = 80
 
 
 def require_uuid(value: Any, field: str, noun: str, hint: str) -> str:
-    """Return ``value`` stripped when it is exactly one UUID, else raise a teaching error.
+    """Return ``value`` stripped and lowercased when it is exactly one UUID, else raise.
+
+    Lowercased because Aria issues lowercase ids and keys its answers by them:
+    an uppercase id reached the appliance fine but found nothing when used as a
+    lookup key, so ``resource health BA13F0B7-…`` reported no availability
+    point for a service whose lowercase id read 0.0 (2026-09-15 review).
 
     Args:
         value: The id as the caller passed it.
@@ -37,7 +42,7 @@ def require_uuid(value: Any, field: str, noun: str, hint: str) -> str:
         raise ValueError(f"{field} must be a non-empty Aria {noun} UUID. {hint}")
     text = value.strip()
     if _UUID.fullmatch(text):
-        return text
+        return text.lower()
     shown = sanitize(text, max_len=_SHOWN_MAX)
     found = _UUID.findall(text)
     if len(found) > 1:

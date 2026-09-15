@@ -253,7 +253,8 @@ Options:
 **Output**: Table with ID, Name, Criticality, Status, Started (UTC), Resource (name), Resource ID. IDs are never
 shortened. A terminal narrower than 160 columns cannot hold both UUID columns, so there each alert prints as a short
 block instead (ID, criticality, status and start time; name; resource name and ID). `--json` prints every row field,
-including `start_time_utc` / `update_time_utc` (ISO-8601 UTC) beside the millisecond times. Names and kinds come from one batched `GET /resources` lookup per page. A resource whose name could not be resolved prints as `?` — unknown, not "no resource" — and a yellow note under the table says how many could not be retrieved, were not returned (deleted or stale), or were returned with no name in Aria Operations. If the lookup answers with rows that were not requested (the appliance ignored the id filter), requested ids it left out count as could not be retrieved — retry — not as deleted.
+including the start and update times in ISO-8601 UTC (the fields ending `_time_utc`) beside the millisecond times.
+The start-time field there is `start_time_utc`. Names and kinds come from one batched `GET /resources` lookup per page. A resource whose name could not be resolved prints as `?` — unknown, not "no resource" — and a yellow note under the table says how many could not be retrieved, were not returned (deleted or stale), or were returned with no name in Aria Operations. If the lookup answers with rows that were not requested (the appliance ignored the id filter), requested ids it left out count as could not be retrieved — retry — not as deleted.
 
 ### `vmware-aria alert get`
 
@@ -265,13 +266,21 @@ Each symptom also names the object it is on: `resource_id`, `resource_name`, `re
 `condition` filled from the symptom instance's message (e.g. `HT not equal 0 != 1`). On 8.18.7 the contributing-symptom
 payload carries no resource id, so it is read from the symptom instance in `GET /symptoms`; that endpoint ignores its
 `id` filter there, so the tool walks the collection and keys rows by id. For "vCenter app health is affected" this names
-the services that are down (e.g. `mem`, `system`). `resource_lookup` is `not_needed`, `resolved`, `not_found` (every
+the services that are down (e.g. `mem`, `system`).
+
+Cost and scope: the walk runs for every alert whose symptoms carry no resource id — on 8.18.7 that is every alert,
+not only vCenter app alerts. It costs one `GET /symptoms` per page of the appliance's whole symptom list (1,000 per
+page; 78 symptoms on the lab = one request), stops as soon as every symptom is found, and is capped at 20,000
+symptoms; plus one batched `GET /resources`. `alert acknowledge` and `alert cancel` read the alert for their
+before-state without the walk. A page that fails keeps the symptoms found before it; a server that returns no total
+count leaves the unfound ones `failed` (unknown), not `not_found`. `resource_lookup` is `not_needed`, `resolved`, `not_found` (every
 page was read and the instance was not there), `failed` (the read failed or stopped early), `no_symptom_id`, or
 `instance_names_no_resource`. A `symptom_resources_note` key appears when some could not be read — an empty
 `resource_id` there is unknown, not absent.
 
-Times are returned as epoch milliseconds (`start_time_ms`, `update_time_ms`, `cancel_time_ms`) and as ISO-8601 UTC
-(`start_time_utc`, `update_time_utc`, `cancel_time_utc`; `null` when the alert was never cancelled).
+The start, update and cancel times are each returned twice: as epoch milliseconds (the fields ending `_time_ms`) and
+as ISO-8601 UTC (the fields ending `_time_utc`). The cancel time is `0` in milliseconds and `null` in UTC when the
+alert was never cancelled.
 
 ```
 vmware-aria alert get <alert-id> [OPTIONS]

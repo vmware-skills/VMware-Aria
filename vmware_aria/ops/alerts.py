@@ -673,7 +673,7 @@ def _get_contributing_symptoms(client: AriaClient, alert_id: str) -> tuple[list[
     return symptoms, "" if recognized else _UNPARSED_SYMPTOMS_NOTE, definitions_note
 
 
-def get_alert(client: AriaClient, alert_id: str) -> dict:
+def get_alert(client: AriaClient, alert_id: str, resolve_symptom_resources: bool = True) -> dict:
     """Get full details for a specific alert.
 
     Triggered symptoms are fetched from GET /alerts/contributingsymptoms.
@@ -684,6 +684,12 @@ def get_alert(client: AriaClient, alert_id: str) -> dict:
     Args:
         client: Authenticated Aria Operations API client.
         alert_id: The alert UUID.
+        resolve_symptom_resources: Name the object each symptom is on. On
+            8.18.7 no contributing symptom carries a resource id, so this pages
+            ``GET /symptoms`` (about one request per 1,000 symptoms on the
+            appliance, at most 20) plus one batched ``GET /resources``. Writes
+            capturing a before-state pass False; the symptoms then carry no
+            resource fields.
 
     Returns:
         Dict with alert details and contributing symptom list. A
@@ -700,12 +706,14 @@ def get_alert(client: AriaClient, alert_id: str) -> dict:
     """
     alert_id = require_uuid(alert_id, "alert_id", "alert", _ALERT_ID_HINT)
 
-    # Imported here: symptom_resources imports this module's lookup helpers.
-    from vmware_aria.ops.symptom_resources import attach_symptom_resources
-
     data = client.get(f"/alerts/{alert_id}")
     symptoms, symptoms_note, definitions_note = _get_contributing_symptoms(client, alert_id)
-    symptoms, resources_note = attach_symptom_resources(client, symptoms)
+    resources_note = ""
+    if resolve_symptom_resources:
+        # Imported here: symptom_resources imports this module's lookup helpers.
+        from vmware_aria.ops.symptom_resources import attach_symptom_resources
+
+        symptoms, resources_note = attach_symptom_resources(client, symptoms)
     result = {
         "id": sanitize(data.get("alertId", "")),
         "name": sanitize(data.get("alertDefinitionName", ""), max_len=300),
@@ -766,7 +774,9 @@ def acknowledge_alert(
     # Capture before state
     before = {}
     try:
-        before = get_alert(client, alert_id)
+        # Before-state for the audit row: skip the symptom-resource walk, which
+        # would add up to 20 GETs to every write.
+        before = get_alert(client, alert_id, resolve_symptom_resources=False)
     except Exception as exc:
         _log.warning("Could not retrieve before-state for alert %s: %s", alert_id, exc)
 
@@ -819,7 +829,9 @@ def cancel_alert(
 
     before = {}
     try:
-        before = get_alert(client, alert_id)
+        # Before-state for the audit row: skip the symptom-resource walk, which
+        # would add up to 20 GETs to every write.
+        before = get_alert(client, alert_id, resolve_symptom_resources=False)
     except Exception as exc:
         _log.warning("Could not retrieve before-state for alert %s: %s", alert_id, exc)
 

@@ -50,12 +50,14 @@ def test_two_joined_uuids_are_named_as_such():
 
 @pytest.mark.unit
 @pytest.mark.parametrize("value", [GOOD, f"  {GOOD}\n", GOOD.upper()])
-def test_one_uuid_is_accepted_and_stripped(value):
+def test_one_uuid_is_accepted_stripped_and_lowercased(value):
+    """Lowercased: Aria issues lowercase ids and answers key rows by them, so an
+    uppercase id used as a lookup key finds nothing (2026-09-15 review)."""
     from vmware_aria.ops.alert_notes import require_alert_id
     from vmware_aria.ops.maintenance import require_resource_id
 
-    assert require_alert_id(value) == value.strip()
-    assert require_resource_id(value) == value.strip()
+    assert require_alert_id(value) == GOOD
+    assert require_resource_id(value) == GOOD
 
 
 @pytest.mark.unit

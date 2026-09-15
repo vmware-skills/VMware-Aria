@@ -145,14 +145,14 @@ All MCP tools accept an optional `target` parameter to select which Aria Operati
 |----------|------|:----:|-------------|
 | Resource | `list_resources` | Read | List VMs, hosts, clusters by resource kind (or `all`); `collection_status` finds objects not receiving data |
 | | `get_resource` | Read | Get resource details with health, risk, efficiency badges |
-| | `get_resource_metrics` | Read | Fetch time-series metric stats (`summary=true`: n/min/max/avg/latest + change points); `missing` says why a key has no points |
-| | `get_resource_health` | Read | Badge scores (0–100); for a service object also `service.available` — a down service can show GREEN 100 |
+| | `get_resource_metrics` | Read | Time-series stats; `summary=true` gives n/min/max/avg/latest + change points; `missing` explains empty keys |
+| | `get_resource_health` | Read | Badge scores; service objects add `service.available` (a badge is not service state) |
 | | `get_top_consumers` | Read | Rank by last-hour average `value` (`latest_value` = newest point) |
 | | `list_metric_keys` | Read | Keys a resource reports with name/unit and `definition`, or a kind's defined keys — look up before querying |
 | | `get_resource_properties` | Read | Current property values (power state, parent host, extraConfig) |
 | | `get_resource_relationships` | Read | Related resources with `direction`; `relationship_type` ALL / PARENT / CHILD |
 | Alerts | `list_alerts` | Read | List active alerts with criticality, resource ID, name and kind (`resource_name: null` = unknown, see `resource_names_note`) |
-| | `get_alert` | Read | Get alert details with contributing symptoms, named from their symptom definitions, each with the object it is on (`resource_name`, e.g. the down service) and ISO-8601 times (recommendations live on the alert definition) |
+| | `get_alert` | Read | Alert details: named symptoms, the object each is on (e.g. the down service), ISO-8601 times |
 | | `investigate_alert` | Read | Resolve an alert to its confirmed affected resource in one call — returns both UUIDs explicitly labelled plus the vmware-monitor handoff |
 | | `acknowledge_alert` | **Write** | Mark an alert as acknowledged (does not close it) |
 | | `cancel_alert` | **Write** | Cancel (dismiss) an active alert |

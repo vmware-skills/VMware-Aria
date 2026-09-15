@@ -212,6 +212,92 @@ def test_symptoms_that_carry_their_resource_need_no_walk():
     assert {s["resource_name"] for s in result["symptoms"]} == {"mem"}
 
 
+def _rows_by_resource() -> dict[str, dict]:
+    return {r["resourceId"]: r for r in _captured_symptom_rows()}
+
+
+def _capped(rows: list[dict], cap: int, total: bool = True) -> Any:
+    """A /symptoms route whose server caps every page at ``cap`` rows, whatever pageSize asks."""
+
+    def answer(params: Any) -> dict:
+        page = params["page"]
+        body_ = {"symptom": rows[page * cap : (page + 1) * cap]}
+        if total:
+            body_["pageInfo"] = {"totalCount": len(rows), "page": page, "pageSize": cap}
+        return body_
+
+    return answer
+
+
+@pytest.mark.unit
+def test_a_server_that_caps_page_size_is_walked_to_its_total_count():
+    from vmware_aria.ops.alerts import get_alert
+
+    by_resource = _rows_by_resource()
+    others = [r for rid, r in by_resource.items() if rid not in (MEM, SYSTEM)]
+    rows = others + [by_resource[MEM], by_resource[SYSTEM]]  # wanted rows on the second capped page
+    client = _Client(**{"/symptoms": _capped(rows, cap=2)})
+    result = get_alert(client, ALERT_ID)
+
+    assert {s["resource_lookup"] for s in result["symptoms"]} == {"resolved"}
+    assert client.count("/symptoms") == 2
+
+
+@pytest.mark.unit
+def test_without_a_total_count_a_symptom_not_seen_is_unknown_not_not_found():
+    from vmware_aria.ops.alerts import get_alert
+
+    others = [r for rid, r in _rows_by_resource().items() if rid not in (MEM, SYSTEM)]
+    result = get_alert(_Client(**{"/symptoms": _capped(others, cap=2, total=False)}), ALERT_ID)
+
+    assert {s["resource_lookup"] for s in result["symptoms"]} == {"failed"}
+
+
+@pytest.mark.unit
+def test_a_page_that_fails_midway_keeps_what_earlier_pages_found():
+    from vmware_aria.ops.alerts import get_alert
+
+    by_resource = _rows_by_resource()
+    others = [r for rid, r in by_resource.items() if rid not in (MEM, SYSTEM)]
+    page_zero = [by_resource[MEM], others[0]]
+
+    def answer(params: Any) -> dict:
+        if params["page"] == 0:
+            return {"pageInfo": {"totalCount": 4}, "symptom": page_zero}
+        raise api_error(503, "/symptoms")
+
+    result = get_alert(_Client(**{"/symptoms": answer}), ALERT_ID)
+    by_lookup = {s["resource_lookup"]: s for s in result["symptoms"]}
+
+    assert set(by_lookup) == {"resolved", "failed"}
+    assert by_lookup["resolved"]["resource_name"] == "mem"
+    assert by_lookup["failed"]["resource_id"] == ""
+    assert "symptom_resources_note" in result
+
+
+class _WritingClient(_Client):
+    def __init__(self) -> None:
+        super().__init__()
+        self.posts: list[tuple[str, Any]] = []
+
+    def post(self, path: str, json_data: Any = None, params: Any = None, **_kw: Any) -> Any:
+        self.posts.append((path, params))
+        return {}
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("operation", ["acknowledge_alert", "cancel_alert"])
+def test_writes_capture_before_state_without_walking_symptoms(operation):
+    from vmware_aria.ops import alerts
+
+    client = _WritingClient()
+    getattr(alerts, operation)(client, ALERT_ID)
+
+    assert client.posts, "the write itself must still be sent"
+    assert client.count("/symptoms") == 0
+    assert client.count("/resources") == 0
+
+
 @pytest.mark.unit
 def test_investigate_alert_carries_the_down_services():
     from vmware_aria.ops.investigate import investigate_alert

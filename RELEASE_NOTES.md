@@ -7,19 +7,28 @@ Found in a live session on Aria 8.18.7 (2026-09-15); each checked again on the l
   scores alerts attached to that object, and the alert sits on the parent. For SERVICE kinds the result now carries
   a `service` block (`status`, `availability`, `available`, `read_errors`, `note`); `available` is true only for 1,
   false only for 0, and null when unread.
-* **"vCenter app health is affected" names the services that are down.** Its symptoms carried no resource id or
-  condition on 8.18.7. The id is on the symptom object itself (`/symptoms`, which ignores its id filter, so the
-  pages are read until every symptom is found). `alert get` / `investigate_alert` symptoms now carry
-  `resource_name`, `resource_kind`, `stat_key` and `condition` (live: `mem`, `system`, `SERVICE|AVAILABILITY`),
-  with `resource_lookup` saying whether the read completed — a failed lookup is reported as unknown, never as "no
-  resource".
+* **Every alert's symptoms name the object they are on — for "vCenter app health is affected", the services that
+  are down.** On 8.18.7 no contributing symptom carries a resource id or condition, for any alert. The id is on the
+  symptom object itself (`/symptoms`, which ignores its id filter). `alert get` / `investigate_alert` symptoms now
+  carry `resource_name`, `resource_kind`, `stat_key` and `condition` (live: `mem`, `system`,
+  `SERVICE|AVAILABILITY`), with `resource_lookup` saying whether the read completed — a failed lookup is reported as
+  unknown, never as "no resource".
+  **Cost:** this applies to every alert on 8.18.7, not only vCenter app alerts. Each `alert get` /
+  `investigate_alert` pages the appliance's whole symptom list — one request per 1,000 symptoms, stopping once all are
+  found, capped at 20,000 symptoms (20 requests) — plus one batched `/resources` lookup. `alert acknowledge` /
+  `alert cancel` read their before-state without it.
+  The walk counts as complete only when every symptom is found or `pageInfo.totalCount` symptoms were read. A short
+  page is not taken as the end, because a server may cap its page size. Without a total, unfound symptoms are
+  `failed` (unknown), not `not_found`. A page that fails keeps what earlier pages found.
 * **`resource metrics --summary`** (MCP `summary=true`): per metric n / min / max / avg / latest and the change
   points (live: `badge|health` 100 → 25). Raw points remain the default.
 * **Alert ids are pasteable and times readable.** `alert list` never truncates ids (one block per alert on narrow
   terminals, a table with `Started (UTC)` on wide ones, `--json` for the envelope); `alert get` and list rows add
-  `start_time_utc` / `update_time_utc` / `cancel_time_utc` (null when never cancelled).
+  the start, update and cancel times as `*_time_utc` (null when never cancelled).
 * **Ids must be UUID-shaped.** `GREEN(100.0)` or two ids joined by a space used to reach Aria as an HTTP 400; alert
-  and resource ids are now checked with a teaching error before any call.
+  and resource ids are now checked with a teaching error before any call. Ids are lowercased as Aria issues them:
+  an uppercase id reached Aria fine but found nothing when used as a lookup key, so `resource health` reported "no
+  availability point" for a service whose lowercase id read 0.
 
 ## v1.14.1 — CLI reads are audited
 

@@ -115,6 +115,19 @@ def test_a_down_service_is_not_reported_healthy_by_its_green_badge():
 
 
 @pytest.mark.unit
+def test_an_uppercase_id_reads_the_same_availability_as_the_lowercase_one():
+    """Aria's ids are lowercase and latest_stats_bulk keys by them (2026-09-15 review:
+    ``BA13F0B7-…`` answered available null with a false "no point" error)."""
+    from vmware_aria.ops.resources import get_resource_health
+
+    result = get_resource_health(_service_client(MEM, "mem", 0.0), MEM.upper())
+
+    assert result["resource_id"] == MEM
+    assert result["service"]["available"] is False
+    assert result["service"]["read_errors"] == []
+
+
+@pytest.mark.unit
 def test_a_running_service_reads_available():
     from vmware_aria.ops.resources import get_resource_health
 
