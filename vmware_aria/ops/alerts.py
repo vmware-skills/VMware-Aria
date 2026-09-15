@@ -12,6 +12,8 @@ from typing import TYPE_CHECKING, Any
 
 from vmware_policy import paginated, sanitize
 
+from vmware_aria.ops._collection import iso_utc_or_none
+from vmware_aria.ops._ids import require_uuid
 from vmware_aria.ops._paging import (
     MAX_LIMIT,
     CollectionTotal,
@@ -29,6 +31,11 @@ if TYPE_CHECKING:
 _log = logging.getLogger("vmware-aria.ops.alerts")
 
 _VALID_CRITICALITIES = {"INFORMATION", "WARNING", "IMMEDIATE", "CRITICAL"}
+
+_ALERT_ID_HINT = (
+    "Run list_alerts to see open alerts and copy an exact 'id' — note that the "
+    "alert UUID is not the affected resource UUID."
+)
 
 # Severity ranking for picking the max across AlertDefinition states[]
 _SEVERITY_RANK = {
@@ -405,6 +412,8 @@ def list_alerts(
             "resource_kind": resources.get(str(a.get("resourceId") or ""), {}).get("kind"),
             "start_time_ms": a.get("startTimeUTC", None),
             "update_time_ms": a.get("updateTimeUTC", None),
+            "start_time_utc": iso_utc_or_none(a.get("startTimeUTC")),
+            "update_time_utc": iso_utc_or_none(a.get("updateTimeUTC")),
             "alert_definition_id": sanitize(a.get("alertDefinitionId", "")),
             "alert_definition_name": sanitize(a.get("alertDefinitionName", ""), max_len=300),
             "control_state": sanitize(a.get("controlState", "")),
@@ -689,15 +698,14 @@ def get_alert(client: AriaClient, alert_id: str) -> dict:
         ``no_definition_id``. A ``symptom_definitions_note`` key is present
         only when some definition did not resolve.
     """
-    if not alert_id:
-        raise ValueError(
-            "alert_id must be a non-empty Aria alert UUID. Run list_alerts to see "
-            "open alerts and copy an exact 'id' — note that the alert UUID is not "
-            "the affected resource UUID."
-        )
+    alert_id = require_uuid(alert_id, "alert_id", "alert", _ALERT_ID_HINT)
+
+    # Imported here: symptom_resources imports this module's lookup helpers.
+    from vmware_aria.ops.symptom_resources import attach_symptom_resources
 
     data = client.get(f"/alerts/{alert_id}")
     symptoms, symptoms_note, definitions_note = _get_contributing_symptoms(client, alert_id)
+    symptoms, resources_note = attach_symptom_resources(client, symptoms)
     result = {
         "id": sanitize(data.get("alertId", "")),
         "name": sanitize(data.get("alertDefinitionName", ""), max_len=300),
@@ -708,6 +716,10 @@ def get_alert(client: AriaClient, alert_id: str) -> dict:
         "start_time_ms": data.get("startTimeUTC", None),
         "update_time_ms": data.get("updateTimeUTC", None),
         "cancel_time_ms": data.get("cancelTimeUTC", None),
+        # cancelTimeUTC is 0 on an alert that was never cancelled: no ISO form.
+        "start_time_utc": iso_utc_or_none(data.get("startTimeUTC")),
+        "update_time_utc": iso_utc_or_none(data.get("updateTimeUTC")),
+        "cancel_time_utc": iso_utc_or_none(data.get("cancelTimeUTC")),
         "control_state": sanitize(data.get("controlState", "")),
         "alert_definition_id": sanitize(data.get("alertDefinitionId", "")),
         "alert_definition_name": sanitize(data.get("alertDefinitionName", ""), max_len=300),
@@ -717,6 +729,8 @@ def get_alert(client: AriaClient, alert_id: str) -> dict:
         result["symptoms_note"] = symptoms_note
     if definitions_note:
         result["symptom_definitions_note"] = definitions_note
+    if resources_note:
+        result["symptom_resources_note"] = resources_note
     return result
 
 
@@ -747,12 +761,7 @@ def acknowledge_alert(
     Returns:
         Dict confirming the operation with alert id and new control_state.
     """
-    if not alert_id:
-        raise ValueError(
-            "alert_id must be a non-empty Aria alert UUID. Run list_alerts to see "
-            "open alerts and copy an exact 'id' — note that the alert UUID is not "
-            "the affected resource UUID."
-        )
+    alert_id = require_uuid(alert_id, "alert_id", "alert", _ALERT_ID_HINT)
 
     # Capture before state
     before = {}
@@ -806,12 +815,7 @@ def cancel_alert(
     Returns:
         Dict confirming the cancellation.
     """
-    if not alert_id:
-        raise ValueError(
-            "alert_id must be a non-empty Aria alert UUID. Run list_alerts to see "
-            "open alerts and copy an exact 'id' — note that the alert UUID is not "
-            "the affected resource UUID."
-        )
+    alert_id = require_uuid(alert_id, "alert_id", "alert", _ALERT_ID_HINT)
 
     before = {}
     try:

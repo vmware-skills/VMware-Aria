@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Any
 from vmware_policy import paginated
 
 from vmware_aria.ops._collection import int_or_none, read_window, text_or_none
+from vmware_aria.ops._ids import require_uuid
 from vmware_aria.ops._paging import next_offset, validate_page_args
 
 if TYPE_CHECKING:
@@ -35,10 +36,8 @@ _ALERT_HINT = (
 
 
 def require_alert_id(alert_id: Any) -> str:
-    """The stripped alert id, or a teaching ``ValueError``."""
-    if not isinstance(alert_id, str) or not alert_id.strip():
-        raise ValueError(f"alert_id must be a non-empty Aria alert UUID. {_ALERT_HINT}")
-    return alert_id.strip()
+    """The stripped alert id when it is one UUID, or a teaching ``ValueError``."""
+    return require_uuid(alert_id, "alert_id", "alert", _ALERT_HINT)
 
 
 def require_note_text(note: Any) -> str:

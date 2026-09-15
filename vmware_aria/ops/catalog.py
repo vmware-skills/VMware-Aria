@@ -25,6 +25,7 @@ from typing import TYPE_CHECKING, Any
 from vmware_policy import paginated, sanitize
 
 from vmware_aria.connection import AriaApiError
+from vmware_aria.ops._ids import require_uuid
 from vmware_aria.ops._paging import next_offset, paginate, validate_page_args
 
 if TYPE_CHECKING:
@@ -75,12 +76,13 @@ def _text(value: Any) -> str | None:
     return text or None
 
 
-def _require_id(resource_id: str | None) -> None:
-    if not resource_id:
-        raise ValueError(
-            "resource_id must be a non-empty Aria resource UUID. Run list_resources "
-            "(filter with name_filter= or resource_kind=) and copy an exact 'id' value."
-        )
+def _require_id(resource_id: str | None) -> str:
+    return require_uuid(
+        resource_id,
+        "resource_id",
+        "resource",
+        "Run list_resources (filter with name_filter= or resource_kind=) and copy an exact 'id' value.",
+    )
 
 
 def _envelope(rows: list[dict], limit: int, offset: int, total: int | None, **extra: Any) -> dict:
@@ -312,7 +314,7 @@ def get_resource_properties(
         AriaApiError: The read failed (a missing resource is a 404) or its body
             was unrecognisable.
     """
-    _require_id(resource_id)
+    resource_id = _require_id(resource_id)
     validate_page_args(limit, offset)
     path = f"/resources/{resource_id}/properties"
     data = client.get(f"/resources/{resource_id}/properties")
@@ -435,7 +437,7 @@ def get_resource_relationships(
             f"got {relationship_type!r}. ANCESTOR/DESCENDANT are not accepted: walk "
             f"PARENT one level at a time instead."
         )
-    _require_id(resource_id)
+    resource_id = _require_id(resource_id)
     validate_page_args(limit, offset)
 
     rows, complete = _walk_related(client, resource_id, relationship_type)

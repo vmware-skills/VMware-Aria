@@ -30,6 +30,7 @@ from vmware_aria.ops._collection import (
     read_window,
     text_or_none,
 )
+from vmware_aria.ops._ids import require_uuid
 from vmware_aria.ops._paging import next_offset, validate_page_args
 
 if TYPE_CHECKING:
@@ -76,10 +77,8 @@ def _is_int(value: Any) -> bool:
 
 
 def require_resource_id(resource_id: Any) -> str:
-    """The stripped resource id, or a teaching ``ValueError``."""
-    if not isinstance(resource_id, str) or not resource_id.strip():
-        raise ValueError(f"resource_id must be a non-empty Aria resource UUID. {_ID_HINT}")
-    return resource_id.strip()
+    """The stripped resource id when it is one UUID, or a teaching ``ValueError``."""
+    return require_uuid(resource_id, "resource_id", "resource", _ID_HINT)
 
 
 def maintenance_window_params(

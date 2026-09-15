@@ -46,7 +46,7 @@ _DOMAIN_SUMMARIES_WIRE = {
 _CONTRIBUTING_SYMPTOMS_WIRE = {
     "contributingSymptoms": [
         {
-            "alertId": "alert-1",
+            "alertId": "a0000000-0000-4000-8000-000000000001",
             "contributingSymptoms": {
                 "contributingSymptoms": [
                     {
@@ -76,11 +76,11 @@ _CONTRIBUTING_SYMPTOMS_WIRE = {
 }
 
 _ALERT_WIRE = {
-    "alertId": "alert-1",
+    "alertId": "a0000000-0000-4000-8000-000000000001",
     "alertDefinitionName": "VM CPU contention",
     "alertLevel": "CRITICAL",
     "status": "ACTIVE",
-    "resourceId": "res-1",
+    "resourceId": "b0000000-0000-4000-8000-000000000001",
 }
 
 
@@ -96,7 +96,7 @@ def _alert_client(symptoms_body: object) -> MagicMock:
     client = _client()
 
     def get_side(path, params=None):
-        if path == "/alerts/alert-1":
+        if path == "/alerts/a0000000-0000-4000-8000-000000000001":
             return dict(_ALERT_WIRE)
         if path == "/alerts/contributingsymptoms":
             if isinstance(symptoms_body, Exception):
@@ -212,7 +212,7 @@ def test_get_alert_unwraps_three_level_contributing_symptoms() -> None:
     """The real body must yield a symptom that actually says something."""
     from vmware_aria.ops.alerts import get_alert
 
-    result = get_alert(_alert_client(_CONTRIBUTING_SYMPTOMS_WIRE), "alert-1")
+    result = get_alert(_alert_client(_CONTRIBUTING_SYMPTOMS_WIRE), "a0000000-0000-4000-8000-000000000001")
 
     assert len(result["symptoms"]) == 1, "the symptoms are three levels down, not one"
     sym = result["symptoms"][0]
@@ -234,11 +234,11 @@ def test_get_alert_keeps_reading_the_flat_symptom_shape() -> None:
                 "message": "CPU usage above 90%",
                 "symptomCriticality": "CRITICAL",
                 "symptomDefinitionId": "sd-9",
-                "resourceId": "res-1",
+                "resourceId": "b0000000-0000-4000-8000-000000000001",
             }
         ]
     }
-    sym = get_alert(_alert_client(body), "alert-1")["symptoms"][0]
+    sym = get_alert(_alert_client(body), "a0000000-0000-4000-8000-000000000001")["symptoms"][0]
     assert sym["id"] == "sym-9"
     assert sym["severity"] == "CRITICAL"
     assert "CPU usage" in sym["name"]
@@ -259,15 +259,15 @@ def test_get_alert_reports_a_genuinely_symptomless_alert_as_empty() -> None:
 
     bodies = {
         "empty body": {},
-        "alert entry with nothing triggered": {"contributingSymptoms": [{"alertId": "alert-1"}]},
+        "alert entry with nothing triggered": {"contributingSymptoms": [{"alertId": "a0000000-0000-4000-8000-000000000001"}]},
         "empty innermost array": {
             "contributingSymptoms": [
-                {"alertId": "alert-1", "contributingSymptoms": {"contributingSymptoms": []}}
+                {"alertId": "a0000000-0000-4000-8000-000000000001", "contributingSymptoms": {"contributingSymptoms": []}}
             ]
         },
     }
     for label, body in bodies.items():
-        result = get_alert(_alert_client(body), "alert-1")
+        result = get_alert(_alert_client(body), "a0000000-0000-4000-8000-000000000001")
         assert result["symptoms"] == [], label
         assert result.get("symptoms_note") is None, (
             f"{label}: understood the response and found none — a confirmed none, not 'unknown'"
@@ -278,7 +278,7 @@ def test_get_alert_flags_an_unrecognized_symptom_shape() -> None:
     """A body we could not walk must not read as 'this alert has no symptoms'."""
     from vmware_aria.ops.alerts import get_alert
 
-    result = get_alert(_alert_client({"someFutureContainer": [{"symptomId": "s1"}]}), "alert-1")
+    result = get_alert(_alert_client({"someFutureContainer": [{"symptomId": "s1"}]}), "a0000000-0000-4000-8000-000000000001")
 
     assert result["symptoms"] == []
     assert "unconfirmed" in result.get("symptoms_note", "")
@@ -288,7 +288,7 @@ def test_get_alert_flags_symptoms_that_could_not_be_fetched() -> None:
     """A failed symptoms call is also an empty list — it must not pass as 'none'."""
     from vmware_aria.ops.alerts import get_alert
 
-    result = get_alert(_alert_client(RuntimeError("boom")), "alert-1")
+    result = get_alert(_alert_client(RuntimeError("boom")), "a0000000-0000-4000-8000-000000000001")
 
     assert result["symptoms"] == []
     assert result.get("symptoms_note"), "a fetch failure must be visible, not silently empty"

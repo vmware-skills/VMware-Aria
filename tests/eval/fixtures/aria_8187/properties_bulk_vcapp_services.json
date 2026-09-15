@@ -1,0 +1,145 @@
+{
+ "_captured": "2026-09-15, real Aria Operations 8.18.7 (home lab), read-only requests through the skill's own AriaClient",
+ "_note": "GET /resources/properties?resourceId=<the 8 VCENTER_APPLIANCE_HEALTH_SERVICES children of the VC_APP object>: mem and system report SERVICE|STATUS orange, the other six green",
+ "http_status": 200,
+ "body": {
+  "resourcePropertiesList": [
+   {
+    "resourceId": "ba13f0b7-19b5-4f30-b321-bc3a791d3497",
+    "property": [
+     {
+      "name": "System Properties|resource_kind_subtype",
+      "value": "GENERAL"
+     },
+     {
+      "name": "SERVICE|STATUS",
+      "value": "orange"
+     },
+     {
+      "name": "System Properties|resource_kind_type",
+      "value": "SERVICE"
+     }
+    ]
+   },
+   {
+    "resourceId": "1810d550-c8bd-48fb-a03f-7524b0e80707",
+    "property": [
+     {
+      "name": "System Properties|resource_kind_subtype",
+      "value": "GENERAL"
+     },
+     {
+      "name": "SERVICE|STATUS",
+      "value": "green"
+     },
+     {
+      "name": "System Properties|resource_kind_type",
+      "value": "SERVICE"
+     }
+    ]
+   },
+   {
+    "resourceId": "de7adcb9-7f31-4a7b-beab-db6a8e48a474",
+    "property": [
+     {
+      "name": "System Properties|resource_kind_subtype",
+      "value": "GENERAL"
+     },
+     {
+      "name": "SERVICE|STATUS",
+      "value": "green"
+     },
+     {
+      "name": "System Properties|resource_kind_type",
+      "value": "SERVICE"
+     }
+    ]
+   },
+   {
+    "resourceId": "f2c18bac-d83f-4ccf-a7cb-ba5eda184486",
+    "property": [
+     {
+      "name": "System Properties|resource_kind_subtype",
+      "value": "GENERAL"
+     },
+     {
+      "name": "SERVICE|STATUS",
+      "value": "orange"
+     },
+     {
+      "name": "System Properties|resource_kind_type",
+      "value": "SERVICE"
+     }
+    ]
+   },
+   {
+    "resourceId": "04cb65aa-ce96-408f-849f-307f7dc9730b",
+    "property": [
+     {
+      "name": "System Properties|resource_kind_subtype",
+      "value": "GENERAL"
+     },
+     {
+      "name": "SERVICE|STATUS",
+      "value": "green"
+     },
+     {
+      "name": "System Properties|resource_kind_type",
+      "value": "SERVICE"
+     }
+    ]
+   },
+   {
+    "resourceId": "b0981d67-3dd0-47e5-ac95-5a52801b2e0d",
+    "property": [
+     {
+      "name": "System Properties|resource_kind_subtype",
+      "value": "GENERAL"
+     },
+     {
+      "name": "SERVICE|STATUS",
+      "value": "green"
+     },
+     {
+      "name": "System Properties|resource_kind_type",
+      "value": "SERVICE"
+     }
+    ]
+   },
+   {
+    "resourceId": "878b9d70-e13b-4c62-b5c3-2f67a3256d1f",
+    "property": [
+     {
+      "name": "System Properties|resource_kind_subtype",
+      "value": "GENERAL"
+     },
+     {
+      "name": "SERVICE|STATUS",
+      "value": "green"
+     },
+     {
+      "name": "System Properties|resource_kind_type",
+      "value": "SERVICE"
+     }
+    ]
+   },
+   {
+    "resourceId": "9d0e8767-8e14-4708-95c2-b14acfd22d23",
+    "property": [
+     {
+      "name": "System Properties|resource_kind_subtype",
+      "value": "GENERAL"
+     },
+     {
+      "name": "SERVICE|STATUS",
+      "value": "green"
+     },
+     {
+      "name": "System Properties|resource_kind_type",
+      "value": "SERVICE"
+     }
+    ]
+   }
+  ]
+ }
+}

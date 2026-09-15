@@ -11,6 +11,7 @@ recognised, so the caller can say "unknown" instead of "none".
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
 from vmware_policy import sanitize
@@ -101,6 +102,22 @@ def text_or_none(value: Any, max_len: int = 500) -> str | None:
 def int_or_none(value: Any) -> int | None:
     """An integer field, or ``None`` when absent or not an integer."""
     return value if _is_int(value) else None
+
+
+def iso_utc_or_none(value: Any) -> str | None:
+    """Epoch milliseconds as ISO-8601 UTC (``2023-11-14T22:13:20.000Z``), or ``None``.
+
+    ``None`` for anything that is not a positive integer: Aria writes
+    ``cancelTimeUTC: 0`` on an alert that was never cancelled, and that is not
+    a moment in January 1970.
+    """
+    if not _is_int(value) or value <= 0:
+        return None
+    try:
+        moment = datetime.fromtimestamp(value // 1000, tz=timezone.utc)
+    except (OverflowError, OSError, ValueError):
+        return None
+    return f"{moment:%Y-%m-%dT%H:%M:%S}.{value % 1000:03d}Z"
 
 
 def list_or_none(value: Any) -> list | None:

@@ -160,11 +160,11 @@ def test_definition_lookup_does_not_grow_with_symptom_count() -> None:
         {"symptomId": f"sym-{n}", "symptomSetId": "set", "symptomDefinitionsIds": [f"SymptomDefinition-synthetic-{n % 60}"], "alertConditions": []}
         for n in range(120)
     ]
-    alert = {**ACTIVE[0], "alertId": "big"}
-    contrib = {"big": {"contributingSymptoms": [{"alertId": "big", "contributingSymptoms": {"contributingSymptoms": leaves}}]}}
+    alert = {**ACTIVE[0], "alertId": "a0000000-0000-4000-8000-0000000000b1"}
+    contrib = {"a0000000-0000-4000-8000-0000000000b1": {"contributingSymptoms": [{"alertId": "a0000000-0000-4000-8000-0000000000b1", "contributingSymptoms": {"contributingSymptoms": leaves}}]}}
     client = FakeAria(alerts=[alert], contrib=contrib, definitions=definitions)
 
-    result = get_alert(client, "big")
+    result = get_alert(client, "a0000000-0000-4000-8000-0000000000b1")
 
     assert client.count("/symptomdefinitions") == math.ceil(60 / chunk)
     requested = [i for m, p, prm in client.calls if p == "/symptomdefinitions" for i in _as_list(prm.get("id"))]
@@ -175,9 +175,9 @@ def test_definition_lookup_does_not_grow_with_symptom_count() -> None:
 def test_symptoms_that_already_say_something_trigger_no_lookup() -> None:
     """CONTROL: the older flat body names its symptoms — do not spend a request on it."""
     body = {"symptoms": [{"id": "s", "message": "CPU above 90%", "symptomCriticality": "CRITICAL", "symptomDefinitionId": "sd-9"}]}
-    client = FakeAria(alerts=[{**ACTIVE[0], "alertId": "flat"}], contrib={"flat": body})
+    client = FakeAria(alerts=[{**ACTIVE[0], "alertId": "a0000000-0000-4000-8000-0000000000f1"}], contrib={"a0000000-0000-4000-8000-0000000000f1": body})
 
-    sym = get_alert(client, "flat")["symptoms"][0]
+    sym = get_alert(client, "a0000000-0000-4000-8000-0000000000f1")["symptoms"][0]
 
     assert client.count("/symptomdefinitions") == 0
     assert sym["name"] == "CPU above 90%"
@@ -320,11 +320,11 @@ def test_an_ignored_filter_that_still_returns_the_requested_rows_resolves() -> N
 
 def test_a_symptom_with_no_definition_id_and_no_name_is_noted() -> None:
     """2026-09-13 review: definition_lookup no_definition_id but symptom_definitions_note absent."""
-    body = {"contributingSymptoms": [{"alertId": "bare", "contributingSymptoms": {
+    body = {"contributingSymptoms": [{"alertId": "a0000000-0000-4000-8000-0000000000ba", "contributingSymptoms": {
         "contributingSymptoms": [{"symptomId": "s-1", "symptomSetId": "set", "alertConditions": []}]
     }}]}
-    client = FakeAria(alerts=[{**ACTIVE[0], "alertId": "bare"}], contrib={"bare": body})
-    result = get_alert(client, "bare")
+    client = FakeAria(alerts=[{**ACTIVE[0], "alertId": "a0000000-0000-4000-8000-0000000000ba"}], contrib={"a0000000-0000-4000-8000-0000000000ba": body})
+    result = get_alert(client, "a0000000-0000-4000-8000-0000000000ba")
 
     assert [s["definition_lookup"] for s in result["symptoms"]] == ["no_definition_id"]
     assert result["symptoms"][0]["name"] == ""

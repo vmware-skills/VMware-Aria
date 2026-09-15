@@ -94,16 +94,20 @@ def get_resource_metrics(
     metric_keys: list[str],
     hours: int = 1,
     rollup_type: str = "AVG",
+    summary: bool = False,
     target: Optional[str] = None,
 ) -> dict:
     """[READ] Fetch time-series metric statistics for a resource.
 
-    Returns metrics (metric key -> list of {timestamp_ms, value} points, only
-    keys with points) and missing (one entry per requested key with no points:
-    reason not_collected_for_resource with similar_keys to try,
+    Returns mode ("raw" or "summary"), then metrics (raw: metric key -> list
+    of {timestamp_ms, value} points, only keys with points) or summary
+    (summary=True: per key n, min, max, avg, latest, first/latest timestamps,
+    change_count and change_points — {timestamp_ms, from, to} where the value
+    changed, at most 50, most recent kept), and missing (one entry per requested
+    key with no points: not_collected_for_resource with similar_keys to try,
     no_data_in_window, resource_reports_no_stat_keys, or undetermined).
-    Never report a missing key as zero. Use this for history; for a single
-    current score use get_resource_health instead.
+    Never report a missing key as zero. Prefer summary=True for windows over a
+    few hours. For a single current score use get_resource_health instead.
 
     Args:
         resource_id: The resource UUID.
@@ -111,6 +115,7 @@ def get_resource_metrics(
             "mem|usage_average", "disk|usage_average", "net|usage_average"].
         hours: Number of hours of history to retrieve. Default 1.
         rollup_type: Aggregation type: AVG, MAX, MIN, SUM, COUNT, LATEST. Default AVG.
+        summary: Return per-metric summaries instead of every point. Default False.
         target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
@@ -123,7 +128,10 @@ def get_resource_metrics(
         client = server._get_connection(target)
         end_ms = int(_time.time() * 1000)
         begin_ms = end_ms - (hours * 3_600_000)
-        return _get_metrics(client, resource_id, metric_keys, begin_time_ms=begin_ms, end_time_ms=end_ms, rollup_type=rollup_type)
+        return _get_metrics(
+            client, resource_id, metric_keys, begin_time_ms=begin_ms, end_time_ms=end_ms,
+            rollup_type=rollup_type, summary=summary,
+        )
     except Exception as e:
         return {"error": server._safe_error(e, "get_resource_metrics"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
 
@@ -138,6 +146,14 @@ def get_resource_health(resource_id: str, target: Optional[str] = None) -> dict:
     scores are all you need; use get_resource for the whole object, or
     list_alerts(resource_id=...) for what drove a low score. A score is null
     (or -1) when Aria has not computed that badge — that does not mean healthy.
+
+    Badges score the alerts attached to the object, not a service's own state:
+    a down service can show HEALTH GREEN 100. For a service object (kind
+    containing SERVICE, e.g. VCENTER_APPLIANCE_HEALTH_SERVICES) the result also
+    carries service: status (SERVICE|STATUS, e.g. green/orange), availability
+    (latest SERVICE|AVAILABILITY), available (true for 1, false for 0, null
+    when unknown) and read_errors. Read available, not the badge. service is
+    null for other kinds. name and kind are included.
 
     Args:
         resource_id: The resource UUID.

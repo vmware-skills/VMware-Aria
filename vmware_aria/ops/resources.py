@@ -11,11 +11,19 @@ from typing import TYPE_CHECKING, Any
 from vmware_policy import paginated, sanitize
 
 from vmware_aria.connection import AriaApiError
+from vmware_aria.ops._ids import require_uuid
+from vmware_aria.ops.metric_summary import summarize_series
+from vmware_aria.ops.service_state import is_service_kind, read_service_state
 
 if TYPE_CHECKING:
     from vmware_aria.connection import AriaClient
 
 _log = logging.getLogger("vmware-aria.ops.resources")
+
+_RESOURCE_ID_HINT = (
+    "Run list_resources (filter with name= or resource_kind=, e.g. "
+    "resource_kind='VirtualMachine') and copy an exact 'id' value."
+)
 
 # Valid resource kinds recognised by Aria Operations
 _VALID_RESOURCE_KINDS = {
@@ -281,12 +289,7 @@ def get_resource(client: AriaClient, resource_id: str) -> dict:
     Returns:
         Dict with resource key, identifiers, health badge, and relationships.
     """
-    if not resource_id:
-        raise ValueError(
-            "resource_id must be a non-empty Aria resource UUID. Run list_resources "
-            "(filter with name= or resource_kind=, e.g. resource_kind='VirtualMachine') "
-            "and copy an exact 'id' value."
-        )
+    resource_id = require_uuid(resource_id, "resource_id", "resource", _RESOURCE_ID_HINT)
 
     data = client.get(f"/resources/{resource_id}")
     key = data.get("resourceKey", {})
@@ -334,6 +337,7 @@ def get_resource_metrics(
     rollup_type: str = "AVG",
     interval_type: str = "MINUTES",
     interval_quantity: int = 5,
+    summary: bool = False,
 ) -> dict:
     """Fetch time-series metric stats for a resource.
 
@@ -346,6 +350,8 @@ def get_resource_metrics(
         rollup_type: Aggregation type: AVG, MAX, MIN, SUM, COUNT, LATEST.
         interval_type: MINUTES, HOURS, DAYS, WEEKS, MONTHS.
         interval_quantity: Number of interval_type units per data point.
+        summary: Return per-metric summaries (``summary``) instead of every
+            point (``metrics``). The raw series is the default.
 
     Returns:
         ``metrics``: metric key -> list of ``{timestamp_ms, value}`` points, only
@@ -359,13 +365,11 @@ def get_resource_metrics(
         many keys the resource reports (``None`` when not read: it is only read
         when something is missing). Also ``resource_id``, ``window_begin_ms``,
         ``window_end_ms``. A resource id that does not exist is a 404 and raises.
+        ``mode`` is ``raw`` or ``summary``; in summary mode ``metrics`` is
+        replaced by ``summary``: metric key -> :func:`summarize_series` of its
+        points (n, min, max, avg, latest, change points).
     """
-    if not resource_id:
-        raise ValueError(
-            "resource_id must be a non-empty Aria resource UUID. Run list_resources "
-            "(filter with name= or resource_kind=, e.g. resource_kind='VirtualMachine') "
-            "and copy an exact 'id' value."
-        )
+    resource_id = require_uuid(resource_id, "resource_id", "resource", _RESOURCE_ID_HINT)
     if not metric_keys:
         raise ValueError(
             "metric_keys must be a non-empty list of Aria statKeys, e.g. "
@@ -404,11 +408,17 @@ def get_resource_metrics(
     # so it is read on this path alone.
     absent = [key for key in dict.fromkeys(metric_keys) if key not in metrics]
     missing, key_count = _explain_missing(client, resource_id, absent) if absent else ([], None)
+    series: dict[str, Any] = (
+        {"summary": {key: summarize_series(points) for key, points in metrics.items()}}
+        if summary
+        else {"metrics": metrics}
+    )
     return {
         "resource_id": resource_id,
         "window_begin_ms": begin_time_ms,
         "window_end_ms": end_time_ms,
-        "metrics": metrics,
+        "mode": "summary" if summary else "raw",
+        **series,
         "missing": missing,
         "stat_keys_on_resource": key_count,
     }
@@ -606,20 +616,17 @@ def get_resource_health(client: AriaClient, resource_id: str) -> dict:
     Returns:
         Dict with health, risk, and efficiency scores and colors.
     """
-    if not resource_id:
-        raise ValueError(
-            "resource_id must be a non-empty Aria resource UUID. Run list_resources "
-            "(filter with name= or resource_kind=, e.g. resource_kind='VirtualMachine') "
-            "and copy an exact 'id' value."
-        )
+    resource_id = require_uuid(resource_id, "resource_id", "resource", _RESOURCE_ID_HINT)
 
     # suite-api has no /resources/{id}/badge/* endpoints — badges come back
     # as the badges[] array on the ResourceDto (2026-06-08 spec audit).
     data = client.get(f"/resources/{resource_id}")
     badges = {b.get("type", ""): b for b in data.get("badges", [])}
+    key = data.get("resourceKey") if isinstance(data.get("resourceKey"), dict) else {}
+    kind = sanitize(str(key.get("resourceKindKey") or ""))
 
-    def _badge(kind: str) -> dict:
-        b = badges.get(kind, {})
+    def _badge(badge_type: str) -> dict:
+        b = badges.get(badge_type, {})
         return {"score": b.get("score", None), "color": sanitize(b.get("color", ""))}
 
     health = _badge("HEALTH")
@@ -627,12 +634,17 @@ def get_resource_health(client: AriaClient, resource_id: str) -> dict:
     efficiency = _badge("EFFICIENCY")
     return {
         "resource_id": resource_id,
+        "name": sanitize(str(key.get("name") or "")),
+        "kind": kind,
         "health_score": health["score"],
         "health_color": health["color"],
         "risk_score": risk["score"],
         "risk_color": risk["color"],
         "efficiency_score": efficiency["score"],
         "efficiency_color": efficiency["color"],
+        # A service object's badges are not its service state (8.18.7: mem
+        # service GREEN 100 with SERVICE|AVAILABILITY 0) — read that state too.
+        "service": read_service_state(client, resource_id) if is_service_kind(kind) else None,
     }
 
 

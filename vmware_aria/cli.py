@@ -324,10 +324,17 @@ def resource_metrics(
         str, typer.Option("--metrics", "-m", help="Comma-separated metric keys")
     ] = "cpu|usage_average,mem|usage_average",
     hours: Annotated[int, typer.Option("--hours", help="History window in hours")] = 1,
+    summary: Annotated[
+        bool,
+        typer.Option(
+            "--summary",
+            help="Per metric n/min/max/avg/latest and the times the value changed, instead of every point",
+        ),
+    ] = False,
     target: TargetOption = None,
     config: ConfigOption = None,
 ) -> None:
-    """Fetch time-series metrics for a resource."""
+    """Fetch time-series metrics for a resource (raw points, or --summary)."""
     import time as _time
 
     from vmware_aria.ops.resources import get_resource_metrics
@@ -336,7 +343,9 @@ def resource_metrics(
     metric_keys = [k.strip() for k in metrics.split(",") if k.strip()]
     end_ms = int(_time.time() * 1000)
     begin_ms = end_ms - (hours * 3_600_000)
-    result = get_resource_metrics(client, resource_id, metric_keys, begin_time_ms=begin_ms, end_time_ms=end_ms)
+    result = get_resource_metrics(
+        client, resource_id, metric_keys, begin_time_ms=begin_ms, end_time_ms=end_ms, summary=summary
+    )
     _json_output(result)
 
 
@@ -391,6 +400,53 @@ def resource_top(
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
+#: Narrowest terminal at which the alert table keeps both UUID columns whole.
+_ALERT_TABLE_MIN_WIDTH = 160
+
+
+def _alert_started(alert: dict) -> str:
+    iso = alert.get("start_time_utc")
+    return f"{iso[:10]} {iso[11:16]}" if iso else "—"
+
+
+def _alert_resource(alert: dict) -> str:
+    # Alert model has no resourceName; list_alerts resolves it in one batched
+    # lookup. An unresolved name prints as "?" — unknown, not "no resource".
+    return alert.get("resource_name") or ("?" if alert["resource_id"] else "")
+
+
+def _print_alert_table(items: list[dict]) -> None:
+    table = Table(title="Aria Operations Alerts", show_lines=False)
+    table.add_column("ID", no_wrap=True, min_width=36)
+    table.add_column("Name", style="bold")
+    table.add_column("Criticality")
+    table.add_column("Status")
+    table.add_column("Started (UTC)", no_wrap=True)
+    table.add_column("Resource")
+    table.add_column("Resource ID", no_wrap=True, min_width=36)
+    for a in items:
+        table.add_row(
+            a["id"], a["name"][:60], a["criticality"], a["status"], _alert_started(a),
+            _alert_resource(a)[:40], a["resource_id"],
+        )
+    console.print(table)
+
+
+def _print_alert_records(items: list[dict]) -> None:
+    """One block per alert; each UUID is a single word, so wrapping never splits it."""
+    from rich.markup import escape
+
+    console.print("[bold]Aria Operations Alerts[/bold]")
+    for a in items:
+        console.print(
+            f"{a['id']}  {escape(a['criticality'])}  {escape(a['status'])}  Started {_alert_started(a)} UTC",
+            highlight=False,
+        )
+        console.print(f"  {escape(a['name'])}", highlight=False)
+        if a["resource_id"]:
+            console.print(f"  on {escape(_alert_resource(a))} ({a['resource_id']})", highlight=False)
+
+
 @alert_app.command("list")
 @_friendly_errors
 @audited("list_alerts")
@@ -399,35 +455,28 @@ def alert_list(
     criticality: Annotated[str | None, typer.Option("--criticality", help="Filter by criticality")] = None,
     limit: Annotated[int, typer.Option("--limit", "-n", help="Page size, 1-500")] = 50,
     offset: Annotated[int, typer.Option("--offset", help="Rows to skip; the next-page offset is printed below the table")] = 0,
+    as_json: Annotated[bool, typer.Option("--json", help="Print the result envelope as JSON instead of a table")] = False,
     target: TargetOption = None,
     config: ConfigOption = None,
 ) -> None:
-    """List alerts, optionally filtered by criticality."""
+    """List alerts, optionally filtered by criticality. IDs are printed whole."""
     from vmware_aria.ops.alerts import list_alerts
 
     client, _ = _get_connection(target, config)
     _result = list_alerts(
         client, active_only=active_only, criticality=criticality, limit=limit, offset=offset
     )
-    items = _result["items"]
+    if as_json:
+        _json_output(_result)
+        return
 
-    table = Table(title="Aria Operations Alerts", show_lines=False)
-    table.add_column("ID")
-    table.add_column("Name", style="bold")
-    table.add_column("Criticality")
-    table.add_column("Status")
-    table.add_column("Resource")
-    table.add_column("Resource ID")
-
-    # Alert model has no resourceName; list_alerts resolves it in one batched
-    # lookup. An unresolved name prints as "?" — unknown, not "no resource".
-    for a in items:
-        resource = a.get("resource_name") or ("?" if a["resource_id"] else "")
-        table.add_row(
-            a["id"][:36], a["name"][:60], a["criticality"], a["status"], resource[:40], a["resource_id"][:36]
-        )
-
-    console.print(table)
+    # A table narrower than this cannot hold two 36-character IDs: rich shrinks
+    # every column, IDs included, to "ba793832-5…", which cannot be pasted into
+    # `alert get` (2026-09-15). Narrower terminals get one record per alert.
+    if console.width >= _ALERT_TABLE_MIN_WIDTH:
+        _print_alert_table(_result["items"])
+    else:
+        _print_alert_records(_result["items"])
     if _result.get("resource_names_note"):
         console.print(f"[yellow]{_result['resource_names_note']}[/yellow]")
     _print_next_page(_result)

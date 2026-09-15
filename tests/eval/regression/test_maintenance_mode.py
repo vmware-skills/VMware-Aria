@@ -373,38 +373,38 @@ def _cli(args: list[str], answers: str = ""):
          patch.object(cli, "_audit", MagicMock()), \
          patch("vmware_aria.ops.maintenance.start_resource_maintenance") as start, \
          patch("vmware_aria.ops.maintenance.end_resource_maintenance") as end:
-        start.return_value = {"resource_id": "r-1", "confirmed": True}
-        end.return_value = {"resource_id": "r-1", "confirmed": True}
+        start.return_value = {"resource_id": "d0000000-0000-4000-8000-000000000001", "confirmed": True}
+        end.return_value = {"resource_id": "d0000000-0000-4000-8000-000000000001", "confirmed": True}
         result = CliRunner().invoke(cli.app, args, input=answers)
     return result, connect, start, end
 
 
 def test_cli_start_dry_run_prints_the_call_and_makes_none() -> None:
-    result, connect, start, _ = _cli(["maintenance", "start", "r-1", "--duration", "60", "--dry-run"])
+    result, connect, start, _ = _cli(["maintenance", "start", "d0000000-0000-4000-8000-000000000001", "--duration", "60", "--dry-run"])
     assert result.exit_code == 0, result.output
     assert "PUT" in result.output
-    assert "/resources/r-1/maintained" in result.output
+    assert "/resources/d0000000-0000-4000-8000-000000000001/maintained" in result.output
     assert "duration=60" in result.output
     connect.assert_not_called()
     start.assert_not_called()
 
 
 def test_cli_end_dry_run_prints_the_call_and_makes_none() -> None:
-    result, connect, _, end = _cli(["maintenance", "end", "r-1", "--dry-run"])
+    result, connect, _, end = _cli(["maintenance", "end", "d0000000-0000-4000-8000-000000000001", "--dry-run"])
     assert result.exit_code == 0, result.output
-    assert "DELETE" in result.output and "/resources/r-1/maintained" in result.output
+    assert "DELETE" in result.output and "/resources/d0000000-0000-4000-8000-000000000001/maintained" in result.output
     connect.assert_not_called()
     end.assert_not_called()
 
 
 def test_cli_dry_run_still_refuses_an_impossible_window() -> None:
-    result, connect, start, _ = _cli(["maintenance", "start", "r-1", "--duration", "5", "--end", "1", "--dry-run"])
+    result, connect, start, _ = _cli(["maintenance", "start", "d0000000-0000-4000-8000-000000000001", "--duration", "5", "--end", "1", "--dry-run"])
     assert result.exit_code != 0
     connect.assert_not_called()
     start.assert_not_called()
 
 
-@pytest.mark.parametrize("command", [["maintenance", "start", "r-1", "--duration", "60"], ["maintenance", "end", "r-1"]])
+@pytest.mark.parametrize("command", [["maintenance", "start", "d0000000-0000-4000-8000-000000000001", "--duration", "60"], ["maintenance", "end", "d0000000-0000-4000-8000-000000000001"]])
 def test_cli_writes_stop_when_the_prompt_is_declined(command: list[str]) -> None:
     result, connect, start, end = _cli(command, "n\n")
     assert result.exit_code != 0
@@ -413,14 +413,14 @@ def test_cli_writes_stop_when_the_prompt_is_declined(command: list[str]) -> None
 
 
 def test_cli_start_runs_after_yes_at_the_prompt() -> None:
-    result, _, start, _ = _cli(["maintenance", "start", "r-1", "--duration", "60"], "y\n")
+    result, _, start, _ = _cli(["maintenance", "start", "d0000000-0000-4000-8000-000000000001", "--duration", "60"], "y\n")
     assert result.exit_code == 0, result.output
     start.assert_called_once()
     assert start.call_args.kwargs["duration_minutes"] == 60
 
 
 def test_cli_yes_flag_skips_the_prompt() -> None:
-    result, _, _, end = _cli(["maintenance", "end", "r-1", "--yes"])
+    result, _, _, end = _cli(["maintenance", "end", "d0000000-0000-4000-8000-000000000001", "--yes"])
     assert result.exit_code == 0, result.output
     end.assert_called_once()
 
@@ -551,6 +551,6 @@ def test_cli_dry_run_refuses_a_blank_resource_id(args: list[str]) -> None:
 
 
 def test_cli_dry_run_prints_the_id_the_real_call_would_use() -> None:
-    result, _, _, _ = _cli(["maintenance", "start", "  r-1 ", "--duration", "60", "--dry-run"])
+    result, _, _, _ = _cli(["maintenance", "start", "  d0000000-0000-4000-8000-000000000001 ", "--duration", "60", "--dry-run"])
     assert result.exit_code == 0, result.output
-    assert "/resources/r-1/maintained?duration=60" in result.output
+    assert "/resources/d0000000-0000-4000-8000-000000000001/maintained?duration=60" in result.output

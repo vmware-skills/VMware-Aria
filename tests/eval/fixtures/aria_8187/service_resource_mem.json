@@ -1,0 +1,61 @@
+{
+ "_captured": "2026-09-15, real Aria Operations 8.18.7 (home lab), read-only requests through the skill's own AriaClient",
+ "_note": "GET /resources/<mem service object>: badges HEALTH GREEN 100 while its SERVICE|STATUS is orange and SERVICE|AVAILABILITY has been 0 for 72h",
+ "http_status": 200,
+ "body": {
+  "creationTime": 1789261664628,
+  "resourceKey": {
+   "name": "mem",
+   "adapterKindKey": "VMWARE_INFRA_HEALTH",
+   "resourceKindKey": "VCENTER_APPLIANCE_HEALTH_SERVICES",
+   "resourceIdentifiers": [
+    {
+     "identifierType": {
+      "name": "VCHOST",
+      "dataType": "STRING",
+      "isPartOfUniqueness": true
+     },
+     "value": "192.0.2.16"
+    },
+    {
+     "identifierType": {
+      "name": "VCSERVICE",
+      "dataType": "STRING",
+      "isPartOfUniqueness": true
+     },
+     "value": "mem"
+    }
+   ]
+  },
+  "resourceStatusStates": [
+   {
+    "adapterInstanceId": "20869e54-7009-489a-b3d1-a72a9e660c44",
+    "resourceStatus": "DATA_RECEIVING",
+    "resourceState": "STARTED",
+    "statusMessage": ""
+   }
+  ],
+  "resourceHealth": "GREEN",
+  "resourceHealthValue": 100.0,
+  "dtEnabled": true,
+  "badges": [
+   {
+    "type": "HEALTH",
+    "color": "GREEN",
+    "score": 100.0
+   },
+   {
+    "type": "RISK",
+    "color": "GREEN",
+    "score": 0.0
+   },
+   {
+    "type": "EFFICIENCY",
+    "color": "GREEN",
+    "score": 100.0
+   }
+  ],
+  "relatedResources": [],
+  "identifier": "ba13f0b7-19b5-4f30-b321-bc3a791d3497"
+ }
+}

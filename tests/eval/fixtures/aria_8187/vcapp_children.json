@@ -1,0 +1,666 @@
+{
+ "_captured": "2026-09-15, real Aria Operations 8.18.7 (home lab), read-only requests through the skill's own AriaClient",
+ "_note": "GET /resources/<VC_APP object>/relationships/CHILD: 13 children, 8 of kind VCENTER_APPLIANCE_HEALTH_SERVICES",
+ "http_status": 200,
+ "body": {
+  "pageInfo": {
+   "totalCount": 13,
+   "page": 0,
+   "pageSize": 1000
+  },
+  "relationshipType": "CHILD",
+  "resourceList": [
+   {
+    "creationTime": 1789261664628,
+    "resourceKey": {
+     "name": "swap",
+     "adapterKindKey": "VMWARE_INFRA_HEALTH",
+     "resourceKindKey": "VCENTER_APPLIANCE_HEALTH_SERVICES",
+     "resourceIdentifiers": [
+      {
+       "identifierType": {
+        "name": "VCHOST",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "192.0.2.16"
+      },
+      {
+       "identifierType": {
+        "name": "VCSERVICE",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "swap"
+      }
+     ]
+    },
+    "resourceStatusStates": [],
+    "dtEnabled": true,
+    "badges": [
+     {
+      "type": "HEALTH",
+      "color": "GREEN",
+      "score": 100.0
+     },
+     {
+      "type": "RISK",
+      "color": "GREEN",
+      "score": 0.0
+     },
+     {
+      "type": "EFFICIENCY",
+      "color": "GREEN",
+      "score": 100.0
+     }
+    ],
+    "relatedResources": [],
+    "identifier": "04cb65aa-ce96-408f-849f-307f7dc9730b"
+   },
+   {
+    "creationTime": 1789261664628,
+    "resourceKey": {
+     "name": "storage",
+     "adapterKindKey": "VMWARE_INFRA_HEALTH",
+     "resourceKindKey": "VCENTER_APPLIANCE_HEALTH_SERVICES",
+     "resourceIdentifiers": [
+      {
+       "identifierType": {
+        "name": "VCHOST",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "192.0.2.16"
+      },
+      {
+       "identifierType": {
+        "name": "VCSERVICE",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "storage"
+      }
+     ]
+    },
+    "resourceStatusStates": [],
+    "dtEnabled": true,
+    "badges": [
+     {
+      "type": "HEALTH",
+      "color": "GREEN",
+      "score": 100.0
+     },
+     {
+      "type": "RISK",
+      "color": "GREEN",
+      "score": 0.0
+     },
+     {
+      "type": "EFFICIENCY",
+      "color": "GREEN",
+      "score": 100.0
+     }
+    ],
+    "relatedResources": [],
+    "identifier": "1810d550-c8bd-48fb-a03f-7524b0e80707"
+   },
+   {
+    "creationTime": 1789261664628,
+    "resourceKey": {
+     "name": "192.0.2.1",
+     "adapterKindKey": "VMWARE_INFRA_HEALTH",
+     "resourceKindKey": "VCENTER_NTP_SERVER",
+     "resourceIdentifiers": [
+      {
+       "identifierType": {
+        "name": "NTPHOST",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "192.0.2.1"
+      },
+      {
+       "identifierType": {
+        "name": "VCHOST",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "192.0.2.16"
+      }
+     ]
+    },
+    "resourceStatusStates": [],
+    "dtEnabled": true,
+    "badges": [
+     {
+      "type": "HEALTH",
+      "color": "GREEN",
+      "score": 100.0
+     },
+     {
+      "type": "RISK",
+      "color": "GREEN",
+      "score": 0.0
+     },
+     {
+      "type": "EFFICIENCY",
+      "color": "GREEN",
+      "score": 100.0
+     }
+    ],
+    "relatedResources": [],
+    "identifier": "4f8a608c-c5ff-40a7-b944-daaf7832ec16"
+   },
+   {
+    "creationTime": 1789261664628,
+    "resourceKey": {
+     "name": "VCENTER-192.0.2.16-MACHINE_SSL_CERT-12b5635b81a4f4b8bc988a7f14e4a00da54d3951b0385a195be2328edfd53e5e",
+     "adapterKindKey": "VMWARE_INFRA_HEALTH",
+     "resourceKindKey": "CERTIFICATE",
+     "resourceIdentifiers": [
+      {
+       "identifierType": {
+        "name": "APP_HOST",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "192.0.2.16"
+      },
+      {
+       "identifierType": {
+        "name": "APPLIANCE_TYPE",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "VCENTER"
+      },
+      {
+       "identifierType": {
+        "name": "CERTIFICATE_THUMBPRINT",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "12b5635b81a4f4b8bc988a7f14e4a00da54d3951b0385a195be2328edfd53e5e"
+      },
+      {
+       "identifierType": {
+        "name": "CERTIFICATE_TYPE",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "MACHINE_SSL_CERT"
+      }
+     ]
+    },
+    "resourceStatusStates": [],
+    "dtEnabled": true,
+    "badges": [
+     {
+      "type": "HEALTH",
+      "color": "GREEN",
+      "score": 100.0
+     },
+     {
+      "type": "RISK",
+      "color": "GREEN",
+      "score": 0.0
+     },
+     {
+      "type": "EFFICIENCY",
+      "color": "GREEN",
+      "score": 100.0
+     }
+    ],
+    "relatedResources": [],
+    "identifier": "5c524821-f6ae-45a8-8d84-94763e029b07"
+   },
+   {
+    "creationTime": 1789261664628,
+    "resourceKey": {
+     "name": "applmgmt",
+     "adapterKindKey": "VMWARE_INFRA_HEALTH",
+     "resourceKindKey": "VCENTER_APPLIANCE_HEALTH_SERVICES",
+     "resourceIdentifiers": [
+      {
+       "identifierType": {
+        "name": "VCHOST",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "192.0.2.16"
+      },
+      {
+       "identifierType": {
+        "name": "VCSERVICE",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "applmgmt"
+      }
+     ]
+    },
+    "resourceStatusStates": [],
+    "dtEnabled": true,
+    "badges": [
+     {
+      "type": "HEALTH",
+      "color": "GREEN",
+      "score": 100.0
+     },
+     {
+      "type": "RISK",
+      "color": "GREEN",
+      "score": 0.0
+     },
+     {
+      "type": "EFFICIENCY",
+      "color": "GREEN",
+      "score": 100.0
+     }
+    ],
+    "relatedResources": [],
+    "identifier": "878b9d70-e13b-4c62-b5c3-2f67a3256d1f"
+   },
+   {
+    "creationTime": 1789261664628,
+    "resourceKey": {
+     "name": "database-storage",
+     "adapterKindKey": "VMWARE_INFRA_HEALTH",
+     "resourceKindKey": "VCENTER_APPLIANCE_HEALTH_SERVICES",
+     "resourceIdentifiers": [
+      {
+       "identifierType": {
+        "name": "VCHOST",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "192.0.2.16"
+      },
+      {
+       "identifierType": {
+        "name": "VCSERVICE",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "database-storage"
+      }
+     ]
+    },
+    "resourceStatusStates": [],
+    "dtEnabled": true,
+    "badges": [
+     {
+      "type": "HEALTH",
+      "color": "GREEN",
+      "score": 100.0
+     },
+     {
+      "type": "RISK",
+      "color": "GREEN",
+      "score": 0.0
+     },
+     {
+      "type": "EFFICIENCY",
+      "color": "GREEN",
+      "score": 100.0
+     }
+    ],
+    "relatedResources": [],
+    "identifier": "9d0e8767-8e14-4708-95c2-b14acfd22d23"
+   },
+   {
+    "creationTime": 1789261664628,
+    "resourceKey": {
+     "name": "VCENTER-192.0.2.16-STS_CERT-242d16c40bec833dbed5614aa226d80df83676d0503e5da0a756d3abd751c957",
+     "adapterKindKey": "VMWARE_INFRA_HEALTH",
+     "resourceKindKey": "CERTIFICATE",
+     "resourceIdentifiers": [
+      {
+       "identifierType": {
+        "name": "APP_HOST",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "192.0.2.16"
+      },
+      {
+       "identifierType": {
+        "name": "APPLIANCE_TYPE",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "VCENTER"
+      },
+      {
+       "identifierType": {
+        "name": "CERTIFICATE_THUMBPRINT",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "242d16c40bec833dbed5614aa226d80df83676d0503e5da0a756d3abd751c957"
+      },
+      {
+       "identifierType": {
+        "name": "CERTIFICATE_TYPE",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "STS_CERT"
+      }
+     ]
+    },
+    "resourceStatusStates": [],
+    "dtEnabled": true,
+    "badges": [
+     {
+      "type": "HEALTH",
+      "color": "GREEN",
+      "score": 100.0
+     },
+     {
+      "type": "RISK",
+      "color": "GREEN",
+      "score": 0.0
+     },
+     {
+      "type": "EFFICIENCY",
+      "color": "GREEN",
+      "score": 100.0
+     }
+    ],
+    "relatedResources": [],
+    "identifier": "a87b2ce5-521a-4a2c-9383-63470bd78b2e"
+   },
+   {
+    "creationTime": 1789261664628,
+    "resourceKey": {
+     "name": "vCenterLicense-192.0.2.16",
+     "adapterKindKey": "VMWARE_INFRA_HEALTH",
+     "resourceKindKey": "vCenterLicense",
+     "resourceIdentifiers": [
+      {
+       "identifierType": {
+        "name": "VCHOST",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "192.0.2.16"
+      }
+     ]
+    },
+    "resourceStatusStates": [],
+    "dtEnabled": true,
+    "badges": [
+     {
+      "type": "HEALTH",
+      "color": "GREEN",
+      "score": 100.0
+     },
+     {
+      "type": "RISK",
+      "color": "GREEN",
+      "score": 0.0
+     },
+     {
+      "type": "EFFICIENCY",
+      "color": "GREEN",
+      "score": 100.0
+     }
+    ],
+    "relatedResources": [],
+    "identifier": "ad9ca5cf-fba2-432b-8b40-0b13a0cf3c12"
+   },
+   {
+    "creationTime": 1789261664628,
+    "resourceKey": {
+     "name": "software-packages",
+     "adapterKindKey": "VMWARE_INFRA_HEALTH",
+     "resourceKindKey": "VCENTER_APPLIANCE_HEALTH_SERVICES",
+     "resourceIdentifiers": [
+      {
+       "identifierType": {
+        "name": "VCHOST",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "192.0.2.16"
+      },
+      {
+       "identifierType": {
+        "name": "VCSERVICE",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "software-packages"
+      }
+     ]
+    },
+    "resourceStatusStates": [],
+    "dtEnabled": true,
+    "badges": [
+     {
+      "type": "HEALTH",
+      "color": "GREEN",
+      "score": 100.0
+     },
+     {
+      "type": "RISK",
+      "color": "GREEN",
+      "score": 0.0
+     },
+     {
+      "type": "EFFICIENCY",
+      "color": "GREEN",
+      "score": 100.0
+     }
+    ],
+    "relatedResources": [],
+    "identifier": "b0981d67-3dd0-47e5-ac95-5a52801b2e0d"
+   },
+   {
+    "creationTime": 1789261664628,
+    "resourceKey": {
+     "name": "mem",
+     "adapterKindKey": "VMWARE_INFRA_HEALTH",
+     "resourceKindKey": "VCENTER_APPLIANCE_HEALTH_SERVICES",
+     "resourceIdentifiers": [
+      {
+       "identifierType": {
+        "name": "VCHOST",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "192.0.2.16"
+      },
+      {
+       "identifierType": {
+        "name": "VCSERVICE",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "mem"
+      }
+     ]
+    },
+    "resourceStatusStates": [],
+    "dtEnabled": true,
+    "badges": [
+     {
+      "type": "HEALTH",
+      "color": "GREEN",
+      "score": 100.0
+     },
+     {
+      "type": "RISK",
+      "color": "GREEN",
+      "score": 0.0
+     },
+     {
+      "type": "EFFICIENCY",
+      "color": "GREEN",
+      "score": 100.0
+     }
+    ],
+    "relatedResources": [],
+    "identifier": "ba13f0b7-19b5-4f30-b321-bc3a791d3497"
+   },
+   {
+    "creationTime": 1789261664628,
+    "resourceKey": {
+     "name": "VCENTER-192.0.2.16-ROOT_CERT-44ac559628857cf6247a8efbabe92769988ee5d92e00904e087f2c2b5a1904a5",
+     "adapterKindKey": "VMWARE_INFRA_HEALTH",
+     "resourceKindKey": "CERTIFICATE",
+     "resourceIdentifiers": [
+      {
+       "identifierType": {
+        "name": "APP_HOST",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "192.0.2.16"
+      },
+      {
+       "identifierType": {
+        "name": "APPLIANCE_TYPE",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "VCENTER"
+      },
+      {
+       "identifierType": {
+        "name": "CERTIFICATE_THUMBPRINT",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "44ac559628857cf6247a8efbabe92769988ee5d92e00904e087f2c2b5a1904a5"
+      },
+      {
+       "identifierType": {
+        "name": "CERTIFICATE_TYPE",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "ROOT_CERT"
+      }
+     ]
+    },
+    "resourceStatusStates": [],
+    "dtEnabled": true,
+    "badges": [
+     {
+      "type": "HEALTH",
+      "color": "GREEN",
+      "score": 100.0
+     },
+     {
+      "type": "RISK",
+      "color": "GREEN",
+      "score": 0.0
+     },
+     {
+      "type": "EFFICIENCY",
+      "color": "GREEN",
+      "score": 100.0
+     }
+    ],
+    "relatedResources": [],
+    "identifier": "c70aa761-a586-4b71-bd6e-17606aee9263"
+   },
+   {
+    "creationTime": 1789261664628,
+    "resourceKey": {
+     "name": "load",
+     "adapterKindKey": "VMWARE_INFRA_HEALTH",
+     "resourceKindKey": "VCENTER_APPLIANCE_HEALTH_SERVICES",
+     "resourceIdentifiers": [
+      {
+       "identifierType": {
+        "name": "VCHOST",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "192.0.2.16"
+      },
+      {
+       "identifierType": {
+        "name": "VCSERVICE",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "load"
+      }
+     ]
+    },
+    "resourceStatusStates": [],
+    "dtEnabled": true,
+    "badges": [
+     {
+      "type": "HEALTH",
+      "color": "GREEN",
+      "score": 100.0
+     },
+     {
+      "type": "RISK",
+      "color": "GREEN",
+      "score": 0.0
+     },
+     {
+      "type": "EFFICIENCY",
+      "color": "GREEN",
+      "score": 100.0
+     }
+    ],
+    "relatedResources": [],
+    "identifier": "de7adcb9-7f31-4a7b-beab-db6a8e48a474"
+   },
+   {
+    "creationTime": 1789261664628,
+    "resourceKey": {
+     "name": "system",
+     "adapterKindKey": "VMWARE_INFRA_HEALTH",
+     "resourceKindKey": "VCENTER_APPLIANCE_HEALTH_SERVICES",
+     "resourceIdentifiers": [
+      {
+       "identifierType": {
+        "name": "VCHOST",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "192.0.2.16"
+      },
+      {
+       "identifierType": {
+        "name": "VCSERVICE",
+        "dataType": "STRING",
+        "isPartOfUniqueness": true
+       },
+       "value": "system"
+      }
+     ]
+    },
+    "resourceStatusStates": [],
+    "dtEnabled": true,
+    "badges": [
+     {
+      "type": "HEALTH",
+      "color": "GREEN",
+      "score": 100.0
+     },
+     {
+      "type": "RISK",
+      "color": "GREEN",
+      "score": 0.0
+     },
+     {
+      "type": "EFFICIENCY",
+      "color": "GREEN",
+      "score": 100.0
+     }
+    ],
+    "relatedResources": [],
+    "identifier": "f2c18bac-d83f-4ccf-a7cb-ba5eda184486"
+   }
+  ]
+ }
+}

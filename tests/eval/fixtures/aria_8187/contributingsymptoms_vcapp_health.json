@@ -1,0 +1,32 @@
+{
+ "_captured": "2026-09-15, real Aria Operations 8.18.7 (home lab), read-only requests through the skill's own AriaClient",
+ "_note": "GET /alerts/contributingsymptoms?id=<active 'vCenter app health is affected' alert>: two leaves, each only symptomId/symptomSetId/symptomDefinitionsIds and an empty alertConditions — no resourceId anywhere",
+ "http_status": 200,
+ "body": {
+  "contributingSymptoms": [
+   {
+    "alertId": "ba793832-533a-4c87-bee4-217ed3747c85",
+    "contributingSymptoms": {
+     "contributingSymptoms": [
+      {
+       "symptomId": "1c44529e-72e7-4a35-ac79-027133a37073",
+       "symptomSetId": "1f4e13f2-51b3-4bc9-932b-c910d8207add",
+       "symptomDefinitionsIds": [
+        "SymptomDefinition-vCenterApplianceHealthServiceDownSymptom"
+       ],
+       "alertConditions": []
+      },
+      {
+       "symptomId": "10243eb1-5d12-4b0d-8cc0-167f529c0a10",
+       "symptomSetId": "1f4e13f2-51b3-4bc9-932b-c910d8207add",
+       "symptomDefinitionsIds": [
+        "SymptomDefinition-vCenterApplianceHealthServiceDownSymptom"
+       ],
+       "alertConditions": []
+      }
+     ]
+    }
+   }
+  ]
+ }
+}

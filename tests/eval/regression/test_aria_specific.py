@@ -29,11 +29,11 @@ def test_metrics_query_body_shape() -> None:
     from vmware_aria.ops.resources import get_resource_metrics
 
     client = _client()
-    get_resource_metrics(client, "res-1", ["cpu|usage_average", "mem|usage_average"])
+    get_resource_metrics(client, "b0000000-0000-4000-8000-000000000001", ["cpu|usage_average", "mem|usage_average"])
 
     path, = client.post.call_args.args
     body = client.post.call_args.kwargs["json_data"]
-    assert path == "/resources/res-1/stats/query"
+    assert path == "/resources/b0000000-0000-4000-8000-000000000001/stats/query"
     assert body["statKey"] == ["cpu|usage_average", "mem|usage_average"], (
         "statKey must be an array of plain strings, not [{key: ...}] objects"
     )
@@ -50,7 +50,7 @@ def test_metrics_response_parses_stat_list_nesting() -> None:
     client.post.return_value = {
         "values": [
             {
-                "resourceId": "res-1",
+                "resourceId": "b0000000-0000-4000-8000-000000000001",
                 "stat-list": {
                     "stat": [
                         {
@@ -63,7 +63,7 @@ def test_metrics_response_parses_stat_list_nesting() -> None:
             }
         ]
     }
-    result = get_resource_metrics(client, "res-1", ["cpu|usage_average"])
+    result = get_resource_metrics(client, "b0000000-0000-4000-8000-000000000001", ["cpu|usage_average"])
     assert result["metrics"]["cpu|usage_average"] == [
         {"timestamp_ms": 1000, "value": 1.5},
         {"timestamp_ms": 2000, "value": 2.5},
@@ -78,15 +78,15 @@ def test_top_consumers_uses_get_stats_topn() -> None:
 
     client = _client()
     client.get.side_effect = [
-        {"resourceList": [{"identifier": "vm-1", "resourceKey": {"name": "web-01"}}]},
+        {"resourceList": [{"identifier": "c0000000-0000-4000-8000-000000000001", "resourceKey": {"name": "web-01"}}]},
         {
             "resourceStatGroups": [
                 {
-                    "groupKey": "vm-1",
+                    "groupKey": "c0000000-0000-4000-8000-000000000001",
                     # spec shape: data nests under `stat`
                     "resourceStats": [
                         {
-                            "resourceId": "vm-1",
+                            "resourceId": "c0000000-0000-4000-8000-000000000001",
                             "stat": {"statKey": {"key": "cpu|usage_average"}, "data": [42.0]},
                         }
                     ],
@@ -98,10 +98,10 @@ def test_top_consumers_uses_get_stats_topn() -> None:
 
     topn_call = client.get.call_args_list[1]
     assert topn_call.args[0] == "/resources/stats/topn"
-    assert topn_call.kwargs["params"]["resourceId"] == ["vm-1"]
+    assert topn_call.kwargs["params"]["resourceId"] == ["c0000000-0000-4000-8000-000000000001"]
     assert "intervalQuantifier" in topn_call.kwargs["params"]
     client.post.assert_not_called()
-    assert results[0] == {"id": "vm-1", "name": "web-01", "metric_key": "cpu|usage_average", "value": 42.0, "latest_value": 42.0}
+    assert results[0] == {"id": "c0000000-0000-4000-8000-000000000001", "name": "web-01", "metric_key": "cpu|usage_average", "value": 42.0, "latest_value": 42.0}
 
 
 # ── #5: alert filtering must go through POST /alerts/query ─────────────
@@ -131,12 +131,12 @@ def test_acknowledge_alert_uses_takeownership_action() -> None:
 
     client = _client()
     client.get.return_value = {}
-    result = acknowledge_alert(client, "alert-1")
+    result = acknowledge_alert(client, "a0000000-0000-4000-8000-000000000001")
 
     path, = client.post.call_args.args
     assert path == "/alerts"
     assert client.post.call_args.kwargs["params"] == {"action": "takeownership"}
-    assert client.post.call_args.kwargs["json_data"] == {"uuids": ["alert-1"]}
+    assert client.post.call_args.kwargs["json_data"] == {"uuids": ["a0000000-0000-4000-8000-000000000001"]}
     assert result["action"] == "takeownership"
 
 
@@ -145,12 +145,12 @@ def test_cancel_alert_uses_cancel_action() -> None:
 
     client = _client()
     client.get.return_value = {}
-    cancel_alert(client, "alert-2")
+    cancel_alert(client, "a0000000-0000-4000-8000-000000000002")
 
     path, = client.post.call_args.args
     assert path == "/alerts"
     assert client.post.call_args.kwargs["params"] == {"action": "cancel"}
-    assert client.post.call_args.kwargs["json_data"] == {"uuids": ["alert-2"]}
+    assert client.post.call_args.kwargs["json_data"] == {"uuids": ["a0000000-0000-4000-8000-000000000002"]}
     client.delete.assert_not_called()
 
 
@@ -194,11 +194,11 @@ def test_generate_report_body_shape_and_requires_resource() -> None:
 
     client = _client()
     client.post.return_value = {"id": "rep-1", "status": "PENDING"}
-    generate_report(client, "rdef-1", resource_ids=["res-1"])
+    generate_report(client, "rdef-1", resource_ids=["b0000000-0000-4000-8000-000000000001"])
 
     body = client.post.call_args.kwargs["json_data"]
     assert body["reportDefinitionId"] == "rdef-1"
-    assert body["resourceId"] == "res-1"
+    assert body["resourceId"] == "b0000000-0000-4000-8000-000000000001"
     assert "reportDefinition" not in body  # old invented nesting
 
     with pytest.raises(ValueError, match="resource_ids"):
@@ -292,19 +292,19 @@ def test_anomaly_uses_bulk_stats_query_not_invented_endpoints() -> None:
     client.get.return_value = {
         "badges": [{"type": "RISK", "score": 25, "color": "GREEN"}]
     }
-    result = get_resource_riskbadge(client, "res-1")
-    assert client.get.call_args.args[0] == "/resources/res-1"  # no /badge/risk
+    result = get_resource_riskbadge(client, "b0000000-0000-4000-8000-000000000001")
+    assert client.get.call_args.args[0] == "/resources/b0000000-0000-4000-8000-000000000001"  # no /badge/risk
     assert result["risk_score"] == 25
 
     # list_anomalies now issues ONE bulk POST /resources/stats/query with a
     # resourceId array (was a per-VM GET /resources/{id}/stats/latest N+1).
     client.post.reset_mock()
     client.post.return_value = {"values": []}
-    list_anomalies(client, resource_id="res-1")
+    list_anomalies(client, resource_id="b0000000-0000-4000-8000-000000000001")
     path, = client.post.call_args.args
     assert path == "/resources/stats/query"
     body = client.post.call_args.kwargs["json_data"]
-    assert body["resourceId"] == ["res-1"]
+    assert body["resourceId"] == ["b0000000-0000-4000-8000-000000000001"]
     assert body["statKey"] == ["System Attributes|total_alarms"]
 
 
@@ -713,7 +713,7 @@ def test_idempotent_query_posts_opt_into_retry() -> None:
 
     client.post.reset_mock()
     client.post.return_value = {"values": []}
-    get_resource_metrics(client, "res-1", ["cpu|usage_average"])
+    get_resource_metrics(client, "b0000000-0000-4000-8000-000000000001", ["cpu|usage_average"])
     assert client.post.call_args.kwargs.get("retries") == 1
 
 
@@ -722,7 +722,7 @@ def test_create_posts_do_not_pass_retries() -> None:
 
     client = _client()
     client.post.return_value = {"id": "r-1", "status": "QUEUED"}
-    generate_report(client, definition_id="d-1", resource_ids=["res-1"])
+    generate_report(client, definition_id="d-1", resource_ids=["b0000000-0000-4000-8000-000000000001"])
     assert "retries" not in client.post.call_args.kwargs, (
         "report creation is not idempotent — it must use the no-retry default"
     )

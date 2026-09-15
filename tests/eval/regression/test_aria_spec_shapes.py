@@ -32,7 +32,7 @@ def test_list_resources_handles_empty_status_states() -> None:
     client.get.return_value = {
         "resourceList": [
             {
-                "identifier": "vm-1",
+                "identifier": "c0000000-0000-4000-8000-000000000001",
                 "resourceKey": {"name": "web-01", "resourceKindKey": "VirtualMachine"},
                 "resourceStatusStates": [],  # key present, list empty
             }
@@ -52,7 +52,7 @@ def test_list_resources_parses_badges_array() -> None:
     client.get.return_value = {
         "resourceList": [
             {
-                "identifier": "vm-1",
+                "identifier": "c0000000-0000-4000-8000-000000000001",
                 "resourceKey": {"name": "web-01", "resourceKindKey": "VirtualMachine"},
                 "badges": [
                     {"type": "HEALTH", "color": "GREEN", "score": 100.0},
@@ -72,7 +72,7 @@ def test_get_resource_parses_badges_array() -> None:
 
     client = _client()
     client.get.return_value = {
-        "identifier": "vm-1",
+        "identifier": "c0000000-0000-4000-8000-000000000001",
         "resourceKey": {"name": "web-01", "resourceKindKey": "VirtualMachine"},
         "badges": [
             {"type": "HEALTH", "color": "GREEN", "score": 100.0},
@@ -80,7 +80,7 @@ def test_get_resource_parses_badges_array() -> None:
             {"type": "EFFICIENCY", "color": "RED", "score": 25.0},
         ],
     }
-    result = get_resource(client, "vm-1")
+    result = get_resource(client, "c0000000-0000-4000-8000-000000000001")
     assert result["health_color"] == "GREEN" and result["health_score"] == 100.0
     assert result["risk_color"] == "YELLOW" and result["risk_score"] == 50.0
     assert result["efficiency_color"] == "RED" and result["efficiency_score"] == 25.0
@@ -173,14 +173,14 @@ def test_top_consumers_data_nests_under_stat() -> None:
 
     client = _client()
     client.get.side_effect = [
-        {"resourceList": [{"identifier": "vm-1", "resourceKey": {"name": "web-01"}}]},
+        {"resourceList": [{"identifier": "c0000000-0000-4000-8000-000000000001", "resourceKey": {"name": "web-01"}}]},
         {
             "resourceStatGroups": [
                 {
-                    "groupKey": "vm-1",
+                    "groupKey": "c0000000-0000-4000-8000-000000000001",
                     "resourceStats": [
                         {
-                            "resourceId": "vm-1",
+                            "resourceId": "c0000000-0000-4000-8000-000000000001",
                             "stat": {
                                 "statKey": {"key": "cpu|usage_average"},
                                 "timestamps": [1000],
@@ -222,13 +222,13 @@ def test_top_consumers_caps_resource_ids_at_100() -> None:
 # ── H3: Alert fields — alertLevel + alertDefinitionName ────────────────
 
 _ALERT_WIRE = {
-    "alertId": "alert-1",
+    "alertId": "a0000000-0000-4000-8000-000000000001",
     "alertLevel": "CRITICAL",
     "alertDefinitionName": "VM CPU contention",
     "alertDefinitionId": "ad-1",
     "status": "ACTIVE",
     "alertImpact": "RISK",
-    "resourceId": "res-1",
+    "resourceId": "b0000000-0000-4000-8000-000000000001",
     "startTimeUTC": 1000,
     "updateTimeUTC": 2000,
     "cancelTimeUTC": 0,
@@ -252,7 +252,7 @@ def test_list_alerts_uses_alert_level_and_definition_name() -> None:
     assert a["resource_name"] is None, "Alert model has no resourceName field — never read it off the alert"
     assert result["resource_names_note"], "an unresolved name must be explained, not silently null"
     assert "info" not in a, "Alert model has no info field"
-    assert a["resource_id"] == "res-1"
+    assert a["resource_id"] == "b0000000-0000-4000-8000-000000000001"
 
 
 def test_get_alert_fields_and_contributing_symptoms() -> None:
@@ -261,10 +261,10 @@ def test_get_alert_fields_and_contributing_symptoms() -> None:
     client = _client()
 
     def get_side(path, params=None):
-        if path == "/alerts/alert-1":
+        if path == "/alerts/a0000000-0000-4000-8000-000000000001":
             return dict(_ALERT_WIRE)
         if path == "/alerts/contributingsymptoms":
-            assert params == {"id": "alert-1"}
+            assert params == {"id": "a0000000-0000-4000-8000-000000000001"}
             return {
                 "symptoms": [
                     {
@@ -272,14 +272,14 @@ def test_get_alert_fields_and_contributing_symptoms() -> None:
                         "message": "CPU usage above 90%",
                         "symptomCriticality": "CRITICAL",
                         "symptomDefinitionId": "sd-1",
-                        "resourceId": "res-1",
+                        "resourceId": "b0000000-0000-4000-8000-000000000001",
                     }
                 ]
             }
         raise AssertionError(f"unexpected GET {path}")
 
     client.get.side_effect = get_side
-    result = get_alert(client, "alert-1")
+    result = get_alert(client, "a0000000-0000-4000-8000-000000000001")
 
     assert result["criticality"] == "CRITICAL"
     assert result["name"] == "VM CPU contention"
@@ -301,12 +301,12 @@ def test_get_alert_survives_contributing_symptoms_failure() -> None:
     client = _client()
 
     def get_side(path, params=None):
-        if path == "/alerts/alert-1":
+        if path == "/alerts/a0000000-0000-4000-8000-000000000001":
             return dict(_ALERT_WIRE)
         raise ConnectionError("boom")
 
     client.get.side_effect = get_side
-    result = get_alert(client, "alert-1")
+    result = get_alert(client, "a0000000-0000-4000-8000-000000000001")
     assert result["symptoms"] == []
 
 
@@ -435,7 +435,7 @@ def test_rightsizing_keys_have_no_demand_segment() -> None:
     # Rightsizing now uses the bulk POST /resources/stats/query (was a per-VM
     # GET /resources/{id}/stats/latest N+1); the statKey array is unchanged.
     client.post.return_value = {"values": []}
-    list_rightsizing_recommendations(client, resource_id="vm-1")
+    list_rightsizing_recommendations(client, resource_id="c0000000-0000-4000-8000-000000000001")
 
     body = next(
         c.kwargs["json_data"] for c in client.post.call_args_list
@@ -449,7 +449,7 @@ def test_rightsizing_keys_have_no_demand_segment() -> None:
         "OnlineCapacityAnalytics|diskspace|recommendedSize",
     ]
     assert not [k for k in body["statKey"] if "|demand|" in k]
-    assert body["resourceId"] == ["vm-1"]
+    assert body["resourceId"] == ["c0000000-0000-4000-8000-000000000001"]
 
 
 # ── H9: anomaly metric wire key is total_alarms ────────────────────────
@@ -462,7 +462,7 @@ def test_anomaly_stat_key_is_total_alarms() -> None:
     # list_anomalies now uses the bulk POST /resources/stats/query (was a
     # per-VM GET /resources/{id}/stats/latest N+1); the statKey is unchanged.
     client.post.return_value = {"values": []}
-    results = list_anomalies(client, resource_id="res-1")["items"]
+    results = list_anomalies(client, resource_id="b0000000-0000-4000-8000-000000000001")["items"]
 
     assert client.post.call_args.kwargs["json_data"]["statKey"] == [
         "System Attributes|total_alarms"
@@ -690,13 +690,13 @@ def _rightsizing_client(values: dict):
     """A client whose bulk stats query answers with `values` for one VM."""
     client = _client()
     client.get.return_value = {
-        "resourceList": [{"identifier": "vm-1", "resourceKey": {"name": "web-01"}}],
+        "resourceList": [{"identifier": "c0000000-0000-4000-8000-000000000001", "resourceKey": {"name": "web-01"}}],
         "pageInfo": {"totalCount": 1},
     }
     client.post.return_value = {
         "values": [
             {
-                "resourceId": "vm-1",
+                "resourceId": "c0000000-0000-4000-8000-000000000001",
                 "stat-list": {
                     "stat": [
                         {"statKey": {"key": k}, "data": [v]} for k, v in values.items()
@@ -790,7 +790,7 @@ def test_the_cli_renders_the_three_sizing_states_distinctly(monkeypatch) -> None
     c = _client()
     c.get.return_value = {
         "resourceList": [
-            {"identifier": "vm-1", "resourceKey": {"name": "sized-01"}},
+            {"identifier": "c0000000-0000-4000-8000-000000000001", "resourceKey": {"name": "sized-01"}},
             {"identifier": "vm-2", "resourceKey": {"name": "idle-01"}},
             {"identifier": "vm-3", "resourceKey": {"name": "quiet-01"}},
         ],
@@ -799,7 +799,7 @@ def test_the_cli_renders_the_three_sizing_states_distinctly(monkeypatch) -> None
     def st(k, v):
         return {"statKey": {"key": k}, "data": [v]}
     c.post.return_value = {"values": [
-        {"resourceId": "vm-1", "stat-list": {"stat": [
+        {"resourceId": "c0000000-0000-4000-8000-000000000001", "stat-list": {"stat": [
             st("OnlineCapacityAnalytics|cpu|recommendedSize", 2.0)]}},
         {"resourceId": "vm-2", "stat-list": {"stat": [
             st("OnlineCapacityAnalytics|cpu|recommendedSize", 0.0)]}},
@@ -827,7 +827,7 @@ def test_rightsizing_asks_for_a_day_wide_window() -> None:
     from vmware_aria.ops.capacity import list_rightsizing_recommendations
 
     client = _rightsizing_client({"OnlineCapacityAnalytics|cpu|recommendedSize": 2.0})
-    list_rightsizing_recommendations(client, resource_id="vm-1")
+    list_rightsizing_recommendations(client, resource_id="c0000000-0000-4000-8000-000000000001")
 
     body = next(
         c.kwargs["json_data"] for c in client.post.call_args_list

@@ -1,0 +1,66 @@
+{
+ "_captured": "2026-09-15, real Aria Operations 8.18.7 (home lab), read-only requests through the skill's own AriaClient",
+ "_note": "GET /symptoms?id=<the two symptom ids above>: the appliance ignored the id filter and answered all 78 symptoms (POST /symptoms/query with an id list did the same). Trimmed here to 2 unrequested rows + the 2 requested ones, totalCount set to 4. The requested rows carry resourceId (the mem and system service objects), statKey and message.",
+ "http_status": 200,
+ "body": {
+  "pageInfo": {
+   "totalCount": 4,
+   "page": 0,
+   "pageSize": 1000
+  },
+  "symptom": [
+   {
+    "id": "1f258a21-3951-4dd3-8854-584dc506c2a1",
+    "resourceId": "a5816f95-ca4f-4a6a-b7ba-4987e3038ffe",
+    "startTimeUTC": 1789437225041,
+    "updateTimeUTC": 1789437225041,
+    "cancelTimeUTC": 0,
+    "kpi": false,
+    "symptomCriticality": "INFORMATION",
+    "symptomDefinitionId": "SymptomDefinition-VMWARE-VMToolsRunning",
+    "statKey": "summary|guest|toolsRunningStatus",
+    "message": "Property Guest Tools Running contains Guest Tools Running",
+    "faultDevices": []
+   },
+   {
+    "id": "3a420492-3639-4def-98cf-b121de63b176",
+    "resourceId": "d9bdf96f-3f58-4673-b415-47b7d703b502",
+    "startTimeUTC": 1789437225041,
+    "updateTimeUTC": 1789437225041,
+    "cancelTimeUTC": 0,
+    "kpi": false,
+    "symptomCriticality": "INFORMATION",
+    "symptomDefinitionId": "SymptomDefinition-VMWARE-VMBalloonZero",
+    "statKey": "mem|balloonPct",
+    "message": "HT equals 0 = 0",
+    "faultDevices": []
+   },
+   {
+    "id": "10243eb1-5d12-4b0d-8cc0-167f529c0a10",
+    "resourceId": "f2c18bac-d83f-4ccf-a7cb-ba5eda184486",
+    "startTimeUTC": 1789287487132,
+    "updateTimeUTC": 1789287487132,
+    "cancelTimeUTC": 0,
+    "kpi": false,
+    "symptomCriticality": "CRITICAL",
+    "symptomDefinitionId": "SymptomDefinition-vCenterApplianceHealthServiceDownSymptom",
+    "statKey": "SERVICE|AVAILABILITY",
+    "message": "HT not equal 0 != 1",
+    "faultDevices": []
+   },
+   {
+    "id": "1c44529e-72e7-4a35-ac79-027133a37073",
+    "resourceId": "ba13f0b7-19b5-4f30-b321-bc3a791d3497",
+    "startTimeUTC": 1789287487060,
+    "updateTimeUTC": 1789287487060,
+    "cancelTimeUTC": 0,
+    "kpi": false,
+    "symptomCriticality": "CRITICAL",
+    "symptomDefinitionId": "SymptomDefinition-vCenterApplianceHealthServiceDownSymptom",
+    "statKey": "SERVICE|AVAILABILITY",
+    "message": "HT not equal 0 != 1",
+    "faultDevices": []
+   }
+  ]
+ }
+}

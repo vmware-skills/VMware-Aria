@@ -1,3 +1,26 @@
+## Unreleased — service state, VC_APP drill-down, readable alert ids and times
+
+Found in a live session on Aria 8.18.7 (2026-09-15); each checked again on the lab after the fix.
+
+* **`resource health` no longer calls a failing service healthy.** The vCenter appliance services `mem` and
+  `system` scored HEALTH GREEN 100 while `SERVICE|STATUS` was orange and `SERVICE|AVAILABILITY` 0 — a badge only
+  scores alerts attached to that object, and the alert sits on the parent. For SERVICE kinds the result now carries
+  a `service` block (`status`, `availability`, `available`, `read_errors`, `note`); `available` is true only for 1,
+  false only for 0, and null when unread.
+* **"vCenter app health is affected" names the services that are down.** Its symptoms carried no resource id or
+  condition on 8.18.7. The id is on the symptom object itself (`/symptoms`, which ignores its id filter, so the
+  pages are read until every symptom is found). `alert get` / `investigate_alert` symptoms now carry
+  `resource_name`, `resource_kind`, `stat_key` and `condition` (live: `mem`, `system`, `SERVICE|AVAILABILITY`),
+  with `resource_lookup` saying whether the read completed — a failed lookup is reported as unknown, never as "no
+  resource".
+* **`resource metrics --summary`** (MCP `summary=true`): per metric n / min / max / avg / latest and the change
+  points (live: `badge|health` 100 → 25). Raw points remain the default.
+* **Alert ids are pasteable and times readable.** `alert list` never truncates ids (one block per alert on narrow
+  terminals, a table with `Started (UTC)` on wide ones, `--json` for the envelope); `alert get` and list rows add
+  `start_time_utc` / `update_time_utc` / `cancel_time_utc` (null when never cancelled).
+* **Ids must be UUID-shaped.** `GREEN(100.0)` or two ids joined by a space used to reach Aria as an HTTP 400; alert
+  and resource ids are now checked with a teaching error before any call.
+
 ## v1.14.1 — CLI reads are audited
 
 No CLI read wrote `~/.vmware/audit.db` — only MCP calls and CLI writes (`@guarded`) did. A live

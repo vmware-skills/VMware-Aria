@@ -93,6 +93,7 @@ Options:
   --metrics -m TEXT    Comma-separated metric keys
                        [default: cpu|usage_average,mem|usage_average]
   --hours INT          History window in hours [default: 1]
+  --summary            Per metric n/min/max/avg/latest and change points, instead of every point
   --target -t TEXT     Target name
 ```
 
@@ -111,6 +112,7 @@ Options:
   "resource_id": "<uuid>",
   "window_begin_ms": 1757700000000,
   "window_end_ms": 1757703600000,
+  "mode": "raw",
   "metrics": {"cpu|usage_average": [{"timestamp_ms": 1757700300000, "value": 3.2}]},
   "missing": [
     {"metric_key": "mem|usage_avg", "reason": "not_collected_for_resource",
@@ -129,15 +131,27 @@ only keys that `sanitize()` leaves unchanged and that are at most 200 characters
 `N of M 'stat-key' rows in an unrecognised form`). `metric_key` is sanitized. `stat_keys_on_resource` is `null` unless something is missing.
 A missing key is not a zero. (Before this change the output was a bare object keyed by metric.)
 
+With `--summary` (MCP `summary=true`) `mode` is `summary` and `metrics` is replaced by `summary`: per key `n`, `min`,
+`max`, `avg`, `latest`, `first_timestamp_ms`, `latest_timestamp_ms`, `change_count`, `change_points` (each
+`{timestamp_ms, from, to}` where the value differed from the point before — e.g. `badge|health` 100 → 25; at most 50,
+the most recent kept, `change_points_truncated` says when more were dropped) and `non_numeric_points`. `missing` is
+unchanged. A continuously varying metric such as CPU usage changes at almost every point, so read `change_count` there.
+
 ### `vmware-aria resource health`
 
-Get health badge for a resource.
+Get the health, risk and efficiency badges for a resource — and, for a service object, its service state.
 
 ```
 vmware-aria resource health <resource-id> [OPTIONS]
 ```
 
-**Output**: JSON with health score (0–100), color, description.
+**Output**: JSON with `name`, `kind`, and each badge's score (0–100) and color. The badges score the alerts attached to
+that object, not a service's own state: on Aria Operations 8.18.7 the `mem` and `system` children of a vCenter app
+object showed HEALTH GREEN 100 while `SERVICE|STATUS` was `orange` and `SERVICE|AVAILABILITY` was 0, because the alert is
+raised on the parent. For a kind containing `SERVICE` (e.g. `VCENTER_APPLIANCE_HEALTH_SERVICES`) the output adds `service`:
+`status` (`SERVICE|STATUS`, e.g. `green` / `orange`), `availability` (latest `SERVICE|AVAILABILITY` in the last hour),
+`available` (`true` for 1, `false` for 0, `null` for anything else or nothing read), `read_errors` (why a value is
+unknown) and `note`. `service` is `null` for other kinds.
 
 ### `vmware-aria resource top`
 
@@ -232,16 +246,32 @@ Options:
   --active / --all          Active alerts only vs all [default: active]
   --criticality TEXT        Filter: INFORMATION, WARNING, IMMEDIATE, CRITICAL
   --limit -n INT            Max results [default: 50]
+  --json                    Print the result envelope as JSON instead of a table
   --target -t TEXT          Target name
 ```
 
-**Output**: Table with ID, Name, Criticality, Status, Resource (name), Resource ID. Names and kinds come from one batched `GET /resources` lookup per page. A resource whose name could not be resolved prints as `?` — unknown, not "no resource" — and a yellow note under the table says how many could not be retrieved, were not returned (deleted or stale), or were returned with no name in Aria Operations. If the lookup answers with rows that were not requested (the appliance ignored the id filter), requested ids it left out count as could not be retrieved — retry — not as deleted.
+**Output**: Table with ID, Name, Criticality, Status, Started (UTC), Resource (name), Resource ID. IDs are never
+shortened. A terminal narrower than 160 columns cannot hold both UUID columns, so there each alert prints as a short
+block instead (ID, criticality, status and start time; name; resource name and ID). `--json` prints every row field,
+including `start_time_utc` / `update_time_utc` (ISO-8601 UTC) beside the millisecond times. Names and kinds come from one batched `GET /resources` lookup per page. A resource whose name could not be resolved prints as `?` — unknown, not "no resource" — and a yellow note under the table says how many could not be retrieved, were not returned (deleted or stale), or were returned with no name in Aria Operations. If the lookup answers with rows that were not requested (the appliance ignored the id filter), requested ids it left out count as could not be retrieved — retry — not as deleted.
 
 ### `vmware-aria alert get`
 
 Get full alert details with contributing (triggered) symptoms. Recommendations are attached to the alert definition, not the alert. `get_alert` carries the resource ID only — resolve the name via `vmware-aria resource get <id>` or `alert list`.
 
 Symptoms that carry no name or severity themselves (all of them on Aria Operations 8.18.7) take both from their symptom definition, fetched in one batched `GET /symptomdefinitions` lookup. Each symptom has `definition_lookup`: `resolved`, `not_needed`, `not_found`, `failed`, or `no_definition_id`. A `symptom_definitions_note` key appears when some did not resolve, or when symptoms carry no definition id to look a missing name or severity up by; an empty name there means unknown.
+
+Each symptom also names the object it is on: `resource_id`, `resource_name`, `resource_kind`, `stat_key`, and
+`condition` filled from the symptom instance's message (e.g. `HT not equal 0 != 1`). On 8.18.7 the contributing-symptom
+payload carries no resource id, so it is read from the symptom instance in `GET /symptoms`; that endpoint ignores its
+`id` filter there, so the tool walks the collection and keys rows by id. For "vCenter app health is affected" this names
+the services that are down (e.g. `mem`, `system`). `resource_lookup` is `not_needed`, `resolved`, `not_found` (every
+page was read and the instance was not there), `failed` (the read failed or stopped early), `no_symptom_id`, or
+`instance_names_no_resource`. A `symptom_resources_note` key appears when some could not be read — an empty
+`resource_id` there is unknown, not absent.
+
+Times are returned as epoch milliseconds (`start_time_ms`, `update_time_ms`, `cancel_time_ms`) and as ISO-8601 UTC
+(`start_time_utc`, `update_time_utc`, `cancel_time_utc`; `null` when the alert was never cancelled).
 
 ```
 vmware-aria alert get <alert-id> [OPTIONS]

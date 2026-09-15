@@ -218,37 +218,37 @@ def _cli(args: list[str], answers: str = ""):
          patch.object(cli, "_audit", MagicMock()), \
          patch("vmware_aria.ops.alert_notes.add_alert_note") as add, \
          patch("vmware_aria.ops.alert_notes.list_alert_notes") as notes:
-        add.return_value = {"alert_id": "a-1", "created": {"id": "n-1"}, "confirmation_note": None}
+        add.return_value = {"alert_id": "a0000000-0000-4000-8000-00000000000a", "created": {"id": "n-1"}, "confirmation_note": None}
         notes.return_value = {"items": [], "notes_note": None, "next_offset": None}
         result = CliRunner().invoke(cli.app, args, input=answers)
     return result, connect, add, notes
 
 
 def test_cli_note_add_dry_run_prints_the_call_and_makes_none() -> None:
-    result, connect, add, _ = _cli(["alert", "note-add", "a-1", "rebooting host", "--dry-run"])
+    result, connect, add, _ = _cli(["alert", "note-add", "a0000000-0000-4000-8000-00000000000a", "rebooting host", "--dry-run"])
     assert result.exit_code == 0, result.output
-    assert "POST" in result.output and "/alerts/a-1/notes" in result.output
+    assert "POST" in result.output and "/alerts/a0000000-0000-4000-8000-00000000000a/notes" in result.output
     assert "rebooting host" in result.output
     connect.assert_not_called()
     add.assert_not_called()
 
 
 def test_cli_note_add_stops_when_declined_and_runs_when_confirmed() -> None:
-    declined, _, add, _ = _cli(["alert", "note-add", "a-1", "rebooting host"], "n\n")
+    declined, _, add, _ = _cli(["alert", "note-add", "a0000000-0000-4000-8000-00000000000a", "rebooting host"], "n\n")
     assert declined.exit_code != 0
     add.assert_not_called()
 
-    accepted, _, add, _ = _cli(["alert", "note-add", "a-1", "rebooting host"], "y\n")
+    accepted, _, add, _ = _cli(["alert", "note-add", "a0000000-0000-4000-8000-00000000000a", "rebooting host"], "y\n")
     assert accepted.exit_code == 0, accepted.output
     add.assert_called_once()
 
-    flagged, _, add, _ = _cli(["alert", "note-add", "a-1", "rebooting host", "--yes"])
+    flagged, _, add, _ = _cli(["alert", "note-add", "a0000000-0000-4000-8000-00000000000a", "rebooting host", "--yes"])
     assert flagged.exit_code == 0, flagged.output
     add.assert_called_once()
 
 
 def test_cli_notes_lists() -> None:
-    result, _, _, notes = _cli(["alert", "notes", "a-1"])
+    result, _, _, notes = _cli(["alert", "notes", "a0000000-0000-4000-8000-00000000000a"])
     assert result.exit_code == 0, result.output
     notes.assert_called_once()
 
@@ -263,7 +263,7 @@ def test_cli_guarded_name_equals_the_mcp_tool_name() -> None:
 
 @pytest.mark.parametrize(
     "args",
-    [["alert", "note-add", " ", "rebooting host", "--dry-run"], ["alert", "note-add", "a-1", "   ", "--dry-run"]],
+    [["alert", "note-add", " ", "rebooting host", "--dry-run"], ["alert", "note-add", "a0000000-0000-4000-8000-00000000000a", "   ", "--dry-run"]],
     ids=["blank-alert-id", "blank-text"],
 )
 def test_cli_note_add_dry_run_refuses_blank_arguments(args: list[str]) -> None:
@@ -275,7 +275,7 @@ def test_cli_note_add_dry_run_refuses_blank_arguments(args: list[str]) -> None:
 
 
 def test_cli_note_add_dry_run_prints_the_id_and_text_the_real_call_would_send() -> None:
-    result, _, _, _ = _cli(["alert", "note-add", " a-1 ", "  rebooting host ", "--dry-run"])
+    result, _, _, _ = _cli(["alert", "note-add", " a0000000-0000-4000-8000-00000000000a ", "  rebooting host ", "--dry-run"])
     assert result.exit_code == 0, result.output
-    assert "/alerts/a-1/notes" in result.output
+    assert "/alerts/a0000000-0000-4000-8000-00000000000a/notes" in result.output
     assert '{"content": "rebooting host"}' in result.output
