@@ -1,3 +1,26 @@
+## Unreleased — which objects stopped reporting, and whether a recommendation has settled
+
+**`resource list` can say which objects stopped reporting.** With "Objects are not receiving data from adapter
+instance" active on a live 8.18.7, the listing showed every object as `STARTED`. That column is Aria's lifecycle
+state (a powered-off VM is `STARTED` too); the field that answers the question, `resourceStatus`, was dropped.
+Rows now carry `aria_state` and `collection_status` (`DATA_RECEIVING`, `NO_DATA_RECEIVING`, …; `status` is kept and
+equals `aria_state`). `list_resources` takes `collection_status` (CLI `--collection-status`) and `resource_kind="all"`
+(CLI `--kind all`), because an adapter instance's objects span several kinds. A filter that matches nothing returns a
+`note` naming the statuses that were seen, so a misspelt status is not read as "everything is reporting".
+
+**Rightsizing says whether a recommendation has settled.** The memory recommendation for one VM read 9.0 GiB one day
+and 12.3 GiB the next; read back by day, it had ranged from 8 GiB to 32 GiB, and the tool showed only the latest
+point. Rows now carry `recommendation_range` (daily low and high of CPU, memory and disk over the last 7 days, with
+`days_with_data` — the live appliance held 3) and `recommendation_stable`. A CPU or memory range wider than 5% of its
+high is not settled: the row is not actionable and a caveat names the range. 5% sits between the 2.1% day-to-day
+drift and the smallest genuine resize (7.4%) seen on the same appliance. The history costs two more bulk stats
+queries per page, whatever the VM count; if that read fails, `history_note` says so and `actionable` is decided as
+before.
+
+**The anomaly column was right.** `System Attributes|total_alarms` had been suspected of being an alert count. The
+live key catalogue names it "Total Anomalies"; the alert count is a separate key, `System Attributes|total_alert_count`,
+and vcsa read 5 anomalies with no alerts. `anomaly list` now uses Aria's name and points at the other key.
+
 ## v1.13.0 — look things up, check Aria itself, and handle maintenance and alert notes
 
 Eleven new MCP tools (33 → 44: 34 read, 10 write) and eleven new CLI commands.

@@ -337,6 +337,11 @@ def list_rightsizing_recommendations(
     # context lost, not the answer lost: the recommendations came from stats.
     props_by_resource, properties_note = _read_rightsizing_properties(client, ids)
     props_failed = properties_note is not None
+    # How far the recommendation moved over the last week: two more bulk
+    # queries for the page (daily MIN and MAX), whatever the VM count. Same
+    # degradation rule as the properties — a failed read leaves stability
+    # unknown and says why, it does not fail the tool.
+    history_by_resource, history_note = _read_recommendation_history(client, ids)
 
     results = [
         _rightsizing_row(
@@ -345,13 +350,20 @@ def list_rightsizing_recommendations(
             stats_by_resource.get(rid, {}),
             props_by_resource.get(rid, {}),
             props_failed=props_failed,
+            history=history_by_resource.get(rid),
         )
         for rid, name in targets.items()
         if rid
     ]
     if resource_id:
-        return paginated(results, properties_note=properties_note)
-    return paginated(results, limit=limit, total=vm_total, properties_note=properties_note)
+        return paginated(results, properties_note=properties_note, history_note=history_note)
+    return paginated(
+        results,
+        limit=limit,
+        total=vm_total,
+        properties_note=properties_note,
+        history_note=history_note,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -415,6 +427,123 @@ CPU_VCPU_ROUNDING_EPSILON = 0.01
 #: rounds to whole GiB, so it cannot serve as the threshold (it calls +3 MB
 #: "undersized by 1 GiB").
 MEMORY_DIRECTION_TOLERANCE = 0.01
+
+#: How far back the recommendation's movement is read. A week is what "has this
+#: settled" needs, and more than the appliance may hold: the live 8.18.7 had
+#: three days of history on 2026-09-15, which the row reports rather than
+#: implying seven.
+RECOMMENDATION_HISTORY_DAYS = 7
+
+#: A recommendation whose daily low and high over the window differ by more than
+#: this fraction of the high is ``recommendation_stable: False``. It sits between
+#: two live 8.18.7 readings: 2.1% of day-to-day drift on the Aria appliance
+#: (12683900 -> 12961757 KB) and the smallest genuine resize in the same estate
+#: (vcsa, -7.4%). A range as wide as a real resize cannot be told apart from
+#: one, so the latest point is not something to act on.
+RECOMMENDATION_SPREAD_UNSTABLE = 0.05
+
+_DAY_MS = 86_400_000
+_STATS_QUERY_PATH = "/resources/stats/query"
+
+
+def _read_recommendation_history(
+    client: AriaClient, resource_ids: list[str]
+) -> tuple[dict[str, dict], str | None]:
+    """Daily low and high of each recommendedSize key per VM, or ``({}, why)``.
+
+    Two bulk ``POST /resources/stats/query`` calls for the page — ``rollUpType``
+    MIN and MAX with ``intervalType`` DAYS — whatever the VM count; both rollups
+    answered on a live 8.18.7 (2026-09-15). A VM the appliance returns nothing
+    for is left out: its history is unknown, not flat.
+    """
+    if not resource_ids:
+        return {}, None
+    import time as _time
+
+    end_ms = int(_time.time() * 1000)
+    base = {
+        "resourceId": list(resource_ids),
+        "statKey": list(_RECOMMENDED_KEYS.values()),
+        "begin": end_ms - RECOMMENDATION_HISTORY_DAYS * _DAY_MS,
+        "end": end_ms,
+        "intervalType": "DAYS",
+        "intervalQuantifier": 1,
+    }
+    series: dict[str, dict[str, dict[str, list[float]]]] = {}
+    days: dict[str, set] = {}
+    try:
+        for rollup in ("MIN", "MAX"):
+            data = client.post(_STATS_QUERY_PATH, json_data={**base, "rollUpType": rollup}, retries=1)
+            for entry in data.get("values", []) or []:
+                rid = entry.get("resourceId", "")
+                container = entry.get("stat-list") or entry.get("statList") or {}
+                for stat in container.get("stat", []) or []:
+                    key = (stat.get("statKey") or {}).get("key", "")
+                    values = [v for v in stat.get("data") or [] if v is not None]
+                    if not key or not values:
+                        continue
+                    series.setdefault(rid, {}).setdefault(key, {})[rollup] = values
+                    days.setdefault(rid, set()).update(stat.get("timestamps") or [])
+    except AriaApiError as exc:
+        status = _describe_status(exc)
+        _log.warning("rightsizing: recommendation history query failed (%s): %s", status, exc)
+        return {}, (
+            f"POST {_STATS_QUERY_PATH} for the {RECOMMENDATION_HISTORY_DAYS}-day recommendation "
+            f"history failed ({status}), so recommendation_range and recommendation_stable "
+            "could not be read for any VM here. They are null because they are unknown. "
+            "The recommendations are unaffected, and actionable is decided as it would be "
+            "without the history; retry to see whether a recommendation has settled."
+        )
+    return {rid: _history_summary(keys, len(days.get(rid, ()))) for rid, keys in series.items()}, None
+
+
+def _history_summary(keys: dict[str, dict[str, list[float]]], days_with_data: int) -> dict:
+    def _span(dim: str) -> list[float] | None:
+        rollups = keys.get(_RECOMMENDED_KEYS[dim]) or {}
+        low, high = rollups.get("MIN"), rollups.get("MAX")
+        return [float(min(low)), float(max(high))] if low and high else None
+
+    return {
+        "window_days": RECOMMENDATION_HISTORY_DAYS,
+        "days_with_data": days_with_data,
+        "cpu_mhz": _span("cpu"),
+        "memory_kb": _span("mem"),
+        "diskspace_gb": _span("diskspace"),
+    }
+
+
+def _unstable_spans(history: dict | None) -> list[tuple[str, list[float]]] | None:
+    """CPU and memory spans wider than the threshold; None when nothing to judge.
+
+    Disk is not judged: it carries no direction. A span whose high is not
+    positive (a VM held reclaimable throughout) has no spread to measure.
+    """
+    if not history:
+        return None
+    spans = [(dim, history[field]) for dim, field in (("cpu", "cpu_mhz"), ("memory", "memory_kb"))]
+    measurable = [(dim, span) for dim, span in spans if span and span[1] > 0]
+    if not measurable:
+        return None
+    return [
+        (dim, span)
+        for dim, span in measurable
+        if (span[1] - span[0]) / span[1] > RECOMMENDATION_SPREAD_UNSTABLE
+    ]
+
+
+def _history_caveat(row: dict, unstable: list[tuple[str, list[float]]]) -> str:
+    parts = []
+    for dim, (low, high) in unstable:
+        if dim == "memory":
+            parts.append(f"memory ranged {low / 1_048_576:.1f}–{high / 1_048_576:.1f} GiB")
+        else:
+            parts.append(f"CPU ranged {low:.0f}–{high:.0f} MHz")
+    days = row["recommendation_range"]["days_with_data"]
+    return (
+        f"recommendation not settled: {' and '.join(parts)} over the last {days} day(s) of "
+        f"history (window {RECOMMENDATION_HISTORY_DAYS} days) — re-read before acting"
+    )
+
 
 _POWERED_ON = "Powered On"
 _POWERED_OFF = "Powered Off"
@@ -597,7 +726,13 @@ def _rightsizing_caveats(row: dict, props_published: bool, props_failed: bool = 
 
 
 def _rightsizing_row(
-    rid: str, name: str, stats: dict, props: dict, *, props_failed: bool = False
+    rid: str,
+    name: str,
+    stats: dict,
+    props: dict,
+    *,
+    props_failed: bool = False,
+    history: dict | None = None,
 ) -> dict:
     raw = {dim: stats.get(_RECOMMENDED_KEYS[dim]) for dim in _DIMENSIONS}
     # A published 0 means "reclaimable", not "recommend zero" (KB 379521),
@@ -629,13 +764,17 @@ def _rightsizing_row(
         "is_template": _as_bool(props.get(_PROP_IS_TEMPLATE)),
         "product_name": sanitize(str(product)) if product else None,
         "aria_verdict": _aria_verdict(stats),
+        "recommendation_range": history,
     }
+    unstable = _unstable_spans(history)
+    row["recommendation_stable"] = None if unstable is None else not unstable
     row["actionable"] = bool(
         row["power_state"] == _POWERED_ON
         and row["is_template"] is False
         and {"oversized", "undersized"} & {row["cpu_direction"], row["memory_direction"]}
+        # Unknown history does not block; a recommendation known to be moving does.
+        and row["recommendation_stable"] is not False
     )
-    row["caveats"] = _rightsizing_caveats(
-        row, props_published=bool(props), props_failed=props_failed
-    )
+    caveats = _rightsizing_caveats(row, props_published=bool(props), props_failed=props_failed)
+    row["caveats"] = [*caveats, _history_caveat(row, unstable)] if unstable else caveats
     return row

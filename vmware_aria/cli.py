@@ -246,9 +246,16 @@ def doctor(
 @resource_app.command("list")
 @_friendly_errors
 def resource_list(
-    kind: Annotated[str, typer.Option("--kind", "-k", help="Resource kind")] = "VirtualMachine",
+    kind: Annotated[str, typer.Option("--kind", "-k", help="Resource kind, or 'all' for every kind")] = "VirtualMachine",
     limit: Annotated[int, typer.Option("--limit", "-n", help="Max results (paginated)")] = 50,
     name_filter: Annotated[str | None, typer.Option("--name", help="Filter by name substring")] = None,
+    collection_status: Annotated[
+        str | None,
+        typer.Option(
+            "--collection-status",
+            help="Keep objects with this data-collection status, e.g. NO_DATA_RECEIVING",
+        ),
+    ] = None,
     target: TargetOption = None,
     config: ConfigOption = None,
 ) -> None:
@@ -256,21 +263,37 @@ def resource_list(
     from vmware_aria.ops.resources import list_resources
 
     client, _ = _get_connection(target, config)
-    items = list_resources(client, resource_kind=kind, limit=limit, name_filter=name_filter)["items"]
+    all_kinds = kind.strip().lower() == "all"
+    result = list_resources(
+        client,
+        resource_kind=None if all_kinds else kind,
+        limit=limit,
+        name_filter=name_filter,
+        collection_status=collection_status,
+    )
 
     table = Table(title=f"Resources ({kind})", show_lines=False)
     table.add_column("Name", style="bold")
+    if all_kinds:
+        table.add_column("Kind")
     table.add_column("ID")
     table.add_column("Health")
-    table.add_column("Status")
+    # "Aria state" is Aria's lifecycle state (STARTED for a powered-off VM too);
+    # "Collection" is whether data is arriving — the column an "Objects are not
+    # receiving data" alert is about.
+    table.add_column("Aria state")
+    table.add_column("Collection")
 
-    for r in items:
+    for r in result["items"]:
         health = (
             f"{r['health_color']} ({r['health_score']})" if r.get("health_score") is not None else r["health_color"]
         )
-        table.add_row(r["name"], r["id"][:36], health, r["status"])
+        cells = [r["name"], *([r["kind"]] if all_kinds else []), r["id"][:36], health]
+        table.add_row(*cells, r["aria_state"], r["collection_status"] or "—")
 
     console.print(table)
+    if result.get("note"):
+        console.print(f"[yellow]{result['note']}[/]")
 
 
 @resource_app.command("get")
@@ -621,6 +644,8 @@ def capacity_rightsizing(
     if result.get("properties_note"):
         # Without it a failed property read shows only per-row caveats, never why.
         console.print(f"[yellow]{result['properties_note']}[/]")
+    if result.get("history_note"):
+        console.print(f"[yellow]{result['history_note']}[/]")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -642,7 +667,7 @@ def anomaly_list(
     client, _ = _get_connection(target, config)
     items = list_anomalies(client, resource_id=resource_id, limit=limit)["items"]
 
-    table = Table(title="Anomaly Counts (System Attributes|total_alarms)", show_lines=False)
+    table = Table(title="Total Anomalies (System Attributes|total_alarms)", show_lines=False)
     table.add_column("Resource", style="bold")
     table.add_column("Anomaly Count")
 
@@ -653,6 +678,12 @@ def anomaly_list(
         )
 
     console.print(table)
+    # Checked on a live 8.18.7 key catalogue: total_alarms is "Total Anomalies",
+    # and the alert count is a separate key. vcsa read 5 here with no alerts.
+    console.print(
+        "[dim]Aria's name for this key is Total Anomalies. It is not the alert count, "
+        "which is System Attributes|total_alert_count.[/]"
+    )
 
 
 @anomaly_app.command("risk")

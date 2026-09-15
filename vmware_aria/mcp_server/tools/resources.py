@@ -23,20 +23,32 @@ def list_resources(
     resource_kind: str = "VirtualMachine",
     limit: int = 100,
     name_filter: Optional[str] = None,
+    collection_status: Optional[str] = None,
     target: Optional[str] = None,
 ) -> dict:
     """[READ] List resources in Aria Operations filtered by kind. Start here: this turns a name or kind into the UUID other resource tools need. Then call get_resource for detail on one row.
 
+    Each row carries aria_state (Aria's lifecycle state — STARTED even for a
+    powered-off VM, so not a power state) and collection_status (whether data
+    is arriving: DATA_RECEIVING, NO_DATA_RECEIVING, ...; null when Aria did not
+    report one). `status` is kept for existing callers and equals aria_state.
+
     Returns a paginated envelope: items, returned, limit, total (null
-    when the API reports no size), truncated, hint. Check truncated
+    when the API reports no size, or when name_filter / collection_status
+    filtered the rows), truncated, hint, and note when a collection_status
+    filter matched nothing (it names the statuses seen). Check truncated
     before calling this the complete set.
 
     Args:
         resource_kind: e.g. VirtualMachine, HostSystem,
-            ClusterComputeResource, Datastore, Datacenter.
+            ClusterComputeResource, Datastore, Datacenter — or "all" for every
+            kind (an adapter instance's objects span several kinds).
         limit: Maximum number of results. Default 100. Paginated
             automatically, so a larger limit spans more than one page.
         name_filter: Substring filter on resource name (case-insensitive).
+        collection_status: Keep only rows with this collection_status,
+            case-insensitive. NO_DATA_RECEIVING lists the objects an "Objects
+            are not receiving data from adapter instance" alert is about.
         target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
@@ -44,7 +56,14 @@ def list_resources(
     try:
         from vmware_aria.ops.resources import list_resources as _list
 
-        return _list(server._get_connection(target), resource_kind=resource_kind, limit=limit, name_filter=name_filter)
+        kind = None if resource_kind.strip().lower() == "all" else resource_kind
+        return _list(
+            server._get_connection(target),
+            resource_kind=kind,
+            limit=limit,
+            name_filter=name_filter,
+            collection_status=collection_status,
+        )
     except Exception as e:
         return {"error": server._safe_error(e, "list_resources"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
 

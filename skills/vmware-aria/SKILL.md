@@ -198,7 +198,7 @@ List tools return `{items, returned, limit, total, truncated, hint}`, not a bare
 
 ```bash
 # Resources
-vmware-aria resource list [--kind VirtualMachine|HostSystem|ClusterComputeResource] [--name <filter>]
+vmware-aria resource list [--kind VirtualMachine|HostSystem|ClusterComputeResource|all] [--name <filter>] [--collection-status NO_DATA_RECEIVING]
 vmware-aria resource get <resource-id>
 vmware-aria resource metrics <resource-id> --metrics 'cpu|usage_average,mem|usage_average' --hours 4
 vmware-aria resource metrics <vm-id> --metrics 'cpu|readyPct,mem|balloonPct' --hours 24

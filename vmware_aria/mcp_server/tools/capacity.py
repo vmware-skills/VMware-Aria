@@ -117,11 +117,22 @@ def list_rightsizing_recommendations(
     presents allocated plus a suggested delta, not the absolute recommended
     size. Both are correct and they will not match.
 
+    Before acting on a recommendation, read `recommendation_stable`. Each row
+    carries `recommendation_range` — {window_days: 7, days_with_data,
+    cpu_mhz, memory_kb, diskspace_gb}, each a [daily low, daily high] pair —
+    and `recommendation_stable`: false when CPU or memory moved by more than 5%
+    of its high over the window (the row is then not actionable and a caveat
+    names the range), null when no history came back. Quote `days_with_data`
+    with it: the appliance may hold fewer days than the window.
+
     Returns a paginated envelope: items, returned, limit, total (null
-    when the API reports no size), truncated, hint, properties_note. Check truncated
+    when the API reports no size), truncated, hint, properties_note, history_note. Check truncated
     before calling this the complete set. properties_note is null unless the
     VM property read failed; then power_state, is_template and current sizes
     are null because they are UNKNOWN (not unpublished) and no row is actionable.
+    history_note is null unless the history read failed; then
+    recommendation_range and recommendation_stable are null (unknown) and
+    actionable is decided without them.
 
     Args:
         resource_id: Optional VM resource UUID to scope to a single VM.

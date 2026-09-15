@@ -52,6 +52,11 @@ class _ReplayClient:
         self.post_calls.append(path)
         body = json_data or {}
         if path == STATS_PATH:
+            if body.get("rollUpType") != "LATEST":
+                # The daily MIN/MAX history was not captured on 2026-09-13; it is
+                # pinned in test_rightsizing_recommendation_history. No history
+                # leaves stability unknown, which must not change these rows.
+                return {"values": []}
             asked = set(body["statKey"])
             unknown = asked - set(self._f["stat_keys_captured"])
             assert not unknown, f"stat keys never seen answered on 8.18.7: {unknown}"
@@ -225,7 +230,9 @@ def test_every_reduction_warns_to_check_the_vendor_minimum() -> None:
 
 def test_configuration_is_one_bulk_properties_query_not_per_vm() -> None:
     assert CLIENT.post_calls.count(PROPS_PATH) == 1
-    assert CLIENT.post_calls.count(STATS_PATH) == 1
+    # One latest read plus the daily MIN and MAX history (2026-09-15) — a fixed
+    # count for the page, whatever the number of VMs.
+    assert CLIENT.post_calls.count(STATS_PATH) == 3
     assert not [p for p in CLIENT.get_calls if p.endswith("/properties")]
 
 

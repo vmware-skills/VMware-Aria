@@ -70,8 +70,20 @@ def _badges_by_type(dto: dict) -> dict[str, dict]:
 
 
 def _summarize_resource(r: dict) -> dict:
-    """Project one ResourceDto onto the high-signal summary fields we return."""
+    """Project one ResourceDto onto the high-signal summary fields we return.
+
+    ``resourceStatusStates`` carries two different things. ``resourceState`` is
+    Aria's lifecycle state for the object — STARTED for a powered-off VM too —
+    and ``resourceStatus`` is whether data is arriving (``DATA_RECEIVING`` /
+    ``NO_DATA_RECEIVING``, both read on 8.18.7). ``status`` has always carried
+    the first; ``collection_status`` is the one that answers "which objects
+    stopped reporting".
+    """
     health = _badges_by_type(r).get("HEALTH", {})
+    # guard: API may return "resourceStatusStates": [] (key present, empty)
+    first_state = (r.get("resourceStatusStates") or [{}])[0]
+    aria_state = sanitize(first_state.get("resourceState", ""))
+    collection = first_state.get("resourceStatus")
     return {
         "id": sanitize(r.get("identifier", "")),
         "name": sanitize(r.get("resourceKey", {}).get("name", "")),
@@ -79,16 +91,43 @@ def _summarize_resource(r: dict) -> dict:
         "adapter_kind": sanitize(r.get("resourceKey", {}).get("adapterKindKey", "")),
         "health_color": sanitize(health.get("color", "")),
         "health_score": health.get("score", None),
-        # guard: API may return "resourceStatusStates": [] (key present, empty)
-        "status": sanitize((r.get("resourceStatusStates") or [{}])[0].get("resourceState", "")),
+        "status": aria_state,
+        "aria_state": aria_state,
+        "collection_status": sanitize(str(collection)) if collection else None,
     }
+
+
+def _resource_page(
+    results: list[dict],
+    limit: int | None,
+    total_count: int | None,
+    client_side: bool,
+    wanted_status: str | None,
+    seen_statuses: set[str],
+) -> dict:
+    """Wrap a listing; say what was seen when a status filter matched nothing.
+
+    An empty answer to "which objects are NO_DATA_RECEIVING" reads as "none",
+    and a misspelt status produces exactly that answer. Naming the statuses the
+    listing did contain is what tells the two apart.
+    """
+    extra: dict[str, str] = {}
+    if wanted_status and not results:
+        seen = ", ".join(sorted(seen_statuses)) or "none — no objects were listed"
+        extra["note"] = (
+            f"No object has collection_status {wanted_status}. Statuses seen in "
+            f"this listing: {seen}. Check the spelling, or widen resource_kind "
+            f"('all' lists every kind)."
+        )
+    return paginated(results, limit=limit, total=None if client_side else total_count, **extra)
 
 
 def list_resources(
     client: AriaClient,
-    resource_kind: str = "VirtualMachine",
+    resource_kind: str | None = "VirtualMachine",
     limit: int | None = None,
     name_filter: str | None = None,
+    collection_status: str | None = None,
 ) -> dict:
     """List resources of a given kind from Aria Operations, following pagination.
 
@@ -104,19 +143,27 @@ def list_resources(
     Args:
         client: Authenticated Aria Operations API client.
         resource_kind: Resource kind to list (e.g. VirtualMachine, HostSystem).
+            ``None`` lists every kind — the objects under one adapter instance
+            are VMs, hosts and datastores at once.
         limit: Maximum number of results to return. ``None`` (default) returns
             all resources of the kind, walking every page up to an internal
             safety cap. Pass an int to stop early.
         name_filter: Optional substring filter on resource name (case-insensitive).
+        collection_status: Optional ``resourceStatus`` to keep, compared
+            case-insensitively (e.g. ``NO_DATA_RECEIVING``). Applied client-side
+            like ``name_filter``. A row with no reported status never matches.
 
     Returns:
         Result envelope with resource summary dicts under ``items``, each with
-        id, name, kind, and health badge. ``total`` carries the kind's
-        ``pageInfo.totalCount``, except under a name_filter — that filter is
-        applied client-side, so the server's count describes the unfiltered
-        collection, not this result.
+        id, name, kind, health badge, ``aria_state`` and ``collection_status``
+        (``status`` is kept and equals ``aria_state``). ``total`` carries the
+        kind's ``pageInfo.totalCount``, except under a name_filter or a
+        collection_status filter — both are applied client-side, so the
+        server's count describes the unfiltered collection, not this result.
+        When a collection_status filter matches nothing, ``note`` names the
+        statuses the listing contained.
     """
-    if resource_kind not in _VALID_RESOURCE_KINDS:
+    if resource_kind is not None and resource_kind not in _VALID_RESOURCE_KINDS:
         _log.warning("Unknown resource_kind '%s', proceeding anyway", resource_kind)
 
     # Hard ceiling on rows fetched: the explicit limit if given, otherwise the
@@ -128,17 +175,21 @@ def list_resources(
     # collection (bounded by the safety cap) rather than pushing the filter down.
     fetch_cap = _RESOURCES_MAX_TOTAL if limit is None else min(limit, _RESOURCES_MAX_TOTAL)
     filter_lc = name_filter.lower() if name_filter else None
+    # Client-side too: the 8.6 and 9.1 operation indexes list GET /resources but
+    # not its query parameters, so no server-side status filter is assumed.
+    wanted_status = collection_status.strip().upper() if collection_status else None
+    client_side = bool(filter_lc or wanted_status)
+    seen_statuses: set[str] = set()
 
     results: list[dict] = []
     fetched = 0
     page = 0
     total_count: int | None = None
     while True:
-        params: dict[str, Any] = {
-            "resourceKind": resource_kind,
-            "page": page,
-            "pageSize": _RESOURCES_PAGE_SIZE,
-        }
+        params: dict[str, Any] = {"page": page, "pageSize": _RESOURCES_PAGE_SIZE}
+        if resource_kind is not None:
+            # Omitted, the collection is every kind.
+            params["resourceKind"] = resource_kind
         data = client.get("/resources", params=params)
         items = data.get("resourceList", []) or []
         # Read the count before consuming the page: an explicit `limit` returns
@@ -152,10 +203,17 @@ def list_resources(
             summary = _summarize_resource(r)
             if filter_lc and filter_lc not in summary["name"].lower():
                 continue
+            if wanted_status:
+                status = (summary["collection_status"] or "").upper()
+                seen_statuses.add(status or "not reported")
+                # An object with no reported status is unknown, and unknown
+                # never satisfies a filter for a specific status.
+                if status != wanted_status:
+                    continue
             results.append(summary)
             if limit is not None and len(results) >= limit:
-                return paginated(
-                    results, limit=limit, total=None if filter_lc else total_count
+                return _resource_page(
+                    results, limit, total_count, client_side, wanted_status, seen_statuses
                 )
 
         # Termination: a short page (fewer than a full pageSize) means the last
@@ -177,7 +235,7 @@ def list_resources(
             break
         page += 1
 
-    return paginated(results, limit=limit, total=None if filter_lc else total_count)
+    return _resource_page(results, limit, total_count, client_side, wanted_status, seen_statuses)
 
 
 # ---------------------------------------------------------------------------
