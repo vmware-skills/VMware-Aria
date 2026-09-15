@@ -104,6 +104,10 @@ def _resource_page(
     client_side: bool,
     wanted_status: str | None,
     seen_statuses: set[str],
+    resource_kind: str | None = None,
+    *,
+    scanned: int = 0,
+    capped: bool = False,
 ) -> dict:
     """Wrap a listing; say what was seen when a status filter matched nothing.
 
@@ -111,14 +115,25 @@ def _resource_page(
     and a misspelt status produces exactly that answer. Naming the statuses the
     listing did contain is what tells the two apart.
     """
-    extra: dict[str, str] = {}
+    extra: dict[str, object] = {}
     if wanted_status and not results:
         seen = ", ".join(sorted(seen_statuses)) or "none — no objects were listed"
-        extra["note"] = (
-            f"No object has collection_status {wanted_status}. Statuses seen in "
-            f"this listing: {seen}. Check the spelling, or widen resource_kind "
-            f"('all' lists every kind)."
-        )
+        if capped:
+            # "No object has it" would be a claim about objects nobody read.
+            extra["note"] = (
+                f"No object with collection_status {wanted_status} among the first "
+                f"{scanned} of {total_count} objects: the scan stopped at its "
+                f"{_RESOURCES_MAX_TOTAL}-object safety cap, so the rest were not "
+                f"checked. Narrow resource_kind or name_filter. Statuses seen: {seen}."
+            )
+        else:
+            widen = "" if resource_kind is None else ", or widen resource_kind ('all' lists every kind)"
+            extra["note"] = (
+                f"No object has collection_status {wanted_status}. Statuses seen in "
+                f"this listing: {seen}. Check the spelling{widen}."
+            )
+    if capped:
+        extra["scan_complete"] = False
     return paginated(results, limit=limit, total=None if client_side else total_count, **extra)
 
 
@@ -173,18 +188,24 @@ def list_resources(
     # param, but we keep the client-side case-insensitive substring match for
     # predictable semantics; this is correct, just walks the full unfiltered
     # collection (bounded by the safety cap) rather than pushing the filter down.
-    fetch_cap = _RESOURCES_MAX_TOTAL if limit is None else min(limit, _RESOURCES_MAX_TOTAL)
     filter_lc = name_filter.lower() if name_filter else None
     # Client-side too: the 8.6 and 9.1 operation indexes list GET /resources but
     # not its query parameters, so no server-side status filter is assumed.
     wanted_status = collection_status.strip().upper() if collection_status else None
     client_side = bool(filter_lc or wanted_status)
     seen_statuses: set[str] = set()
+    # A client-side filter runs after the page is read, so `limit` counts matches,
+    # not rows. Capping the scan at `limit` rows stopped after the first page and
+    # answered "no object matched" for an estate it had not finished reading.
+    fetch_cap = (
+        _RESOURCES_MAX_TOTAL if limit is None or client_side else min(limit, _RESOURCES_MAX_TOTAL)
+    )
 
     results: list[dict] = []
     fetched = 0
     page = 0
     total_count: int | None = None
+    capped = False
     while True:
         params: dict[str, Any] = {"page": page, "pageSize": _RESOURCES_PAGE_SIZE}
         if resource_kind is not None:
@@ -201,11 +222,13 @@ def list_resources(
         for r in items:
             fetched += 1
             summary = _summarize_resource(r)
+            if wanted_status:
+                status = (summary["collection_status"] or "").upper()
+                # Recorded before the name filter: the note describes what was read.
+                seen_statuses.add(status or "not reported")
             if filter_lc and filter_lc not in summary["name"].lower():
                 continue
             if wanted_status:
-                status = (summary["collection_status"] or "").upper()
-                seen_statuses.add(status or "not reported")
                 # An object with no reported status is unknown, and unknown
                 # never satisfies a filter for a specific status.
                 if status != wanted_status:
@@ -213,7 +236,8 @@ def list_resources(
             results.append(summary)
             if limit is not None and len(results) >= limit:
                 return _resource_page(
-                    results, limit, total_count, client_side, wanted_status, seen_statuses
+                    results, limit, total_count, client_side, wanted_status, seen_statuses,
+                    resource_kind, scanned=fetched,
                 )
 
         # Termination: a short page (fewer than a full pageSize) means the last
@@ -232,10 +256,14 @@ def list_resources(
                 resource_kind,
                 total_count,
             )
+            capped = True
             break
         page += 1
 
-    return _resource_page(results, limit, total_count, client_side, wanted_status, seen_statuses)
+    return _resource_page(
+        results, limit, total_count, client_side, wanted_status, seen_statuses,
+        resource_kind, scanned=fetched, capped=capped,
+    )
 
 
 # ---------------------------------------------------------------------------

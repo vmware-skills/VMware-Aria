@@ -470,7 +470,9 @@ def _read_recommendation_history(
         "intervalQuantifier": 1,
     }
     series: dict[str, dict[str, dict[str, list[float]]]] = {}
-    days: dict[str, set] = {}
+    # Days are counted per key from the MAX reply alone: MIN and MAX need not
+    # stamp a day's bucket identically, and a union would count one day twice.
+    days: dict[str, dict[str, int]] = {}
     try:
         for rollup in ("MIN", "MAX"):
             data = client.post(_STATS_QUERY_PATH, json_data={**base, "rollUpType": rollup}, retries=1)
@@ -483,7 +485,12 @@ def _read_recommendation_history(
                     if not key or not values:
                         continue
                     series.setdefault(rid, {}).setdefault(key, {})[rollup] = values
-                    days.setdefault(rid, set()).update(stat.get("timestamps") or [])
+                    if rollup == "MAX":
+                        days.setdefault(rid, {})[key] = len(set(stat.get("timestamps") or []))
+        history = {
+            rid: _history_summary(keys, max(days.get(rid, {}).values(), default=0))
+            for rid, keys in series.items()
+        }
     except AriaApiError as exc:
         status = _describe_status(exc)
         _log.warning("rightsizing: recommendation history query failed (%s): %s", status, exc)
@@ -494,7 +501,18 @@ def _read_recommendation_history(
             "The recommendations are unaffected, and actionable is decided as it would be "
             "without the history; retry to see whether a recommendation has settled."
         )
-    return {rid: _history_summary(keys, len(days.get(rid, ()))) for rid, keys in series.items()}, None
+    except (AttributeError, KeyError, TypeError, ValueError) as exc:
+        # Optional enrichment: a reply this code cannot parse must not fail the
+        # rightsizing answer, which it did not need before the history existed.
+        _log.warning("rightsizing: recommendation history reply unreadable: %r", exc)
+        return {}, (
+            f"POST {_STATS_QUERY_PATH} for the {RECOMMENDATION_HISTORY_DAYS}-day recommendation "
+            f"history answered in a shape this version could not read ({type(exc).__name__}), "
+            "so recommendation_range and recommendation_stable are null for every VM here — "
+            "unknown, not settled. The recommendations are unaffected, and actionable is "
+            "decided as it would be without the history."
+        )
+    return history, None
 
 
 def _history_summary(keys: dict[str, dict[str, list[float]]], days_with_data: int) -> dict:
@@ -512,14 +530,21 @@ def _history_summary(keys: dict[str, dict[str, list[float]]], days_with_data: in
     }
 
 
-def _unstable_spans(history: dict | None) -> list[tuple[str, list[float]]] | None:
+def _unstable_spans(history: dict | None, row: dict) -> list[tuple[str, list[float]]] | None:
     """CPU and memory spans wider than the threshold; None when nothing to judge.
 
     Disk is not judged: it carries no direction. A span whose high is not
     positive (a VM held reclaimable throughout) has no spread to measure.
+
+    None — not "settled" — with fewer than two days of history (one day cannot
+    show movement), and when a dimension the row would act on has no span: a
+    memory resize is not settled by CPU history alone.
     """
-    if not history:
+    if not history or history.get("days_with_data", 0) < 2:
         return None
+    for dim, field in (("cpu", "cpu_mhz"), ("memory", "memory_kb")):
+        if row.get(f"{dim}_direction") in ("oversized", "undersized") and not history.get(field):
+            return None
     spans = [(dim, history[field]) for dim, field in (("cpu", "cpu_mhz"), ("memory", "memory_kb"))]
     measurable = [(dim, span) for dim, span in spans if span and span[1] > 0]
     if not measurable:
@@ -766,7 +791,7 @@ def _rightsizing_row(
         "aria_verdict": _aria_verdict(stats),
         "recommendation_range": history,
     }
-    unstable = _unstable_spans(history)
+    unstable = _unstable_spans(history, row)
     row["recommendation_stable"] = None if unstable is None else not unstable
     row["actionable"] = bool(
         row["power_state"] == _POWERED_ON
