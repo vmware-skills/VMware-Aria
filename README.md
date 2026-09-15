@@ -202,7 +202,7 @@ VMs / Hosts / Clusters / Alerts / Capacity
 ## Security
 
 - Passwords loaded from env vars or `.env` file, never from `config.yaml`
-- Write operations (alert acknowledge/cancel, alert notes, alert definition management, report generate/delete, resource maintenance start/end) audit-logged to `~/.vmware/audit.db` (MCP, via vmware-policy) and `~/.vmware-aria/audit.log` (CLI)
+- Every MCP tool call and every CLI command that reaches Aria audit-logged to `~/.vmware/audit.db` (via vmware-policy); CLI write operations (alert acknowledge/cancel, alert notes, alert definition management, report generate/delete, resource maintenance start/end) also append to `~/.vmware-aria/audit.log`
 - API responses sanitized (control chars stripped, 500-char limit) to prevent prompt injection
 - TLS verification is on by default; for a private CA set `SSL_CERT_FILE` to a bundle with your CA (see setup guide). `verify_ssl: false` is for isolated self-signed labs only
 

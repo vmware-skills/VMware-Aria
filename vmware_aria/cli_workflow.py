@@ -21,7 +21,7 @@ from typing import Annotated, Any
 
 import typer
 from rich.table import Table
-from vmware_policy import guarded
+from vmware_policy import audited, guarded
 
 from vmware_aria import cli as _cli
 from vmware_aria.cli import ConfigOption, TargetOption, _friendly_errors, alert_app, app, console
@@ -164,6 +164,7 @@ def maintenance_end(
 
 @maintenance_app.command("schedules")
 @_friendly_errors
+@audited("list_maintenance_schedules")
 def maintenance_schedules(
     resource_id: Annotated[str | None, typer.Option("--resource-id", help="Only schedules for this resource")] = None,
     limit: LimitOption = 50,
@@ -200,6 +201,7 @@ def maintenance_schedules(
 
 @alert_app.command("notes")
 @_friendly_errors
+@audited("list_alert_notes")
 def alert_notes(
     alert_id: str,
     limit: LimitOption = 50,
@@ -253,6 +255,7 @@ def alert_note_add(
 
 @alert_app.command("recommendations")
 @_friendly_errors
+@audited("get_alert_recommendations")
 def alert_recommendations(
     alert_id: str,
     target: TargetOption = None,

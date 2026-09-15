@@ -16,6 +16,7 @@ from rich.table import Table
 
 from vmware_aria import cli as _cli
 from vmware_aria.cli import ConfigOption, TargetOption
+from vmware_policy import audited
 
 LimitOption = Annotated[int, typer.Option("--limit", "-n", help="Page size, 1-500")]
 OffsetOption = Annotated[int, typer.Option("--offset", help="Rows to skip; the next-page offset is printed below the table")]
@@ -52,6 +53,7 @@ def _print_notes(result: dict, *notes: str) -> None:
 @_cli.resource_app.command("keys")
 @_cli._friendly_errors
 @_bad_input_is_one_line
+@audited("list_metric_keys")
 def resource_keys(
     resource_id: Annotated[str | None, typer.Argument(help="Resource UUID; omit and pass --kind for a kind's definitions")] = None,
     kind: Annotated[str | None, typer.Option("--kind", "-k", help="Resource kind, e.g. VirtualMachine")] = None,
@@ -85,6 +87,7 @@ def resource_keys(
 @_cli.resource_app.command("properties")
 @_cli._friendly_errors
 @_bad_input_is_one_line
+@audited("get_resource_properties")
 def resource_properties(
     resource_id: str,
     name_filter: Annotated[str | None, typer.Option("--name", help="Substring of the property name, e.g. 'summary|'")] = None,
@@ -110,6 +113,7 @@ def resource_properties(
 @_cli.resource_app.command("relationships")
 @_cli._friendly_errors
 @_bad_input_is_one_line
+@audited("get_resource_relationships")
 def resource_relationships(
     resource_id: str,
     relationship_type: Annotated[str, typer.Option("--type", help="ALL, PARENT or CHILD")] = "ALL",

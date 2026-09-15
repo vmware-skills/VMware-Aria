@@ -14,7 +14,7 @@ from typing import Annotated
 import typer
 from rich.console import Console
 from rich.table import Table
-from vmware_policy import PolicyDenied, guarded
+from vmware_policy import PolicyDenied, audited, cli_local, guarded
 
 from vmware_aria.notify.audit import AuditLogger
 import sys
@@ -93,6 +93,7 @@ app.add_typer(fleet_app, name="fleet")
 
 
 @app.command("mcp")
+@cli_local("starts the MCP server; its tools audit themselves")
 def mcp_cmd() -> None:
     """Start the MCP server (stdio transport).
 
@@ -207,6 +208,7 @@ def _json_output(data: object) -> None:
 
 
 @app.command()
+@audited("init")
 def init(
     force: Annotated[bool, typer.Option("--force", help="Overwrite an existing config without asking")] = False,
     skip_test: Annotated[bool, typer.Option("--skip-test", help="Skip the post-setup connection test")] = False,
@@ -227,6 +229,7 @@ def init(
 
 @app.command()
 @_friendly_errors
+@audited("doctor")
 def doctor(
     skip_auth: Annotated[bool, typer.Option("--skip-auth", help="Skip authentication check")] = False,
     config: ConfigOption = None,
@@ -245,6 +248,7 @@ def doctor(
 
 @resource_app.command("list")
 @_friendly_errors
+@audited("list_resources")
 def resource_list(
     kind: Annotated[str, typer.Option("--kind", "-k", help="Resource kind, or 'all' for every kind")] = "VirtualMachine",
     limit: Annotated[int, typer.Option("--limit", "-n", help="Max results (paginated)")] = 50,
@@ -298,6 +302,7 @@ def resource_list(
 
 @resource_app.command("get")
 @_friendly_errors
+@audited("get_resource")
 def resource_get(
     resource_id: str,
     target: TargetOption = None,
@@ -312,6 +317,7 @@ def resource_get(
 
 @resource_app.command("metrics")
 @_friendly_errors
+@audited("get_resource_metrics")
 def resource_metrics(
     resource_id: str,
     metrics: Annotated[
@@ -336,6 +342,7 @@ def resource_metrics(
 
 @resource_app.command("health")
 @_friendly_errors
+@audited("get_resource_health")
 def resource_health(
     resource_id: str,
     target: TargetOption = None,
@@ -350,6 +357,7 @@ def resource_health(
 
 @resource_app.command("top")
 @_friendly_errors
+@audited("get_top_consumers")
 def resource_top(
     metric: Annotated[str, typer.Option("--metric", help="Metric key to rank by")] = "cpu|usage_average",
     kind: Annotated[str, typer.Option("--kind", "-k", help="Resource kind")] = "VirtualMachine",
@@ -385,6 +393,7 @@ def resource_top(
 
 @alert_app.command("list")
 @_friendly_errors
+@audited("list_alerts")
 def alert_list(
     active_only: Annotated[bool, typer.Option("--active/--all", help="Active alerts only")] = True,
     criticality: Annotated[str | None, typer.Option("--criticality", help="Filter by criticality")] = None,
@@ -426,6 +435,7 @@ def alert_list(
 
 @alert_app.command("get")
 @_friendly_errors
+@audited("get_alert")
 def alert_get(
     alert_id: str,
     target: TargetOption = None,
@@ -487,6 +497,7 @@ def alert_cancel(
 
 @alert_app.command("definitions")
 @_friendly_errors
+@audited("list_alert_definitions")
 def alert_definitions(
     name_filter: Annotated[str | None, typer.Option("--name", help="Filter by name substring")] = None,
     limit: Annotated[int, typer.Option("--limit", "-n", help="Page size, 1-500")] = 50,
@@ -525,6 +536,7 @@ def alert_definitions(
 
 @capacity_app.command("overview")
 @_friendly_errors
+@audited("get_capacity_overview")
 def capacity_overview(
     cluster_id: str,
     target: TargetOption = None,
@@ -539,6 +551,7 @@ def capacity_overview(
 
 @capacity_app.command("remaining")
 @_friendly_errors
+@audited("get_remaining_capacity")
 def capacity_remaining(
     resource_id: str,
     target: TargetOption = None,
@@ -553,6 +566,7 @@ def capacity_remaining(
 
 @capacity_app.command("time-remaining")
 @_friendly_errors
+@audited("get_time_remaining")
 def capacity_time_remaining(
     resource_id: str,
     target: TargetOption = None,
@@ -567,6 +581,7 @@ def capacity_time_remaining(
 
 @capacity_app.command("rightsizing")
 @_friendly_errors
+@audited("list_rightsizing_recommendations")
 def capacity_rightsizing(
     resource_id: Annotated[str | None, typer.Option("--resource-id", help="Scope to a specific VM")] = None,
     limit: Annotated[int, typer.Option("--limit", "-n")] = 20,
@@ -655,6 +670,7 @@ def capacity_rightsizing(
 
 @anomaly_app.command("list")
 @_friendly_errors
+@audited("list_anomalies")
 def anomaly_list(
     resource_id: Annotated[str | None, typer.Option("--resource-id", help="Scope to a resource")] = None,
     limit: Annotated[int, typer.Option("--limit", "-n")] = 20,
@@ -688,6 +704,7 @@ def anomaly_list(
 
 @anomaly_app.command("risk")
 @_friendly_errors
+@audited("get_resource_riskbadge")
 def anomaly_risk(
     resource_id: str,
     target: TargetOption = None,
@@ -707,6 +724,7 @@ def anomaly_risk(
 
 @health_app.command("status")
 @_friendly_errors
+@audited("get_aria_health")
 def health_status(
     target: TargetOption = None,
     config: ConfigOption = None,
@@ -740,6 +758,7 @@ def health_status(
 
 @health_app.command("collectors")
 @_friendly_errors
+@audited("list_collector_groups")
 def health_collectors(
     target: TargetOption = None,
     config: ConfigOption = None,
@@ -772,6 +791,7 @@ def health_collectors(
 
 @report_app.command("definitions")
 @_friendly_errors
+@audited("list_report_definitions")
 def report_definitions(
     name_filter: Annotated[str | None, typer.Option("--name", help="Filter by name substring")] = None,
     limit: Annotated[int, typer.Option("--limit", "-n", help="Page size, 1-500")] = 50,
@@ -825,6 +845,7 @@ def report_generate(
 
 @report_app.command("list")
 @_friendly_errors
+@audited("list_reports")
 def report_list(
     definition_id: Annotated[str | None, typer.Option("--definition-id", help="Filter by definition UUID")] = None,
     limit: Annotated[int, typer.Option("--limit", "-n")] = 20,
@@ -852,6 +873,7 @@ def report_list(
 
 @report_app.command("get")
 @_friendly_errors
+@audited("get_report")
 def report_get(
     report_id: str,
     target: TargetOption = None,
@@ -919,6 +941,7 @@ def report_delete(
 
 @fleet_app.command("certificates")
 @_friendly_errors
+@audited("fleet_certificate_list")
 def fleet_certificates(
     limit: Annotated[int, typer.Option("--limit", "-n", help="Max rows")] = 50,
     target: TargetOption = None,
@@ -942,6 +965,7 @@ def fleet_certificates(
 
 @fleet_app.command("passwords")
 @_friendly_errors
+@audited("fleet_password_account_list")
 def fleet_passwords(
     limit: Annotated[int, typer.Option("--limit", "-n", help="Max rows")] = 50,
     target: TargetOption = None,
@@ -965,6 +989,7 @@ def fleet_passwords(
 
 @fleet_app.command("domains")
 @_friendly_errors
+@audited("fleet_domain_list")
 def fleet_domains(
     integration_id: Annotated[str, typer.Argument(help="VCF integration UUID (from Operations Integrations page)")],
     limit: Annotated[int, typer.Option("--limit", "-n", help="Max rows")] = 50,
@@ -994,6 +1019,7 @@ def fleet_domains(
 
 @fleet_app.command("findings")
 @_friendly_errors
+@audited("findings_list")
 def fleet_findings(
     severities: Annotated[str | None, typer.Option("--severities", help="Comma-separated, e.g. CRITICAL,WARNING")] = None,
     categories: Annotated[str | None, typer.Option("--categories", help="Comma-separated category filter")] = None,
@@ -1029,6 +1055,7 @@ def fleet_findings(
 
 @fleet_app.command("promql")
 @_friendly_errors
+@audited("promql_query")
 def fleet_promql(
     query: Annotated[str, typer.Argument(help="PromQL expression, e.g. 'cpu_usage_average{}'")],
     at_time: Annotated[str | None, typer.Option("--time", help="Evaluation timestamp (RFC3339 or Unix seconds)")] = None,

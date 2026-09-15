@@ -22,6 +22,7 @@ from vmware_aria.cli import (
     console,
     health_app,
 )
+from vmware_policy import audited
 
 _PRESSURE_STYLE = {"NORMAL": "green", "ELEVATED": "yellow", "HIGH": "red", "UNKNOWN": "yellow"}
 
@@ -67,6 +68,7 @@ def _print_node(node: dict, window_hours: int) -> None:
 
 @health_app.command("node")
 @_friendly_errors
+@audited("get_aria_node_resources")
 def health_node(
     hours: Annotated[int, typer.Option("--hours", help="Window for min/avg/max, 1-720 hours")] = 24,
     as_json: Annotated[bool, typer.Option("--json", help="Print the full result as JSON")] = False,
@@ -94,6 +96,7 @@ def health_node(
 
 @health_app.command("adapters")
 @_friendly_errors
+@audited("list_adapters")
 def health_adapters(
     kind: Annotated[str | None, typer.Option("--kind", help="Adapter kind key, e.g. VMWARE (case-insensitive)")] = None,
     limit: Annotated[int, typer.Option("--limit", "-n", help="Page size, 1-500")] = 100,
