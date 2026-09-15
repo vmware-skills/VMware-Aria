@@ -1,4 +1,4 @@
-## Unreleased — service state, VC_APP drill-down, readable alert ids and times
+## v1.15.0 — service state, VC_APP drill-down, readable alert ids and times
 
 Found in a live session on Aria 8.18.7 (2026-09-15); each checked again on the lab after the fix.
 
