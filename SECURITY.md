@@ -26,12 +26,17 @@ Do **not** open a public GitHub issue for security vulnerabilities.
 
 ### Read-Heavy Design
 
-21 of 27 tools are read-only. Write operations are limited to:
-- Alert acknowledge and cancel
-- Alert definition management
-- Report generation and management
+34 of 44 MCP tools are read-only. The 10 write operations are limited to:
+- Alert acknowledge, cancel and notes
+- Alert definition create, enable/disable and delete
+- Report generation and deletion
+- Resource maintenance mode start and end
 
 No VM lifecycle, no networking, no storage operations.
+
+### MCP Confirmation Gate
+
+The six destructive MCP writes — `acknowledge_alert`, `cancel_alert`, `delete_alert_definition`, `delete_report`, `start_resource_maintenance`, `end_resource_maintenance` — take `confirm` (default `false`). A call without `confirm=true` reads the object and returns its `blast_radius` (the alert with its definition and resource, the alert definition, the report, or the resource and its maintenance state) and changes nothing. `confirm=true` is refused, and audited as a failure, when a blocker is found (a cancelled alert, a resource already in or not in maintenance) or a field the measurement depends on could not be read. `confirmed` is a deprecated alias for one minor release.
 
 ### Audit Logging
 

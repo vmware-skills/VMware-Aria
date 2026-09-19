@@ -6,9 +6,10 @@ actually lives:
 
 1. **ops layer** — every write function accepts ``audit_logger`` and logs the
    operation (audit is mandatory family-wide).
-2. **MCP layer** — every destructive tool has a ``confirmed: bool = False``
-   parameter returning a preview until explicitly confirmed (MCP cannot
-   prompt interactively).
+2. **MCP layer** — every destructive tool has a ``confirm: bool = False``
+   parameter returning a blast-radius preview until explicitly confirmed (MCP
+   cannot prompt interactively). HLD §7, revised 2026-09-16; ``confirmed`` is
+   a deprecated alias. The behaviour is pinned in tests/test_gated_writes.py.
 3. **CLI layer** — every destructive command prompts via ``typer.confirm``
    (with a ``--yes`` escape hatch for automation).
 
@@ -47,7 +48,7 @@ OPS_WRITE_FUNCTIONS: list[tuple[str, str]] = [
     ("alert_notes.py", "add_alert_note"),
 ]
 
-# MCP destructive tools: must gate on confirmed=False preview.
+# MCP destructive tools: must gate on confirm=False preview.
 MCP_CONFIRMED_TOOLS = [
     "acknowledge_alert",
     "cancel_alert",
@@ -98,19 +99,27 @@ class TestOpsAuditLayer:
 
 @pytest.mark.unit
 class TestMcpConfirmedLayer:
-    """Layer 2: destructive MCP tools default to a confirmed=False preview."""
+    """Layer 2: destructive MCP tools default to a confirm=False preview."""
 
     @pytest.mark.parametrize("func_name", MCP_CONFIRMED_TOOLS)
-    def test_mcp_tool_has_confirmed_gate(self, func_name: str) -> None:
+    def test_mcp_tool_has_confirm_gate(self, func_name: str) -> None:
         node = _find_function(sorted(MCP_DIR.rglob("*.py")), func_name)
-        arg_names = {a.arg for a in node.args.args + node.args.kwonlyargs}
-        assert "confirmed" in arg_names, (
-            f"MCP tool {func_name} must take confirmed: bool = False "
-            "(2026-06-08: delete_alert_definition/delete_report shipped without it)"
+        args = node.args.args
+        defaults = dict(zip([a.arg for a in args][len(args) - len(node.args.defaults):], node.args.defaults))
+        assert "confirm" in defaults, (
+            f"MCP tool {func_name} must take confirm: bool = False "
+            "(2026-06-08: delete_alert_definition/delete_report shipped without a gate)"
         )
-        source = ast.dump(node)
-        assert "preview" in source, (
-            f"MCP tool {func_name} must return a preview payload when not confirmed"
+        default = defaults["confirm"]
+        assert isinstance(default, ast.Constant) and default.value is False, (
+            f"MCP tool {func_name}: confirm must default to False — a bare call previews"
+        )
+        # Read the body without its docstring: the prose says "previews", and a
+        # check that the docstring satisfies is a check of nothing.
+        body = [n for n in node.body if not (isinstance(n, ast.Expr) and isinstance(n.value, ast.Constant))]
+        source = "".join(ast.dump(n) for n in body)
+        assert "resolve_confirm" in source and "gate" in source, (
+            f"MCP tool {func_name} must route through the shared gate (write_gate.gate)"
         )
 
 

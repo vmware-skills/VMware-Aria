@@ -298,28 +298,33 @@ def undo_store(monkeypatch: pytest.MonkeyPatch) -> _UndoStore:
     return store
 
 
-def _no_connection(target: Any = None) -> None:
-    raise AssertionError("a preview must not connect")
+# Updated 2026-09-19 (HLD §7): the MCP preview now *measures* — it reads the
+# resource to state the blast radius — so it connects; it still writes nothing.
+# A confirmed call reads the state three times: the gate's measurement, then
+# the ops function's own before and after. Every _Client below queues that
+# extra first answer.
 
 
-def test_mcp_tools_preview_without_connecting_or_recording_undo(monkeypatch, undo_store) -> None:
+def test_mcp_tools_preview_without_writing_or_recording_undo(monkeypatch, undo_store) -> None:
     import vmware_aria.mcp_server.server as server
 
-    monkeypatch.setattr(server, "_get_connection", _no_connection)
+    client = _Client(_resource("STARTED"), _resource("MAINTAINED"))
+    monkeypatch.setattr(server, "_get_connection", lambda target=None: client)
     start = server.start_resource_maintenance(RID, duration_minutes=30)
     end = server.end_resource_maintenance(RID)
     for result in (start, end):
-        assert result["preview"] is True
-        assert "confirmed=True" in result["message"]
+        assert result["action"] == "preview"
+        assert "confirm=True" in result["hint"]
+    assert client.writes == []
     assert undo_store.rows == [], "a preview changed nothing, so it has nothing to undo"
 
 
 def test_confirmed_start_records_end_as_its_undo(monkeypatch, undo_store) -> None:
     import vmware_aria.mcp_server.server as server
 
-    client = _Client(_resource("STARTED"), _resource("MAINTAINED"))
+    client = _Client(_resource("STARTED"), _resource("STARTED"), _resource("MAINTAINED"))
     monkeypatch.setattr(server, "_get_connection", lambda target=None: client)
-    result = server.start_resource_maintenance(RID, duration_minutes=30, confirmed=True, target="home-aria")
+    result = server.start_resource_maintenance(RID, duration_minutes=30, confirm=True, target="home-aria")
     assert result["confirmed"] is True
     (row,) = undo_store.rows
     descriptor = row["undo_descriptor"]
@@ -331,9 +336,9 @@ def test_confirmed_start_records_end_as_its_undo(monkeypatch, undo_store) -> Non
 def test_confirmed_end_records_start_as_its_undo(monkeypatch, undo_store) -> None:
     import vmware_aria.mcp_server.server as server
 
-    client = _Client(_resource("MAINTAINED"), _resource("STARTED"))
+    client = _Client(_resource("MAINTAINED"), _resource("MAINTAINED"), _resource("STARTED"))
     monkeypatch.setattr(server, "_get_connection", lambda target=None: client)
-    server.end_resource_maintenance(RID, confirmed=True)
+    server.end_resource_maintenance(RID, confirm=True)
     (row,) = undo_store.rows
     assert row["undo_descriptor"]["tool"] == "start_resource_maintenance"
     assert row["undo_descriptor"]["params"]["resource_id"] == RID
@@ -343,7 +348,7 @@ def test_mcp_refusal_is_a_teaching_error_and_records_no_undo(monkeypatch, undo_s
     import vmware_aria.mcp_server.server as server
 
     monkeypatch.setattr(server, "_get_connection", lambda target=None: _Client(_resource("STARTED")))
-    result = server.end_resource_maintenance(RID, confirmed=True)
+    result = server.end_resource_maintenance(RID, confirm=True)
     assert "not in maintenance" in result["error"]
     assert undo_store.rows == []
 
@@ -475,6 +480,11 @@ def test_end_is_not_refused_when_the_adapter_reports_unknown() -> None:
     assert result["before"]["in_maintenance"] is None
 
 
+# The gate reads the state first and refuses "already in maintenance" and
+# "unknown" outright (tests/test_gated_writes.py). The undo guard still matters
+# for the window between that read and the ops function's own before-read, so
+# these cases pass the gate (its read says STARTED / MAINTAINED) and vary what
+# the ops before-read then finds.
 @pytest.mark.parametrize(
     ("before", "expect_undo"),
     [
@@ -486,9 +496,9 @@ def test_end_is_not_refused_when_the_adapter_reports_unknown() -> None:
 def test_start_records_its_undo_only_when_it_began_the_maintenance(monkeypatch, undo_store, before, expect_undo) -> None:
     import vmware_aria.mcp_server.server as server
 
-    client = _Client(before, _resource("MAINTAINED"))
+    client = _Client(_resource("STARTED"), before, _resource("MAINTAINED"))
     monkeypatch.setattr(server, "_get_connection", lambda target=None: client)
-    server.start_resource_maintenance(RID, duration_minutes=30, confirmed=True)
+    server.start_resource_maintenance(RID, duration_minutes=30, confirm=True)
     assert client.writes, "the write itself must still run"
     if expect_undo:
         (row,) = undo_store.rows
@@ -508,9 +518,9 @@ def test_start_records_its_undo_only_when_it_began_the_maintenance(monkeypatch, 
 def test_end_records_its_undo_only_when_the_resource_was_in_maintenance(monkeypatch, undo_store, before, expect_undo) -> None:
     import vmware_aria.mcp_server.server as server
 
-    client = _Client(before, _resource("STARTED"))
+    client = _Client(_resource("MAINTAINED"), before, _resource("STARTED"))
     monkeypatch.setattr(server, "_get_connection", lambda target=None: client)
-    server.end_resource_maintenance(RID, confirmed=True)
+    server.end_resource_maintenance(RID, confirm=True)
     assert client.writes, "the write itself must still run"
     if expect_undo:
         (row,) = undo_store.rows

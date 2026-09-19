@@ -1,3 +1,42 @@
+## v1.16.0 — MCP writes preview their blast radius until `confirm=true` (HLD §7)
+
+**Breaking for MCP callers:**
+
+* `acknowledge_alert`, `cancel_alert`, `delete_alert_definition`, `delete_report`,
+  `start_resource_maintenance` and `end_resource_maintenance` take `confirm: bool = False`. A call without
+  `confirm=true` returns `{"action": "preview", "blast_radius": {...}, "hint": ...}` and changes nothing.
+  The old preview shape (`preview: true`, `message`) is gone.
+* **The preview now connects.** It reads the object to measure what would change; before, the preview
+  answered without connecting. It still sends no write.
+* **`end_resource_maintenance` no longer proceeds on an unknown state over MCP.** A resource whose state
+  cannot be read, or whose adapter reports `UNKNOWN` / `NONE`, is refused (the change cannot be
+  measured). The CLI keeps its old behaviour.
+* **`start_resource_maintenance` refuses a resource already in maintenance** (starting again would
+  replace that window, possibly someone else's) and one whose state is unknown.
+* **`acknowledge_alert` refuses a cancelled alert**; `cancel_alert` on a cancelled alert returns
+  `action: "noop"` and sends nothing.
+* `confirmed` remains as a deprecated alias for one minor release, defaulting to null.
+  `confirmed=true` still acts; an explicit `confirmed=false` holds even next to `confirm=true`. Any call
+  that passes it gets a `deprecated` note. Undo descriptors now carry `confirm: true`.
+* Acting responses are the existing ops results plus `blast_radius`.
+
+**Blast radius (L1)**, from GETs this skill already makes (every path is in the suite-api index):
+
+* alerts: alert id, definition id and name, criticality, status, control state, resource id, resource
+  name (context only — an alert on a removed resource can still be cancelled), start time;
+* alert definition: id, name, description, adapter and resource kind, criticality, state count;
+* report: id, title (from its definition), status, definition id, completion time, owner;
+* maintenance: resource id, name, kind, adapter states, in maintenance or not, mode, the requested window.
+
+**Refusals (L3)** are teaching errors audited as failures: a blocker (above), or anything the radius
+depends on that could not be read (the alert, its status, control state or resource id; the definition or
+its name; the report, its status or definition id; the maintenance state). A 404 on an alert, definition or
+report is reported as not found; on `start_`/`end_resource_maintenance` it reads as an unknown maintenance
+state and the call is refused as unreadable.
+
+* Requires `vmware-policy>=1.17.0`, which audits a `confirm=False` preview as `dry_run` and redacts long
+  audit text in linear time.
+
 ## v1.15.0 — service state, VC_APP drill-down, readable alert ids and times
 
 Found in a live session on Aria 8.18.7 (2026-09-15); each checked again on the lab after the fix.

@@ -1,9 +1,10 @@
 """MAINTENANCE tools (3): start / end resource maintenance (write), list_maintenance_schedules (read).
 
-The two writes carry a ``confirmed=False`` preview gate like acknowledge_alert
-(same risk: reversible, but alerting on the resource stops), and declare each
-other as their undo — recorded only when the before-state shows the undo would
-restore it (start: was not in maintenance; end: was in maintenance). ``tests/test_no_destructive_ops.py`` finds the gate here by
+The two writes carry the ``confirm=False`` blast-radius gate (HLD §7) like
+acknowledge_alert (same risk: reversible, but alerting on the resource stops),
+and declare each other as their undo — recorded only when the before-state
+shows the undo would restore it (start: was not in maintenance; end: was in
+maintenance). ``tests/test_no_destructive_ops.py`` finds the gate here by
 searching the whole ``mcp_server`` tree.
 """
 
@@ -14,11 +15,19 @@ from vmware_policy import vmware_tool
 from vmware_aria.mcp_server._shared import mcp
 
 _HINT = "Run 'vmware-aria doctor' to verify connectivity."
+_STATE_NEXT = "Check the resource with get_resource and retry."
+
+#: Actions that report a change nothing was sent for.
+_NOT_A_CHANGE = frozenset({"preview", "noop"})
 
 
 def _changed(result: Any) -> bool:
     """True only for a result that reports an executed write."""
-    return isinstance(result, dict) and not result.get("preview") and not result.get("error")
+    return (
+        isinstance(result, dict)
+        and result.get("action") not in _NOT_A_CHANGE
+        and not result.get("error")
+    )
 
 
 def _before_in_maintenance(result: Any) -> Optional[bool]:
@@ -35,7 +44,7 @@ def _undo_start(params: dict, result: Any) -> Optional[dict]:
         return None
     return {
         "tool": "end_resource_maintenance",
-        "params": {"resource_id": params.get("resource_id"), "confirmed": True, "target": params.get("target")},
+        "params": {"resource_id": params.get("resource_id"), "confirm": True, "target": params.get("target")},
         "skill": "aria",
         "note": "Inverse of start_resource_maintenance: take the resource out of maintenance.",
     }
@@ -50,7 +59,7 @@ def _undo_end(params: dict, result: Any) -> Optional[dict]:
         return None
     return {
         "tool": "start_resource_maintenance",
-        "params": {"resource_id": params.get("resource_id"), "confirmed": True, "target": params.get("target")},
+        "params": {"resource_id": params.get("resource_id"), "confirm": True, "target": params.get("target")},
         "skill": "aria",
         "note": (
             "Inverse of end_resource_maintenance: put the resource back in maintenance. It re-enters as "
@@ -59,21 +68,14 @@ def _undo_end(params: dict, result: Any) -> Optional[dict]:
     }
 
 
-def _describe_window(duration_minutes: Optional[int], end_time_ms: Optional[int]) -> str:
-    if duration_minutes is not None:
-        return f"for {duration_minutes} minutes"
-    if end_time_ms is not None:
-        return f"until {end_time_ms} (epoch ms)"
-    return "with NO end (MAINTAINED_MANUAL — stays until end_resource_maintenance)"
-
-
 @mcp.tool(annotations={"readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
 @vmware_tool(risk_level="medium", undo=_undo_start)
 def start_resource_maintenance(
     resource_id: str,
     duration_minutes: Optional[int] = None,
     end_time_ms: Optional[int] = None,
-    confirmed: bool = False,
+    confirm: bool = False,
+    confirmed: Optional[bool] = None,
     target: Optional[str] = None,
 ) -> dict:
     """[WRITE] Put one resource in maintenance so Aria stops alerting on it and collecting its data — use before planned work such as powering a VM or host off.
@@ -81,97 +83,108 @@ def start_resource_maintenance(
     Pass duration_minutes OR end_time_ms for a timed window (state MAINTAINED;
     the resource returns to its prior state when it expires). Pass neither for
     manual maintenance (MAINTAINED_MANUAL) that lasts until
-    end_resource_maintenance — easy to forget, so prefer a window. Returns the
-    state before and after, confirmed (true / false / null when the after-state
-    could not be read — null is unknown, not failure) and a note. Default
-    confirmed=False returns a preview without connecting. Undo:
-    end_resource_maintenance, recorded only when the resource was known not to
-    be in maintenance before.
+    end_resource_maintenance — easy to forget, so prefer a window.
+
+    Without confirm=True this only previews: it reads the resource and returns
+    blast_radius (resource name and kind, each adapter's state, whether it is
+    in maintenance now, and the requested window) and changes nothing. Show
+    that to the user and get their explicit decision. Do not set confirm=True
+    on your own because the user asked earlier: they have not seen what it
+    changes yet. Refused with confirm=True: a resource already in maintenance
+    (starting again would replace that window) and a resource whose state
+    cannot be read.
+
+    Acting returns the state before and after, confirmed (true / false / null
+    when the after-state could not be read — null is unknown, not failure) and
+    a note. Undo: end_resource_maintenance, recorded only when the resource was
+    known not to be in maintenance before.
 
     Args:
         resource_id: Resource UUID from list_resources (not the resource name).
         duration_minutes: Window length in whole minutes, 1-525600. Not with end_time_ms.
         end_time_ms: Window end as epoch MILLISECONDS in the future. Not with duration_minutes.
-        confirmed: Must be True to actually start maintenance. Default False = preview only.
+        confirm: False (default) returns the blast radius and changes nothing.
+            True applies it.
+        confirmed: Deprecated alias for confirm; removed in the next minor
+            release. confirmed=False holds even when confirm=True.
         target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
+    from vmware_aria.ops import gate_measures
+    from vmware_aria.ops.maintenance import maintenance_window_params
+    from vmware_aria.ops.maintenance import start_resource_maintenance as _start
+    from vmware_aria.ops.write_gate import gate, resolve_confirm
 
-    try:
-        if not confirmed:
-            from vmware_aria.ops.maintenance import maintenance_window_params
+    decision = resolve_confirm(confirm, confirmed)
 
-            maintenance_window_params(duration_minutes, end_time_ms)
-            return {
-                "preview": True,
-                "action": "start_resource_maintenance",
-                "resource_id": resource_id,
-                "message": (
-                    f"[preview] Would put resource {resource_id} in maintenance "
-                    f"{_describe_window(duration_minutes, end_time_ms)}; alerting and collection stop. "
-                    "Re-invoke with confirmed=True to execute."
-                ),
-            }
-        from vmware_aria.ops.maintenance import start_resource_maintenance as _start
-
-        return _start(
-            server._get_connection(target),
-            resource_id,
-            duration_minutes=duration_minutes,
-            end_time_ms=end_time_ms,
-            audit_logger=server._audit,
-            target_name=server._target_name(target),
+    def run() -> dict:
+        maintenance_window_params(duration_minutes, end_time_ms)  # refuse a bad window unconnected
+        client = server._get_connection(target)
+        radius = gate_measures.measure_maintenance_start(client, resource_id, duration_minutes, end_time_ms)
+        return gate(
+            "start_resource_maintenance", f"resource {radius['resource_id']}", radius,
+            act=decision.act, next_step=_STATE_NEXT,
+            apply=lambda: _start(
+                client, resource_id, duration_minutes=duration_minutes, end_time_ms=end_time_ms,
+                audit_logger=server._audit, target_name=server._target_name(target),
+            ),
         )
-    except Exception as e:
-        return {"error": server._safe_error(e, "start_resource_maintenance"), "hint": _HINT}
+
+    return server._gated("start_resource_maintenance", decision.deprecated, run)
 
 
 @mcp.tool(annotations={"readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
 @vmware_tool(risk_level="medium", undo=_undo_end)
 def end_resource_maintenance(
     resource_id: str,
-    confirmed: bool = False,
+    confirm: bool = False,
+    confirmed: Optional[bool] = None,
     target: Optional[str] = None,
 ) -> dict:
     """[WRITE] Take one resource out of maintenance so Aria resumes alerting on it and collecting its data.
 
-    Refuses only a resource known not to be in maintenance (an adapter reports
-    a state such as STARTED or STOPPED — nothing to end). When the state is
-    unknown (unreadable, or reported as UNKNOWN / NONE) it proceeds and
-    before.in_maintenance is null. Returns the state before and after,
-    confirmed (true / false / null when unknown) and a note. Default
-    confirmed=False returns a preview without connecting. Undo:
-    start_resource_maintenance (re-enters as manual maintenance), recorded only
-    when the resource was known to be in maintenance before.
+    Without confirm=True this only previews: it reads the resource and returns
+    blast_radius (resource name and kind, each adapter's state, the maintenance
+    mode it is in) and changes nothing. Show that to the user and get their
+    explicit decision. Do not set confirm=True on your own because the user
+    asked earlier: they have not seen what it changes yet. Refused with
+    confirm=True: a resource known not to be in maintenance (an adapter reports
+    a state such as STARTED or STOPPED — nothing to end), and a resource whose
+    state is unknown (unreadable, or reported as UNKNOWN / NONE) — end that one
+    from the Aria UI or the CLI after checking it.
+
+    Acting returns the state before and after, confirmed (true / false / null
+    when unknown) and a note. Undo: start_resource_maintenance (re-enters as
+    manual maintenance), recorded only when the resource was known to be in
+    maintenance before.
 
     Args:
         resource_id: Resource UUID from list_resources (not the resource name).
-        confirmed: Must be True to actually end maintenance. Default False = preview only.
+        confirm: False (default) returns the blast radius and changes nothing.
+            True applies it.
+        confirmed: Deprecated alias for confirm; removed in the next minor
+            release. confirmed=False holds even when confirm=True.
         target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
+    from vmware_aria.ops import gate_measures
+    from vmware_aria.ops.maintenance import end_resource_maintenance as _end
+    from vmware_aria.ops.write_gate import gate, resolve_confirm
 
-    if not confirmed:
-        return {
-            "preview": True,
-            "action": "end_resource_maintenance",
-            "resource_id": resource_id,
-            "message": (
-                f"[preview] Would take resource {resource_id} out of maintenance; alerting and collection "
-                "resume. Re-invoke with confirmed=True to execute."
+    decision = resolve_confirm(confirm, confirmed)
+
+    def run() -> dict:
+        client = server._get_connection(target)
+        radius = gate_measures.measure_maintenance_end(client, resource_id)
+        return gate(
+            "end_resource_maintenance", f"resource {radius['resource_id']}", radius,
+            act=decision.act, next_step=_STATE_NEXT,
+            apply=lambda: _end(
+                client, resource_id, audit_logger=server._audit, target_name=server._target_name(target),
             ),
-        }
-    try:
-        from vmware_aria.ops.maintenance import end_resource_maintenance as _end
-
-        return _end(
-            server._get_connection(target),
-            resource_id,
-            audit_logger=server._audit,
-            target_name=server._target_name(target),
         )
-    except Exception as e:
-        return {"error": server._safe_error(e, "end_resource_maintenance"), "hint": _HINT}
+
+    return server._gated("end_resource_maintenance", decision.deprecated, run)
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})

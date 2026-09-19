@@ -204,6 +204,7 @@ VMs / Hosts / Clusters / Alerts / Capacity
 - Passwords loaded from env vars or `.env` file, never from `config.yaml`
 - Every MCP tool call and every CLI command that reaches Aria audit-logged to `~/.vmware/audit.db` (via vmware-policy); CLI write operations (alert acknowledge/cancel, alert notes, alert definition management, report generate/delete, resource maintenance start/end) also append to `~/.vmware-aria/audit.log`
 - API responses sanitized (control chars stripped, 500-char limit) to prevent prompt injection
+- MCP destructive writes (alert acknowledge/cancel, alert definition and report delete, maintenance start/end) take `confirm` (default `false`): without `confirm=true` they return a `blast_radius` of what would change and change nothing; `confirm=true` is refused on a blocker (e.g. a resource already in maintenance) or an unreadable field. `confirmed` is a deprecated alias
 - TLS verification is on by default; for a private CA set `SSL_CERT_FILE` to a bundle with your CA (see setup guide). `verify_ssl: false` is for isolated self-signed labs only
 
 #### Official Broadcom References

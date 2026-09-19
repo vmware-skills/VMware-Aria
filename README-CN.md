@@ -191,6 +191,7 @@ Token 为 6 小时滑动有效期（每次调用自动延长，官方规范行�
 - 密码仅从环境变量或 `.env` 文件加载，不存入 `config.yaml`
 - 每次 MCP 工具调用和每条访问 Aria 的 CLI 命令记录审计日志至 `~/.vmware/audit.db`（经 vmware-policy）；CLI 写操作（告警确认/取消、告警备注、告警定义管理、报表生成/删除、资源维护开始/结束）另写 `~/.vmware-aria/audit.log`
 - API 响应经过净化处理（去除控制字符，截断至 500 字符），防止提示注入攻击
+- MCP 的破坏性写操作（告警确认/取消、删除告警定义和报表、开始/结束维护）带 `confirm` 参数（默认 `false`）：不传 `confirm=true` 时只返回将改变什么的 `blast_radius`，不做任何修改；遇到阻断项（如资源已在维护中）或有字段读不到时，`confirm=true` 会被拒绝。`confirmed` 为已弃用的别名
 - 默认开启 TLS 校验；私有 CA 请把 `SSL_CERT_FILE` 指向包含你 CA 的证书包（见 setup guide）。`verify_ssl: false` 仅用于隔离的自签名实验环境
 
 ## 许可证

@@ -1,6 +1,6 @@
 {
   "name": "@zw008/vmware-aria",
-  "version": "1.15.0",
+  "version": "1.16.0",
   "description": "VMware Aria Operations: metrics, alerts, capacity, anomaly detection — 44 MCP tools.",
   "private": true,
   "license": "MIT",

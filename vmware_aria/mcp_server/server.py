@@ -83,6 +83,7 @@ from vmware_policy import describe_tool_parameters, vmware_tool
 # mcp, _get_connection, ...` (and monkeypatch targets) keep resolving.
 from vmware_aria.mcp_server._shared import (  # noqa: F401  (logger re-exported for the historical vmware_aria.mcp_server.server.logger path)
     _audit,
+    _gated,
     _get_connection,
     _safe_error,
     _target_name,
@@ -234,76 +235,115 @@ __all__ = [
 
 @mcp.tool(annotations={"readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
 @vmware_tool(risk_level="medium")
-def acknowledge_alert(alert_id: str, confirmed: bool = False, target: Optional[str] = None) -> dict:
+def acknowledge_alert(
+    alert_id: str,
+    confirm: bool = False,
+    confirmed: Optional[bool] = None,
+    target: Optional[str] = None,
+) -> dict:
     """[WRITE] Acknowledge an active alert by taking ownership (does not cancel it).
 
     The suite-api has no dedicated "acknowledge" action; this maps to
     POST /alerts?action=takeownership, assigning the alert to the API user
     (control state ASSIGNED). The alert remains active until cancelled.
     Use this when you want to own the alert without closing it; cancel_alert
-    closes it for good. Default confirmed=False returns a preview without
-    making any change.
+    closes it for good.
+
+    Without confirm=True this only previews: it returns blast_radius (alert id,
+    definition, criticality, status, control state, and the resource it is on)
+    and changes nothing. Show that to the user and get their explicit decision.
+    Do not set confirm=True on your own because the user asked earlier: they
+    have not seen what it changes yet. Refused with confirm=True: a cancelled
+    alert, and an alert whose status or resource cannot be read.
 
     Args:
         alert_id: The alert UUID to acknowledge.
-        confirmed: Must be True to actually acknowledge. Default False = preview only.
+        confirm: False (default) returns the blast radius and changes nothing.
+            True applies it.
+        confirmed: Deprecated alias for confirm; removed in the next minor
+            release. confirmed=False holds even when confirm=True.
         target: Aria target name from config; default when omitted.
     """
-    if not confirmed:
-        return {
-            "preview": True,
-            "action": "acknowledge",
-            "alert_id": alert_id,
-            "message": (
-                f"[preview] Would acknowledge alert {alert_id}. "
-                "Re-invoke with confirmed=True to execute."
-            ),
-        }
-    try:
-        from vmware_aria.ops.alerts import acknowledge_alert as _ack
+    from vmware_aria.ops import gate_measures
+    from vmware_aria.ops.alerts import acknowledge_alert as _ack
+    from vmware_aria.ops.write_gate import gate, resolve_confirm
 
-        return _ack(_get_connection(target), alert_id, audit_logger=_audit, target_name=_target_name(target))
-    except Exception as e:
-        return {"error": _safe_error(e, "acknowledge_alert"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+    decision = resolve_confirm(confirm, confirmed)
+
+    def run() -> dict:
+        client = _get_connection(target)
+        radius = gate_measures.measure_alert(
+            client, alert_id, "Assigns the alert to the API user (control state ASSIGNED); it stays active."
+        )
+        if gate_measures.is_canceled(radius):
+            radius = {**radius, "blockers": [
+                "The alert is cancelled; there is nothing to take ownership of. List active "
+                "alerts with list_alerts."
+            ]}
+        return gate(
+            "acknowledge_alert", f"alert {radius['alert_id']}", radius, act=decision.act,
+            next_step="Check it with get_alert and retry.",
+            apply=lambda: _ack(client, alert_id, audit_logger=_audit, target_name=_target_name(target)),
+        )
+
+    return _gated("acknowledge_alert", decision.deprecated, run)
 
 
 @mcp.tool(annotations={"readOnlyHint": False, "destructiveHint": True, "idempotentHint": False, "openWorldHint": True})
 @vmware_tool(risk_level="medium")
-def cancel_alert(alert_id: str, confirmed: bool = False, target: Optional[str] = None) -> dict:
+def cancel_alert(
+    alert_id: str,
+    confirm: bool = False,
+    confirmed: Optional[bool] = None,
+    target: Optional[str] = None,
+) -> dict:
     """[WRITE] Cancel (dismiss) an active alert. This WRITE operation permanently closes the alert.
 
     Use acknowledge_alert instead if you only want to mark it as seen.
     Cancelled alerts will not re-trigger unless the underlying condition recurs.
-    Default confirmed=False returns a preview without making any change.
+
+    Without confirm=True this only previews: it returns blast_radius (alert id,
+    definition, criticality, status, and the resource it is on) and changes
+    nothing. Show that to the user and get their explicit decision. Do not set
+    confirm=True on your own because the user asked earlier: they have not seen
+    what it changes yet. An alert already cancelled returns action "noop".
+    Refused with confirm=True: an alert whose status or resource cannot be read.
 
     Args:
         alert_id: The alert UUID to cancel.
-        confirmed: Must be True to actually cancel. Default False = preview only.
+        confirm: False (default) returns the blast radius and changes nothing.
+            True applies it.
+        confirmed: Deprecated alias for confirm; removed in the next minor
+            release. confirmed=False holds even when confirm=True.
         target: Aria target name from config; default when omitted.
     """
-    if not confirmed:
-        return {
-            "preview": True,
-            "action": "cancel",
-            "alert_id": alert_id,
-            "message": (
-                f"[preview] Would cancel alert {alert_id}. "
-                "Re-invoke with confirmed=True to execute."
-            ),
-        }
-    try:
-        from vmware_aria.ops.alerts import cancel_alert as _cancel
+    from vmware_aria.ops import gate_measures
+    from vmware_aria.ops.alerts import cancel_alert as _cancel
+    from vmware_aria.ops.write_gate import gate, resolve_confirm
 
-        return _cancel(_get_connection(target), alert_id, audit_logger=_audit, target_name=_target_name(target))
-    except Exception as e:
-        return {"error": _safe_error(e, "cancel_alert"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+    decision = resolve_confirm(confirm, confirmed)
+
+    def run() -> dict:
+        client = _get_connection(target)
+        radius = gate_measures.measure_alert(
+            client, alert_id, "Closes the alert permanently; it re-triggers only if the condition recurs."
+        )
+        return gate(
+            "cancel_alert", f"alert {radius['alert_id']}", radius, act=decision.act,
+            next_step="Check it with get_alert and retry.",
+            noop="The alert is already cancelled; nothing to do." if gate_measures.is_canceled(radius) else None,
+            apply=lambda: _cancel(client, alert_id, audit_logger=_audit, target_name=_target_name(target)),
+        )
+
+    return _gated("cancel_alert", decision.deprecated, run)
 
 
 @mcp.tool(annotations={"readOnlyHint": False, "destructiveHint": True, "idempotentHint": False, "openWorldHint": True})
 @vmware_tool(risk_level="medium")
 def delete_alert_definition(
     definition_id: str,
-    confirmed: bool = False,
+    confirm: bool = False,
+    confirmed: Optional[bool] = None,
     target: Optional[str] = None,
 ) -> dict:
     """[WRITE] Permanently delete an alert definition. Irreversible.
@@ -312,71 +352,87 @@ def delete_alert_definition(
     Active alerts generated by this definition will not be affected.
     Use set_alert_definition_state(enabled=False) instead to silence a
     definition you may want back.
-    Default confirmed=False returns a preview without making any change.
+
+    Without confirm=True this only previews: it returns blast_radius (the
+    definition's id, name, adapter and resource kind, criticality and state
+    count) and deletes nothing. Show that to the user and get their explicit
+    decision. Do not set confirm=True on your own because the user asked
+    earlier: they have not seen what it deletes yet. Refused with confirm=True:
+    a definition that cannot be read.
 
     Args:
-        definition_id: Alert definition UUID to delete.
-        confirmed: Must be True to actually delete. Default False = preview only.
+        definition_id: Alert definition id to delete (from list_alert_definitions).
+        confirm: False (default) returns the blast radius and changes nothing.
+            True applies it.
+        confirmed: Deprecated alias for confirm; removed in the next minor
+            release. confirmed=False holds even when confirm=True.
         target: Aria target name from config; default when omitted.
     """
-    if not confirmed:
-        return {
-            "preview": True,
-            "action": "delete_alert_definition",
-            "definition_id": definition_id,
-            "message": (
-                f"[preview] Would permanently delete alert definition {definition_id}. "
-                "Re-invoke with confirmed=True to execute."
-            ),
-        }
-    try:
-        from vmware_aria.ops.alerts import delete_alert_definition as _delete
+    from vmware_aria.ops import gate_measures
+    from vmware_aria.ops.alerts import delete_alert_definition as _delete
+    from vmware_aria.ops.write_gate import gate, resolve_confirm
 
-        return _delete(
-            _get_connection(target),
-            definition_id=definition_id,
-            audit_logger=_audit,
-            target_name=_target_name(target),
+    decision = resolve_confirm(confirm, confirmed)
+
+    def run() -> dict:
+        client = _get_connection(target)
+        radius = gate_measures.measure_alert_definition(client, definition_id)
+        return gate(
+            "delete_alert_definition", f"alert definition {radius['definition_id']}", radius,
+            act=decision.act, next_step="Check it with list_alert_definitions and retry.",
+            apply=lambda: _delete(
+                client, definition_id=definition_id.strip(), audit_logger=_audit,
+                target_name=_target_name(target),
+            ),
         )
-    except Exception as e:
-        return {"error": _safe_error(e, "delete_alert_definition"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+
+    return _gated("delete_alert_definition", decision.deprecated, run)
 
 
 @mcp.tool(annotations={"readOnlyHint": False, "destructiveHint": True, "idempotentHint": False, "openWorldHint": True})
 @vmware_tool(risk_level="medium")
 def delete_report(
     report_id: str,
-    confirmed: bool = False,
+    confirm: bool = False,
+    confirmed: Optional[bool] = None,
     target: Optional[str] = None,
 ) -> dict:
-    """[WRITE] Permanently delete a generated report artifact from Aria Operations. Removes only the generated report instance and its output — the report definition and any schedules remain intact; re-run generate_report to recreate it. Deletion is irreversible and is recorded in the audit log. Returns an error if the report_id does not exist; use list_reports to find valid UUIDs first. Default confirmed=False returns a preview without deleting.
+    """[WRITE] Permanently delete a generated report artifact from Aria Operations. Removes only the generated report instance and its output — the report definition and any schedules remain intact; re-run generate_report to recreate it. Deletion is irreversible and is recorded in the audit log. Returns an error if the report_id does not exist; use list_reports to find valid UUIDs first.
+
+    Without confirm=True this only previews: it returns blast_radius (report
+    id, title, status, definition id, completion time, owner) and deletes
+    nothing. Show that to the user and get their explicit decision. Do not set
+    confirm=True on your own because the user asked earlier: they have not
+    seen what it deletes yet. Refused with confirm=True: a report whose status
+    or definition cannot be read.
 
     Args:
         report_id: The report UUID to delete (from generate_report or list_reports).
-        confirmed: Must be True to actually delete. Default False = preview only.
+        confirm: False (default) returns the blast radius and changes nothing.
+            True applies it.
+        confirmed: Deprecated alias for confirm; removed in the next minor
+            release. confirmed=False holds even when confirm=True.
         target: Aria target name from config; default when omitted.
     """
-    if not confirmed:
-        return {
-            "preview": True,
-            "action": "delete_report",
-            "report_id": report_id,
-            "message": (
-                f"[preview] Would permanently delete report {report_id}. "
-                "Re-invoke with confirmed=True to execute."
-            ),
-        }
-    try:
-        from vmware_aria.ops.reports import delete_report as _delete
+    from vmware_aria.ops import gate_measures
+    from vmware_aria.ops.reports import delete_report as _delete
+    from vmware_aria.ops.write_gate import gate, resolve_confirm
 
-        return _delete(
-            _get_connection(target),
-            report_id=report_id,
-            audit_logger=_audit,
-            target_name=_target_name(target),
+    decision = resolve_confirm(confirm, confirmed)
+
+    def run() -> dict:
+        client = _get_connection(target)
+        radius = gate_measures.measure_report(client, report_id)
+        return gate(
+            "delete_report", f"report {radius['report_id']}", radius, act=decision.act,
+            next_step="Check it with get_report and retry.",
+            apply=lambda: _delete(
+                client, report_id=report_id.strip(), audit_logger=_audit,
+                target_name=_target_name(target),
+            ),
         )
-    except Exception as e:
-        return {"error": _safe_error(e, "delete_report"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+
+    return _gated("delete_report", decision.deprecated, run)
 
 
 # ---------------------------------------------------------------------------
