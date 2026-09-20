@@ -95,16 +95,62 @@ def _safe_error(exc: Exception, tool: str) -> str:
 
 _audit = AuditLogger()
 
-mcp = FastMCP(
-    "vmware-aria",
-    instructions=(
-        "VMware Aria Operations (vRealize Operations) monitoring, alerting, and capacity planning. "
-        "Query VM/host/cluster metrics, manage alerts, check capacity and rightsizing recommendations, "
-        "detect anomalies, and monitor Aria platform health. "
-        "For VM lifecycle operations use vmware-aiops. "
-        "For NSX networking use vmware-nsx."
-    ),
+_BASE_INSTRUCTIONS = (
+    "VMware Aria Operations (vRealize Operations) monitoring, alerting, and capacity planning. "
+    "Query VM/host/cluster metrics, manage alerts, check capacity and rightsizing recommendations, "
+    "detect anomalies, and monitor Aria platform health. "
+    "For VM lifecycle operations use vmware-aiops. "
+    "For NSX networking use vmware-nsx."
 )
+
+_TARGET_RULE = (
+    " Choosing a target: every tool that queries Aria Operations takes `target`. "
+    "Choose it from what the user asked. If the request does not say which "
+    "instance, and more than one is configured, ask the user which one before "
+    "querying. A result does not repeat the target that answered, so pass "
+    "`target` explicitly and say in the answer which instance you queried."
+)
+
+
+def _target_instructions() -> str:
+    """Server instructions that name the configured targets and how to choose one.
+
+    ``initialize`` hands the client these instructions, and for a skill whose
+    every tool takes ``target`` that text is the only place the client learns
+    which targets exist. Without it the model calls tools with no target, gets
+    whatever ``default_target`` happens to be, and answers confidently about the
+    wrong system — measured on Monitor 2026-09-15, where a standalone ESXi host
+    was the default and "how many VMs does the vCenter have" was answered from
+    that host.
+
+    Built from the loaded config on every call rather than written out here: a
+    hardcoded sentence would drift from the operator's file the day they edit it.
+    Never raises — a missing or broken config must not stop the server from
+    starting, and the tools report that error themselves with the remedy.
+    """
+    try:
+        cfg = load_config()
+    except Exception as exc:  # noqa: BLE001 — instructions are advisory, startup is not
+        # Say so rather than dropping the listing: a client shown no listing at
+        # all cannot tell "this skill has no targets" from "this skill could not
+        # read them", and the first reading is the one that produces a confident
+        # answer about a system nobody chose. Only the exception's type — its
+        # text quotes the config path.
+        detail = f"could not be read ({type(exc).__name__}) — run `vmware-aria doctor`"
+    else:
+        listed = "; ".join(
+            f"{name} ({t.host}{', default' if name == cfg.default_target else ''})"
+            for name, t in cfg.targets.items()
+        )
+        detail = (
+            f"{listed}. Each is a VCF Operations / Aria Operations instance"
+            if listed
+            else "none yet — add one under `targets:` in ~/.vmware-aria/config.yaml"
+        )
+    return f"{_BASE_INSTRUCTIONS} Configured targets: {detail}.{_TARGET_RULE}"
+
+
+mcp = FastMCP("vmware-aria", instructions=_target_instructions())
 
 # FastMCP takes no version argument and leaves the lowlevel server's at
 # None, which makes `initialize` answer with the MCP SDK's version rather
