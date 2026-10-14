@@ -12,6 +12,14 @@ AI-assisted monitoring and capacity planning for VMware Aria Operations (vRealiz
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+## Upgrading to 2.0
+
+2.0 renames 4 MCP tools so every name starts with a verb (e.g. `findings_list` → `list_findings`, `fleet_certificate_list` → `list_fleet_certificates`, `fleet_domain_list` → `list_fleet_domains`). The full old → new table is in
+[RELEASE_NOTES.md](RELEASE_NOTES.md#v200--mcp-tools-renamed-verb-first). Nothing else changes: same tools, parameters,
+safety gates and CLI commands. If an agent prompt, script or `~/.vmware/rules.yaml` names a tool, update it — though deny
+rules written with the old names keep working with vmware-policy ≥ 1.18 (`vmware-audit policy` lists any rule the
+renames widened), and vmware-pilot ≥ 1.13 translates old names in saved workflows.
+
 ## Overview
 
 `vmware-aria` exposes 44 MCP tools for interacting with Aria Operations through natural language AI agents (Claude Code, Cursor, Goose, etc.):

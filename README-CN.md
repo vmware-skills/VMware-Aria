@@ -7,6 +7,13 @@
 
 通过 Model Context Protocol (MCP) 为 VMware Aria Operations（原 vRealize Operations）提供 AI 辅助的监控与容量规划能力。
 
+## 升级到 2.0
+
+2.0 把 4 个 MCP 工具改成动词在前（例如 `findings_list` → `list_findings`, `fleet_certificate_list` → `list_fleet_certificates`, `fleet_domain_list` → `list_fleet_domains`），完整的新旧名对照表见
+[RELEASE_NOTES.md](RELEASE_NOTES.md#v200--mcp-tools-renamed-verb-first)。其他都不变：工具、参数、安全确认门和 CLI 命令都一样。
+如果 agent 提示词、脚本或 `~/.vmware/rules.yaml` 里写了工具名，请改成新名——不过用旧名写的 deny 规则在
+vmware-policy ≥ 1.18 下仍然生效（`vmware-audit policy` 会列出因改名而多匹配的规则），vmware-pilot ≥ 1.13 也会自动转换已保存工作流里的旧名。
+
 ## 概述
 
 `vmware-aria` 提供 44 个 MCP 工具，支持通过自然语言 AI Agent（Claude Code、Cursor、Goose 等）与 Aria Operations 交互：
