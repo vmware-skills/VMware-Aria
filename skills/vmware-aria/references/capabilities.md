@@ -130,7 +130,7 @@ All requests carry `Authorization: vRealizeOpsToken <token>`.
 | `GET /suite-api/api/deployment/node/status` | get_aria_health (a 503 is read as a status, not an error), is_alive, list_adapters (the appliance clock, `systemTime`, for collection ages) |
 | `GET /suite-api/api/adapters` | list_adapters (unpaged) |
 | `GET /suite-api/api/deployment/node/services/info` | get_aria_health, doctor (per-service health) |
-| `GET /suite-api/api/versions/current` | get_aria_health, doctor "Aria version" row, and the version shown when a 9.0+ tool (fleet_*, list_findings, promql_query) is called on an older appliance |
+| `GET /suite-api/api/versions/current` | get_aria_health, doctor "Aria version" row, and the version shown when a 9.0+ tool (list_fleet_*, list_findings, promql_query) is called on an older appliance |
 | `GET /suite-api/api/collectorgroups` + `GET /suite-api/api/collectors` | list_collector_groups (groups carry member IDs; details enriched from /collectors) |
 
 ---
