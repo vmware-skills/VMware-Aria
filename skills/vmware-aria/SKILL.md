@@ -48,7 +48,7 @@ VMware Aria Operations (vRealize Operations 8.x, VCF Operations 9.x) AI-assisted
 ## Quick Install
 
 ```bash
-uv tool install vmware-aria==2.0.0
+uv tool install vmware-aria==2.0.1
 vmware-aria init      # guided setup: writes config + .env (chmod 600, password grep-safe), then verifies
 vmware-aria doctor
 ```
@@ -145,7 +145,7 @@ All MCP tools accept an optional `target`. The six destructive writes take `conf
 |----------|------|:----:|-------------|
 | Resource | `list_resources` | Read | List VMs, hosts, clusters by resource kind (or `all`); `collection_status` finds objects not receiving data |
 | | `get_resource` | Read | Get resource details with health, risk, efficiency badges |
-| | `get_resource_metrics` | Read | Time-series stats; `summary=true` gives n/min/max/avg/latest + change points; `missing` explains empty keys |
+| | `get_resource_metrics` | Read | Time-series stats; `interval_type=DAYS` for long windows; `summary=true` gives min/max/avg/latest; `missing` explains absent |
 | | `get_resource_health` | Read | Badge scores; service objects add `service.available` (a badge is not service state) |
 | | `get_top_consumers` | Read | Rank by last-hour average `value` (`latest_value` = newest point) |
 | | `list_metric_keys` | Read | Keys a resource reports with name/unit and `definition`, or a kind's defined keys — look up before querying |
@@ -300,7 +300,7 @@ Variable names follow the pattern `VMWARE_ARIA_<TARGET_NAME_UPPER>_PASSWORD` whe
 
 ### `invalid peer certificate: UnknownIssuer` when running uvx (corporate TLS proxy)
 
-`uvx` re-resolves dependencies from PyPI on every launch. Behind a corporate TLS-intercepting proxy whose CA is not in uv's bundled cert store, the handshake fails. Use the v1.5.15+ recommended single-command form `vmware-aria mcp` (after `uv tool install vmware-aria==2.0.0` — no network on launch), or set `UV_NATIVE_TLS=true` to make uv use the system cert store.
+`uvx` re-resolves dependencies from PyPI on every launch. Behind a corporate TLS-intercepting proxy whose CA is not in uv's bundled cert store, the handshake fails. Use the v1.5.15+ recommended single-command form `vmware-aria mcp` (after `uv tool install vmware-aria==2.0.1` — no network on launch), or set `UV_NATIVE_TLS=true` to make uv use the system cert store.
 
 ## Audit & Safety
 

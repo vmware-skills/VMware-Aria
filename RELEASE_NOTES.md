@@ -1,3 +1,34 @@
+## v2.0.1 — `get_resource_metrics` can return daily (or hourly) points
+
+Reported in [VMware-AIops#45](https://github.com/vmware-skills/VMware-AIops/issues/45): pulling a month of CPU
+utilisation was very expensive in tokens. The MCP tool and the CLI always asked Aria for one point per 5 minutes,
+which is about 8,600 points per key for a month. The ops layer already accepted a coarser resolution; neither entry
+point passed one on.
+
+- **MCP `get_resource_metrics`** takes `interval_type` (`MINUTES`, `HOURS`, `DAYS`, `WEEKS`, `MONTHS`) and
+  `interval_quantity` (≥ 1). Each point is `rollup_type` over that span, so `interval_type="DAYS"`,
+  `interval_quantity=1`, `rollup_type="AVG"` gives daily averages, about 30 points per key for a month. Combine
+  it with `summary=true` for one line per key. The defaults (`MINUTES`, `5`) keep the old behaviour.
+- **CLI `vmware-aria resource metrics`** has `--interval-type`, `--interval-quantity` and `--rollup` (the MCP tool
+  already had `rollup_type`; the CLI had no way to set it).
+- The result has a new `interval` field: the resolution asked for (`type`, `quantity`, `rollup`) and `applied`,
+  the resolution Aria echoes on each series (`intervalUnit` and `rollUpType`, which live 8.18.7 returns). An echo
+  that is missing a field or unreadable counts as "not said" (`series_without_echo`), never as a difference;
+  `applied` is `null` when no series gave a complete echo, and a `note` appears only when a complete echo differs
+  from the request. Spelling differences (case, a quantifier sent as `"5"`) are normalised first.
+- `interval_type`, `interval_quantity` and `rollup_type` are checked before connecting. Anything outside
+  `MINUTES`/`HOURS`/`DAYS`/`WEEKS`/`MONTHS`, a quantity below 1, or a rollup outside
+  `AVG`/`MAX`/`MIN`/`SUM`/`COUNT`/`LATEST` is refused with an error naming the valid values. Previously the MCP
+  tool sent any `rollup_type` string to Aria (upper-cased) without checking it.
+- With `rollup_type="AVG"`, the summary `max` over daily points is the highest daily average, not the peak. The
+  tool description now says to use `MAX` for peaks.
+- **Not yet verified against a live appliance through this tool:** DAYS with AVG, WEEKS and MONTHS. On a real
+  Aria Operations 8.18.7, MINUTES/5 and HOURS/1 with AVG have been captured (Aria echoed what was asked), and
+  DAYS/1 with MIN and MAX is used by the capacity tools. `applied` shows the resolution Aria reports for each
+  series.
+
+Not in this release: choosing which fields `get_resource` returns, and p95 in the summary.
+
 ## v2.0.0 — MCP tools renamed verb-first
 
 **Breaking for MCP clients.** The VMware skill family now follows one tool-naming convention: the verb comes
