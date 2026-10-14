@@ -35,10 +35,10 @@ from vmware_aria.ops.resources import get_resource
 #: resource name. Kinds absent from this map get an explanatory note instead of
 #: a guessed tool.
 _MONITOR_HANDOFF: dict[str, tuple[str, str]] = {
-    "VirtualMachine": ("vm_investigation_bundle", "vm_name"),
-    "HostSystem": ("host_investigation_bundle", "host_name"),
-    "Datastore": ("datastore_investigation_bundle", "datastore_name"),
-    "ClusterComputeResource": ("cluster_health_summary", "cluster_filter"),
+    "VirtualMachine": ("investigate_vm", "vm_name"),
+    "HostSystem": ("investigate_host", "host_name"),
+    "Datastore": ("investigate_datastore", "datastore_name"),
+    "ClusterComputeResource": ("get_cluster_health_summary", "cluster_filter"),
 }
 
 

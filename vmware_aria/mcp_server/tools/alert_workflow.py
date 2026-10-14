@@ -2,7 +2,7 @@
 
 add_alert_note is ``risk_level="low"`` with no confirmed gate: a note changes
 neither the alert nor monitoring, it only records text beside the alert — the
-same judgement the family made for VDI's session_send_message. It is still a
+same judgement the family made for VDI's send_vdi_session_message. It is still a
 [WRITE], audited, and @guarded on the CLI.
 """
 

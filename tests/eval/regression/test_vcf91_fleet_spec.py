@@ -457,10 +457,10 @@ def test_new_fleet_tools_register_on_the_mcp_server() -> None:
 
     names = {t.name for t in asyncio.run(mcp.list_tools())}
     for tool in (
-        "fleet_certificate_list",
-        "fleet_password_account_list",
-        "fleet_domain_list",
-        "findings_list",
+        "list_fleet_certificates",
+        "list_fleet_password_accounts",
+        "list_fleet_domains",
+        "list_findings",
         "promql_query",
     ):
         assert tool in names, f"{tool} not registered on the MCP server"
@@ -471,10 +471,10 @@ def test_new_fleet_tools_are_read_only() -> None:
 
     tools = {t.name: t for t in asyncio.run(mcp.list_tools())}
     for name in (
-        "fleet_certificate_list",
-        "fleet_password_account_list",
-        "fleet_domain_list",
-        "findings_list",
+        "list_fleet_certificates",
+        "list_fleet_password_accounts",
+        "list_fleet_domains",
+        "list_findings",
         "promql_query",
     ):
         ann = tools[name].annotations

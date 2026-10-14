@@ -1,7 +1,7 @@
 """FLEET + PromQL tools (5, read-only) — VCF Operations 9.1.
 
-fleet_certificate_list, fleet_password_account_list, fleet_domain_list,
-findings_list, promql_query.
+list_fleet_certificates, list_fleet_password_accounts, list_fleet_domains,
+list_findings, promql_query.
 
 All read-only (risk_level="low", readOnlyHint=True). These surface VCF
 Operations 9.1 fleet cert/password/domain status, diagnostic findings, and
@@ -19,7 +19,7 @@ _HINT = "Run 'vmware-aria doctor' to verify connectivity."
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
 @vmware_tool(risk_level="low")
-def fleet_certificate_list(limit: Optional[int] = 50, target: Optional[str] = None) -> dict:
+def list_fleet_certificates(limit: Optional[int] = 50, target: Optional[str] = None) -> dict:
     """[READ] List certificate status and expiry across the VCF fleet.
 
     Use this to spot certificates that are expired or expiring soon across all
@@ -41,12 +41,12 @@ def fleet_certificate_list(limit: Optional[int] = 50, target: Optional[str] = No
 
         return _fn(server._get_connection(target), limit=limit)
     except Exception as e:
-        return {"error": server._safe_error(e, "fleet_certificate_list"), "hint": _HINT}
+        return {"error": server._safe_error(e, "list_fleet_certificates"), "hint": _HINT}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
 @vmware_tool(risk_level="low")
-def fleet_password_account_list(limit: Optional[int] = 50, target: Optional[str] = None) -> dict:
+def list_fleet_password_accounts(limit: Optional[int] = 50, target: Optional[str] = None) -> dict:
     """[READ] List managed password-account status across the VCF fleet.
 
     Use this to review which fleet accounts Operations manages and their
@@ -67,12 +67,12 @@ def fleet_password_account_list(limit: Optional[int] = 50, target: Optional[str]
 
         return _fn(server._get_connection(target), limit=limit)
     except Exception as e:
-        return {"error": server._safe_error(e, "fleet_password_account_list"), "hint": _HINT}
+        return {"error": server._safe_error(e, "list_fleet_password_accounts"), "hint": _HINT}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
 @vmware_tool(risk_level="low")
-def fleet_domain_list(integration_id: str, limit: Optional[int] = 50, target: Optional[str] = None) -> dict:
+def list_fleet_domains(integration_id: str, limit: Optional[int] = 50, target: Optional[str] = None) -> dict:
     """[READ] List the SDDC/workload domains behind one registered VCF integration.
 
     Use this to enumerate the domains of a VCF integration registered in
@@ -99,12 +99,12 @@ def fleet_domain_list(integration_id: str, limit: Optional[int] = 50, target: Op
 
         return _fn(server._get_connection(target), integration_id=integration_id, limit=limit)
     except Exception as e:
-        return {"error": server._safe_error(e, "fleet_domain_list"), "hint": _HINT}
+        return {"error": server._safe_error(e, "list_fleet_domains"), "hint": _HINT}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
 @vmware_tool(risk_level="low")
-def findings_list(
+def list_findings(
     severities: Optional[str] = None,
     categories: Optional[str] = None,
     finding_types: Optional[str] = None,
@@ -143,7 +143,7 @@ def findings_list(
             limit=limit,
         )
     except Exception as e:
-        return {"error": server._safe_error(e, "findings_list"), "hint": _HINT}
+        return {"error": server._safe_error(e, "list_findings"), "hint": _HINT}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})

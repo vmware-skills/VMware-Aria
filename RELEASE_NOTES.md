@@ -1,3 +1,27 @@
+## v2.0.0 — MCP tools renamed verb-first
+
+**Breaking for MCP clients.** The VMware skill family now follows one tool-naming convention: the verb comes
+first (`list_…`, `get_…`), with a domain word added where two skills would otherwise collide. In this skill the
+other 40 tools already followed it; the four VCF Operations fleet/findings tools did not:
+
+| Old MCP tool name | New MCP tool name |
+|---|---|
+| `findings_list` | `list_findings` |
+| `fleet_certificate_list` | `list_fleet_certificates` |
+| `fleet_domain_list` | `list_fleet_domains` |
+| `fleet_password_account_list` | `list_fleet_password_accounts` |
+
+Parameters, results, annotations and behaviour are unchanged; the tool count (44: 34 read, 10 write) is unchanged.
+The CLI's audit records for `vmware-aria fleet …` now carry the new names.
+
+`investigate_alert`'s `next_step` hand-off now names vmware-monitor's 2.0 tools: `investigate_vm`,
+`investigate_host`, `investigate_datastore`, `get_cluster_health_summary`.
+
+**CLI commands are unchanged.**
+
+Deny rules in `~/.vmware/rules.yaml` written with old names keep working with vmware-policy ≥ 1.18.0 (it matches
+both names); `vmware-audit policy` lists any rule that now matches more.
+
 ## v1.17.0 — the MCP instructions name the configured targets
 
 `initialize` hands the client this server's `instructions`, and for a skill whose every tool takes a target that

@@ -122,9 +122,9 @@ def test_correlation_keys_always_present_even_when_unresolved():
 @pytest.mark.parametrize(
     ("kind", "tool", "arg"),
     [
-        ("VirtualMachine", "vm_investigation_bundle", "vm_name"),
-        ("HostSystem", "host_investigation_bundle", "host_name"),
-        ("Datastore", "datastore_investigation_bundle", "datastore_name"),
+        ("VirtualMachine", "investigate_vm", "vm_name"),
+        ("HostSystem", "investigate_host", "host_name"),
+        ("Datastore", "investigate_datastore", "datastore_name"),
     ],
 )
 def test_next_step_targets_the_matching_monitor_bundle(kind, tool, arg):
@@ -138,7 +138,7 @@ def test_next_step_targets_the_matching_monitor_bundle(kind, tool, arg):
 def test_next_step_for_cluster_uses_health_summary():
     client = _client(resource=_resource_payload(kind="ClusterComputeResource", name="prod"))
     next_step = investigate_alert(client, ALERT_ID)["next_step"]
-    assert next_step["tool"] == "cluster_health_summary"
+    assert next_step["tool"] == "get_cluster_health_summary"
     assert next_step["args"] == {"cluster_filter": "prod"}
 
 

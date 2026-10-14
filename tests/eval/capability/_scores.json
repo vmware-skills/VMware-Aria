@@ -11,10 +11,10 @@
           "list_symptom_definitions",
           "list_anomalies",
           "list_rightsizing_recommendations",
-          "fleet_certificate_list",
-          "fleet_password_account_list",
-          "fleet_domain_list",
-          "findings_list",
+          "list_fleet_certificates",
+          "list_fleet_password_accounts",
+          "list_fleet_domains",
+          "list_findings",
           "promql_query",
           "get_aria_health",
           "list_collector_groups",
@@ -97,7 +97,7 @@
     "manifest_context_headroom": {
       "detail": {
         "heaviest_tools": {
-          "findings_list": 327,
+          "list_findings": 327,
           "list_alerts": 402,
           "list_anomalies": 356,
           "list_symptom_definitions": 345,
@@ -214,16 +214,16 @@
             "gotcha"
           ],
           "delete_alert_definition": [],
-          "findings_list": [
+          "list_findings": [
             "next_hop"
           ],
-          "fleet_certificate_list": [
+          "list_fleet_certificates": [
             "next_hop"
           ],
-          "fleet_domain_list": [
+          "list_fleet_domains": [
             "next_hop"
           ],
-          "fleet_password_account_list": [
+          "list_fleet_password_accounts": [
             "next_hop"
           ]
         }

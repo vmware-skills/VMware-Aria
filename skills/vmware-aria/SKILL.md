@@ -48,7 +48,7 @@ VMware Aria Operations (vRealize Operations 8.x, VCF Operations 9.x) AI-assisted
 ## Quick Install
 
 ```bash
-uv tool install vmware-aria==1.17.0
+uv tool install vmware-aria==2.0.0
 vmware-aria init      # guided setup: writes config + .env (chmod 600, password grep-safe), then verifies
 vmware-aria doctor
 ```
@@ -182,10 +182,10 @@ All MCP tools accept an optional `target`. The six destructive writes take `conf
 | Maintenance | `start_resource_maintenance` | **Write** | Timed (`duration_minutes` / `end_time_ms`) or manual maintenance; before/after state; undo = end |
 | | `end_resource_maintenance` | **Write** | End maintenance; refuses a resource not known to be in maintenance |
 | | `list_maintenance_schedules` | Read | Recurring maintenance schedules, optionally for one `resource_id` |
-| Fleet / PromQL (VCF Ops 9.1) | `fleet_certificate_list` | Read | Certificate status/expiry across the VCF fleet |
-| | `fleet_password_account_list` | Read | Managed password-account status (read-only; does not rotate) |
-| | `fleet_domain_list` | Read | SDDC/workload domains behind one registered VCF integration |
-| | `findings_list` | Read | Operations diagnostic findings (not compliance — see vmware-harden) |
+| Fleet / PromQL (VCF Ops 9.1) | `list_fleet_certificates` | Read | Certificate status/expiry across the VCF fleet |
+| | `list_fleet_password_accounts` | Read | Managed password-account status (read-only; does not rotate) |
+| | `list_fleet_domains` | Read | SDDC/workload domains behind one registered VCF integration |
+| | `list_findings` | Read | Operations diagnostic findings (not compliance — see vmware-harden) |
 | | `promql_query` | Read | Real-time PromQL instant query via the VODAP service (base path INFERRED, unverified on real hardware) |
 
 **Read/write split**: 34 read-only, 10 write. All write operations are audit-logged to `~/.vmware/audit.db` (via vmware-policy).
@@ -300,7 +300,7 @@ Variable names follow the pattern `VMWARE_ARIA_<TARGET_NAME_UPPER>_PASSWORD` whe
 
 ### `invalid peer certificate: UnknownIssuer` when running uvx (corporate TLS proxy)
 
-`uvx` re-resolves dependencies from PyPI on every launch. Behind a corporate TLS-intercepting proxy whose CA is not in uv's bundled cert store, the handshake fails. Use the v1.5.15+ recommended single-command form `vmware-aria mcp` (after `uv tool install vmware-aria==1.17.0` — no network on launch), or set `UV_NATIVE_TLS=true` to make uv use the system cert store.
+`uvx` re-resolves dependencies from PyPI on every launch. Behind a corporate TLS-intercepting proxy whose CA is not in uv's bundled cert store, the handshake fails. Use the v1.5.15+ recommended single-command form `vmware-aria mcp` (after `uv tool install vmware-aria==2.0.0` — no network on launch), or set `UV_NATIVE_TLS=true` to make uv use the system cert store.
 
 ## Audit & Safety
 

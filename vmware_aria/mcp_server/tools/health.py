@@ -22,7 +22,7 @@ def get_aria_health(target: Optional[str] = None) -> dict:
     services (name, health, details; null when unreadable), services_not_ok,
     healthy, system_time_ms, details, and product_version / product_line
     ("8.x", "9.x") / release_name — check the line before assuming 9.x-only
-    tools (fleet_*, findings_list, promql_query) exist. A 503 is reported,
+    tools (fleet_*, list_findings, promql_query) exist. A 503 is reported,
     never raised. If HEALTHY but data looks stale, check list_collector_groups.
 
     Args:

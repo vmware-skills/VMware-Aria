@@ -990,7 +990,7 @@ def report_delete(
 
 @fleet_app.command("certificates")
 @_friendly_errors
-@audited("fleet_certificate_list")
+@audited("list_fleet_certificates")
 def fleet_certificates(
     limit: Annotated[int, typer.Option("--limit", "-n", help="Max rows")] = 50,
     target: TargetOption = None,
@@ -1014,7 +1014,7 @@ def fleet_certificates(
 
 @fleet_app.command("passwords")
 @_friendly_errors
-@audited("fleet_password_account_list")
+@audited("list_fleet_password_accounts")
 def fleet_passwords(
     limit: Annotated[int, typer.Option("--limit", "-n", help="Max rows")] = 50,
     target: TargetOption = None,
@@ -1038,7 +1038,7 @@ def fleet_passwords(
 
 @fleet_app.command("domains")
 @_friendly_errors
-@audited("fleet_domain_list")
+@audited("list_fleet_domains")
 def fleet_domains(
     integration_id: Annotated[str, typer.Argument(help="VCF integration UUID (from Operations Integrations page)")],
     limit: Annotated[int, typer.Option("--limit", "-n", help="Max rows")] = 50,
@@ -1068,7 +1068,7 @@ def fleet_domains(
 
 @fleet_app.command("findings")
 @_friendly_errors
-@audited("findings_list")
+@audited("list_findings")
 def fleet_findings(
     severities: Annotated[str | None, typer.Option("--severities", help="Comma-separated, e.g. CRITICAL,WARNING")] = None,
     categories: Annotated[str | None, typer.Option("--categories", help="Comma-separated category filter")] = None,

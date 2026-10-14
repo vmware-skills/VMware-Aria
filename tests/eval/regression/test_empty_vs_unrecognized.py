@@ -4,7 +4,7 @@ Two real-appliance failures from the 2026-08 VCF Operations 9.1 test run, both
 the same shape: the tool answered with an empty list and nothing else, and the
 agent reading it concluded the environment was clean.
 
-* ``fleet_domain_list`` reported 0 domains against a fleet that had one. The
+* ``list_fleet_domains`` reported 0 domains against a fleet that had one. The
   9.1 body is the ``VCFDomainSummaries`` model — three sibling arrays
   (configuredDomains / notConfiguredDomains / removedDomains) — and the parser
   was looking for a single ``domains`` container that the appliance never
@@ -109,7 +109,7 @@ def _alert_client(symptoms_body: object) -> MagicMock:
 
 
 # ---------------------------------------------------------------------------
-# fleet_domain_list — the real VCFDomainSummaries body
+# list_fleet_domains — the real VCFDomainSummaries body
 # ---------------------------------------------------------------------------
 
 
@@ -303,10 +303,10 @@ def test_get_alert_flags_symptoms_that_could_not_be_fetched() -> None:
 def test_mcp_docstrings_tell_the_agent_the_empty_result_may_be_unconfirmed() -> None:
     """An agent only knows to check a field if the tool description names it."""
     from vmware_aria.mcp_server.tools.alerts import get_alert
-    from vmware_aria.mcp_server.tools.fleet import fleet_domain_list
+    from vmware_aria.mcp_server.tools.fleet import list_fleet_domains
 
-    domain_doc = fleet_domain_list.__doc__ or ""
-    assert "note" in domain_doc, "fleet_domain_list must document the unconfirmed-shape note"
+    domain_doc = list_fleet_domains.__doc__ or ""
+    assert "note" in domain_doc, "list_fleet_domains must document the unconfirmed-shape note"
 
     alert_doc = get_alert.__doc__ or ""
     assert "symptoms_note" in alert_doc, "get_alert must document symptoms_note"

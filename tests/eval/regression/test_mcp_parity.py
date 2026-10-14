@@ -19,8 +19,8 @@ import asyncio
 import pytest
 
 # 28 base tools + 5 read tools added for VCF Operations 9.1 fleet/findings/PromQL
-# (fleet_certificate_list, fleet_password_account_list, fleet_domain_list,
-# findings_list, promql_query) → 33 total, 26 read, 7 write.
+# (list_fleet_certificates, list_fleet_password_accounts, list_fleet_domains,
+# list_findings, promql_query) → 33 total, 26 read, 7 write.
 # + 3 resource-catalog read tools (list_metric_keys, get_resource_properties,
 # get_resource_relationships), 2 platform self-check reads
 # (get_aria_node_resources, list_adapters), and maintenance / alert-workflow

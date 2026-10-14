@@ -44,8 +44,8 @@ Tool categories
   get_aria_node_resources, list_adapters — ``tools/health.py``
 
 * **Fleet / PromQL** (5 tools, read-only, VCF Operations 9.1):
-  fleet_certificate_list, fleet_password_account_list, fleet_domain_list,
-  findings_list, promql_query — ``tools/fleet.py``
+  list_fleet_certificates, list_fleet_password_accounts, list_fleet_domains,
+  list_findings, promql_query — ``tools/fleet.py``
 
 * **Reports** (5 tools, 4 read + 1 write... ): list_report_definitions,
   generate_report, list_reports, get_report (``tools/reports.py``);
@@ -146,10 +146,10 @@ from vmware_aria.mcp_server.tools.catalog import (  # noqa: F401
     list_metric_keys,
 )
 from vmware_aria.mcp_server.tools.fleet import (  # noqa: F401
-    findings_list,
-    fleet_certificate_list,
-    fleet_domain_list,
-    fleet_password_account_list,
+    list_findings,
+    list_fleet_certificates,
+    list_fleet_domains,
+    list_fleet_password_accounts,
     promql_query,
 )
 from vmware_aria.mcp_server.tools.health import (  # noqa: F401
@@ -208,10 +208,10 @@ __all__ = [
     "list_collector_groups",
     "get_aria_node_resources",
     "list_adapters",
-    "fleet_certificate_list",
-    "fleet_password_account_list",
-    "fleet_domain_list",
-    "findings_list",
+    "list_fleet_certificates",
+    "list_fleet_password_accounts",
+    "list_fleet_domains",
+    "list_findings",
     "promql_query",
     "list_report_definitions",
     "generate_report",
