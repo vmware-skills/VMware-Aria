@@ -94,8 +94,20 @@ Options:
                        [default: cpu|usage_average,mem|usage_average]
   --hours INT          History window in hours [default: 1]
   --summary            Per metric n/min/max/avg/latest and change points, instead of every point
+  --interval-type TEXT Span each point covers: MINUTES, HOURS, DAYS, WEEKS, MONTHS [default: MINUTES]
+  --interval-quantity INT
+                       Units of --interval-type per point, at least 1 [default: 5]
+  --rollup TEXT        Value per point: AVG, MAX, MIN, SUM, COUNT, LATEST [default: AVG]
   --target -t TEXT     Target name
 ```
+
+By default every point is one 5-minute sample, so a month is about 8,600 points per key. For long windows ask Aria to
+aggregate: `--hours 720 --interval-type DAYS --interval-quantity 1` returns about 30 daily averages per key (`--rollup MAX`
+for daily peaks; with AVG the summary `max` is the highest daily average, not the peak). The MCP tool takes the same
+`interval_type`, `interval_quantity` and `rollup_type`. Any other interval type or rollup, or a quantity below 1, is an
+error before connecting. `interval` in the output is the resolution requested; `applied` is what Aria reports it used
+(`null` when no series carried a complete echo; `series_without_echo` counts those that did not), and `note` appears
+only when a complete echo differs from the request.
 
 **Common metric keys** (VirtualMachine names and units as Aria Operations 8.18.7 defines them; other resource kinds differ):
 - `cpu|usage_average` — CPU|Usage (%)
@@ -113,6 +125,8 @@ Options:
   "window_begin_ms": 1757700000000,
   "window_end_ms": 1757703600000,
   "mode": "raw",
+  "interval": {"type": "MINUTES", "quantity": 5, "rollup": "AVG",
+               "applied": [{"type": "MINUTES", "quantity": 5, "rollup": "AVG"}], "series_without_echo": 0},
   "metrics": {"cpu|usage_average": [{"timestamp_ms": 1757700300000, "value": 3.2}]},
   "missing": [
     {"metric_key": "mem|usage_avg", "reason": "not_collected_for_resource",

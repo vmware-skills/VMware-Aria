@@ -45,6 +45,40 @@ _VALID_SORT_METRICS = {
     "net|usage_average",
 }
 
+# Sample resolutions get_resource_metrics will ask Aria for. Aria also knows
+# SECONDS and YEARS; collection is every 5 minutes, so neither is useful here.
+VALID_INTERVAL_TYPES = ("MINUTES", "HOURS", "DAYS", "WEEKS", "MONTHS")
+
+# Value each point carries: the rollup over its interval.
+VALID_ROLLUP_TYPES = ("AVG", "MAX", "MIN", "SUM", "COUNT", "LATEST")
+
+
+def normalize_interval(interval_type: str, interval_quantity: int, rollup_type: str) -> tuple[str, int, str]:
+    """Upper-case and check a metrics resolution; raise ValueError on anything else.
+
+    Entry points call this before connecting, so a typo is a teaching error
+    rather than a connection attempt.
+    """
+    interval_type = interval_type.upper()
+    if interval_type not in VALID_INTERVAL_TYPES:
+        raise ValueError(
+            f"interval_type {interval_type!r} is not supported. Use one of "
+            f"{', '.join(VALID_INTERVAL_TYPES)}, e.g. interval_type='DAYS' with "
+            "interval_quantity=1 for daily values."
+        )
+    if interval_quantity < 1:
+        raise ValueError(
+            f"interval_quantity must be 1 or more (got {interval_quantity}): it is "
+            "the number of interval_type units each point covers."
+        )
+    rollup_type = rollup_type.upper()
+    if rollup_type not in VALID_ROLLUP_TYPES:
+        raise ValueError(
+            f"rollup_type {rollup_type!r} is not supported. Use one of "
+            f"{', '.join(VALID_ROLLUP_TYPES)}: AVG for typical values, MAX for peaks."
+        )
+    return interval_type, interval_quantity, rollup_type
+
 # URL-length protection for GET /resources/stats/topn: each resourceId adds
 # ~40 chars to the query string; >100 IDs risks HTTP 414 (URI Too Long).
 _TOPN_MAX_RESOURCE_IDS = 100
@@ -348,8 +382,11 @@ def get_resource_metrics(
         begin_time_ms: Start of query window (epoch ms). Defaults to 1 hour ago.
         end_time_ms: End of query window (epoch ms). Defaults to now.
         rollup_type: Aggregation type: AVG, MAX, MIN, SUM, COUNT, LATEST.
-        interval_type: MINUTES, HOURS, DAYS, WEEKS, MONTHS.
-        interval_quantity: Number of interval_type units per data point.
+        interval_type: MINUTES, HOURS, DAYS, WEEKS, MONTHS (case-insensitive).
+            Anything else raises before a request is sent.
+        interval_quantity: Number of interval_type units per data point (>= 1).
+            Each point is rollup_type over that span, so DAYS/1/AVG gives
+            daily averages.
         summary: Return per-metric summaries (``summary``) instead of every
             point (``metrics``). The raw series is the default.
 
@@ -367,7 +404,11 @@ def get_resource_metrics(
         ``window_end_ms``. A resource id that does not exist is a 404 and raises.
         ``mode`` is ``raw`` or ``summary``; in summary mode ``metrics`` is
         replaced by ``summary``: metric key -> :func:`summarize_series` of its
-        points (n, min, max, avg, latest, change points).
+        points (n, min, max, avg, latest, change points). ``interval`` is the
+        resolution asked for, ``{type, quantity, rollup}``, plus ``applied``:
+        the distinct resolutions Aria echoes (``None`` when no series carried a
+        complete echo), ``series_without_echo``, and a ``note`` when a complete
+        echo differs from the request.
     """
     resource_id = require_uuid(resource_id, "resource_id", "resource", _RESOURCE_ID_HINT)
     if not metric_keys:
@@ -377,6 +418,10 @@ def get_resource_metrics(
             "there is no 'all metrics' mode. At the CLI these are the "
             "comma-separated values of --metrics/-m."
         )
+
+    interval_type, interval_quantity, rollup_type = normalize_interval(
+        interval_type, interval_quantity, rollup_type
+    )
 
     import time as _time
 
@@ -393,8 +438,8 @@ def get_resource_metrics(
         "statKey": list(metric_keys),
         "begin": begin_time_ms,
         "end": end_time_ms,
-        "rollUpType": rollup_type.upper(),
-        "intervalType": interval_type.upper(),
+        "rollUpType": rollup_type,
+        "intervalType": interval_type,
         "intervalQuantifier": interval_quantity,
     }
 
@@ -418,10 +463,55 @@ def get_resource_metrics(
         "window_begin_ms": begin_time_ms,
         "window_end_ms": end_time_ms,
         "mode": "summary" if summary else "raw",
+        "interval": _interval_report(data, interval_type, interval_quantity, rollup_type),
         **series,
         "missing": missing,
         "stat_keys_on_resource": key_count,
     }
+
+
+def _interval_report(data: dict, interval_type: str, interval_quantity: int, rollup_type: str) -> dict:
+    """The resolution asked for, and the one(s) Aria echoed on each stat.
+
+    Live 8.18.7 echoes ``rollUpType`` and ``intervalUnit`` per stat (seen with
+    MINUTES/5 and HOURS/1). What it does with a span it does not support has
+    not been observed, so the echo is reported rather than assumed to match.
+    An echo missing a field or unreadable is "not said" (counted in
+    ``series_without_echo``), never a difference.
+    """
+    requested = {"type": interval_type, "quantity": interval_quantity, "rollup": rollup_type}
+    applied: list[dict] = []
+    without_echo = 0
+    for value_entry in data.get("values", []):
+        stat_container = value_entry.get("stat-list") or value_entry.get("statList") or {}
+        for stat in stat_container.get("stat", []):
+            seen = _echoed_resolution(stat)
+            if seen is None:
+                without_echo += 1
+            elif seen not in applied:
+                applied.append(seen)
+    report: dict[str, Any] = {**requested, "applied": applied or None, "series_without_echo": without_echo}
+    if any(a != requested for a in applied):
+        report["note"] = (
+            "The resolution Aria reports in 'applied' differs from the one requested; "
+            "read the points at the applied resolution."
+        )
+    return report
+
+
+def _echoed_resolution(stat: dict) -> dict | None:
+    """``{type, quantity, rollup}`` from one stat's echo, or None when incomplete."""
+    unit = stat.get("intervalUnit")
+    if not isinstance(unit, dict):
+        return None
+    echo_type, quantity, rollup = unit.get("intervalType"), unit.get("quantifier"), stat.get("rollUpType")
+    if isinstance(quantity, str) and quantity.strip().isdigit():
+        quantity = int(quantity)
+    if not (isinstance(echo_type, str) and echo_type and isinstance(rollup, str) and rollup):
+        return None
+    if not isinstance(quantity, int) or isinstance(quantity, bool):
+        return None
+    return {"type": sanitize(echo_type).upper(), "quantity": quantity, "rollup": sanitize(rollup).upper()}
 
 
 def _parse_stat_series(data: dict) -> dict[str, list[dict]]:

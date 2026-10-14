@@ -331,20 +331,33 @@ def resource_metrics(
             help="Per metric n/min/max/avg/latest and the times the value changed, instead of every point",
         ),
     ] = False,
+    interval_type: Annotated[
+        str,
+        typer.Option("--interval-type", help="Span each point covers: MINUTES, HOURS, DAYS, WEEKS, MONTHS"),
+    ] = "MINUTES",
+    interval_quantity: Annotated[
+        int, typer.Option("--interval-quantity", help="Units of --interval-type per point (DAYS + 1 = daily)")
+    ] = 5,
+    rollup: Annotated[
+        str, typer.Option("--rollup", help="Value per point: AVG, MAX, MIN, SUM, COUNT, LATEST")
+    ] = "AVG",
     target: TargetOption = None,
     config: ConfigOption = None,
 ) -> None:
     """Fetch time-series metrics for a resource (raw points, or --summary)."""
     import time as _time
 
-    from vmware_aria.ops.resources import get_resource_metrics
+    from vmware_aria.ops.resources import get_resource_metrics, normalize_interval
 
+    interval_type, interval_quantity, rollup = normalize_interval(interval_type, interval_quantity, rollup)
     client, _ = _get_connection(target, config)
     metric_keys = [k.strip() for k in metrics.split(",") if k.strip()]
     end_ms = int(_time.time() * 1000)
     begin_ms = end_ms - (hours * 3_600_000)
     result = get_resource_metrics(
-        client, resource_id, metric_keys, begin_time_ms=begin_ms, end_time_ms=end_ms, summary=summary
+        client, resource_id, metric_keys, begin_time_ms=begin_ms, end_time_ms=end_ms,
+        rollup_type=rollup, interval_type=interval_type, interval_quantity=interval_quantity,
+        summary=summary,
     )
     _json_output(result)
 

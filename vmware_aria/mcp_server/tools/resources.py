@@ -94,6 +94,8 @@ def get_resource_metrics(
     metric_keys: list[str],
     hours: int = 1,
     rollup_type: str = "AVG",
+    interval_type: str = "MINUTES",
+    interval_quantity: int = 5,
     summary: bool = False,
     target: Optional[str] = None,
 ) -> dict:
@@ -107,7 +109,13 @@ def get_resource_metrics(
     key with no points: not_collected_for_resource with similar_keys to try,
     no_data_in_window, resource_reports_no_stat_keys, or undetermined).
     Never report a missing key as zero. Prefer summary=True for windows over a
-    few hours. For a single current score use get_resource_health instead.
+    few hours. Over days or weeks, set interval_type="DAYS" (or "HOURS"): the
+    default is one point per 5 minutes, about 8,600 per key for a month. Each
+    point is rollup_type over its span, so with AVG the summary max is the
+    highest daily average, not the peak: use rollup_type="MAX" for peaks.
+    interval in the result gives the resolution requested and, in applied, the
+    one Aria reports it used. For a single current score use
+    get_resource_health instead.
 
     Args:
         resource_id: The resource UUID.
@@ -115,6 +123,11 @@ def get_resource_metrics(
             "mem|usage_average", "disk|usage_average", "net|usage_average"].
         hours: Number of hours of history to retrieve. Default 1.
         rollup_type: Aggregation type: AVG, MAX, MIN, SUM, COUNT, LATEST. Default AVG.
+        interval_type: Span each point covers: MINUTES, HOURS, DAYS, WEEKS or
+            MONTHS. Default MINUTES. Each point is rollup_type over the span,
+            so DAYS with AVG gives daily averages.
+        interval_quantity: Number of interval_type units per point, at least 1.
+            Default 5 (with MINUTES: Aria's 5-minute collection).
         summary: Return per-metric summaries instead of every point. Default False.
         target: Aria target name from config; default when omitted.
     """
@@ -124,13 +137,21 @@ def get_resource_metrics(
         import time as _time
 
         from vmware_aria.ops.resources import get_resource_metrics as _get_metrics
+        from vmware_aria.ops.resources import normalize_interval
 
+        try:
+            interval_type, interval_quantity, rollup_type = normalize_interval(
+                interval_type, interval_quantity, rollup_type
+            )
+        except ValueError as e:
+            return {"error": server._safe_error(e, "get_resource_metrics")}
         client = server._get_connection(target)
         end_ms = int(_time.time() * 1000)
         begin_ms = end_ms - (hours * 3_600_000)
         return _get_metrics(
             client, resource_id, metric_keys, begin_time_ms=begin_ms, end_time_ms=end_ms,
-            rollup_type=rollup_type, summary=summary,
+            rollup_type=rollup_type, interval_type=interval_type,
+            interval_quantity=interval_quantity, summary=summary,
         )
     except Exception as e:
         return {"error": server._safe_error(e, "get_resource_metrics"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
