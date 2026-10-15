@@ -32,7 +32,7 @@ import re
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-SPEC_DIR = REPO_ROOT / "tests" / "eval" / "spec"
+SPEC_DIR = REPO_ROOT / "vmware_aria" / "api_spec"
 OLDEST_SPEC = SPEC_DIR / "vrops86_operations.json"
 PACKAGE = REPO_ROOT / "vmware_aria"
 

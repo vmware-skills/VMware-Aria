@@ -3,7 +3,7 @@
 Each function reads what a write would change, with endpoints this skill
 already calls (``GET /alerts/{id}``, ``GET /alertdefinitions/{id}``,
 ``GET /reports/{id}``, ``GET /resources/{id}``) — no new API surface, and every
-path is in the suite-api indexes under ``tests/eval/spec``.
+path is in the suite-api indexes under ``vmware_aria/api_spec``.
 
 A 404 is not a measurement problem: the id names nothing, so the connection
 layer's teaching error ("list the collection and copy an exact id") is raised

@@ -4,7 +4,7 @@ Guards the read tools added for VCF Operations 9.1 (vmware_aria/ops/fleet.py,
 vmware_aria/ops/promql.py) against 踩坑 #36 (a prior skill shipped hallucinated
 endpoints, half of which 404'd):
 
-* the endpoint spec is seeded at tests/eval/spec/vcf91_fleet_operations.json;
+* the endpoint spec is seeded at vmware_aria/api_spec/vcf91_fleet_operations.json;
 * every HTTP path the two new ops modules touch must resolve to a spec entry
   (AST scan of the two files + a check that each named path constant is listed);
 * behaviour is pinned against a fake client so a shape drift degrades to empty
@@ -27,7 +27,7 @@ from unittest.mock import MagicMock
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-VCF_SPEC_PATH = REPO_ROOT / "tests" / "eval" / "spec" / "vcf91_fleet_operations.json"
+VCF_SPEC_PATH = REPO_ROOT / "vmware_aria" / "api_spec" / "vcf91_fleet_operations.json"
 NEW_OPS_FILES = [
     REPO_ROOT / "vmware_aria" / "ops" / "fleet.py",
     REPO_ROOT / "vmware_aria" / "ops" / "promql.py",

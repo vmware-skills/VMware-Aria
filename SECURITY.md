@@ -26,11 +26,13 @@ Do **not** open a public GitHub issue for security vulnerabilities.
 
 ### Read-Heavy Design
 
-34 of 44 MCP tools are read-only. The 10 write operations are limited to:
+36 of 46 MCP tools are read-only. The 10 write operations are limited to:
 - Alert acknowledge, cancel and notes
 - Alert definition create, enable/disable and delete
 - Report generation and deletion
 - Resource maintenance mode start and end
+
+`get_api_path` (raw API escape hatch) issues `GET` only, and only for a path that matches a GET operation in the operation index shipped with the package; other methods, unindexed paths, `..`, `//`, query strings in the path and absolute URLs are refused before any request. Its answer is sanitized and capped at 30,000 characters.
 
 No VM lifecycle, no networking, no storage operations.
 

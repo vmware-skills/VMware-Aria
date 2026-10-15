@@ -24,7 +24,7 @@ against both the old and the new name, so one file serves both.
 
 ## Overview
 
-`vmware-aria` exposes 44 MCP tools for interacting with Aria Operations through natural language AI agents (Claude Code, Cursor, Goose, etc.):
+`vmware-aria` exposes 46 MCP tools for interacting with Aria Operations through natural language AI agents (Claude Code, Cursor, Goose, etc.):
 
 | Category | Tools | Type |
 |----------|-------|------|
@@ -37,8 +37,9 @@ against both the old and the new name, so one file serves both.
 | **Health** | platform health, collector groups, Aria node memory/swap/heap, adapter collection state | Read-only (4) |
 | **Maintenance** | start / end resource maintenance, maintenance schedules | Read + 2 Write (3) |
 | **Fleet / PromQL** (VCF Ops 9.1) | fleet certificates, password accounts, VCF domains, diagnostic findings, real-time PromQL query | Read-only (5) |
+| **Raw API** | search the API operation index, GET one indexed path — for reads no tool above covers | Read-only (2) |
 
-**Total**: 44 tools — 34 read-only, 10 write
+**Total**: 46 tools — 36 read-only, 10 write
 
 ## Quick Start
 
@@ -263,8 +264,9 @@ claude mcp add --transport http vmware-aria https://mcp.example.com:8443/mcp \
   before it binds that unauthenticated requests get 401. Use a certificate your clients trust for those names.
 - Behind a TLS-terminating reverse proxy on the same machine use `--transport http --host 127.0.0.1
   --public-name mcp.example.com` and pass the `Authorization` header through.
-- The audit log records each caller as `token:<name>`. Calls naming different targets run in parallel; calls that
-  name no target run one at a time, so name the target when several people share a server.
+- The audit log records each caller as `token:<name>`. Calls run side by side: each holds its own session to a
+  target, up to `VMWARE_MCP_POOL_SIZE` (default 2) sessions per target. Each session is a login on the target; a
+  call waits at most 300 s for a free one.
 - **Everyone who can reach the endpoint acts with this server's account.** Tokens identify callers; they grant
   nothing on the platform. Run one endpoint per privilege level.
 

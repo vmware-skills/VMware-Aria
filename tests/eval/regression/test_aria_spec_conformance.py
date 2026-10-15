@@ -10,7 +10,7 @@ against the official specification.
 This test AST-parses every ``client.<get|post|put|delete>("<path>")`` call
 in vmware_aria/ (ops + connection) and asserts the (method, path) pair
 exists in the official vROps 8.6 operation index stored at
-tests/eval/spec/vrops86_operations.json (315 operations, parsed from the
+vmware_aria/api_spec/vrops86_operations.json (315 operations, parsed from the
 official Swagger UI dump).
 
 Any future invented endpoint fails here instead of 404-ing in production.
@@ -25,7 +25,7 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-SPEC_DIR = REPO_ROOT / "tests" / "eval" / "spec"
+SPEC_DIR = REPO_ROOT / "vmware_aria" / "api_spec"
 SPEC_PATH = SPEC_DIR / "vrops86_operations.json"
 # VCF Operations 9.1 suite-api endpoints added for the fleet/findings/PromQL
 # read tools (vmware_aria/ops/fleet.py, promql.py). Merged into the matcher so

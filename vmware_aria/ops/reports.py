@@ -228,7 +228,7 @@ def _definition_title(client: "AriaClient", definition_id: str) -> str | None:
 
     ``GET /reports/{id}`` does not carry the title in any field, so it has to be
     fetched from ``GET /reportdefinitions/{id}`` (both paths verified against the
-    operation index in tests/eval/spec). Returns ``None`` -- never a guess and
+    operation index in vmware_aria/api_spec). Returns ``None`` -- never a guess and
     never the blurb -- when there is no definition id, the fetch fails, or the
     definition has no name. A caller can tell "no title available" from a title;
     it could not tell a title from a sentence.

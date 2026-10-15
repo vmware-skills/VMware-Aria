@@ -15,7 +15,7 @@ metadata: {"openclaw":{"requires":{"anyBins":["vmware-aria","uvx"]},"optional":{
 compatibility: >
   vmware-policy auto-installed as Python dependency (provides @vmware_tool decorator and audit logging). All write operations audited to ~/.vmware/audit.db.
   Credentials: Each Aria Operations target requires a per-target password env var in ~/.vmware-aria/.env following the pattern VMWARE_ARIA_<TARGET_NAME_UPPER>_PASSWORD. Passwords are never logged or echoed.
-  Read-heavy: 34 of 44 tools are read-only. Write operations limited to alert acknowledge/cancel, alert notes, alert definition management, report management, and resource maintenance start/end.
+  Read-heavy: 36 of 46 tools are read-only. Write operations limited to alert acknowledge/cancel, alert notes, alert definition management, report management, and resource maintenance start/end.
   No webhooks, no outbound network calls, no guest operations. Local only: stdio MCP + Aria Operations REST API (HTTPS 443).
   Transitive dependencies: Only vmware-policy (audit/policy). No post-install scripts or background services.
 ---
@@ -24,7 +24,7 @@ compatibility: >
 
 > **Disclaimer**: This is a community-maintained open-source project and is **not affiliated with, endorsed by, or sponsored by VMware, Inc. or Broadcom Inc.** "VMware" and "Aria" are trademarks of Broadcom. Source code is publicly auditable at [github.com/vmware-skills/VMware-Aria](https://github.com/vmware-skills/VMware-Aria) under the MIT license.
 
-VMware Aria Operations (vRealize Operations 8.x, VCF Operations 9.x) AI-assisted monitoring — 44 MCP tools for resources (metric keys, properties, relationships), alerts (notes, recommendations), alert definitions, capacity planning, anomaly detection, report automation, resource maintenance mode, platform health (Aria node memory, adapter collection), and VCF 9.1 fleet certificates/passwords/domains, diagnostic findings, and real-time PromQL metrics.
+VMware Aria Operations (vRealize Operations 8.x, VCF Operations 9.x) AI-assisted monitoring — 46 MCP tools, by category below.
 
 > **Know the version first**: `vmware-aria health status` (MCP `get_aria_health`) names the product line. Fleet, findings and PromQL exist only on VCF Operations 9.0+ (PromQL uses the 9.1 VODAP service); on 8.x they return a "requires 9.0 or newer" error, not data.
 > **Companion skills**: vmware-monitor (real-time vSphere), vmware-aiops (VM lifecycle), vmware-nsx (networking), vmware-avi (AVI/ALB/AKO), vmware-harden (compliance), vmware-pilot (approval workflows), vmware-policy (audit/policy).
@@ -42,8 +42,9 @@ VMware Aria Operations (vRealize Operations 8.x, VCF Operations 9.x) AI-assisted
 | **Health** | Aria platform health, collector group status, Aria node memory/swap/heap, adapter collection state | 4 |
 | **Maintenance** | start / end resource maintenance, list maintenance schedules | 3 |
 | **Fleet / PromQL** (VCF Ops 9.1) | fleet certificates, password accounts, VCF domains, diagnostic findings, real-time PromQL query | 5 |
+| **Raw API** | search the API operation index; GET one indexed path (read-only escape hatch) | 2 |
 
-**Total**: 44 tools (34 read-only + 10 write)
+**Total**: 46 tools (36 read-only + 10 write)
 
 ## Quick Install
 
@@ -61,6 +62,7 @@ vmware-aria doctor
 - **Capacity**: cluster headroom, time until full, VM rightsizing
 - **Reports**: generate, poll, download and delete reports
 - **Maintenance**: put a resource in maintenance before planned work (timed or until ended), end it, list maintenance schedules
+- **Anything else the API reads**: when no tool answers, `search_api_operations` then one `get_api_path` (GET of an indexed path only)
 - **Platform**: is Aria Operations itself healthy (DEGRADED vs DOWN, which service), which version and product line, collector groups, whether the Aria node is short of memory, which adapter stopped collecting
 
 For VM changes, NSX, vSphere alarms, storage or load balancing, route with the table below.
@@ -83,7 +85,7 @@ For VM changes, NSX, vSphere alarms, storage or load balancing, route with the t
 
 > **Troubleshooting paths**: step-by-step playbooks for a DEGRADED platform, alert triage, VM contention, empty metrics, pre-resize checks and planned maintenance — [`references/ops-playbooks.md`](references/ops-playbooks.md).
 >
-> **Diagnostic investigations**: Before running any "why is X slow / failing / down" workflow, follow [`references/investigation-protocol.md`](references/investigation-protocol.md). It enforces the four root-cause completeness criteria (falsifiability / sufficiency / necessity / mechanism) and the up-to-three-rounds deepening loop. Stopping at a partial conclusion is an anti-pattern — always self-check against the criteria before outputting a report.
+> **Diagnostic investigations**: before any "why is X slow / failing / down" report, follow [`references/investigation-protocol.md`](references/investigation-protocol.md) — four root-cause criteria and up to three deepening rounds; never stop at a partial conclusion.
 
 ### Daily VM Health Check (Proactive Ops)
 
@@ -110,7 +112,7 @@ For VM changes, NSX, vSphere alarms, storage or load balancing, route with the t
 
 ### Post-Incident: Create Detection Alert (RCA Follow-up)
 
-After resolving an incident, create an early-warning alert to prevent recurrence. Alert definition management is **MCP-only** (no CLI subcommands):
+After an incident, create an early-warning alert. Alert definition management is **MCP-only**:
 
 1. Find matching symptom definitions → MCP `list_symptom_definitions` (filter by `name_filter` / `resource_kind`)
 2. Create alert definition referencing symptoms → MCP `create_alert_definition` with name, resource_kind, symptom_definition_ids, criticality (any one symptom firing triggers the alert)
@@ -137,7 +139,7 @@ Running vmware-aria with a local or small model? See [`references/agent-guardrai
 
 Every command accepts `--target <name>` (every MCP tool `target`) to pick the Aria Operations instance.
 
-## MCP Tools (44 — 34 read, 10 write)
+## MCP Tools (46 — 36 read, 10 write)
 
 All MCP tools accept an optional `target`. The six destructive writes take `confirm`: without `confirm=true` they return a `blast_radius` and change nothing — show it to the user first.
 
@@ -187,8 +189,10 @@ All MCP tools accept an optional `target`. The six destructive writes take `conf
 | | `list_fleet_domains` | Read | SDDC/workload domains behind one registered VCF integration |
 | | `list_findings` | Read | Operations diagnostic findings (not compliance — see vmware-harden) |
 | | `promql_query` | Read | Real-time PromQL instant query via the VODAP service (base path INFERRED, unverified on real hardware) |
+| Raw API | `search_api_operations` | Read | Search the shipped 8.6 / 9.1 operation index; marks GET operations |
+| | `get_api_path` | Read | GET one indexed path (`{id}` filled in, query in `params`); sanitized, capped at 30,000 chars (`truncated`) |
 
-**Read/write split**: 34 read-only, 10 write. All write operations are audit-logged to `~/.vmware/audit.db` (via vmware-policy).
+**Read/write split**: 36 read-only, 10 write. All write operations are audit-logged to `~/.vmware/audit.db` (via vmware-policy).
 
 ### List results are envelopes — read `truncated` before you summarise
 
@@ -218,9 +222,7 @@ vmware-aria alert notes <alert-id>
 vmware-aria alert note-add <alert-id> "Taking this: rebooting esx-03"
 vmware-aria alert recommendations <alert-id>
 
-# Alert Definitions: creation/enable/disable/delete and symptom-definition
-# lookup are MCP-only tools (list_symptom_definitions, create_alert_definition,
-# set_alert_definition_state, delete_alert_definition) — no CLI subcommands.
+# Alert definitions and symptom lookup are MCP-only (no CLI subcommands).
 
 # Capacity
 vmware-aria capacity overview <cluster-id>
@@ -250,6 +252,10 @@ vmware-aria maintenance start <resource-id> --duration 60   # neither --duration
 vmware-aria maintenance end <resource-id>
 vmware-aria maintenance schedules [--resource-id <id>]
 
+# Raw API (read-only: GET of an indexed path only)
+vmware-aria api search "resource properties" [--limit 20]
+vmware-aria api get /api/resources/<id>/properties [--param pageSize=20]
+
 # Diagnostics
 vmware-aria doctor [--skip-auth]
 ```
@@ -277,14 +283,14 @@ VirtualMachine keys and units as defined on Aria Operations 8.18.7; other resour
 
 ### "Token not found" error after setup
 
-The token acquisition request failed. Verify:
+Token acquisition failed. Verify:
 1. Aria Ops is reachable: `vmware-aria doctor`
 2. The `auth_source` in config matches your environment (LOCAL, LDAP, AD)
 3. The password env var follows the naming convention: `VMWARE_ARIA_<TARGET>_PASSWORD`
 
 ### Resources appear missing from list_resources
 
-The collector agent may be offline. Check `list_collector_groups` for any collectors in a DOWN state. Restart the affected collector from the Aria Ops UI under Administration > Collector Groups.
+A collector may be offline: `list_collector_groups` shows DOWN ones. Restart it in the Aria Ops UI (Administration > Collector Groups).
 
 ### Metrics return empty data
 
@@ -296,11 +302,11 @@ The node flag is OFFLINE whenever any one service is not running. Read `assessme
 
 ### "Password not found" error
 
-Variable names follow the pattern `VMWARE_ARIA_<TARGET_NAME_UPPER>_PASSWORD` where hyphens become underscores. Example: target `prod` needs `VMWARE_ARIA_PROD_PASSWORD`. Check your `~/.vmware-aria/.env` file.
+Set `VMWARE_ARIA_<TARGET_NAME_UPPER>_PASSWORD` (hyphens become underscores; target `prod` → `VMWARE_ARIA_PROD_PASSWORD`) in `~/.vmware-aria/.env`.
 
 ### `invalid peer certificate: UnknownIssuer` when running uvx (corporate TLS proxy)
 
-`uvx` re-resolves dependencies from PyPI on every launch. Behind a corporate TLS-intercepting proxy whose CA is not in uv's bundled cert store, the handshake fails. Use the v1.5.15+ recommended single-command form `vmware-aria mcp` (after `uv tool install vmware-aria==2.2.0` — no network on launch), or set `UV_NATIVE_TLS=true` to make uv use the system cert store.
+`uvx` re-resolves from PyPI on every launch, and a TLS-intercepting proxy breaks that. Run `vmware-aria mcp` after `uv tool install vmware-aria==2.2.0` (no network on launch), or set `UV_NATIVE_TLS=true` to use the system cert store.
 
 ## Audit & Safety
 

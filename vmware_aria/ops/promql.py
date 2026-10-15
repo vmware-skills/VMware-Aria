@@ -13,7 +13,7 @@ The PromQL query itself is then issued to ``<host>/data-query-service/api/v1/que
 with ``Authorization: Bearer <jwt>`` (NOT the OpsToken header).
 
 Verification (踩坑 #36): the two suite-api paths above and the query path are
-all present in ``tests/eval/spec/vcf91_fleet_operations.json``. The
+all present in ``vmware_aria/api_spec/vcf91_fleet_operations.json``. The
 ``/data-query-service`` base *prefix* is marked INFERRED there — it comes from
 the Swagger UI location, not a wire capture, so it must be confirmed against a
 live appliance. Every returned envelope carries ``base_path_confirmed: False``
@@ -46,7 +46,7 @@ TOKEN_EXCHANGE_PATH = "/auth/token/exchange"
 
 #: VODAP real-time metrics is a 9.x capability: neither /integrations/services
 #: nor /auth/token/exchange appears in the vROps 8.6 operation index kept under
-#: tests/eval/spec/. Declared beside the paths for the same reason as the fleet
+#: vmware_aria/api_spec/. Declared beside the paths for the same reason as the fleet
 #: block: the requirement travels with the request it describes.
 REQUIRES_VODAP = Requires(
     product="VCF Operations",

@@ -1,7 +1,7 @@
 """MCP server wrapping VMware Aria Operations monitoring and capacity planning.
 
 This module exposes VMware Aria Operations management tools via the Model
-Context Protocol (MCP) using stdio transport.  The 44 tools are split by
+Context Protocol (MCP) using stdio transport.  The 46 tools are split by
 domain across ``vmware_aria/mcp_server/tools/*.py``; each module registers its tools onto
 the shared ``mcp`` instance defined in ``vmware_aria/mcp_server/_shared.py``.  Importing
 those modules below is what performs the registration.
@@ -59,6 +59,9 @@ Tool categories
   get_alert_recommendations (read); add_alert_note (write, low risk)
   — ``tools/alert_workflow.py``
 
+* **Raw API** (2 tools, read-only, HLD §17 D-18): search_api_operations,
+  get_api_path (GET of an indexed path only) — ``tools/api.py``
+
 Security considerations
 -----------------------
 * **Credential handling**: Credentials are loaded from environment
@@ -97,6 +100,7 @@ from vmware_aria.mcp_server.tools import (  # noqa: F401  (imported for registra
     alert_definitions,
     alert_workflow,
     alerts,
+    api,
     anomaly,
     capacity,
     catalog,
@@ -129,6 +133,10 @@ from vmware_aria.mcp_server.tools.alerts import (  # noqa: F401
     list_alert_definitions,
     list_alerts,
     list_symptom_definitions,
+)
+from vmware_aria.mcp_server.tools.api import (  # noqa: F401
+    get_api_path,
+    search_api_operations,
 )
 from vmware_aria.mcp_server.tools.anomaly import (  # noqa: F401
     get_resource_riskbadge,
@@ -224,6 +232,8 @@ __all__ = [
     "list_alert_notes",
     "add_alert_note",
     "get_alert_recommendations",
+    "search_api_operations",
+    "get_api_path",
 ]
 
 
@@ -471,6 +481,8 @@ def main(
         skill="aria",
         expose=expose, allow_write=allow_write, transport=transport, host=host, port=port,
         cert=cert, key=key, public_name=public_name, token_file=token_file,
+        # ConnectionManager gives each call its own AriaClient (HLD §16 D-13(2)).
+        pooled=True,
     )
 
 

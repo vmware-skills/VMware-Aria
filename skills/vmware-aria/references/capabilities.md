@@ -2,11 +2,11 @@
 
 ## Automation Level Reference
 
-Each operation is classified by autonomy level per the Enterprise Harness Engineering framework. **vmware-aria is heavily L1/L2 (34 read / 10 write)** — primarily a monitoring and analysis skill.
+Each operation is classified by autonomy level per the Enterprise Harness Engineering framework. **vmware-aria is heavily L1/L2 (36 read / 10 write)** — primarily a monitoring and analysis skill.
 
 | Level | Meaning | Agent autonomy | Examples in this skill |
 |:-:|---|---|---|
-| **L1** | Read-only, raw data | Always auto-run | `list_resources`, `get_resource`, `get_resource_metrics`, `list_metric_keys`, `get_resource_properties`, `get_resource_relationships`, `list_alerts`, `get_alert`, `list_alert_definitions`, `list_alert_notes`, `list_maintenance_schedules`, `get_aria_node_resources`, `list_adapters`, capacity / badge queries |
+| **L1** | Read-only, raw data | Always auto-run | `list_resources`, `get_resource`, `get_resource_metrics`, `list_metric_keys`, `get_resource_properties`, `get_resource_relationships`, `list_alerts`, `get_alert`, `list_alert_definitions`, `list_alert_notes`, `list_maintenance_schedules`, `get_aria_node_resources`, `list_adapters`, `search_api_operations`, `get_api_path`, capacity / badge queries |
 | **L2** | Read + analysis / recommendation | Always auto-run | `investigate_alert` (alert → confirmed affected resource), `get_alert_recommendations` (alert → definition state → prioritized recommendations), anomaly counts, top-N consumer ranking, capacity trend forecasting, rightsizing recommendations |
 | **L3** | Single write — user must approve | Only after explicit confirmation | `acknowledge_alert` (via takeownership action), `cancel_alert`, `create_alert_definition`, `set_alert_definition_state`, `delete_alert_definition`, `generate_report`, `delete_report`, `start_resource_maintenance`, `end_resource_maintenance`, `add_alert_note` *(the only writes; all auditable. On MCP, `acknowledge_alert`, `cancel_alert`, `delete_alert_definition`, `delete_report`, `start_resource_maintenance` and `end_resource_maintenance` take `confirm` (default false): without `confirm=true` they return a `blast_radius` — what the call would change — and change nothing; `confirm=true` is refused when a blocker is found or a field the radius depends on could not be read. `confirmed` is a deprecated alias. `add_alert_note` is low risk and has no gate — a note changes neither the alert nor monitoring; the CLI still asks once)* |
 | **L4** | Multi-step plan / apply workflow | *N/A currently* | — *(no multi-step orchestration; Aria is observe/analyze, not configure)* |
@@ -66,6 +66,13 @@ Each operation is classified by autonomy level per the Enterprise Harness Engine
 - **Collector group status**: list collector groups (member IDs) enriched with each collector's name, UP/DOWN state, and local flag
 - **Aria node resources**: `get_aria_node_resources` reads Aria's own self-monitoring objects (`vC-Ops-Node`, `vC-Ops-Watchdog`): per node memory (`mem|total`, `mem|used`, `mem|free`, `mem|actualFree`, `mem|actualUsed`), swap, heap overall and per component, and watchdog restarts per service. Each value has `latest`, `unit` (from Aria's statkey definitions, never assumed) and `window` min / avg / max / points over `window_hours` (1–720, default 24) of 5-minute averages. `memory_pressure.level` is an indicator: HIGH when actual free memory is below 10% of total, ELEVATED below 20%, NORMAL at 20% or more, UNKNOWN when the readings do not settle it. A key with no value is in the node's `missing` list (`not_reported` / `no_data` / `undetermined`), never zeroed; `watchdog_restarts: null` is unknown, not zero. On Aria Operations 8.18.7 after a memory upgrade the node read `mem|total` 15.61 GB (was 7.75), actual free 41%, pressure NORMAL, and 9 watchdog services with 0 restarts
 - **Adapter collection state**: `list_adapters` — each adapter instance's kind, collector, monitoring interval, resources and metrics collected, last collected and last heartbeat with ages in seconds, its own message, and `stale`: true when the last collection is older than max(3 × monitoring interval, 15 minutes), false within that, null when the fields cannot support a verdict (`stale_basis` shows the arithmetic). Ages use the appliance clock from node status when it is available (`reference_clock`). An empty or unrecognised answer is an error, never "no adapters". A recent collection does not prove every object behind the adapter receives data. On Aria Operations 8.18.7 all 6 adapters were not stale
+
+### Raw API (read-only escape hatch)
+
+For a read no tool above covers (HLD §17 D-18). Prefer the dedicated tools: their results are shaped, paginated and explained.
+
+- **`search_api_operations(query, limit=20)`**: searches the suite-api operation index shipped in the package (`vmware_aria/api_spec/`: vROps 8.6, 315 operations; VCF Operations 9.1, 504 operations plus the verified fleet subset). Every word must appear in method, path or summary; path matches rank first, then GET. Each row: `method`, `path` template, `summary`, `indexes` (`8.6` / `9.1`) and `callable_with_get_api_path` (true only for GET). `limit` 1–100. Contacts no appliance. Typical response: ~1,500 tokens at the default limit
+- **`get_api_path(path, params=None, target=None)`**: one `GET` through the target's client (its token, retry and error translation). `path` must match a GET operation of the index with every `{name}` replaced by one segment (letters, digits, space, `- . _ ~ : @ + , =`). Refused before any request: other methods, unindexed paths, `..` / `.` / `//`, `?` or `#` in `path` (use `params`), URLs, percent-encoding, non-string `params`. A 9.x appliance (read from `/versions/current`) is held to the 9.1 index; on 8.x, or when the version cannot be read, a path in either index is accepted — the 8.6 index is the only 8.x specification held and 8.18 answers paths it lacks; a path the appliance does not have returns a 404 error. Every string in the answer is sanitized (control/format characters stripped, cut to 500 characters). Answers over 30,000 characters of JSON (about 8k tokens — one resource or one page of a list fits; an unpaged list, 1,000 rows by default, does not) return `truncated: true`, `original_size` and `body_text` (cut, not valid JSON): page with `params` such as `pageSize`. Audited like every call. The account's Aria roles still decide what it can read. Typical response: 500–8,000 tokens
 
 ---
 
@@ -132,6 +139,7 @@ All requests carry `Authorization: vRealizeOpsToken <token>`.
 | `GET /suite-api/api/deployment/node/services/info` | get_aria_health, doctor (per-service health) |
 | `GET /suite-api/api/versions/current` | get_aria_health, doctor "Aria version" row, and the version shown when a 9.0+ tool (list_fleet_*, list_findings, promql_query) is called on an older appliance |
 | `GET /suite-api/api/collectorgroups` + `GET /suite-api/api/collectors` | list_collector_groups (groups carry member IDs; details enriched from /collectors) |
+| Any `GET` in the shipped index (`vmware_aria/api_spec/`) | get_api_path (GET only; path must match an indexed GET operation) |
 
 ---
 
@@ -194,4 +202,4 @@ Reading rules for an agent:
 | Anomaly detection | 7.5+ |
 | Suite API v2 paths used | 8.0+ |
 
-Endpoints are checked against the vROps 8.6 and VCF Operations 9.1 API indexes in `tests/eval/spec/`. Live-verified on Aria Operations 8.18.7 (2026-09): resources, metrics, alerts and symptoms, rightsizing, health, doctor, node resources, adapters, alert recommendations, and reads of maintenance schedules and alert notes (none existed).
+Endpoints are checked against the vROps 8.6 and VCF Operations 9.1 API indexes in `vmware_aria/api_spec/`. Live-verified on Aria Operations 8.18.7 (2026-09): resources, metrics, alerts and symptoms, rightsizing, health, doctor, node resources, adapters, alert recommendations, and reads of maintenance schedules and alert notes (none existed).

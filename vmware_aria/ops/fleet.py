@@ -9,7 +9,7 @@ Four read-only queries added for VCF Operations 9.1:
 
 The four *paths* are VERIFIED against the VCF Operations 9.1 OpenAPI
 (vcf-operations-openapi.json) and seeded into
-``tests/eval/spec/vcf91_fleet_operations.json`` — the spec-conformance
+``vmware_aria/api_spec/vcf91_fleet_operations.json`` — the spec-conformance
 regression guards them against 踩坑 #36. The response *schemas* are not
 verified, and are therefore read without depending on having guessed a name:
 the row container is located by name where we know one and by *shape* where we
@@ -59,7 +59,7 @@ PASSWORD_ACCOUNT_QUERY_PATH = "/fleet-management/password-management/accounts/qu
 FINDINGS_QUERY_PATH = "/diagnostics/findings/query"
 
 #: These four queries exist only on VCF Operations 9.x — they are absent from the
-#: vROps 8.6 operation index this repo keeps under tests/eval/spec/, which is the
+#: vROps 8.6 operation index this repo keeps under vmware_aria/api_spec/, which is the
 #: mechanical evidence, not a recollection. Declared here, beside the paths, so
 #: the requirement and the request are one edit rather than two (形态 #6).
 #:
@@ -169,7 +169,7 @@ def _extract_rows(data: Any, *keys: str) -> tuple[list[dict], bool]:
         _log.info(
             "VCF fleet response used container key %r, which is not one of the "
             "names this skill knows (%s); read it by shape. Worth recording in "
-            "tests/eval/spec if it is what this appliance always sends.",
+            "vmware_aria/api_spec if it is what this appliance always sends.",
             key,
             ", ".join(keys),
         )

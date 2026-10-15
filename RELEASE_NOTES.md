@@ -1,3 +1,26 @@
+## Unreleased — calls run side by side; read-only raw API escape hatch
+
+**Calls no longer wait for each other** (HLD §16 D-13(2), via vmware-policy 1.22.0). When one server serves several
+callers (`--transport https` / `http`), each call now holds its own connection to a target for as long as it runs,
+up to `VMWARE_MCP_POOL_SIZE` (default 2) connections per target. Each connection is a login on Aria Operations with
+its own token, so two calls never share or refresh one token. A call that finds every connection busy waits at most
+300 s, then fails naming the target. The CLI and stdio keep one connection per target, as before.
+
+**Two new read tools for questions no tool answers** (HLD §17 D-18; 44 → 46 tools, 36 read / 10 write):
+
+* `search_api_operations(query, limit=20)` searches the suite-api operation index now shipped in the package
+  (`vmware_aria/api_spec/`: vROps 8.6 and VCF Operations 9.1). It marks which operations are GET and which index
+  documents each. It contacts no appliance.
+* `get_api_path(path, params, target)` issues one `GET` through the target's existing client (token, retry, error
+  messages). The path must match a GET operation in the index; other methods, unindexed paths, `..`, `//`, `?` or `#`
+  in the path, URLs, percent-encoding and non-string params are refused before any request. A 9.x appliance is held to
+  the 9.1 index; on 8.x, or when the version cannot be read, either index is accepted. Strings are sanitized; answers
+  over 30,000 characters of JSON come back `truncated: true` with `original_size` — page with `pageSize`.
+* CLI: `vmware-aria api search <words>` and `vmware-aria api get <path> [--param NAME=VALUE]`, audited under the same
+  tool names.
+
+The account's Aria roles still decide what can be read. Requires `vmware-policy>=1.22.0`.
+
 ## v2.2.0 — serve MCP over HTTPS
 
 `vmware-aria mcp` can now serve the network as well as stdio (HLD §16, via vmware-policy 1.21.0):

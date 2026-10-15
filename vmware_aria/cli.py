@@ -1171,6 +1171,8 @@ def fleet_promql(
 import vmware_aria.cli_catalog  # noqa: E402,F401
 # `health node` / `health adapters` live in cli_platform.py; importing it registers them.
 from vmware_aria import cli_platform  # noqa: E402,F401
+# `api search` / `api get` (HLD §17 D-18) live in cli_api.py; importing it registers them.
+from vmware_aria import cli_api  # noqa: E402,F401
 # Maintenance and alert notes/recommendations register onto the apps above from
 # cli_workflow.py (keeps this file under its size limit). Must stay last.
 from vmware_aria import cli_workflow  # noqa: E402,F401

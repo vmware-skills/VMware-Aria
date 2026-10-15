@@ -22,6 +22,7 @@ from typing import Any
 import httpx
 from vmware_policy import sanitize
 from vmware_policy.compat import Requires, version_remedy
+from vmware_policy.pool import SessionPool
 
 from vmware_aria.config import AppConfig, TargetConfig, load_config
 
@@ -674,11 +675,28 @@ class AriaClient:
 
 
 class ConnectionManager:
-    """Manages connections to multiple Aria Operations targets."""
+    """Manages connections to multiple Aria Operations targets.
+
+    Sessions come from a :class:`vmware_policy.pool.SessionPool` (HLD §16
+    D-13(2)). A session here is one :class:`AriaClient` — its own HTTP pool and
+    its own token, which it refreshes in place — so two calls must never share
+    one. Inside an MCP call scope each call holds its own client per target
+    (up to ``VMWARE_MCP_POOL_SIZE`` per target); outside one (CLI, stdio) every
+    caller gets the target's one dedicated client, as before.
+    """
 
     def __init__(self, config: AppConfig) -> None:
         self._config = config
-        self._clients: dict[str, AriaClient] = {}
+        self._pool: SessionPool[AriaClient] = SessionPool(
+            "aria",
+            create=self._create_client,
+            # Same probe as before pooling: a successful probe is trusted for
+            # _LIVENESS_TTL_SEC, so back-to-back calls do not re-probe.
+            is_alive=lambda client: client.is_alive_cached(),
+            # Releases the token and closes the HTTP connection pool, so a
+            # replaced or discarded client leaks neither.
+            close=lambda client: client.close(),
+        )
 
     @classmethod
     def from_config(cls, config: AppConfig | None = None) -> ConnectionManager:
@@ -686,8 +704,7 @@ class ConnectionManager:
         cfg = config or load_config()
         return cls(cfg)
 
-    def connect(self, target_name: str | None = None) -> AriaClient:
-        """Get or create an AriaClient for the specified target."""
+    def _resolve(self, target_name: str | None) -> tuple[str, TargetConfig]:
         name = target_name or self._config.default_target
         if not name:
             configured = ", ".join(self._config.targets.keys())
@@ -696,15 +713,6 @@ class ConnectionManager:
                 f"Configured targets: {configured or '(none)'}. Pass target=<name> "
                 f"explicitly, or set 'default_target' in ~/.vmware-aria/config.yaml."
             )
-
-        if name in self._clients:
-            if self._clients[name].is_alive_cached():
-                return self._clients[name]
-            # Stale client: release its token and close the HTTP connection
-            # pool before replacing it, so sockets don't leak across reconnects.
-            self._clients[name].close()
-            del self._clients[name]
-
         target_cfg = self._config.get_target(name)
         if target_cfg is None:
             available = ", ".join(self._config.targets.keys())
@@ -713,25 +721,28 @@ class ConnectionManager:
                 f"Pass --target with one of those names, or add a '{name}' entry "
                 f"under 'targets:' in ~/.vmware-aria/config.yaml and re-run."
             )
+        return name, target_cfg
 
+    def _create_client(self, name: str) -> AriaClient:
+        _, target_cfg = self._resolve(name)
         # Resolve both halves of the credential together — a username left
         # behind by a rotation would pair with the new password and fail.
         password = target_cfg.get_password(name)
         username = target_cfg.get_username(name)
-        client = AriaClient(target_cfg, password, username)
-        self._clients[name] = client
-        return client
+        return AriaClient(target_cfg, password, username)
+
+    def connect(self, target_name: str | None = None) -> AriaClient:
+        """Get or create an AriaClient for the specified target (default target if None)."""
+        name, _ = self._resolve(target_name)
+        return self._pool.get(name)
 
     def disconnect(self, target_name: str) -> None:
-        """Close and remove a client."""
-        if target_name in self._clients:
-            self._clients[target_name].close()
-            del self._clients[target_name]
+        """Close the target's clients (busy ones when their calls finish)."""
+        self._pool.discard(target_name)
 
     def disconnect_all(self) -> None:
         """Disconnect from all targets."""
-        for name in list(self._clients):
-            self.disconnect(name)
+        self._pool.close_all()
 
     def list_targets(self) -> list[str]:
         """List available target names."""
@@ -739,4 +750,4 @@ class ConnectionManager:
 
     def list_connected(self) -> list[str]:
         """List currently connected target names."""
-        return list(self._clients.keys())
+        return self._pool.keys()

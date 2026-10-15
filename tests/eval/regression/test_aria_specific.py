@@ -744,17 +744,20 @@ def test_stale_client_closed_before_replacement(monkeypatch) -> None:
     mgr = ConnectionManager(cfg)
 
     stale = MagicMock(name="stale-client")
-    stale.is_alive_cached.return_value = False
-    mgr._clients["t1"] = stale
-
     fresh = MagicMock(name="fresh-client")
+    fresh.is_alive_cached.return_value = True
+    made = iter([stale, fresh])
     monkeypatch.setenv("VMWARE_ARIA_T1_PASSWORD", "pw")
-    monkeypatch.setattr("vmware_aria.connection.AriaClient", lambda t, p, u=None: fresh)
+    monkeypatch.setattr("vmware_aria.connection.AriaClient", lambda t, p, u=None: next(made))
+
+    assert mgr.connect("t1") is stale  # first connect builds it
+    stale.is_alive_cached.return_value = False  # then its session dies
 
     result = mgr.connect("t1")
 
     stale.close.assert_called_once()
     assert result is fresh
+    fresh.close.assert_not_called()
 
 
 # ── CLI surfaces operational errors as one line, not a traceback ────────

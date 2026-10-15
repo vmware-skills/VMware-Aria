@@ -15,7 +15,7 @@ bill of health, and it did its job here — but a tool that answers "unknown" fo
 a 32-certificate fleet is still not answering.
 
 The response *schemas* of these three query endpoints are NOT recorded: only
-their *paths* are VERIFIED (tests/eval/spec/vcf91_fleet_operations.json). That
+their *paths* are VERIFIED (vmware_aria/api_spec/vcf91_fleet_operations.json). That
 is exactly the reason the parse must stop depending on the name. So these tests
 do not assert one spelling — they assert the property the name-guessing broke:
 **every way an appliance can package a list of records must yield the records,

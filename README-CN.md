@@ -17,7 +17,7 @@ vmware-policy ≥ 1.18 下仍然生效（`vmware-audit policy` 会列出因改�
 
 ## 概述
 
-`vmware-aria` 提供 44 个 MCP 工具，支持通过自然语言 AI Agent（Claude Code、Cursor、Goose 等）与 Aria Operations 交互：
+`vmware-aria` 提供 46 个 MCP 工具，支持通过自然语言 AI Agent（Claude Code、Cursor、Goose 等）与 Aria Operations 交互：
 
 | 类别 | 工具 | 类型 |
 |------|------|------|
@@ -30,8 +30,9 @@ vmware-policy ≥ 1.18 下仍然生效（`vmware-audit policy` 会列出因改�
 | **健康** | 平台健康、采集器状态、Aria 节点内存/交换/堆、适配器采集状态 | 只读 (4) |
 | **维护** | 开始 / 结束资源维护模式、维护计划 | 读+2写 (3) |
 | **Fleet / PromQL**（VCF Ops 9.1） | Fleet 证书、密码账户、VCF 域、诊断发现、实时 PromQL 查询 | 只读 (5) |
+| **原始 API** | 搜索 API 操作索引、GET 一个索引内的路径 —— 用于上面工具都覆盖不到的读取 | 只读 (2) |
 
-**共 44 个工具** — 34 只读、10 写操作
+**共 46 个工具** — 36 只读、10 写操作
 
 ## 快速开始
 
@@ -242,8 +243,8 @@ claude mcp add --transport http vmware-aria https://mcp.example.com:8443/mcp \
   证书要用客户端信任、且覆盖这些名字的证书。
 - 在同一台机器上由反向代理终结 TLS 时，用 `--transport http --host 127.0.0.1 --public-name mcp.example.com`，
   并让代理透传 `Authorization` 头。
-- 审计日志把每个调用者记为 `token:<名字>`。指定不同 target 的调用并行执行；不指定 target 的调用逐个执行，
-  所以多人共用一个 server 时请写明 target。
+- 审计日志把每个调用者记为 `token:<名字>`。调用并行执行：每个调用独占一个到 target 的会话，每个 target 最多
+  `VMWARE_MCP_POOL_SIZE`（默认 2）个会话。每个会话都是在 target 上的一次登录；调用最多等待 300 秒拿到空闲会话。
 - **能连到这个端点的人，都以该 server 配置的账号操作。** token 只用来识别调用者，不在平台上授予任何权限。
   每个权限级别单独起一个端点。
 

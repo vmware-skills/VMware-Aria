@@ -791,6 +791,43 @@ Options:
 
 ---
 
+## Raw API Commands (read-only escape hatch)
+
+For reads no other command covers. The MCP tools are `search_api_operations` and `get_api_path`; both are audited under those names.
+
+### `vmware-aria api search`
+
+Search the suite-api operation index shipped with this skill (vROps 8.6 and VCF Operations 9.1). Contacts no appliance.
+
+```
+vmware-aria api search <query> [OPTIONS]
+vmware-aria api search "resource properties"
+
+Options:
+  --limit -n INT    Operations to show, 1-100 [default: 20]
+```
+
+**Output**: Table of Method, Path, Indexes (`8.6`, `9.1`) and Summary; non-GET methods are dimmed — only GET paths can be read with `api get`.
+
+### `vmware-aria api get`
+
+GET one indexed suite-api path through the target's client and print the JSON answer.
+
+```
+vmware-aria api get <path> [OPTIONS]
+vmware-aria api get /api/resources/<id>/properties
+vmware-aria api get /api/alerts --param pageSize=20 --param page=0
+
+Options:
+  --param -p TEXT   Query parameter NAME=VALUE; repeatable
+  --target -t TEXT  Target name
+  --config -c PATH  Config file path
+```
+
+**Output**: `{path, operation, index, product_version, truncated, body}`. `path` must match a GET operation of the index with each `{name}` replaced by a value; other methods, unindexed paths, `..`, `//`, `?` or `#` in the path, URLs and percent-encoding are refused before connecting (exit 2). On a 9.x appliance only the 9.1 index applies; on 8.x, or when the version cannot be read, either index. Strings are sanitized and cut to 500 characters; over 30,000 characters of JSON the answer is `truncated: true` with `original_size` and `body_text` (cut, not valid JSON) — page with `--param pageSize=...`.
+
+---
+
 ## Exit Codes
 
 | Code | Meaning |

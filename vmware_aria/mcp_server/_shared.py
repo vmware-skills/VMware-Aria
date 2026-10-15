@@ -24,6 +24,7 @@ keep resolving.
 import logging
 import os
 import ssl
+import threading
 from pathlib import Path
 from typing import Any, Optional
 
@@ -162,17 +163,25 @@ mcp._mcp_server.version = __version__
 # ---------------------------------------------------------------------------
 
 _conn_mgr: Optional[ConnectionManager] = None
+# Calls run in worker threads at once (HLD §16): without the lock two first
+# calls could each build a manager, and the loser's pool — with its logins —
+# would be dropped unclosed.
+_conn_mgr_lock = threading.Lock()
 
 
 def _get_connection(target: Optional[str] = None) -> Any:
     """Return an AriaClient, lazily initialising the connection manager."""
     global _conn_mgr  # noqa: PLW0603
-    if _conn_mgr is None:
-        config_path_str = os.environ.get("VMWARE_ARIA_CONFIG")
-        config_path = Path(config_path_str) if config_path_str else None
-        config = load_config(config_path)
-        _conn_mgr = ConnectionManager(config)
-    return _conn_mgr.connect(target)
+    mgr = _conn_mgr
+    if mgr is None:
+        with _conn_mgr_lock:
+            if _conn_mgr is None:
+                config_path_str = os.environ.get("VMWARE_ARIA_CONFIG")
+                config_path = Path(config_path_str) if config_path_str else None
+                config = load_config(config_path)
+                _conn_mgr = ConnectionManager(config)
+            mgr = _conn_mgr
+    return mgr.connect(target)
 
 
 def _target_name(target: Optional[str]) -> str:

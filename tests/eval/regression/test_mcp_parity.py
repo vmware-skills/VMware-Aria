@@ -26,9 +26,11 @@ import pytest
 # (get_aria_node_resources, list_adapters), and maintenance / alert-workflow
 # tools: 3 read (list_maintenance_schedules, list_alert_notes,
 # get_alert_recommendations) and 3 write (start_resource_maintenance,
-# end_resource_maintenance, add_alert_note) → 44 total, 34 read, 10 write.
-EXPECTED_TOOL_COUNT = 44
-EXPECTED_READ_COUNT = 34
+# end_resource_maintenance, add_alert_note) → 44 total, 34 read, 10 write;
+# + 2 raw-API reads (search_api_operations, get_api_path; HLD §17 D-18)
+# → 46 total, 36 read, 10 write.
+EXPECTED_TOOL_COUNT = 46
+EXPECTED_READ_COUNT = 36
 EXPECTED_WRITE_COUNT = 10
 
 
