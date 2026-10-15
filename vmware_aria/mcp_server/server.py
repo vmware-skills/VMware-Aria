@@ -449,12 +449,14 @@ from vmware_aria.policy_environment import _cached_config, _environment_for  # n
 # ---------------------------------------------------------------------------
 
 
-def main() -> None:
+def main(expose: Optional[str] = None, allow_write: Optional[str] = None) -> None:
     """Start the MCP server using stdio transport."""
     logging.basicConfig(
         level=logging.WARNING,
         format="%(asctime)s %(name)s %(levelname)s %(message)s",
     )
+    from vmware_policy.exposure import apply_or_exit
+    apply_or_exit(mcp, skill="aria", expose=expose, allow_write=allow_write)
     mcp.run()
 
 
