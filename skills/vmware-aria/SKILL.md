@@ -49,7 +49,7 @@ VMware Aria Operations (vRealize Operations 8.x, VCF Operations 9.x) AI-assisted
 ## Quick Install
 
 ```bash
-uv tool install vmware-aria==2.2.0
+uv tool install vmware-aria==2.3.0
 vmware-aria init      # guided setup: writes config + .env (chmod 600, password grep-safe), then verifies
 vmware-aria doctor
 ```
@@ -306,7 +306,7 @@ Set `VMWARE_ARIA_<TARGET_NAME_UPPER>_PASSWORD` (hyphens become underscores; targ
 
 ### `invalid peer certificate: UnknownIssuer` when running uvx (corporate TLS proxy)
 
-`uvx` re-resolves from PyPI on every launch, and a TLS-intercepting proxy breaks that. Run `vmware-aria mcp` after `uv tool install vmware-aria==2.2.0` (no network on launch), or set `UV_NATIVE_TLS=true` to use the system cert store.
+`uvx` re-resolves from PyPI on every launch, and a TLS-intercepting proxy breaks that. Run `vmware-aria mcp` after `uv tool install vmware-aria==2.3.0` (no network on launch), or set `UV_NATIVE_TLS=true` to use the system cert store.
 
 ## Audit & Safety
 

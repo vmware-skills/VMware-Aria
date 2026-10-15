@@ -1,4 +1,4 @@
-## Unreleased — calls run side by side; read-only raw API escape hatch
+## v2.3.0 — calls run side by side; read-only raw API escape hatch
 
 **Calls no longer wait for each other** (HLD §16 D-13(2), via vmware-policy 1.22.0). When one server serves several
 callers (`--transport https` / `http`), each call now holds its own connection to a target for as long as it runs,
