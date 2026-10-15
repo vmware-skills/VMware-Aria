@@ -30,6 +30,7 @@ from typing import Any, Optional
 
 from mcp.server.fastmcp import FastMCP
 from vmware_policy import sanitize
+from vmware_policy.pool import PoolTimeoutError
 
 from vmware_aria.config import ConfigError, load_config
 from vmware_aria.connection import AriaApiError, ConnectionManager
@@ -88,7 +89,10 @@ def _safe_error(exc: Exception, tool: str) -> str:
         return f"{type(exc).__name__}: operation failed."
     if isinstance(
         exc,
-        (AriaApiError, ValueError, FileNotFoundError, KeyError, PermissionError, ConnectionError, ConfigError),
+        (
+            AriaApiError, ValueError, FileNotFoundError, KeyError, PermissionError, ConnectionError, ConfigError,
+            PoolTimeoutError,  # vmware-policy's own text: the target and the remedy, nothing from the platform
+        ),
     ):
         return sanitize(str(exc), 300)
     return f"{type(exc).__name__}: operation failed."

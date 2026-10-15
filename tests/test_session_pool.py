@@ -196,3 +196,17 @@ def test_unknown_target_teaches_before_any_login(made: list[FakeClient]) -> None
     with pytest.raises(ValueError, match="Available: prod, lab"):
         _manager().connect("nope")
     assert made == []
+
+
+def test_pool_timeout_reaches_the_agent_with_its_remedy() -> None:
+    from vmware_policy.pool import PoolTimeoutError
+
+    from vmware_aria.mcp_server.server import _safe_error
+
+    msg = _safe_error(
+        PoolTimeoutError(
+            "All 2 aria sessions to target 'prod' stayed busy for 300 s. Retry ..., or raise VMWARE_MCP_POOL_SIZE"
+        ),
+        "list_alerts",
+    )
+    assert "VMWARE_MCP_POOL_SIZE" in msg and "'prod'" in msg
