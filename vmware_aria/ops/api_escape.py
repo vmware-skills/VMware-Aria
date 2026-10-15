@@ -60,7 +60,8 @@ _STRING_MAX = 500
 #: What one ``{id}`` segment may hold: ids, keys, names. No ``%`` (an encoded
 #: ``..`` or ``/``), no ``/``, ``?``, ``#`` or backslash.
 _SEGMENT = r"[A-Za-z0-9._~:@+,= -]+"
-_SAFE_PATH = re.compile(r"^/[A-Za-z0-9._~:@+,=/ -]*$")
+# \Z, not $: `$` also matches before a trailing newline.
+_SAFE_PATH = re.compile(r"^/[A-Za-z0-9._~:@+,=/ -]*\Z")
 
 _SEARCH_HINT = "Call search_api_operations with words from what you want (e.g. 'resource properties') to find the path."
 
@@ -77,7 +78,7 @@ class Operation:
 def _compile(path: str) -> re.Pattern[str]:
     parts = re.split(r"(\{[^}/]+\})", path)
     body = "".join(_SEGMENT if p.startswith("{") else re.escape(p) for p in parts)
-    return re.compile(f"^{body}$")
+    return re.compile(f"^{body}\\Z")
 
 
 @functools.lru_cache(maxsize=1)

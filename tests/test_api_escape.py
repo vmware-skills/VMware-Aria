@@ -183,3 +183,11 @@ def test_built_wheel_ships_the_index(tmp_path: Path) -> None:
     names = set(zipfile.ZipFile(wheel).namelist())
     for name in ("vrops86_operations.json", "vcfops91_operations.json", "vcf91_fleet_operations.json"):
         assert f"vmware_aria/api_spec/{name}" in names
+
+
+@pytest.mark.parametrize("tail", ["\n", "\r\n", "\n/../x"])
+def test_a_trailing_newline_is_refused_before_any_request(tail):
+    from vmware_aria.ops.api_escape import check_request
+
+    with pytest.raises(ValueError):
+        check_request("/api/resources" + tail, None)
