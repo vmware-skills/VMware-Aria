@@ -1,3 +1,11 @@
+## v2.4.0 — roles for network callers (HLD §18)
+
+* Declares the role metadata vmware-policy ≥ 1.24.0 needs to apply **roles** to this server over HTTPS
+  (HLD §18): how a missing target resolves, and that `get_api_path` escapes a role (it reads any indexed API path, account and credential listings included). With an older vmware-policy nothing changes. Once an operator runs
+  `vmware-audit roles enable`, a token's role decides which tools and targets it may use here; a refused call is
+  audited as `denied`. See vmware-policy's README, "Roles for network callers".
+* README and setup guide: one endpoint for several people or roles.
+
 ## v2.3.0 — calls run side by side; read-only raw API escape hatch
 
 **Calls no longer wait for each other** (HLD §16 D-13(2), via vmware-policy 1.22.0). When one server serves several

@@ -16,19 +16,19 @@ Complete setup and security guide for `vmware-aria`.
 ### Via uv (recommended)
 
 ```bash
-uv tool install vmware-aria==2.3.0
+uv tool install vmware-aria==2.4.0
 ```
 
 ### Via pip
 
 ```bash
-pip install vmware-aria==2.3.0
+pip install vmware-aria==2.4.0
 ```
 
 ### From source
 
 ```bash
-git clone --branch v2.3.0 https://github.com/vmware-skills/VMware-Aria.git
+git clone --branch v2.4.0 https://github.com/vmware-skills/VMware-Aria.git
 cd VMware-Aria
 pip install -e .
 ```
@@ -194,7 +194,7 @@ Add to `~/.claude.json` (or use `claude mcp add`):
 
 > v1.5.15+ recommends `vmware-aria mcp`. Pre-1.5.15 used the legacy
 > `vmware-aria-mcp` console script (still kept for backward compatibility).
-> If using `uvx --from vmware-aria==2.3.0 vmware-aria mcp` and you hit
+> If using `uvx --from vmware-aria==2.4.0 vmware-aria mcp` and you hit
 > `invalid peer certificate: UnknownIssuer` behind a corporate TLS proxy,
 > set `UV_NATIVE_TLS=true` or use the recommended form above.
 
@@ -270,6 +270,7 @@ vmware-aria mcp --transport https --host 0.0.0.0 --port 8443 \
 - **Everyone who can reach the endpoint acts with this server's account.** Tokens identify callers; they grant
   nothing on the platform. Run one endpoint per privilege level (for example a read-only account behind
   `--expose read`, and a separate endpoint for operators).
+- **Several people or roles on one endpoint:** give each token a role (`vmware-audit token create NAME --role reader`, or a role in `roles.yaml` naming tools and targets; vmware-policy ≥ 1.24.0). A role limits what the token may call on this endpoint; it cannot grant more than the account has. See vmware-policy's README, "Roles for network callers".
 
 ## Docker Deployment
 
