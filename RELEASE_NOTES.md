@@ -4,7 +4,7 @@
   (HLD §18): how a missing target resolves, and that `get_api_path` escapes a role (it reads any indexed API path, account and credential listings included). With an older vmware-policy nothing changes. Once an operator runs
   `vmware-audit roles enable`, a token's role decides which tools and targets it may use here; a refused call is
   audited as `denied`. See vmware-policy's README, "Roles for network callers".
-* A target-limited role is checked against the same config the connection uses: the config as loaded at startup. Edit `config.yaml` and restart for both to see the change.
+* A target-limited role is checked against the same config the connection uses: the copy the server's connection manager loaded on its first connection. Edit `config.yaml` and restart for both to see the change.
 * README and setup guide: one endpoint for several people or roles.
 
 ## v2.3.0 — calls run side by side; read-only raw API escape hatch
