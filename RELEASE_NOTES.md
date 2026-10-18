@@ -1,9 +1,11 @@
-## Unreleased — a target-limited role can use this skill
+## v2.4.1 — a target-limited role can use this skill
 
 * **Roles (HLD §18): the target resolver raised on every call.** It read a `name` field that this skill's target
   config does not have, so every call by a token whose role lists targets was refused as "cannot be resolved".
   Tokens with the built-in `admin` / `reader` roles, stdio and the CLI were not affected. Found on Log-Insight
   (same code in five skills); the new test calls the resolver on a real loaded config.
+
+* Requires `mcp` ≥ 1.30, a security floor (GHSA-84m7-p3x7-pcfv).
 
 ## v2.4.0 — roles for network callers (HLD §18)
 
