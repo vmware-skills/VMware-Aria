@@ -162,3 +162,63 @@ def test_mcp_summary_option(monkeypatch):
 
     assert "error" not in result, result
     assert result["summary"]["badge|health"]["latest"] == 25.0
+
+
+# Aria#22 (from AIops#45): p95 in the summary, from the points already fetched.
+
+
+@pytest.mark.unit
+def test_summary_gives_p95_by_nearest_rank():
+    from vmware_aria.ops.metric_summary import summarize_series
+
+    # 1..100: the 95th of 100 sorted values is 95, an observed value, not an interpolation.
+    summary = summarize_series(_series([float(v) for v in reversed(range(1, 101))]))
+
+    assert summary["p95"] == 95.0
+    assert summary["p95_unavailable"] is None
+
+
+@pytest.mark.unit
+def test_p95_needs_enough_points_and_says_why_when_it_has_too_few():
+    from vmware_aria.ops import metric_summary
+
+    enough = metric_summary.summarize_series(_series([float(v) for v in range(metric_summary.MIN_POINTS_FOR_P95)]))
+    too_few = metric_summary.summarize_series(_series([float(v) for v in range(metric_summary.MIN_POINTS_FOR_P95 - 1)]))
+
+    assert enough["p95"] is not None
+    assert too_few["p95"] is None
+    assert str(metric_summary.MIN_POINTS_FOR_P95) in too_few["p95_unavailable"]
+
+
+@pytest.mark.unit
+def test_p95_of_no_points_is_unknown_not_zero():
+    from vmware_aria.ops.metric_summary import summarize_series
+
+    summary = summarize_series([{"timestamp_ms": T0, "value": None}])
+
+    assert summary["p95"] is None
+    assert summary["p95_unavailable"]
+
+
+@pytest.mark.unit
+def test_p95_ignores_points_that_are_not_numbers():
+    from vmware_aria.ops import metric_summary
+
+    # 20 numbers 1..20 and 30 non-numeric points: p95 is rank ceil(0.95 * 20) = 19 of the
+    # numbers alone. Counting the 30 would move it.
+    points = _series([float(v) for v in range(1, 21)]) + [{"timestamp_ms": T0 + 99 * STEP, "value": None}] * 30
+    summary = metric_summary.summarize_series(points)
+
+    assert summary["n"] == 20
+    assert summary["p95"] == 19.0
+
+
+@pytest.mark.unit
+def test_get_resource_metrics_summary_carries_p95():
+    from vmware_aria.ops.resources import get_resource_metrics
+
+    client = MagicMock()
+    client.post.return_value = _stats_body({"cpu|usage_average": [float(v) for v in range(1, 101)]})
+    result = get_resource_metrics(client, RID, ["cpu|usage_average"], summary=True)
+
+    assert result["summary"]["cpu|usage_average"]["p95"] == 95.0

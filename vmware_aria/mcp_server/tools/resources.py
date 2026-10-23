@@ -103,7 +103,7 @@ def get_resource_metrics(
 
     Returns mode ("raw" or "summary"), then metrics (raw: metric key -> list
     of {timestamp_ms, value} points, only keys with points) or summary
-    (summary=True: per key n, min, max, avg, latest, first/latest timestamps,
+    (summary=True: per key n, min, max, avg, p95, latest, first/latest timestamps,
     change_count and change_points — {timestamp_ms, from, to} where the value
     changed, at most 50, most recent kept), and missing (one entry per requested
     key with no points: not_collected_for_resource with similar_keys to try,
@@ -113,6 +113,8 @@ def get_resource_metrics(
     default is one point per 5 minutes, about 8,600 per key for a month. Each
     point is rollup_type over its span, so with AVG the summary max is the
     highest daily average, not the peak: use rollup_type="MAX" for peaks.
+    p95 is likewise over the returned points (with DAYS it is the p95 of daily
+    values) and null, with p95_unavailable, below 20 points.
     interval in the result gives the resolution requested and, in applied, the
     one Aria reports it used. For a single current score use
     get_resource_health instead.
