@@ -147,7 +147,7 @@ All MCP tools accept an optional `target`. The six destructive writes take `conf
 |----------|------|:----:|-------------|
 | Resource | `list_resources` | Read | List VMs, hosts, clusters by resource kind (or `all`); `collection_status` finds objects not receiving data |
 | | `get_resource` | Read | Get resource details with health, risk, efficiency badges |
-| | `get_resource_metrics` | Read | Time-series stats; `interval_type=DAYS` for long windows; `summary=true` gives min/max/avg/latest; `missing` explains absent |
+| | `get_resource_metrics` | Read | Time-series stats; `interval_type=DAYS` for long windows; `summary=true` gives min/max/avg/p95/latest; `missing` explains absent |
 | | `get_resource_health` | Read | Badge scores; service objects add `service.available` (a badge is not service state) |
 | | `get_top_consumers` | Read | Rank by last-hour average `value` (`latest_value` = newest point) |
 | | `list_metric_keys` | Read | Keys a resource reports with name/unit and `definition`, or a kind's defined keys — look up before querying |

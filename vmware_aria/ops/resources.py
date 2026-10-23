@@ -404,7 +404,7 @@ def get_resource_metrics(
         ``window_end_ms``. A resource id that does not exist is a 404 and raises.
         ``mode`` is ``raw`` or ``summary``; in summary mode ``metrics`` is
         replaced by ``summary``: metric key -> :func:`summarize_series` of its
-        points (n, min, max, avg, latest, change points). ``interval`` is the
+        points (n, min, max, avg, p95, latest, change points). ``interval`` is the
         resolution asked for, ``{type, quantity, rollup}``, plus ``applied``:
         the distinct resolutions Aria echoes (``None`` when no series carried a
         complete echo), ``series_without_echo``, and a ``note`` when a complete

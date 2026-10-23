@@ -361,7 +361,7 @@ def resource_metrics(
         bool,
         typer.Option(
             "--summary",
-            help="Per metric n/min/max/avg/latest and the times the value changed, instead of every point",
+            help="Per metric n/min/max/avg/p95/latest and the times the value changed, instead of every point",
         ),
     ] = False,
     interval_type: Annotated[

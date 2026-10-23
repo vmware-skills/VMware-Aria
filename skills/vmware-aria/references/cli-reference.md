@@ -93,7 +93,7 @@ Options:
   --metrics -m TEXT    Comma-separated metric keys
                        [default: cpu|usage_average,mem|usage_average]
   --hours INT          History window in hours [default: 1]
-  --summary            Per metric n/min/max/avg/latest and change points, instead of every point
+  --summary            Per metric n/min/max/avg/p95/latest and change points, instead of every point
   --interval-type TEXT Span each point covers: MINUTES, HOURS, DAYS, WEEKS, MONTHS [default: MINUTES]
   --interval-quantity INT
                        Units of --interval-type per point, at least 1 [default: 5]
@@ -146,10 +146,13 @@ only keys that `sanitize()` leaves unchanged and that are at most 200 characters
 A missing key is not a zero. (Before this change the output was a bare object keyed by metric.)
 
 With `--summary` (MCP `summary=true`) `mode` is `summary` and `metrics` is replaced by `summary`: per key `n`, `min`,
-`max`, `avg`, `latest`, `first_timestamp_ms`, `latest_timestamp_ms`, `change_count`, `change_points` (each
+`max`, `avg`, `p95`, `latest`, `first_timestamp_ms`, `latest_timestamp_ms`, `change_count`, `change_points` (each
 `{timestamp_ms, from, to}` where the value differed from the point before — e.g. `badge|health` 100 → 25; at most 50,
 the most recent kept, `change_points_truncated` says when more were dropped) and `non_numeric_points`. `missing` is
 unchanged. A continuously varying metric such as CPU usage changes at almost every point, so read `change_count` there.
+`p95` is the nearest-rank 95th percentile of the numeric points, an observed value. It is over the points as returned,
+so with `--interval-type DAYS` it is the p95 of daily values, not of the 5-minute samples. With fewer than 20 numeric
+points it is `null` and `p95_unavailable` says why.
 
 ### `vmware-aria resource health`
 
