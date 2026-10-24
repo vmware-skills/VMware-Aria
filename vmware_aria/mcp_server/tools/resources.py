@@ -65,7 +65,7 @@ def list_resources(
             collection_status=collection_status,
         )
     except Exception as e:
-        return {"error": server._safe_error(e, "list_resources"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "list_resources"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -84,7 +84,7 @@ def get_resource(resource_id: str, target: Optional[str] = None) -> dict:
 
         return _get(server._get_connection(target), resource_id)
     except Exception as e:
-        return {"error": server._safe_error(e, "get_resource"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "get_resource"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -156,7 +156,7 @@ def get_resource_metrics(
             interval_quantity=interval_quantity, summary=summary,
         )
     except Exception as e:
-        return {"error": server._safe_error(e, "get_resource_metrics"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "get_resource_metrics"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -189,7 +189,7 @@ def get_resource_health(resource_id: str, target: Optional[str] = None) -> dict:
 
         return _get_health(server._get_connection(target), resource_id)
     except Exception as e:
-        return {"error": server._safe_error(e, "get_resource_health"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "get_resource_health"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -225,4 +225,4 @@ def get_top_consumers(
 
         return _get_top(server._get_connection(target), metric_key=metric_key, resource_kind=resource_kind, top_n=top_n)
     except Exception as e:
-        return {"error": server._safe_error(e, "get_top_consumers"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "get_top_consumers"), "hint": server._hint_for(e)}

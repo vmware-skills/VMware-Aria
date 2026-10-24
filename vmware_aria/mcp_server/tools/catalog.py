@@ -13,7 +13,6 @@ from vmware_policy import vmware_tool
 from vmware_aria.mcp_server._shared import mcp
 
 _READ = {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True}
-_DOCTOR_HINT = "Run 'vmware-aria doctor' to verify connectivity."
 
 
 @mcp.tool(annotations=_READ)
@@ -52,7 +51,7 @@ def list_metric_keys(
             adapter_kind=adapter_kind, key_filter=key_filter, limit=limit, offset=offset,
         )
     except Exception as e:
-        return {"error": server._safe_error(e, "list_metric_keys"), "hint": _DOCTOR_HINT}
+        return {"error": server._safe_error(e, "list_metric_keys"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations=_READ)
@@ -82,7 +81,7 @@ def get_resource_properties(
 
         return _props(server._get_connection(target), resource_id, name_filter=name_filter, limit=limit, offset=offset)
     except Exception as e:
-        return {"error": server._safe_error(e, "get_resource_properties"), "hint": _DOCTOR_HINT}
+        return {"error": server._safe_error(e, "get_resource_properties"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations=_READ)
@@ -115,4 +114,4 @@ def get_resource_relationships(
             relationship_type=relationship_type, limit=limit, offset=offset,
         )
     except Exception as e:
-        return {"error": server._safe_error(e, "get_resource_relationships"), "hint": _DOCTOR_HINT}
+        return {"error": server._safe_error(e, "get_resource_relationships"), "hint": server._hint_for(e)}

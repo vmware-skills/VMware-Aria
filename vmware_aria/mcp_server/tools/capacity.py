@@ -27,7 +27,7 @@ def get_capacity_overview(cluster_id: str, target: Optional[str] = None) -> dict
 
         return _get(server._get_connection(target), cluster_id)
     except Exception as e:
-        return {"error": server._safe_error(e, "get_capacity_overview"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "get_capacity_overview"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -46,7 +46,7 @@ def get_remaining_capacity(resource_id: str, target: Optional[str] = None) -> di
 
         return _get(server._get_connection(target), resource_id)
     except Exception as e:
-        return {"error": server._safe_error(e, "get_remaining_capacity"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "get_remaining_capacity"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -71,7 +71,7 @@ def get_time_remaining(resource_id: str, target: Optional[str] = None) -> dict:
 
         return _get(server._get_connection(target), resource_id)
     except Exception as e:
-        return {"error": server._safe_error(e, "get_time_remaining"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "get_time_remaining"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -146,4 +146,4 @@ def list_rightsizing_recommendations(
 
         return _list(server._get_connection(target), resource_id=resource_id, limit=limit)
     except Exception as e:
-        return {"error": server._safe_error(e, "list_rightsizing_recommendations"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "list_rightsizing_recommendations"), "hint": server._hint_for(e)}

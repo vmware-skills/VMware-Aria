@@ -40,7 +40,10 @@ the whole sequence server-side and returns:
   `resource_id`), plus `resource_name`, `resource_kind`, and a `confirmed`
   flag. Every key is always present; unresolved values are explicit `null`.
 - `next_step` — the exact vmware-monitor tool and argument to call next, or
-  `null` when there is nothing confirmed to hand off.
+  `null` when there is nothing confirmed to hand off. For an "Objects are not
+  receiving data from adapter instance" alert it is vmware-aria's own
+  `list_resources` with `collection_status=NO_DATA_RECEIVING`, which names the
+  objects that stopped reporting.
 - `warnings` — why anything above is incomplete; empty on success.
 
 A resource that cannot be resolved degrades to a warning plus explicit nulls

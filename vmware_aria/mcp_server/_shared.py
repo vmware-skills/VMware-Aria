@@ -21,6 +21,7 @@ keep resolving.
 """
 
 
+import json
 import logging
 import os
 import ssl
@@ -193,7 +194,37 @@ def _target_name(target: Optional[str]) -> str:
     return target or "default"
 
 
-_GATE_HINT = "Run 'vmware-aria doctor' to verify connectivity."
+_DOCTOR_HINT = "Run 'vmware-aria doctor' to verify connectivity."
+
+#: For an error about the request itself: a malformed id, an id Aria does not
+#: hold, an endpoint this appliance's version lacks, a missing password env var.
+#: The message already names the fix and doctor would report green, so telling
+#: the model to verify connectivity sent it after the wrong problem (2026-10-24
+#: conversation round: a non-UUID alert_id and a 9.x-only 404 both got it).
+_FIX_IN_MESSAGE_HINT = "The error message says what to change; connectivity is not the problem."
+
+#: HTTP statuses whose cause is the request, not the connection. 401/403 stay
+#: with doctor: it is what checks the login.
+_REQUEST_STATUSES = frozenset({400, 404, 409, 422})
+
+
+def _hint_for(exc: Exception) -> str:
+    """The ``hint`` that goes next to ``_safe_error``'s text in an error reply.
+
+    ``ssl.SSLError``, ``json.JSONDecodeError`` and ``UnicodeError`` subclass
+    ``ValueError`` but were not written by this skill and are about the
+    endpoint, so they keep the doctor hint (the exclusion vmware-storage and
+    vmware-monitor make).
+    """
+    if isinstance(exc, AriaApiError):
+        return _FIX_IN_MESSAGE_HINT if exc.status_code in _REQUEST_STATUSES else _DOCTOR_HINT
+    if isinstance(exc, (ssl.SSLError, json.JSONDecodeError, UnicodeError)):
+        return _DOCTOR_HINT
+    # Not KeyError: _safe_error passes it through, but a missing key while
+    # parsing a response is a bug, not a request the caller can fix.
+    if isinstance(exc, (ValueError, ConfigError)):
+        return _FIX_IN_MESSAGE_HINT
+    return _DOCTOR_HINT
 
 
 def _gated(tool: str, run: Any) -> dict:
@@ -211,5 +242,5 @@ def _gated(tool: str, run: Any) -> dict:
         logger.info("Tool %s refused: %s", tool, exc)
         out = {"error": sanitize(str(exc), 1000), "blast_radius": exc.blast_radius}
     except Exception as exc:  # noqa: BLE001 — reduced to a safe string by _safe_error
-        out = {"error": _safe_error(exc, tool), "hint": _GATE_HINT}
+        out = {"error": _safe_error(exc, tool), "hint": _hint_for(exc)}
     return out

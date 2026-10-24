@@ -47,7 +47,7 @@ def list_report_definitions(
 
         return _list(server._get_connection(target), name_filter=name_filter, limit=limit, offset=offset)
     except Exception as e:
-        return {"error": server._safe_error(e, "list_report_definitions"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "list_report_definitions"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations={"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": True})
@@ -84,7 +84,7 @@ def generate_report(
             target_name=server._target_name(target),
         )
     except Exception as e:
-        return {"error": server._safe_error(e, "generate_report"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "generate_report"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -113,7 +113,7 @@ def list_reports(
 
         return _list(server._get_connection(target), definition_id=definition_id, limit=limit)
     except Exception as e:
-        return {"error": server._safe_error(e, "list_reports"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "list_reports"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -146,4 +146,4 @@ def get_report(
 
         return _get(server._get_connection(target), report_id)
     except Exception as e:
-        return {"error": server._safe_error(e, "get_report"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "get_report"), "hint": server._hint_for(e)}
