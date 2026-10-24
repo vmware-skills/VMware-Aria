@@ -14,7 +14,6 @@ from vmware_policy import vmware_tool
 
 from vmware_aria.mcp_server._shared import mcp
 
-_HINT = "Run 'vmware-aria doctor' to verify connectivity."
 _STATE_NEXT = "Check the resource with get_resource and retry."
 
 #: Actions that report a change nothing was sent for.
@@ -218,4 +217,4 @@ def list_maintenance_schedules(
 
         return _list(server._get_connection(target), resource_id=resource_id, limit=limit, offset=offset)
     except Exception as e:
-        return {"error": server._safe_error(e, "list_maintenance_schedules"), "hint": _HINT}
+        return {"error": server._safe_error(e, "list_maintenance_schedules"), "hint": server._hint_for(e)}

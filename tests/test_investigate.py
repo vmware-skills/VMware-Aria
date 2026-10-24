@@ -200,3 +200,28 @@ def test_aria_enum_values_are_passed_through_verbatim():
     assert result["alert"]["status"] == "ACTIVE"
     assert result["alert"]["alert_impact"] == "RISK"
     assert result["alert"]["control_state"] == "OPEN"
+
+
+def test_no_data_alert_hands_off_to_the_objects_that_stopped_reporting():
+    """The alert's resource is the adapter instance; the user asks which objects stopped.
+
+    2026-10-24 conversation round: next_step said "no vmware-monitor tool covers
+    VMWARE_INFRA_HEALTH_INSTANCE", which was true and left the model to find
+    list_resources(collection_status=...) on its own.
+    """
+    alert = _alert_payload()
+    alert["alertDefinitionId"] = (
+        "AlertDefinition-vCenter Operations Adapter-AdapterChildsNoDataReceivingAlert"
+    )
+    resource = _resource_payload(kind="VMWARE_INFRA_HEALTH_INSTANCE", name="Infrastructure Health Adapter")
+    resource["resourceKey"]["adapterKindKey"] = "VMWARE_INFRA_HEALTH"
+    step = investigate_alert(_client(alert=alert, resource=resource), ALERT_ID)["next_step"]
+    assert step["skill"] == "vmware-aria" and step["tool"] == "list_resources"
+    assert step["args"] == {"resource_kind": "all", "collection_status": "NO_DATA_RECEIVING"}
+    assert "VMWARE_INFRA_HEALTH" in step["note"]
+
+
+def test_other_alerts_on_an_adapter_instance_keep_the_generic_handoff():
+    resource = _resource_payload(kind="VMWARE_INFRA_HEALTH_INSTANCE", name="Infrastructure Health Adapter")
+    step = investigate_alert(_client(resource=resource), ALERT_ID)["next_step"]
+    assert step["skill"] == "vmware-monitor" and step["tool"] is None

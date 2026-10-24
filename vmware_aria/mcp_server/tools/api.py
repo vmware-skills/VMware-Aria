@@ -13,7 +13,6 @@ from vmware_aria.mcp_server._shared import mcp
 
 _READ = {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True}
 _LOCAL_READ = {**_READ, "openWorldHint": False}
-_DOCTOR_HINT = "Run 'vmware-aria doctor' to verify connectivity."
 
 
 @mcp.tool(annotations=_LOCAL_READ)
@@ -67,4 +66,4 @@ def get_api_path(
     try:
         return _get(server._get_connection(target), path, params)
     except Exception as e:
-        return {"error": server._safe_error(e, "get_api_path"), "hint": _DOCTOR_HINT}
+        return {"error": server._safe_error(e, "get_api_path"), "hint": server._hint_for(e)}

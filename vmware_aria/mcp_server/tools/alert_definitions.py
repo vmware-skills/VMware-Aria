@@ -61,7 +61,7 @@ def create_alert_definition(
             target_name=server._target_name(target),
         )
     except Exception as e:
-        return {"error": server._safe_error(e, "create_alert_definition"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "create_alert_definition"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations={"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": True})
@@ -95,4 +95,4 @@ def set_alert_definition_state(
             target_name=server._target_name(target),
         )
     except Exception as e:
-        return {"error": server._safe_error(e, "set_alert_definition_state"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "set_alert_definition_state"), "hint": server._hint_for(e)}

@@ -61,7 +61,7 @@ def list_alerts(
 
         return _list(server._get_connection(target), active_only=active_only, criticality=criticality, resource_id=resource_id, limit=limit, offset=offset)
     except Exception as e:
-        return {"error": server._safe_error(e, "list_alerts"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "list_alerts"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -80,7 +80,7 @@ def get_alert(alert_id: str, target: Optional[str] = None) -> dict:
 
         return _get(server._get_connection(target), alert_id)
     except Exception as e:
-        return {"error": server._safe_error(e, "get_alert"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "get_alert"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -120,7 +120,7 @@ def list_alert_definitions(
 
         return _list(server._get_connection(target), name_filter=name_filter, limit=limit, offset=offset)
     except Exception as e:
-        return {"error": server._safe_error(e, "list_alert_definitions"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "list_alert_definitions"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -158,7 +158,7 @@ def list_symptom_definitions(
 
         return _list(server._get_connection(target), name_filter=name_filter, resource_kind=resource_kind, limit=limit, offset=offset)
     except Exception as e:
-        return {"error": server._safe_error(e, "list_symptom_definitions"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "list_symptom_definitions"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -176,7 +176,8 @@ def investigate_alert(alert_id: str, target: Optional[str] = None) -> dict:
     definition_lookup and symptom_definitions_note), resource
     (or null), correlation (both UUIDs labelled, plus confirmed name, kind and
     a confirmed flag), next_step (which vmware-monitor tool to call next, or
-    null), and warnings (empty on success).
+    null; for a "not receiving data" alert, the list_resources call that names
+    the objects that stopped reporting), and warnings (empty on success).
 
     Gotchas: alert_id is the alert UUID from list_alerts, NOT the resource
     UUID — mixing them up is the most common error here; the correlation block
@@ -195,4 +196,4 @@ def investigate_alert(alert_id: str, target: Optional[str] = None) -> dict:
 
         return _investigate(server._get_connection(target), alert_id)
     except Exception as e:
-        return {"error": server._safe_error(e, "investigate_alert"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "investigate_alert"), "hint": server._hint_for(e)}

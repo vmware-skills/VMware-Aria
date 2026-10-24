@@ -52,7 +52,7 @@ def list_anomalies(
 
         return _list(server._get_connection(target), resource_id=resource_id, limit=limit)
     except Exception as e:
-        return {"error": server._safe_error(e, "list_anomalies"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "list_anomalies"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -79,4 +79,4 @@ def get_resource_riskbadge(resource_id: str, target: Optional[str] = None) -> di
 
         return _get(server._get_connection(target), resource_id)
     except Exception as e:
-        return {"error": server._safe_error(e, "get_resource_riskbadge"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "get_resource_riskbadge"), "hint": server._hint_for(e)}

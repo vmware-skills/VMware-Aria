@@ -12,8 +12,6 @@ from vmware_policy import vmware_tool
 
 from vmware_aria.mcp_server._shared import mcp
 
-_HINT = "Run 'vmware-aria doctor' to verify connectivity."
-
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
 @vmware_tool(risk_level="low")
@@ -51,7 +49,7 @@ def list_alert_notes(
 
         return _list(server._get_connection(target), alert_id, limit=limit, offset=offset)
     except Exception as e:
-        return {"error": server._safe_error(e, "list_alert_notes"), "hint": _HINT}
+        return {"error": server._safe_error(e, "list_alert_notes"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations={"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": True})
@@ -86,7 +84,7 @@ def add_alert_note(
             target_name=server._target_name(target),
         )
     except Exception as e:
-        return {"error": server._safe_error(e, "add_alert_note"), "hint": _HINT}
+        return {"error": server._safe_error(e, "add_alert_note"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -114,4 +112,4 @@ def get_alert_recommendations(alert_id: str, target: Optional[str] = None) -> di
 
         return _get(server._get_connection(target), alert_id)
     except Exception as e:
-        return {"error": server._safe_error(e, "get_alert_recommendations"), "hint": _HINT}
+        return {"error": server._safe_error(e, "get_alert_recommendations"), "hint": server._hint_for(e)}

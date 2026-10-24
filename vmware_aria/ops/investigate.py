@@ -42,6 +42,34 @@ _MONITOR_HANDOFF: dict[str, tuple[str, str]] = {
 }
 
 
+#: Suffix of the alert definition Aria raises on an adapter instance when some
+#: of the objects it collects stop reporting ("Objects are not receiving data
+#: from adapter instance"). Its resource is the adapter instance, so the generic
+#: "no vmware-monitor tool covers this kind" was true and no help: the user asks
+#: which objects stopped, and those are one list_resources call away (2026-10-24
+#: conversation round, aria-no-data-receiving).
+_NO_DATA_DEFINITION_SUFFIX = "AdapterChildsNoDataReceivingAlert"
+
+
+def _no_data_handoff(adapter_kind: Optional[str]) -> dict[str, Any]:
+    """The next_step for a no-data alert: list the objects that stopped reporting."""
+    keep = (
+        f" Keep the rows whose adapter_kind is '{adapter_kind}', the adapter this alert is on."
+        if adapter_kind
+        else ""
+    )
+    return {
+        "skill": "vmware-aria",
+        "tool": "list_resources",
+        "args": {"resource_kind": "all", "collection_status": "NO_DATA_RECEIVING"},
+        "note": (
+            "This alert is about the objects under this adapter instance that "
+            "stopped reporting, not about the adapter itself. Call list_resources "
+            "with these args to name them." + keep
+        ),
+    }
+
+
 def _handoff(kind: str, name: str) -> dict[str, Any]:
     """Build the next_step block for a confirmed resource."""
     mapping = _MONITOR_HANDOFF.get(kind)
@@ -70,6 +98,12 @@ def _handoff(kind: str, name: str) -> dict[str, Any]:
     }
 
 
+def _next_step(alert: dict, resource: dict, kind: str, name: str) -> dict[str, Any]:
+    if str(alert.get("alert_definition_id") or "").endswith(_NO_DATA_DEFINITION_SUFFIX):
+        return _no_data_handoff(resource.get("adapter_kind"))
+    return _handoff(kind, name)
+
+
 def investigate_alert(client: Any, alert_id: str) -> dict[str, Any]:
     """Resolve one alert to its affected resource, confirmed and ready to hand off.
 
@@ -93,7 +127,9 @@ def investigate_alert(client: Any, alert_id: str) -> dict[str, Any]:
           ``confirmed`` flag. Every key is always present; unresolved values are
           explicit ``None`` rather than omitted.
         * ``next_step`` — which vmware-monitor tool to call next and with what
-          argument, or ``None`` when there is no resource to hand off.
+          argument, or ``None`` when there is no resource to hand off. For a
+          "not receiving data" alert it is vmware-aria's own list_resources,
+          which names the objects that stopped reporting.
         * ``warnings`` — why anything above is incomplete; empty on success.
 
     A resource that cannot be fetched degrades to a warning and explicit nulls,
@@ -149,6 +185,6 @@ def investigate_alert(client: Any, alert_id: str) -> dict[str, Any]:
             "resource_kind": kind,
             "confirmed": confirmed,
         },
-        "next_step": _handoff(kind, name) if confirmed else None,
+        "next_step": _next_step(alert, resource, kind, name) if confirmed else None,
         "warnings": warnings,
     }

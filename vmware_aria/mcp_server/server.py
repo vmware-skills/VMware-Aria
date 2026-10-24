@@ -88,6 +88,7 @@ from vmware_aria.mcp_server._shared import (  # noqa: F401  (logger re-exported 
     _audit,
     _gated,
     _get_connection,
+    _hint_for,
     _safe_error,
     _target_name,
     logger,

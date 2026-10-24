@@ -41,7 +41,9 @@ def test_404_on_an_8x_appliance_names_the_version_and_clears_the_id(monkeypatch)
 
     msg = str(exc.value)
     assert "8.6.4" in msg and "9.0" in msg
-    assert "id you passed is not the problem" in msg
+    # Pinned to the sentence vmware-policy kept when 1.24.3 dropped "the id you
+    # passed" (these tools take no id), so the test holds on either side.
+    assert "the endpoint does not exist on this version" in msg
     assert "copy an exact UUID" not in msg, "the misleading remedy is still being sent"
 
 

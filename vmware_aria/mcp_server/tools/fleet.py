@@ -14,8 +14,6 @@ from vmware_policy import vmware_tool
 
 from vmware_aria.mcp_server._shared import mcp
 
-_HINT = "Run 'vmware-aria doctor' to verify connectivity."
-
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
 @vmware_tool(risk_level="low")
@@ -41,7 +39,7 @@ def list_fleet_certificates(limit: Optional[int] = 50, target: Optional[str] = N
 
         return _fn(server._get_connection(target), limit=limit)
     except Exception as e:
-        return {"error": server._safe_error(e, "list_fleet_certificates"), "hint": _HINT}
+        return {"error": server._safe_error(e, "list_fleet_certificates"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -67,7 +65,7 @@ def list_fleet_password_accounts(limit: Optional[int] = 50, target: Optional[str
 
         return _fn(server._get_connection(target), limit=limit)
     except Exception as e:
-        return {"error": server._safe_error(e, "list_fleet_password_accounts"), "hint": _HINT}
+        return {"error": server._safe_error(e, "list_fleet_password_accounts"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -99,7 +97,7 @@ def list_fleet_domains(integration_id: str, limit: Optional[int] = 50, target: O
 
         return _fn(server._get_connection(target), integration_id=integration_id, limit=limit)
     except Exception as e:
-        return {"error": server._safe_error(e, "list_fleet_domains"), "hint": _HINT}
+        return {"error": server._safe_error(e, "list_fleet_domains"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -143,7 +141,7 @@ def list_findings(
             limit=limit,
         )
     except Exception as e:
-        return {"error": server._safe_error(e, "list_findings"), "hint": _HINT}
+        return {"error": server._safe_error(e, "list_findings"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -186,4 +184,4 @@ def promql_query(
             limit=limit,
         )
     except Exception as e:
-        return {"error": server._safe_error(e, "promql_query"), "hint": _HINT}
+        return {"error": server._safe_error(e, "promql_query"), "hint": server._hint_for(e)}

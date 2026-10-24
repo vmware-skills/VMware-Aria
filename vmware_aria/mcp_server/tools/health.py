@@ -35,7 +35,7 @@ def get_aria_health(target: Optional[str] = None) -> dict:
 
         return _get(server._get_connection(target))
     except Exception as e:
-        return {"error": server._safe_error(e, "get_aria_health"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "get_aria_health"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -64,7 +64,7 @@ def list_collector_groups(target: Optional[str] = None) -> dict:
 
         return _list(server._get_connection(target))
     except Exception as e:
-        return {"error": server._safe_error(e, "list_collector_groups"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "list_collector_groups"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -108,7 +108,7 @@ def get_aria_node_resources(window_hours: int = 24, target: Optional[str] = None
 
         return _get(server._get_connection(target), window_hours=window_hours)
     except Exception as e:
-        return {"error": server._safe_error(e, "get_aria_node_resources"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "get_aria_node_resources"), "hint": server._hint_for(e)}
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -160,4 +160,4 @@ def list_adapters(
 
         return _list(server._get_connection(target), adapter_kind=adapter_kind, limit=limit, offset=offset)
     except Exception as e:
-        return {"error": server._safe_error(e, "list_adapters"), "hint": "Run 'vmware-aria doctor' to verify connectivity."}
+        return {"error": server._safe_error(e, "list_adapters"), "hint": server._hint_for(e)}
