@@ -26,7 +26,6 @@ PREVIEW_HINT = (
     "decision; to apply, call again with confirm=True."
 )
 
-_DEPRECATED = "confirmed is deprecated; use confirm. Removed in the next minor release."
 
 
 class GateRefusedError(ValueError):
@@ -43,26 +42,18 @@ class GateRefusedError(ValueError):
 
 
 class Decision(NamedTuple):
-    """Whether this call acts, and the deprecation note when the alias was used."""
+    """Whether this call acts."""
 
     act: bool
-    deprecated: str | None
 
 
-def resolve_confirm(confirm: Any, confirmed: bool | None = None) -> Decision:
-    """Read ``confirm`` and the deprecated ``confirmed`` conservatively.
+def resolve_confirm(confirm: Any) -> Decision:
+    """Read ``confirm`` conservatively: only ``True`` itself acts.
 
-    Args:
-        confirm: The new parameter; only ``True`` acts.
-        confirmed: Legacy alias; ``None`` means it was not passed. The old
-            contract acted on ``confirmed=True`` alone.
-
-    Returns:
-        ``Decision(act, deprecated)``: acts iff ``confirm is True`` or
-        ``confirmed is True``, and ``confirmed`` was not explicitly False.
+    The deprecated ``confirmed`` alias was removed in 2.4.2; a caller still
+    passing it is refused by the tool's argument model as an unknown name.
     """
-    act = (confirm is True or confirmed is True) and confirmed is not False
-    return Decision(act=act, deprecated=_DEPRECATED if confirmed is not None else None)
+    return Decision(act=confirm is True)
 
 
 def refusal(tool: str, subject: str, radius: dict, next_step: str) -> str | None:
