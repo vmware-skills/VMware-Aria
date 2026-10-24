@@ -9,7 +9,7 @@
   alert, a resource already in / not in maintenance) or a field the radius
   depends on could not be read.
 
-The deprecated ``confirmed`` alias was removed (2.5.0): a call that still
+The deprecated ``confirmed`` alias was removed (2.4.2): a call that still
 passes it is refused as an unknown argument and writes nothing.
 """
 

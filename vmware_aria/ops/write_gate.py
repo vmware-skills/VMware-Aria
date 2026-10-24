@@ -50,7 +50,7 @@ class Decision(NamedTuple):
 def resolve_confirm(confirm: Any) -> Decision:
     """Read ``confirm`` conservatively: only ``True`` itself acts.
 
-    The deprecated ``confirmed`` alias was removed in 2.5.0; a caller still
+    The deprecated ``confirmed`` alias was removed in 2.4.2; a caller still
     passing it is refused by the tool's argument model as an unknown name.
     """
     return Decision(act=confirm is True)
