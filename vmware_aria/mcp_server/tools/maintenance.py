@@ -75,7 +75,6 @@ def start_resource_maintenance(
     duration_minutes: Optional[int] = None,
     end_time_ms: Optional[int] = None,
     confirm: bool = False,
-    confirmed: Optional[bool] = None,
     target: Optional[str] = None,
 ) -> dict:
     """[WRITE] Put one resource in maintenance so Aria stops alerting on it and collecting its data — use before planned work such as powering a VM or host off.
@@ -105,8 +104,6 @@ def start_resource_maintenance(
         end_time_ms: Window end as epoch MILLISECONDS in the future. Not with duration_minutes.
         confirm: False (default) returns the blast radius and changes nothing.
             True applies it.
-        confirmed: Deprecated alias for confirm; removed in the next minor
-            release. confirmed=False holds even when confirm=True.
         target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
@@ -115,7 +112,7 @@ def start_resource_maintenance(
     from vmware_aria.ops.maintenance import start_resource_maintenance as _start
     from vmware_aria.ops.write_gate import gate, resolve_confirm
 
-    decision = resolve_confirm(confirm, confirmed)
+    decision = resolve_confirm(confirm)
 
     def run() -> dict:
         maintenance_window_params(duration_minutes, end_time_ms)  # refuse a bad window unconnected
@@ -130,7 +127,7 @@ def start_resource_maintenance(
             ),
         )
 
-    return server._gated("start_resource_maintenance", decision.deprecated, run)
+    return server._gated("start_resource_maintenance", run)
 
 
 @mcp.tool(annotations={"readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})
@@ -138,7 +135,6 @@ def start_resource_maintenance(
 def end_resource_maintenance(
     resource_id: str,
     confirm: bool = False,
-    confirmed: Optional[bool] = None,
     target: Optional[str] = None,
 ) -> dict:
     """[WRITE] Take one resource out of maintenance so Aria resumes alerting on it and collecting its data.
@@ -162,8 +158,6 @@ def end_resource_maintenance(
         resource_id: Resource UUID from list_resources (not the resource name).
         confirm: False (default) returns the blast radius and changes nothing.
             True applies it.
-        confirmed: Deprecated alias for confirm; removed in the next minor
-            release. confirmed=False holds even when confirm=True.
         target: Aria target name from config; default when omitted.
     """
     from vmware_aria.mcp_server import server
@@ -171,7 +165,7 @@ def end_resource_maintenance(
     from vmware_aria.ops.maintenance import end_resource_maintenance as _end
     from vmware_aria.ops.write_gate import gate, resolve_confirm
 
-    decision = resolve_confirm(confirm, confirmed)
+    decision = resolve_confirm(confirm)
 
     def run() -> dict:
         client = server._get_connection(target)
@@ -184,7 +178,7 @@ def end_resource_maintenance(
             ),
         )
 
-    return server._gated("end_resource_maintenance", decision.deprecated, run)
+    return server._gated("end_resource_maintenance", run)
 
 
 @mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})

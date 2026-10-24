@@ -196,13 +196,12 @@ def _target_name(target: Optional[str]) -> str:
 _GATE_HINT = "Run 'vmware-aria doctor' to verify connectivity."
 
 
-def _gated(tool: str, deprecated: Optional[str], run: Any) -> dict:
+def _gated(tool: str, run: Any) -> dict:
     """Run one confirm-gated write (HLD §7) and shape every outcome as a dict.
 
     A refusal (``GateRefusedError``) keeps its full teaching text and the blast
     radius it measured; any other failure goes through ``_safe_error``. Both come
     back as ``{"error": ...}``, which ``@vmware_tool`` audits as a failure.
-    ``deprecated`` is attached whenever the legacy ``confirmed`` was passed.
     """
     from vmware_aria.ops.write_gate import GateRefusedError
 
@@ -213,4 +212,4 @@ def _gated(tool: str, deprecated: Optional[str], run: Any) -> dict:
         out = {"error": sanitize(str(exc), 1000), "blast_radius": exc.blast_radius}
     except Exception as exc:  # noqa: BLE001 — reduced to a safe string by _safe_error
         out = {"error": _safe_error(exc, tool), "hint": _GATE_HINT}
-    return {**out, "deprecated": deprecated} if deprecated else out
+    return out

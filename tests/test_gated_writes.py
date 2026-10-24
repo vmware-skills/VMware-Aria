@@ -9,7 +9,8 @@
   alert, a resource already in / not in maintenance) or a field the radius
   depends on could not be read.
 
-``confirmed`` is a deprecated alias; the conservative reading wins.
+The deprecated ``confirmed`` alias was removed (2.5.0): a call that still
+passes it is refused as an unknown argument and writes nothing.
 """
 
 from __future__ import annotations
@@ -177,36 +178,40 @@ def test_confirm_writes_once_and_returns_the_blast_radius(aria, tool):
     assert out["blast_radius"]["unmeasured"] == []
 
 
-@pytest.mark.parametrize("tool", GATED)
-def test_legacy_confirmed_true_still_acts_and_says_it_is_deprecated(aria, tool):
-    client = _ready(aria, tool)
-    out = _call(tool, confirmed=True)
-    assert len(client.writes) == 1
-    assert "confirmed is deprecated; use confirm" in out["deprecated"]
+def _protocol_call(tool: str, **kw: Any):
+    """Call through the MCP layer, where the argument model refuses unknown names."""
+    first_arg = {"acknowledge_alert": "alert_id", "cancel_alert": "alert_id",
+                 "delete_alert_definition": "definition_id", "delete_report": "report_id",
+                 "start_resource_maintenance": "resource_id",
+                 "end_resource_maintenance": "resource_id"}[tool]
+    first = {"alert_id": AID, "definition_id": DEF, "report_id": REPORT, "resource_id": RID}
+    args = {first_arg: first[first_arg], **kw}
+    if tool == "start_resource_maintenance":
+        args = {"duration_minutes": 30, **args}
+    return asyncio.run(server.mcp.call_tool(tool, args))
 
 
 @pytest.mark.parametrize("tool", GATED)
-def test_explicit_confirmed_false_holds_against_confirm(aria, tool):
+def test_the_removed_confirmed_alias_is_refused_and_writes_nothing(aria, tool):
     client = _ready(aria, tool)
-    out = _call(tool, confirm=True, confirmed=False)
-    assert out["action"] == "preview"
+    with pytest.raises(Exception, match="confirmed"):
+        _protocol_call(tool, confirmed=True)
     assert client.writes == []
-    assert "deprecated" in out
 
 
 @pytest.mark.parametrize("tool", GATED)
-def test_no_alias_no_deprecation_note(aria, tool):
+def test_no_deprecation_note_any_more(aria, tool):
     _ready(aria, tool)
     assert "deprecated" not in _call(tool)
+    assert "deprecated" not in _call(tool, confirm=True)
 
 
 @pytest.mark.parametrize("tool", GATED)
-def test_schema_defaults_confirm_false_and_alias_null(tool):
+def test_schema_defaults_confirm_false_and_has_no_alias(tool):
     t = next(x for x in asyncio.run(server.mcp.list_tools()) if x.name == tool)
     props = t.inputSchema["properties"]
     assert props["confirm"]["default"] is False
-    assert props["confirmed"]["default"] is None
-    assert "Deprecated alias for confirm" in props["confirmed"]["description"]
+    assert "confirmed" not in props
     assert "confirm" not in t.inputSchema.get("required", [])
 
 

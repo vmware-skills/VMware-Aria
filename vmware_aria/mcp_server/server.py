@@ -248,7 +248,6 @@ __all__ = [
 def acknowledge_alert(
     alert_id: str,
     confirm: bool = False,
-    confirmed: Optional[bool] = None,
     target: Optional[str] = None,
 ) -> dict:
     """[WRITE] Acknowledge an active alert by taking ownership (does not cancel it).
@@ -270,15 +269,13 @@ def acknowledge_alert(
         alert_id: The alert UUID to acknowledge.
         confirm: False (default) returns the blast radius and changes nothing.
             True applies it.
-        confirmed: Deprecated alias for confirm; removed in the next minor
-            release. confirmed=False holds even when confirm=True.
         target: Aria target name from config; default when omitted.
     """
     from vmware_aria.ops import gate_measures
     from vmware_aria.ops.alerts import acknowledge_alert as _ack
     from vmware_aria.ops.write_gate import gate, resolve_confirm
 
-    decision = resolve_confirm(confirm, confirmed)
+    decision = resolve_confirm(confirm)
 
     def run() -> dict:
         client = _get_connection(target)
@@ -296,7 +293,7 @@ def acknowledge_alert(
             apply=lambda: _ack(client, alert_id, audit_logger=_audit, target_name=_target_name(target)),
         )
 
-    return _gated("acknowledge_alert", decision.deprecated, run)
+    return _gated("acknowledge_alert", run)
 
 
 @mcp.tool(annotations={"readOnlyHint": False, "destructiveHint": True, "idempotentHint": False, "openWorldHint": True})
@@ -304,7 +301,6 @@ def acknowledge_alert(
 def cancel_alert(
     alert_id: str,
     confirm: bool = False,
-    confirmed: Optional[bool] = None,
     target: Optional[str] = None,
 ) -> dict:
     """[WRITE] Cancel (dismiss) an active alert. This WRITE operation permanently closes the alert.
@@ -323,15 +319,13 @@ def cancel_alert(
         alert_id: The alert UUID to cancel.
         confirm: False (default) returns the blast radius and changes nothing.
             True applies it.
-        confirmed: Deprecated alias for confirm; removed in the next minor
-            release. confirmed=False holds even when confirm=True.
         target: Aria target name from config; default when omitted.
     """
     from vmware_aria.ops import gate_measures
     from vmware_aria.ops.alerts import cancel_alert as _cancel
     from vmware_aria.ops.write_gate import gate, resolve_confirm
 
-    decision = resolve_confirm(confirm, confirmed)
+    decision = resolve_confirm(confirm)
 
     def run() -> dict:
         client = _get_connection(target)
@@ -345,7 +339,7 @@ def cancel_alert(
             apply=lambda: _cancel(client, alert_id, audit_logger=_audit, target_name=_target_name(target)),
         )
 
-    return _gated("cancel_alert", decision.deprecated, run)
+    return _gated("cancel_alert", run)
 
 
 @mcp.tool(annotations={"readOnlyHint": False, "destructiveHint": True, "idempotentHint": False, "openWorldHint": True})
@@ -353,7 +347,6 @@ def cancel_alert(
 def delete_alert_definition(
     definition_id: str,
     confirm: bool = False,
-    confirmed: Optional[bool] = None,
     target: Optional[str] = None,
 ) -> dict:
     """[WRITE] Permanently delete an alert definition. Irreversible.
@@ -374,15 +367,13 @@ def delete_alert_definition(
         definition_id: Alert definition id to delete (from list_alert_definitions).
         confirm: False (default) returns the blast radius and changes nothing.
             True applies it.
-        confirmed: Deprecated alias for confirm; removed in the next minor
-            release. confirmed=False holds even when confirm=True.
         target: Aria target name from config; default when omitted.
     """
     from vmware_aria.ops import gate_measures
     from vmware_aria.ops.alerts import delete_alert_definition as _delete
     from vmware_aria.ops.write_gate import gate, resolve_confirm
 
-    decision = resolve_confirm(confirm, confirmed)
+    decision = resolve_confirm(confirm)
 
     def run() -> dict:
         client = _get_connection(target)
@@ -396,7 +387,7 @@ def delete_alert_definition(
             ),
         )
 
-    return _gated("delete_alert_definition", decision.deprecated, run)
+    return _gated("delete_alert_definition", run)
 
 
 @mcp.tool(annotations={"readOnlyHint": False, "destructiveHint": True, "idempotentHint": False, "openWorldHint": True})
@@ -404,7 +395,6 @@ def delete_alert_definition(
 def delete_report(
     report_id: str,
     confirm: bool = False,
-    confirmed: Optional[bool] = None,
     target: Optional[str] = None,
 ) -> dict:
     """[WRITE] Permanently delete a generated report artifact from Aria Operations. Removes only the generated report instance and its output — the report definition and any schedules remain intact; re-run generate_report to recreate it. Deletion is irreversible and is recorded in the audit log. Returns an error if the report_id does not exist; use list_reports to find valid UUIDs first.
@@ -420,15 +410,13 @@ def delete_report(
         report_id: The report UUID to delete (from generate_report or list_reports).
         confirm: False (default) returns the blast radius and changes nothing.
             True applies it.
-        confirmed: Deprecated alias for confirm; removed in the next minor
-            release. confirmed=False holds even when confirm=True.
         target: Aria target name from config; default when omitted.
     """
     from vmware_aria.ops import gate_measures
     from vmware_aria.ops.reports import delete_report as _delete
     from vmware_aria.ops.write_gate import gate, resolve_confirm
 
-    decision = resolve_confirm(confirm, confirmed)
+    decision = resolve_confirm(confirm)
 
     def run() -> dict:
         client = _get_connection(target)
@@ -442,7 +430,7 @@ def delete_report(
             ),
         )
 
-    return _gated("delete_report", decision.deprecated, run)
+    return _gated("delete_report", run)
 
 
 # ---------------------------------------------------------------------------
