@@ -136,3 +136,14 @@ def test_tls_error_hint_offers_trusting_the_ca_before_disabling_verification():
     assert "verify_ssl: false" in hint
     assert hint.index("SSL_CERT_FILE") < hint.index("verify_ssl: false")
     assert "lab" in hint[hint.index("SSL_CERT_FILE"):]
+
+
+def test_tls_early_eof_hint_points_to_service_or_proxy_not_ca():
+    from vmware_aria.connection import _transport_hint
+
+    hint = _transport_hint(Exception(
+        "[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol"
+    ))
+    assert "TLS connection closed unexpectedly" in hint
+    assert "Aria Operations service" in hint
+    assert "SSL_CERT_FILE" not in hint

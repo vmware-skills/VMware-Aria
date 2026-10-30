@@ -252,6 +252,14 @@ def _transport_hint(exc: Exception) -> str:
             "self-signed lab only: `verify_ssl: false` in "
             "~/.vmware-aria/config.yaml."
         )
+    if (
+        "unexpected_eof_while_reading" in str(exc).lower()
+        or "eof occurred in violation of protocol" in str(exc).lower()
+    ):
+        return (
+            "The TLS connection closed unexpectedly. Check the Aria Operations "
+            "service and any reverse proxy or load balancer TLS logs, then retry."
+        )
     return (
         "Check 'host' and 'port' for this target in ~/.vmware-aria/config.yaml "
         "and that the appliance is reachable from this machine."

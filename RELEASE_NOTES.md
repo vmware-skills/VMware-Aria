@@ -11,7 +11,7 @@
   9.0+-only fleet / findings / PromQL endpoints on 8.x) and a missing password env var now say "The error message
   says what to change; connectivity is not the problem" instead of sending the agent to `doctor`, which would
   report green. Login failures (401/403), 5xx, transport, TLS and unparseable responses keep the doctor hint.
-  A TLS connection that ends early no longer gets a certificate-trust remedy when verification was not the cause.
+  A TLS connection that ends early now points to service/proxy TLS logs instead of certificate trust or host/port checks.
 * **`investigate_alert` on "Objects are not receiving data from adapter instance"**: `next_step` is now
   `list_resources(resource_kind=all, collection_status=NO_DATA_RECEIVING)` with the adapter kind to keep, which
   names the objects that stopped reporting, instead of "no vmware-monitor tool covers this kind".
