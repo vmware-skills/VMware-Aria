@@ -221,7 +221,15 @@ def _hint_for_status(status_code: int) -> str:
 def _is_tls_verify_error(exc: Exception) -> bool:
     """True if a transport error looks like a TLS certificate verification failure."""
     text = str(exc).lower()
-    return "certificate" in text or "ssl" in text or "verify" in text
+    return any(
+        marker in text
+        for marker in (
+            "certificate_verify_failed",
+            "certificate verify failed",
+            "certificate not trusted",
+            "self signed certificate",
+        )
+    )
 
 
 def _transport_hint(exc: Exception) -> str:

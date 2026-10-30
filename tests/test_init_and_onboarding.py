@@ -115,6 +115,9 @@ def test_tls_error_hint_suggests_verify_ssl():
 
     assert _is_tls_verify_error(Exception("certificate verify failed: self signed"))
     assert not _is_tls_verify_error(Exception("Connection refused"))
+    assert not _is_tls_verify_error(
+        Exception("[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol")
+    )
 
 
 def test_tls_error_hint_offers_trusting_the_ca_before_disabling_verification():
