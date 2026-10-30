@@ -1,3 +1,23 @@
+## v2.4.2 — p95 in metric summaries; the `confirmed` alias is gone; error hints fit the error
+
+* **Breaking for callers still sending `confirmed`:** the deprecated alias on `acknowledge_alert`, `cancel_alert`,
+  `delete_alert_definition`, `delete_report`, `start_resource_maintenance` and `end_resource_maintenance` is removed. A call that passes it is refused
+  as an unknown argument ("Extra inputs are not permitted") and changes nothing; pass `confirm=true`. A call without
+  `confirm` previews, as before.
+* **`get_resource_metrics(summary=true)` adds `p95`** per series (nearest rank), with `p95_unavailable` saying why
+  when the window holds fewer than 20 numeric points ("widen the window or use a finer interval"). Issue #22.
+  Live on 8.18.7: 288 five-minute points, `cpu|demandmhz` p95 50.2.
+* **Error hints fit the error.** A malformed id, a 400/404/409/422 the message already explains (including the
+  9.0+-only fleet / findings / PromQL endpoints on 8.x) and a missing password env var now say "The error message
+  says what to change; connectivity is not the problem" instead of sending the agent to `doctor`, which would
+  report green. Login failures (401/403), 5xx, transport, TLS and unparseable responses keep the doctor hint.
+  A TLS connection that ends early now points to service/proxy TLS logs instead of certificate trust or host/port checks.
+* **`investigate_alert` on "Objects are not receiving data from adapter instance"**: `next_step` is now
+  `list_resources(resource_kind=all, collection_status=NO_DATA_RECEIVING)` with the adapter kind to keep, which
+  names the objects that stopped reporting, instead of "no vmware-monitor tool covers this kind".
+* Setup guide: "Behind an MCP gateway" (identity per caller, read-only kept on the backends, tool-list size,
+  timeouts, session expiry). AIops#45.
+
 ## v2.4.1 — a target-limited role can use this skill
 
 * **Roles (HLD §18): the target resolver raised on every call.** It read a `name` field that this skill's target
