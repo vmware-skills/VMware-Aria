@@ -22,6 +22,8 @@ compatibility: >
 
 # VMware Aria Operations
 
+> Self-test: [guide](https://github.com/vmware-skills/marketplace/blob/main/MODEL_FIT_SELF_TEST.md).
+
 > **Disclaimer**: This is a community-maintained open-source project and is **not affiliated with, endorsed by, or sponsored by VMware, Inc. or Broadcom Inc.** "VMware" and "Aria" are trademarks of Broadcom. Source code is publicly auditable at [github.com/vmware-skills/VMware-Aria](https://github.com/vmware-skills/VMware-Aria) under the MIT license.
 
 VMware Aria Operations (vRealize Operations 8.x, VCF Operations 9.x) AI-assisted monitoring — 46 MCP tools, by category below.
