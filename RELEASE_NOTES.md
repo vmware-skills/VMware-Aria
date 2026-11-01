@@ -1,4 +1,4 @@
-## v2.4.2 — p95 in metric summaries; the `confirmed` alias is gone; error hints fit the error
+## v2.4.2 — p95 in metric summaries; the `confirmed` alias is gone; error hints fit the error (2026-11-01)
 
 * **Breaking for callers still sending `confirmed`:** the deprecated alias on `acknowledge_alert`, `cancel_alert`,
   `delete_alert_definition`, `delete_report`, `start_resource_maintenance` and `end_resource_maintenance` is removed. A call that passes it is refused
@@ -6,7 +6,7 @@
   `confirm` previews, as before.
 * **`get_resource_metrics(summary=true)` adds `p95`** per series (nearest rank), with `p95_unavailable` saying why
   when the window holds fewer than 20 numeric points ("widen the window or use a finer interval"). Issue #22.
-  Live on 8.18.7: 288 five-minute points, `cpu|demandmhz` p95 50.2.
+  Live on 8.18.7: 288 five-minute points, `cpu|demandmhz` p95 50.2. A fresh lab call on 2026-11-01 was unavailable because the configured appliance did not accept a TCP 443 connection; this release does not claim a second live measurement.
 * **Error hints fit the error.** A malformed id, a 400/404/409/422 the message already explains (including the
   9.0+-only fleet / findings / PromQL endpoints on 8.x) and a missing password env var now say "The error message
   says what to change; connectivity is not the problem" instead of sending the agent to `doctor`, which would
