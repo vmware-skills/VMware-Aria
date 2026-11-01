@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "vmware-aria"
-version = "2.4.1"
+version = "2.4.2"
 description = "VMware Aria Operations (vRealize Operations) monitoring, alerting, and capacity planning"
 readme = "README.md"
 license = "MIT"
