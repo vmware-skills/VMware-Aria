@@ -70,6 +70,10 @@ chmod 600 ~/.vmware-aria/.env
 vmware-aria doctor
 ```
 
+On macOS, v2.4.3 honors the system proxy bypass list for Aria targets. If an
+older installation reaches TCP/443 but token acquisition ends with a TLS close,
+upgrade and rerun `vmware-aria doctor`. `doctor --skip-auth` checks TCP only.
+
 ### Offline / Air-Gapped Install (from source)
 
 This project uses the modern PEP 517 build system (hatchling), so there is **no
