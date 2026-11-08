@@ -1,3 +1,8 @@
+## v2.4.3 — honor macOS proxy bypass for Aria targets (2026-11-08)
+
+* **Connection fix:** when macOS marks an Aria host as bypassed from its system HTTPS proxy, the HTTP client now uses a direct route for that host. It still honors CA bundle settings such as `SSL_CERT_FILE`; targets without a bypass keep their existing proxy route. Previously `httpx` picked up the proxy but missed the bypass, so token acquisition failed with a TLS connection close even though the appliance was healthy.
+* **Live verification on Aria Operations 8.18.7:** `get_aria_health` returned `HEALTHY`; resource and metric-key discovery succeeded. For a powered-on VM, 24-hour `cpu|usage_average` had 56 five-minute points and p95 44.154666900634766. The summary p95 exactly matched an independent nearest-rank calculation from the raw points. A powered-off VM had no CPU points and correctly reported `no_data_in_window`, not zero.
+
 ## v2.4.2 — p95 in metric summaries; the `confirmed` alias is gone; error hints fit the error (2026-11-01)
 
 * **Breaking for callers still sending `confirmed`:** the deprecated alias on `acknowledge_alert`, `cancel_alert`,
