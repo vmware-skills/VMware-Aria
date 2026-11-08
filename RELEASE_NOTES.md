@@ -1,5 +1,7 @@
 ## v2.4.3 — honor macOS proxy bypass for Aria targets (2026-11-08)
 
+* Update public author/project contact metadata to `zhouwei008@gmail.com`.
+
 * **Connection fix:** when macOS marks an Aria host as bypassed from its system HTTPS proxy, the HTTP client now uses a direct route for that host. It still honors CA bundle settings such as `SSL_CERT_FILE`; targets without a bypass keep their existing proxy route. Previously `httpx` picked up the proxy but missed the bypass, so token acquisition failed with a TLS connection close even though the appliance was healthy.
 * **Live verification on Aria Operations 8.18.7:** `get_aria_health` returned `HEALTHY`; resource and metric-key discovery succeeded. For a powered-on VM, 24-hour `cpu|usage_average` had 56 five-minute points and p95 44.154666900634766. The summary p95 exactly matched an independent nearest-rank calculation from the raw points. A powered-off VM had no CPU points and correctly reported `no_data_in_window`, not zero.
 
@@ -1668,7 +1670,7 @@ This release tracks vmware-pilot v1.5.17 (new `investigate_alert` template + `re
 - **[READ]/[WRITE] tool prefixes**: All MCP tool descriptions now start with [READ] or [WRITE] to clearly indicate operation type
 - **Read/write split counts**: SKILL.md MCP Tools section header shows exact read vs write tool counts
 - **Negative routing**: Description frontmatter includes "Do NOT use when..." clause to prevent misrouting
-- **Broadcom author attestation**: README.md, README-CN.md, and pyproject.toml include VMware by Broadcom author identity (wei-wz.zhou@broadcom.com) to resolve Snyk E005 brand warnings
+- **Broadcom author attestation**: README.md, README-CN.md, and pyproject.toml include VMware by Broadcom author identity (zhouwei008@gmail.com) to resolve Snyk E005 brand warnings
 
 ### Aria-specific
 

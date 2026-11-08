@@ -9,7 +9,7 @@ description = "VMware Aria Operations (vRealize Operations) monitoring, alerting
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
-authors = [{ name = "Wei Zhou", email = "wei-wz.zhou@broadcom.com" }]
+authors = [{ name = "Wei Zhou", email = "zhouwei008@gmail.com" }]
 keywords = ["vmware", "aria", "vrealize", "vrops", "monitoring", "capacity", "mcp", "ai-ops"]
 classifiers = [
     "Development Status :: 4 - Beta",

@@ -5,7 +5,7 @@ For a read-only check of this skill with your model and agent host, use the shar
 
 > **Note**: In VCF 9.0 and later, **VMware Aria Operations** has been rebranded as **VCF Operations**. This skill works against both names — the `/suite-api/` REST endpoints are unchanged.
 
-> **Author**: Wei Zhou, VMware by Broadcom — wei-wz.zhou@broadcom.com
+> **Author**: Wei Zhou, VMware by Broadcom — zhouwei008@gmail.com
 > This is a community-driven project by a VMware engineer, not an official VMware product.
 > For official VMware developer tools see [developer.broadcom.com](https://developer.broadcom.com).
 
