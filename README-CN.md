@@ -63,6 +63,10 @@ chmod 600 ~/.vmware-aria/.env
 vmware-aria doctor
 ```
 
+macOS 上的 v2.4.3 会遵守系统代理对 Aria 目标的绕过规则。如果旧版本能连通 TCP/443，
+但获取认证 token 时 TLS 连接被关闭，请升级后重新运行 `vmware-aria doctor`。
+`doctor --skip-auth` 只检查 TCP 连通性。
+
 ### 离线 / 气隙环境安装（从源码）
 
 本项目采用现代 PEP 517 构建系统（hatchling），因此**没有 `setup.py`**——这是

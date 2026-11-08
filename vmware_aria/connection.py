@@ -17,6 +17,7 @@ from __future__ import annotations
 import logging
 import re
 import time
+import urllib.request
 from typing import Any
 
 import httpx
@@ -288,10 +289,19 @@ class AriaClient:
         self._product_version: str | None | object = _UNPROBED
 
 
+        # httpx reads macOS system proxies but can miss their bypass list. Route
+        # an explicitly bypassed Aria host directly while keeping trust_env for
+        # CA bundle settings such as SSL_CERT_FILE.
+        mounts = None
+        if urllib.request.proxy_bypass(target.host):
+            origin = f"https://{target.host}:{target.port}"
+            mounts = {origin: httpx.HTTPTransport(verify=target.verify_ssl, trust_env=True)}
+
         self._client = httpx.Client(
             base_url=self._base_url,
             verify=target.verify_ssl,
             timeout=30.0,
+            mounts=mounts,
         )
         self._acquire_token()
 
