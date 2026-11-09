@@ -1,3 +1,16 @@
+## v2.4.4 — Security documentation and Gemini extension packaging
+
+Released 2026-11-09.
+
+Clarify actual capability, credential, local-write and transport boundaries where applicable.
+Pin documented setup/fallback tools and make credential examples owner-only before writing,
+without overwriting existing files. Runtime permissions, TLS defaults and approval behavior are unchanged.
+These edits do not establish a new ClawHub scan verdict.
+
+Add the root Gemini CLI extension manifest and discovery metadata, using the existing canonical skill and exact MCP package version. No duplicate skill entrypoint is introduced.
+
+Runtime infrastructure operations, permissions, TLS defaults and confirmation behavior are unchanged. No new vSphere/VCF 9.x or live product compatibility is claimed. ClawHub skill and bundle verdicts are checked separately after publication; documentation corrections are not a clean-scan claim.
+
 ## v2.4.3 — honor macOS proxy bypass for Aria targets (2026-11-08)
 
 * Update public author/project contact metadata to `zhouwei008@gmail.com`.
@@ -5,12 +18,6 @@
 * **Connection fix:** when macOS marks an Aria host as bypassed from its system HTTPS proxy, the HTTP client now uses a direct route for that host. It still honors CA bundle settings such as `SSL_CERT_FILE`; targets without a bypass keep their existing proxy route. Previously `httpx` picked up the proxy but missed the bypass, so token acquisition failed with a TLS connection close even though the appliance was healthy.
 * **Live verification on Aria Operations 8.18.7:** `get_aria_health` returned `HEALTHY`; resource and metric-key discovery succeeded. For a powered-on VM, 24-hour `cpu|usage_average` had 56 five-minute points and p95 44.154666900634766. The summary p95 exactly matched an independent nearest-rank calculation from the raw points. A powered-off VM had no CPU points and correctly reported `no_data_in_window`, not zero.
 
-## Unreleased — security documentation corrections
-
-Clarify actual capability, credential, local-write and transport boundaries where applicable.
-Pin documented setup/fallback tools and make credential examples owner-only before writing,
-without overwriting existing files. Runtime permissions, TLS defaults and approval behavior are unchanged.
-These edits do not establish a new ClawHub scan verdict.
 
 ## v2.4.2 — p95 in metric summaries; the `confirmed` alias is gone; error hints fit the error (2026-11-01)
 
