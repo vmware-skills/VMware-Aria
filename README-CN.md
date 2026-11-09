@@ -44,7 +44,7 @@ vmware-policy ≥ 1.18 下仍然生效（`vmware-audit policy` 会列出因改�
 
 ```bash
 # 安装
-uv tool install vmware-aria==2.4.3
+uv tool install vmware-aria==2.4.4
 
 # 配置
 mkdir -p ~/.vmware-aria
@@ -148,7 +148,7 @@ vmware-aria alert recommendations <alert-id>
 
 ## MCP 配置（Claude Code）
 
-完成 `uv tool install vmware-aria==2.4.3` 后，在 `~/.claude.json` 中添加：
+完成 `uv tool install vmware-aria==2.4.4` 后，在 `~/.claude.json` 中添加：
 
 ```json
 {
@@ -165,7 +165,7 @@ vmware-aria alert recommendations <alert-id>
 ```
 
 > **v1.5.15+** 推荐使用单命令 `vmware-aria mcp`。旧的 `vmware-aria-mcp` 入口仍然
-> 保留以向后兼容。如必须使用 `uvx --from vmware-aria==2.4.3 vmware-aria mcp`（不安装）
+> 保留以向后兼容。如必须使用 `uvx --from vmware-aria==2.4.4 vmware-aria mcp`（不安装）
 > 且公司 TLS 代理报 `invalid peer certificate: UnknownIssuer`，请设置
 > `UV_NATIVE_TLS=true`，或直接使用上面的 `vmware-aria mcp` 形式。
 
