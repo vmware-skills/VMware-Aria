@@ -1,34 +1,34 @@
 <!-- mcp-name: io.github.vmware-skills/vmware-aria -->
-# VMware Aria Operations MCP Skill
 
-For a read-only check of this skill with your model and agent host, use the shared [model-fit self-test](https://github.com/vmware-skills/marketplace/blob/main/MODEL_FIT_SELF_TEST.md) in the marketplace root.
+# VMware Aria
+
+[![PyPI](https://img.shields.io/pypi/v/vmware-aria)](https://pypi.org/project/vmware-aria/) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](#readme-license)
+
+English | [中文](README-CN.md)
+
+Maintainer: Wei Zhou · [zhouwei008@gmail.com](mailto:zhouwei008@gmail.com)
+
+Community-maintained open-source project; not an official VMware or Broadcom product.
+
+[Overview](#readme-overview) · [Quick Start](#readme-quick-start) · [MCP Configuration](#readme-mcp-configuration) · [Capabilities and Workflows](#readme-capabilities-and-workflows) · [Safety and Audit](#readme-safety-and-audit) · [Troubleshooting](#readme-troubleshooting) · [Companion Skills](#readme-companion-skills) · [Reference](#readme-reference) · [License](#readme-license)
+
+<a id="readme-overview"></a>
+
+## Overview
+
+Runs locally over stdio by default; configure required targets and credentials on your own machine.
 
 > **Note**: In VCF 9.0 and later, **VMware Aria Operations** has been rebranded as **VCF Operations**. This skill works against both names — the `/suite-api/` REST endpoints are unchanged.
 
-> **Author**: Wei Zhou, VMware by Broadcom — zhouwei008@gmail.com
-> This is a community-driven project by a VMware engineer, not an official VMware product.
-> For official VMware developer tools see [developer.broadcom.com](https://developer.broadcom.com).
 
 AI-assisted monitoring and capacity planning for VMware Aria Operations (vRealize Operations) via the Model Context Protocol (MCP).
 
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 MCP uses local stdio by default. Opt-in HTTPS opens the configured listener and requires TLS plus caller authentication; it is a network service, not a local-only mode. Credential examples create owner-only placeholder files without overwriting existing files; edit secrets locally.
 
 Container examples build a local version-tagged image and run it with `--pull=never`, avoiding registry fallback. A local version tag is not an immutable image digest.
 
-## Upgrading to 2.0
-
-2.0 renames 4 of its MCP tools so every name starts with a verb (e.g. `findings_list` → `list_findings`, `fleet_certificate_list` → `list_fleet_certificates`, `fleet_domain_list` → `list_fleet_domains`). The full old → new table is in
-[RELEASE_NOTES.md](RELEASE_NOTES.md#v200--mcp-tools-renamed-verb-first). Nothing else changes: same tools, parameters,
-safety gates and CLI commands. If an agent prompt, script or `~/.vmware/rules.yaml` names a tool, update it — though deny
-rules written with the old names keep working with vmware-policy ≥ 1.18 (`vmware-audit policy` lists any rule the
-renames widened), and vmware-pilot ≥ 1.13 translates old names in saved workflows.
-If an install older than 2.0 shares that `rules.yaml`, give it vmware-policy ≥ 1.18.2 too: it matches each rule
-against both the old and the new name, so one file serves both.
-
-## Overview
+### Overview
 
 `vmware-aria` exposes 46 MCP tools for interacting with Aria Operations through natural language AI agents (Claude Code, Cursor, Goose, etc.):
 
@@ -47,7 +47,25 @@ against both the old and the new name, so one file serves both.
 
 **Total**: 46 tools — 36 read-only, 10 write
 
+Full agent instructions: [`skills/vmware-aria/SKILL.md`](skills/vmware-aria/SKILL.md).
+
+<a id="readme-quick-start"></a>
+
 ## Quick Start
+
+Requires Python `>=3.10` and `uv`.
+
+```bash
+uv tool install vmware-aria==2.4.3
+vmware-aria --help
+```
+
+Target, credential and local data setup: [setup guide](skills/vmware-aria/references/setup-guide.md).
+
+<details>
+<summary>Installation and configuration details (including offline setup)</summary>
+
+### Quick Start
 
 ```bash
 # Install
@@ -86,7 +104,7 @@ On macOS, v2.4.3 honors the system proxy bypass list for Aria targets. If an
 older installation reaches TCP/443 but token acquisition ends with a TLS close,
 upgrade and rerun `vmware-aria doctor`. `doctor --skip-auth` checks TCP only.
 
-### Offline / Air-Gapped Install (from source)
+#### Offline / Air-Gapped Install (from source)
 
 This project uses the modern PEP 517 build system (hatchling), so there is **no
 `setup.py`** by design — that is expected, not a missing file. If you cloned the
@@ -114,7 +132,92 @@ pip wheel . -w dist        # → dist/*.whl   (or: uv build, for just this packa
 pip install --no-index --find-links dist vmware-aria
 ```
 
-## CLI Examples
+
+### Authentication
+
+Aria Operations uses **vRealizeOpsToken** authentication:
+
+```
+POST /suite-api/api/auth/token/acquire
+{"username": "admin", "password": "...", "authSource": "LOCAL"}
+→ {"token": "abc123", "validity": 1765182896000}  # validity = expiry epoch ms
+
+Subsequent requests: Authorization: vRealizeOpsToken abc123
+```
+
+Tokens have a 6-hour sliding validity (extended on each call, per the official spec); the client re-acquires automatically 60 seconds before expiry. The `validity` field is the expiry timestamp in epoch milliseconds, not a duration.
+
+
+</details>
+
+<a id="readme-mcp-configuration"></a>
+
+## MCP Configuration
+
+Copy this configuration into your MCP client's local stdio settings. The client must be able to find `uvx`; the initial package installation requires access to a package index.
+
+```json
+{
+  "mcpServers": {
+    "vmware-aria": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "vmware-aria==2.4.3",
+        "vmware-aria-mcp"
+      ],
+      "env": {
+        "VMWARE_ARIA_CONFIG": "~/.vmware-aria/config.yaml"
+      }
+    }
+  }
+}
+```
+
+The following sections retain preinstalled CLI alternatives and product-specific MCP options.
+
+<details>
+<summary>Preinstalled CLI and additional MCP options</summary>
+
+### MCP Setup (Claude Code)
+
+After `uv tool install vmware-aria==2.4.3`, add to `~/.claude.json`:
+
+```json
+{
+  "mcpServers": {
+    "vmware-aria": {
+      "command": "vmware-aria",
+      "args": ["mcp"],
+      "env": {
+        "VMWARE_ARIA_CONFIG": "~/.vmware-aria/config.yaml"
+      }
+    }
+  }
+}
+```
+
+> **v1.5.15+** uses the single-command form `vmware-aria mcp`. The legacy
+> `vmware-aria-mcp` console script is still kept for backward compatibility.
+> If you must use `uvx --from vmware-aria==2.4.3 vmware-aria mcp` (no install) and hit
+> `invalid peer certificate: UnknownIssuer` behind a corporate TLS proxy, set
+> `UV_NATIVE_TLS=true` or use the recommended `vmware-aria mcp` form above.
+
+Then use natural language:
+- *"Show me the top 10 CPU consumers right now"*
+- *"List all CRITICAL alerts and acknowledge them"*
+- *"How long until the prod cluster runs out of memory?"*
+- *"Which VMs are over-provisioned? Show rightsizing recommendations"*
+- *"Are there any anomalies on vm-web-01?"*
+
+
+</details>
+
+<a id="readme-capabilities-and-workflows"></a>
+
+## Capabilities and Workflows
+
+### CLI Examples
 
 ```bash
 # List top CPU consumers
@@ -156,79 +259,11 @@ vmware-aria alert note-add <alert-id> "Taking this: rebooting esx-03"
 vmware-aria alert recommendations <alert-id>
 ```
 
-## MCP Setup (Claude Code)
+<a id="readme-safety-and-audit"></a>
 
-After `uv tool install vmware-aria==2.4.3`, add to `~/.claude.json`:
+## Safety and Audit
 
-```json
-{
-  "mcpServers": {
-    "vmware-aria": {
-      "command": "vmware-aria",
-      "args": ["mcp"],
-      "env": {
-        "VMWARE_ARIA_CONFIG": "~/.vmware-aria/config.yaml"
-      }
-    }
-  }
-}
-```
-
-> **v1.5.15+** uses the single-command form `vmware-aria mcp`. The legacy
-> `vmware-aria-mcp` console script is still kept for backward compatibility.
-> If you must use `uvx --from vmware-aria==2.4.3 vmware-aria mcp` (no install) and hit
-> `invalid peer certificate: UnknownIssuer` behind a corporate TLS proxy, set
-> `UV_NATIVE_TLS=true` or use the recommended `vmware-aria mcp` form above.
-
-Then use natural language:
-- *"Show me the top 10 CPU consumers right now"*
-- *"List all CRITICAL alerts and acknowledge them"*
-- *"How long until the prod cluster runs out of memory?"*
-- *"Which VMs are over-provisioned? Show rightsizing recommendations"*
-- *"Are there any anomalies on vm-web-01?"*
-
-## Authentication
-
-Aria Operations uses **vRealizeOpsToken** authentication:
-
-```
-POST /suite-api/api/auth/token/acquire
-{"username": "admin", "password": "...", "authSource": "LOCAL"}
-→ {"token": "abc123", "validity": 1765182896000}  # validity = expiry epoch ms
-
-Subsequent requests: Authorization: vRealizeOpsToken abc123
-```
-
-Tokens have a 6-hour sliding validity (extended on each call, per the official spec); the client re-acquires automatically 60 seconds before expiry. The `validity` field is the expiry timestamp in epoch milliseconds, not a duration.
-
-## Architecture
-
-```
-User (natural language)
-  ↓
-AI Agent (Claude Code / Goose / Cursor)
-  ↓  [reads SKILL.md]
-vmware-aria MCP server (stdio transport)
-  ↓  [HTTPS + vRealizeOpsToken]
-Aria Operations Suite API
-  ↓
-VMs / Hosts / Clusters / Alerts / Capacity
-```
-
-### Companion Skills
-
-| Skill | Scope | Tools | Install |
-|-------|-------|:-----:|---------|
-| **[vmware-aiops](https://github.com/vmware-skills/VMware-AIops)** ⭐ entry point | VM lifecycle, deployment, guest ops, clusters | 60 | `uv tool install vmware-aiops` |
-| **[vmware-monitor](https://github.com/vmware-skills/VMware-Monitor)** | Read-only monitoring, alarms, events, VM info | 32 | `uv tool install vmware-monitor` |
-| **[vmware-nsx](https://github.com/vmware-skills/VMware-NSX)** | NSX networking: segments, gateways, NAT, IPAM | 33 | `uv tool install vmware-nsx-mgmt` |
-| **[vmware-nsx-security](https://github.com/vmware-skills/VMware-NSX-Security)** | DFW microsegmentation, security groups, Traceflow | 22 | `uv tool install vmware-nsx-security` |
-| **[vmware-avi](https://github.com/vmware-skills/VMware-AVI)** | AVI / NSX ALB load balancing, AKO K8s operations | 28 | `uv tool install vmware-avi` |
-| **[vmware-storage](https://github.com/vmware-skills/VMware-Storage)** | Datastores, iSCSI, vSAN | 12 | `uv tool install vmware-storage` |
-| **[vmware-vks](https://github.com/vmware-skills/VMware-VKS)** | Tanzu Namespaces, TKC cluster lifecycle | 23 | `uv tool install vmware-vks` |
-| **[vmware-harden](https://github.com/vmware-skills/VMware-Harden)** | Compliance baselines, drift detection | 8 | `uv tool install vmware-harden` |
-
-## Security
+### Security
 
 - Passwords loaded from env vars or `.env` file, never from `config.yaml`
 - Every MCP tool call and every CLI command that reaches Aria audit-logged to `~/.vmware/audit.db` (via vmware-policy); CLI write operations (alert acknowledge/cancel, alert notes, alert definition management, report generate/delete, resource maintenance start/end) also append to `~/.vmware-aria/audit.log`
@@ -236,14 +271,15 @@ VMs / Hosts / Clusters / Alerts / Capacity
 - MCP destructive writes (alert acknowledge/cancel, alert definition and report delete, maintenance start/end) take `confirm` (default `false`): without `confirm=true` they return a `blast_radius` of what would change and change nothing; `confirm=true` is refused on a blocker (e.g. a resource already in maintenance) or an unreadable field. The old `confirmed` alias was removed in 2.4.2; a call that passes it is refused as an unknown argument
 - TLS verification is on by default; for a private CA set `SSL_CERT_FILE` to a bundle with your CA (see setup guide). `verify_ssl: false` is for isolated self-signed labs only
 
-#### Official Broadcom References
+##### Official Broadcom References
 
 - **REST APIs**: <https://developer.broadcom.com/xapis> — VCF Operations API (formerly Aria Operations suite-api)
 - **SDKs**: <https://developer.broadcom.com/sdks> — VCF Python SDK
 - **CLI Tools**: <https://developer.broadcom.com/tools> — PowerCLI 9.1 includes "VCF Operations (formerly vRealize Operations Manager)" cmdlets
 
 <!-- usage: remote-and-exposure -->
-## Remote access (HTTPS) and limiting tools
+
+### Remote access (HTTPS) and limiting tools
 
 By default `vmware-aria mcp` speaks stdio to one local client and offers every tool. Two options change that
 (vmware-policy ≥ 1.21.0).
@@ -307,6 +343,65 @@ Tools not offered do not appear in the client's tool list. A bad value or an unk
 least-privilege.
 
 Details: `skills/vmware-aria/references/setup-guide.md` ("Serving MCP over HTTPS", "Limiting which tools are offered").
+
+<a id="readme-troubleshooting"></a>
+
+## Troubleshooting
+
+For installation issues, see the installation instructions on this page. Check CLI arguments with `--help` before operating. Include only a minimal, redacted example when reporting a problem.
+
+<a id="readme-companion-skills"></a>
+
+## Companion Skills
+
+The VMware Skills family contains 14 MCP servers and the shared Policy library. Choose tools by responsibility: [vmware-skills](https://github.com/vmware-skills).
+
+<a id="readme-reference"></a>
+
+## Reference
+
+Release history: [RELEASE_NOTES.md](RELEASE_NOTES.md).
+
+Read-only self-test with your own model and agent host: [model-fit self-test](https://github.com/vmware-skills/marketplace/blob/main/MODEL_FIT_SELF_TEST.md).
+
+### Upgrading to 2.0
+
+2.0 renames 4 of its MCP tools so every name starts with a verb (e.g. `findings_list` → `list_findings`, `fleet_certificate_list` → `list_fleet_certificates`, `fleet_domain_list` → `list_fleet_domains`). The full old → new table is in
+[RELEASE_NOTES.md](RELEASE_NOTES.md#v200--mcp-tools-renamed-verb-first). Nothing else changes: same tools, parameters,
+safety gates and CLI commands. If an agent prompt, script or `~/.vmware/rules.yaml` names a tool, update it — though deny
+rules written with the old names keep working with vmware-policy ≥ 1.18 (`vmware-audit policy` lists any rule the
+renames widened), and vmware-pilot ≥ 1.13 translates old names in saved workflows.
+If an install older than 2.0 shares that `rules.yaml`, give it vmware-policy ≥ 1.18.2 too: it matches each rule
+against both the old and the new name, so one file serves both.
+
+### Architecture
+
+```
+User (natural language)
+  ↓
+AI Agent (Claude Code / Goose / Cursor)
+  ↓  [reads SKILL.md]
+vmware-aria MCP server (stdio transport)
+  ↓  [HTTPS + vRealizeOpsToken]
+Aria Operations Suite API
+  ↓
+VMs / Hosts / Clusters / Alerts / Capacity
+```
+
+#### Companion Skills
+
+| Skill | Scope | Tools | Install |
+|-------|-------|:-----:|---------|
+| **[vmware-aiops](https://github.com/vmware-skills/VMware-AIops)** ⭐ entry point | VM lifecycle, deployment, guest ops, clusters | 60 | `uv tool install vmware-aiops` |
+| **[vmware-monitor](https://github.com/vmware-skills/VMware-Monitor)** | Read-only monitoring, alarms, events, VM info | 32 | `uv tool install vmware-monitor` |
+| **[vmware-nsx](https://github.com/vmware-skills/VMware-NSX)** | NSX networking: segments, gateways, NAT, IPAM | 33 | `uv tool install vmware-nsx-mgmt` |
+| **[vmware-nsx-security](https://github.com/vmware-skills/VMware-NSX-Security)** | DFW microsegmentation, security groups, Traceflow | 22 | `uv tool install vmware-nsx-security` |
+| **[vmware-avi](https://github.com/vmware-skills/VMware-AVI)** | AVI / NSX ALB load balancing, AKO K8s operations | 28 | `uv tool install vmware-avi` |
+| **[vmware-storage](https://github.com/vmware-skills/VMware-Storage)** | Datastores, iSCSI, vSAN | 12 | `uv tool install vmware-storage` |
+| **[vmware-vks](https://github.com/vmware-skills/VMware-VKS)** | Tanzu Namespaces, TKC cluster lifecycle | 23 | `uv tool install vmware-vks` |
+| **[vmware-harden](https://github.com/vmware-skills/VMware-Harden)** | Compliance baselines, drift detection | 8 | `uv tool install vmware-harden` |
+
+<a id="readme-license"></a>
 
 ## License
 
