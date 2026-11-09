@@ -1,0 +1,16 @@
+{
+  "name": "vmware-aria",
+  "version": "2.4.3",
+  "description": "VMware Aria Operations (vRealize Operations) monitoring, alerting, and capacity planning",
+  "mcpServers": {
+    "vmware-aria": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "--from",
+        "vmware-aria==2.4.3",
+        "vmware-aria-mcp"
+      ]
+    }
+  }
+}
