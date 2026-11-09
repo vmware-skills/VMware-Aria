@@ -1,11 +1,22 @@
 <!-- mcp-name: io.github.vmware-skills/vmware-aria -->
-# VMware Aria Operations MCP Skill
 
-要用自己的模型和 Agent 平台进行只读自测，请看 marketplace 根目录的[共享模型适配自测任务](https://github.com/vmware-skills/marketplace/blob/main/MODEL_FIT_SELF_TEST.md)。
+# VMware Aria
 
-> **作者**: Wei Zhou, VMware by Broadcom — zhouwei008@gmail.com
-> 本项目由 VMware 工程师维护的社区项目，非 VMware 官方产品。
-> VMware 官方开发者工具请访问 [developer.broadcom.com](https://developer.broadcom.com)。
+[![PyPI](https://img.shields.io/pypi/v/vmware-aria)](https://pypi.org/project/vmware-aria/) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](#readme-license)
+
+[English](README.md) | 中文
+
+维护者: Wei Zhou · [zhouwei008@gmail.com](mailto:zhouwei008@gmail.com)
+
+社区维护的开源项目，非 VMware 或 Broadcom 官方产品。
+
+[概述](#readme-overview) · [快速开始](#readme-quick-start) · [MCP 配置](#readme-mcp-configuration) · [能力与工作流](#readme-capabilities-and-workflows) · [安全与审计](#readme-safety-and-audit) · [故障排查](#readme-troubleshooting) · [配套 Skills](#readme-companion-skills) · [参考资料](#readme-reference) · [许可证](#readme-license)
+
+<a id="readme-overview"></a>
+
+## 概述
+
+默认通过本地 Stdio 运行；请在本机配置所需目标和凭据。
 
 通过 Model Context Protocol (MCP) 为 VMware Aria Operations（原 vRealize Operations）提供 AI 辅助的监控与容量规划能力。
 
@@ -13,15 +24,7 @@ MCP 默认使用本地 stdio。启用可选 HTTPS 后会打开配置的监听端
 
 容器示例先在本地构建带版本标签的镜像，再用 `--pull=never` 运行，避免回退到镜像仓库拉取。本地版本标签不等于不可变的镜像摘要。
 
-## 升级到 2.0
-
-2.0 把 MCP 工具名改成动词在前（共改名 4 处）（例如 `findings_list` → `list_findings`, `fleet_certificate_list` → `list_fleet_certificates`, `fleet_domain_list` → `list_fleet_domains`），完整的新旧名对照表见
-[RELEASE_NOTES.md](RELEASE_NOTES.md#v200--mcp-tools-renamed-verb-first)。其他都不变：工具、参数、安全确认门和 CLI 命令都一样。
-如果 agent 提示词、脚本或 `~/.vmware/rules.yaml` 里写了工具名，请改成新名——不过用旧名写的 deny 规则在
-vmware-policy ≥ 1.18 下仍然生效（`vmware-audit policy` 会列出因改名而多匹配的规则），vmware-pilot ≥ 1.13 也会自动转换已保存工作流里的旧名。
-如果还有 2.0 之前的安装共用这个 `rules.yaml`，请把它的 vmware-policy 也升到 ≥ 1.18.2：它会按新旧两个名字匹配每条规则，一份文件两边都管用。
-
-## 概述
+### 概述
 
 `vmware-aria` 提供 46 个 MCP 工具，支持通过自然语言 AI Agent（Claude Code、Cursor、Goose 等）与 Aria Operations 交互：
 
@@ -40,7 +43,25 @@ vmware-policy ≥ 1.18 下仍然生效（`vmware-audit policy` 会列出因改�
 
 **共 46 个工具** — 36 只读、10 写操作
 
+完整的 Agent 指令见 [`skills/vmware-aria/SKILL.md`](skills/vmware-aria/SKILL.md).
+
+<a id="readme-quick-start"></a>
+
 ## 快速开始
+
+需要 Python `>=3.10` 和 `uv`。
+
+```bash
+uv tool install vmware-aria==2.4.4
+vmware-aria --help
+```
+
+目标、凭据和本地数据目录设置见 [setup guide](skills/vmware-aria/references/setup-guide.md).
+
+<details>
+<summary>安装与配置详情（含离线安装）</summary>
+
+### 快速开始
 
 ```bash
 # 安装
@@ -79,7 +100,7 @@ macOS 上的 v2.4.3 会遵守系统代理对 Aria 目标的绕过规则。如果
 但获取认证 token 时 TLS 连接被关闭，请升级后重新运行 `vmware-aria doctor`。
 `doctor --skip-auth` 只检查 TCP 连通性。
 
-### 离线 / 气隙环境安装（从源码）
+#### 离线 / 气隙环境安装（从源码）
 
 本项目采用现代 PEP 517 构建系统（hatchling），因此**没有 `setup.py`**——这是
 有意为之，不是缺失文件。如果你克隆源码后遇到 `ERROR: File "setup.py" or
@@ -105,7 +126,111 @@ pip wheel . -w dist        # → dist/*.whl   （或：uv build，仅构建本�
 pip install --no-index --find-links dist vmware-aria
 ```
 
-## 常用 CLI 示例
+
+### 认证机制
+
+Aria Operations 使用 **vRealizeOpsToken** 认证：
+
+```
+POST /suite-api/api/auth/token/acquire
+Body: {"username": "admin", "password": "...", "authSource": "LOCAL"}
+响应: {"token": "abc123", "validity": 1765182896000}
+
+后续请求 Header: Authorization: vRealizeOpsToken abc123
+```
+
+Token 为 6 小时滑动有效期（每次调用自动延长，官方规范行为），客户端在到期前 60 秒自动重新获取。响应中的 `validity` 字段是到期时间戳（epoch 毫秒），不是时长。
+
+
+### 密码命名规则
+
+| 目标名 | 环境变量 |
+|--------|---------|
+| `prod` | `VMWARE_ARIA_PROD_PASSWORD` |
+| `aria-lab` | `VMWARE_ARIA_ARIA_LAB_PASSWORD` |
+| `staging-01` | `VMWARE_ARIA_STAGING_01_PASSWORD` |
+
+规则：`VMWARE_ARIA_<TARGET大写>_PASSWORD`，连字符转为下划线。
+
+#### 配套 Skill
+
+| Skill | 功能范围 | 工具数 | 安装 |
+|-------|---------|:-----:|------|
+| **[vmware-aiops](https://github.com/vmware-skills/VMware-AIops)** ⭐ 入口 | VM 生命周期、部署、Guest 操作、集群管理 | 60 | `uv tool install vmware-aiops` |
+| **[vmware-monitor](https://github.com/vmware-skills/VMware-Monitor)** | 只读监控：告警、事件、VM 信息 | 32 | `uv tool install vmware-monitor` |
+| **[vmware-nsx](https://github.com/vmware-skills/VMware-NSX)** | NSX 网络：Segment、网关、NAT、IPAM | 33 | `uv tool install vmware-nsx-mgmt` |
+| **[vmware-nsx-security](https://github.com/vmware-skills/VMware-NSX-Security)** | DFW 微分段、安全组、Traceflow | 22 | `uv tool install vmware-nsx-security` |
+| **[vmware-avi](https://github.com/vmware-skills/VMware-AVI)** | AVI / NSX ALB 负载均衡、AKO K8s 运维 | 28 | `uv tool install vmware-avi` |
+| **[vmware-storage](https://github.com/vmware-skills/VMware-Storage)** | 数据存储、iSCSI、vSAN | 12 | `uv tool install vmware-storage` |
+| **[vmware-vks](https://github.com/vmware-skills/VMware-VKS)** | Tanzu 命名空间、TKC 集群生命周期 | 23 | `uv tool install vmware-vks` |
+| **[vmware-harden](https://github.com/vmware-skills/VMware-Harden)** | 合规基线、Drift 检测 | 8 | `uv tool install vmware-harden` |
+
+
+</details>
+
+<a id="readme-mcp-configuration"></a>
+
+## MCP 配置
+
+将以下配置复制到 MCP 客户端的本地 Stdio 配置中。客户端需要能找到 `uvx`；首次安装所需包时需要访问包源。
+
+```json
+{
+  "mcpServers": {
+    "vmware-aria": {
+      "command": "uvx",
+      "args": ["--from", "vmware-aria==2.4.4", "vmware-aria-mcp"],
+      "env": {
+        "VMWARE_ARIA_CONFIG": "~/.vmware-aria/config.yaml"
+      }
+    }
+  }
+}
+```
+
+以下保留预先安装 CLI 的用法及各工具特有的 MCP 选项。
+
+<details>
+<summary>预先安装的 CLI 与其他 MCP 选项</summary>
+
+### MCP 配置（Claude Code）
+
+完成 `uv tool install vmware-aria==2.4.4` 后，在 `~/.claude.json` 中添加：
+
+```json
+{
+  "mcpServers": {
+    "vmware-aria": {
+      "command": "vmware-aria",
+      "args": ["mcp"],
+      "env": {
+        "VMWARE_ARIA_CONFIG": "~/.vmware-aria/config.yaml"
+      }
+    }
+  }
+}
+```
+
+> **v1.5.15+** 推荐使用单命令 `vmware-aria mcp`。旧的 `vmware-aria-mcp` 入口仍然
+> 保留以向后兼容。如必须使用 `uvx --from vmware-aria==2.4.4 vmware-aria mcp`（不安装）
+> 且公司 TLS 代理报 `invalid peer certificate: UnknownIssuer`，请设置
+> `UV_NATIVE_TLS=true`，或直接使用上面的 `vmware-aria mcp` 形式。
+
+然后即可使用自然语言：
+- *"显示当前 CPU 占用最高的 10 台虚拟机"*
+- *"列出所有严重告警并逐一确认"*
+- *"生产集群的内存还够用多少天？"*
+- *"哪些虚拟机资源配置过多？给出调整建议"*
+- *"vm-web-01 上有没有异常检测结果？"*
+
+
+</details>
+
+<a id="readme-capabilities-and-workflows"></a>
+
+## 能力与工作流
+
+### 常用 CLI 示例
 
 ```bash
 # 查看 CPU 消耗排名前 10 的虚拟机
@@ -146,74 +271,11 @@ vmware-aria alert note-add <alert-id> "Taking this: rebooting esx-03"
 vmware-aria alert recommendations <alert-id>
 ```
 
-## MCP 配置（Claude Code）
+<a id="readme-safety-and-audit"></a>
 
-完成 `uv tool install vmware-aria==2.4.4` 后，在 `~/.claude.json` 中添加：
+## 安全与审计
 
-```json
-{
-  "mcpServers": {
-    "vmware-aria": {
-      "command": "vmware-aria",
-      "args": ["mcp"],
-      "env": {
-        "VMWARE_ARIA_CONFIG": "~/.vmware-aria/config.yaml"
-      }
-    }
-  }
-}
-```
-
-> **v1.5.15+** 推荐使用单命令 `vmware-aria mcp`。旧的 `vmware-aria-mcp` 入口仍然
-> 保留以向后兼容。如必须使用 `uvx --from vmware-aria==2.4.4 vmware-aria mcp`（不安装）
-> 且公司 TLS 代理报 `invalid peer certificate: UnknownIssuer`，请设置
-> `UV_NATIVE_TLS=true`，或直接使用上面的 `vmware-aria mcp` 形式。
-
-然后即可使用自然语言：
-- *"显示当前 CPU 占用最高的 10 台虚拟机"*
-- *"列出所有严重告警并逐一确认"*
-- *"生产集群的内存还够用多少天？"*
-- *"哪些虚拟机资源配置过多？给出调整建议"*
-- *"vm-web-01 上有没有异常检测结果？"*
-
-## 认证机制
-
-Aria Operations 使用 **vRealizeOpsToken** 认证：
-
-```
-POST /suite-api/api/auth/token/acquire
-Body: {"username": "admin", "password": "...", "authSource": "LOCAL"}
-响应: {"token": "abc123", "validity": 1765182896000}
-
-后续请求 Header: Authorization: vRealizeOpsToken abc123
-```
-
-Token 为 6 小时滑动有效期（每次调用自动延长，官方规范行为），客户端在到期前 60 秒自动重新获取。响应中的 `validity` 字段是到期时间戳（epoch 毫秒），不是时长。
-
-## 密码命名规则
-
-| 目标名 | 环境变量 |
-|--------|---------|
-| `prod` | `VMWARE_ARIA_PROD_PASSWORD` |
-| `aria-lab` | `VMWARE_ARIA_ARIA_LAB_PASSWORD` |
-| `staging-01` | `VMWARE_ARIA_STAGING_01_PASSWORD` |
-
-规则：`VMWARE_ARIA_<TARGET大写>_PASSWORD`，连字符转为下划线。
-
-### 配套 Skill
-
-| Skill | 功能范围 | 工具数 | 安装 |
-|-------|---------|:-----:|------|
-| **[vmware-aiops](https://github.com/vmware-skills/VMware-AIops)** ⭐ 入口 | VM 生命周期、部署、Guest 操作、集群管理 | 60 | `uv tool install vmware-aiops` |
-| **[vmware-monitor](https://github.com/vmware-skills/VMware-Monitor)** | 只读监控：告警、事件、VM 信息 | 32 | `uv tool install vmware-monitor` |
-| **[vmware-nsx](https://github.com/vmware-skills/VMware-NSX)** | NSX 网络：Segment、网关、NAT、IPAM | 33 | `uv tool install vmware-nsx-mgmt` |
-| **[vmware-nsx-security](https://github.com/vmware-skills/VMware-NSX-Security)** | DFW 微分段、安全组、Traceflow | 22 | `uv tool install vmware-nsx-security` |
-| **[vmware-avi](https://github.com/vmware-skills/VMware-AVI)** | AVI / NSX ALB 负载均衡、AKO K8s 运维 | 28 | `uv tool install vmware-avi` |
-| **[vmware-storage](https://github.com/vmware-skills/VMware-Storage)** | 数据存储、iSCSI、vSAN | 12 | `uv tool install vmware-storage` |
-| **[vmware-vks](https://github.com/vmware-skills/VMware-VKS)** | Tanzu 命名空间、TKC 集群生命周期 | 23 | `uv tool install vmware-vks` |
-| **[vmware-harden](https://github.com/vmware-skills/VMware-Harden)** | 合规基线、Drift 检测 | 8 | `uv tool install vmware-harden` |
-
-## 安全性
+### 安全性
 
 - 密码仅从环境变量或 `.env` 文件加载，不存入 `config.yaml`
 - 每次 MCP 工具调用和每条访问 Aria 的 CLI 命令记录审计日志至 `~/.vmware/audit.db`（经 vmware-policy）；CLI 写操作（告警确认/取消、告警备注、告警定义管理、报表生成/删除、资源维护开始/结束）另写 `~/.vmware-aria/audit.log`
@@ -222,7 +284,8 @@ Token 为 6 小时滑动有效期（每次调用自动延长，官方规范行�
 - 默认开启 TLS 校验；私有 CA 请把 `SSL_CERT_FILE` 指向包含你 CA 的证书包（见 setup guide）。`verify_ssl: false` 仅用于隔离的自签名实验环境
 
 <!-- usage: remote-and-exposure -->
-## 远程访问（HTTPS）与限制工具
+
+### 远程访问（HTTPS）与限制工具
 
 默认情况下 `vmware-aria mcp` 通过 stdio 服务一个本地客户端，并提供全部工具。以下两个选项可以改变这一点
 （需 vmware-policy ≥ 1.21.0）。
@@ -283,6 +346,36 @@ vmware-aria mcp --expose read --allow-write acknowledge_alert
 这只限制提供给客户端的工具，不是授权；账号本身仍应遵循最小权限。
 
 详见 `skills/vmware-aria/references/setup-guide.md`（"Serving MCP over HTTPS"、"Limiting which tools are offered"）。
+
+<a id="readme-troubleshooting"></a>
+
+## 故障排查
+
+安装问题请查看本页安装说明；操作前先用 CLI 的 `--help` 核对参数。反馈问题时仅提供经过脱敏的最小示例。
+
+<a id="readme-companion-skills"></a>
+
+## 配套 Skills
+
+VMware Skills 家族包含 14 个 MCP Server 和共享 Policy 库。按职责选择工具： [vmware-skills](https://github.com/vmware-skills).
+
+<a id="readme-reference"></a>
+
+## 参考资料
+
+变更记录： [RELEASE_NOTES.md](RELEASE_NOTES.md).
+
+使用自己的模型和 Agent 宿主进行只读自测： [model-fit self-test](https://github.com/vmware-skills/marketplace/blob/main/MODEL_FIT_SELF_TEST.md).
+
+### 升级到 2.0
+
+2.0 把 MCP 工具名改成动词在前（共改名 4 处）（例如 `findings_list` → `list_findings`, `fleet_certificate_list` → `list_fleet_certificates`, `fleet_domain_list` → `list_fleet_domains`），完整的新旧名对照表见
+[RELEASE_NOTES.md](RELEASE_NOTES.md#v200--mcp-tools-renamed-verb-first)。其他都不变：工具、参数、安全确认门和 CLI 命令都一样。
+如果 agent 提示词、脚本或 `~/.vmware/rules.yaml` 里写了工具名，请改成新名——不过用旧名写的 deny 规则在
+vmware-policy ≥ 1.18 下仍然生效（`vmware-audit policy` 会列出因改名而多匹配的规则），vmware-pilot ≥ 1.13 也会自动转换已保存工作流里的旧名。
+如果还有 2.0 之前的安装共用这个 `rules.yaml`，请把它的 vmware-policy 也升到 ≥ 1.18.2：它会按新旧两个名字匹配每条规则，一份文件两边都管用。
+
+<a id="readme-license"></a>
 
 ## 许可证
 
