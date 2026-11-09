@@ -9,6 +9,10 @@
 
 通过 Model Context Protocol (MCP) 为 VMware Aria Operations（原 vRealize Operations）提供 AI 辅助的监控与容量规划能力。
 
+MCP 默认使用本地 stdio。启用可选 HTTPS 后会打开配置的监听端口，并要求 TLS 与调用者认证；此时属于网络服务。凭据示例先创建仅当前用户可读写的占位文件，拒绝覆盖已有文件，再由用户在本地编辑秘密值。
+
+容器示例先在本地构建带版本标签的镜像，再用 `--pull=never` 运行，避免回退到镜像仓库拉取。本地版本标签不等于不可变的镜像摘要。
+
 ## 升级到 2.0
 
 2.0 把 MCP 工具名改成动词在前（共改名 4 处）（例如 `findings_list` → `list_findings`, `fleet_certificate_list` → `list_fleet_certificates`, `fleet_domain_list` → `list_fleet_domains`），完整的新旧名对照表见
@@ -40,7 +44,7 @@ vmware-policy ≥ 1.18 下仍然生效（`vmware-audit policy` 会列出因改�
 
 ```bash
 # 安装
-uv tool install vmware-aria
+uv tool install vmware-aria==2.4.3
 
 # 配置
 mkdir -p ~/.vmware-aria
@@ -56,12 +60,20 @@ default_target: prod
 EOF
 
 # 设置密码（绝不存入 config.yaml）
-echo "VMWARE_ARIA_PROD_PASSWORD=your_password" > ~/.vmware-aria/.env
-chmod 600 ~/.vmware-aria/.env
+(
+  umask 077
+  set -C  # 拒绝覆盖已有文件；已有 .env 请直接用本地编辑器修改
+  cat > ~/.vmware-aria/.env <<'EOF'
+VMWARE_ARIA_PROD_PASSWORD=REPLACE_IN_LOCAL_EDITOR
+EOF
+)
+# 继续前，先用本地编辑器填写 .env；不要在终端命令中输入真实秘密值。
 
 # 验证配置
 vmware-aria doctor
 ```
+
+模板只写入占位符。创建后用本地编辑器填写密码或令牌；不要把真实凭据粘贴到终端命令、聊天或提交中。若文件已存在，上述命令会拒绝覆盖；直接编辑现有文件并先确认权限为 `600`。
 
 macOS 上的 v2.4.3 会遵守系统代理对 Aria 目标的绕过规则。如果旧版本能连通 TCP/443，
 但获取认证 token 时 TLS 连接被关闭，请升级后重新运行 `vmware-aria doctor`。
@@ -136,7 +148,7 @@ vmware-aria alert recommendations <alert-id>
 
 ## MCP 配置（Claude Code）
 
-完成 `uv tool install vmware-aria` 后，在 `~/.claude.json` 中添加：
+完成 `uv tool install vmware-aria==2.4.3` 后，在 `~/.claude.json` 中添加：
 
 ```json
 {
@@ -153,7 +165,7 @@ vmware-aria alert recommendations <alert-id>
 ```
 
 > **v1.5.15+** 推荐使用单命令 `vmware-aria mcp`。旧的 `vmware-aria-mcp` 入口仍然
-> 保留以向后兼容。如必须使用 `uvx --from vmware-aria vmware-aria mcp`（不安装）
+> 保留以向后兼容。如必须使用 `uvx --from vmware-aria==2.4.3 vmware-aria mcp`（不安装）
 > 且公司 TLS 代理报 `invalid peer certificate: UnknownIssuer`，请设置
 > `UV_NATIVE_TLS=true`，或直接使用上面的 `vmware-aria mcp` 形式。
 

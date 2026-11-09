@@ -16,7 +16,7 @@ compatibility: >
   vmware-policy auto-installed as Python dependency (provides @vmware_tool decorator and audit logging). All write operations audited to ~/.vmware/audit.db.
   Credentials: Each Aria Operations target requires a per-target password env var in ~/.vmware-aria/.env following the pattern VMWARE_ARIA_<TARGET_NAME_UPPER>_PASSWORD. Passwords are never logged or echoed.
   Read-heavy: 36 of 46 tools are read-only. Write operations limited to alert acknowledge/cancel, alert notes, alert definition management, report management, and resource maintenance start/end.
-  No webhooks, no outbound network calls, no guest operations. Local only: stdio MCP + Aria Operations REST API (HTTPS 443).
+  No webhooks or guest operations. API calls use the configured Aria endpoint (HTTPS 443); MCP defaults to stdio, with opt-in authenticated HTTPS.
   Transitive dependencies: Only vmware-policy (audit/policy). No post-install scripts or background services.
 ---
 
@@ -314,7 +314,7 @@ Set `VMWARE_ARIA_<TARGET_NAME_UPPER>_PASSWORD` (hyphens become underscores; targ
 
 1. **Source code**: [github.com/vmware-skills/VMware-Aria](https://github.com/vmware-skills/VMware-Aria) (MIT).
 2. **Config and credentials**: `config.yaml` holds hosts and usernames only; passwords live in `~/.vmware-aria/.env` (chmod 600) as `VMWARE_ARIA_<TARGET>_PASSWORD` and are never logged.
-3. **No webhooks**: no outbound calls besides the Aria Operations REST API over HTTPS 443; the MCP server is local stdio.
+3. **Network**: no webhooks. API calls use configured Aria HTTPS endpoints; MCP defaults to local stdio, with opt-in authenticated HTTPS.
 4. **TLS**: verification on by default; for a private CA set `SSL_CERT_FILE` rather than `verify_ssl: false` (isolated labs only).
 5. **Prompt-injection defense**: API text is sanitized (control characters stripped, length capped) before it reaches the agent.
 6. **Least privilege**: use an Aria Operations account with read-only roles unless the write tools (alert acknowledge/cancel, alert notes, alert definitions, reports, resource maintenance) are needed.
