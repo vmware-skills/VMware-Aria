@@ -161,11 +161,7 @@ Copy this configuration into your MCP client's local stdio settings. The client 
   "mcpServers": {
     "vmware-aria": {
       "command": "uvx",
-      "args": [
-        "--from",
-        "vmware-aria==2.4.3",
-        "vmware-aria-mcp"
-      ],
+      "args": ["--from", "vmware-aria==2.4.3", "vmware-aria-mcp"],
       "env": {
         "VMWARE_ARIA_CONFIG": "~/.vmware-aria/config.yaml"
       }

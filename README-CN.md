@@ -179,11 +179,7 @@ Token 为 6 小时滑动有效期（每次调用自动延长，官方规范行�
   "mcpServers": {
     "vmware-aria": {
       "command": "uvx",
-      "args": [
-        "--from",
-        "vmware-aria==2.4.3",
-        "vmware-aria-mcp"
-      ],
+      "args": ["--from", "vmware-aria==2.4.3", "vmware-aria-mcp"],
       "env": {
         "VMWARE_ARIA_CONFIG": "~/.vmware-aria/config.yaml"
       }
