@@ -51,7 +51,7 @@ against both the old and the new name, so one file serves both.
 
 ```bash
 # Install
-uv tool install vmware-aria==2.4.3
+uv tool install vmware-aria==2.4.4
 
 # Configure
 mkdir -p ~/.vmware-aria
@@ -158,7 +158,7 @@ vmware-aria alert recommendations <alert-id>
 
 ## MCP Setup (Claude Code)
 
-After `uv tool install vmware-aria==2.4.3`, add to `~/.claude.json`:
+After `uv tool install vmware-aria==2.4.4`, add to `~/.claude.json`:
 
 ```json
 {
@@ -176,7 +176,7 @@ After `uv tool install vmware-aria==2.4.3`, add to `~/.claude.json`:
 
 > **v1.5.15+** uses the single-command form `vmware-aria mcp`. The legacy
 > `vmware-aria-mcp` console script is still kept for backward compatibility.
-> If you must use `uvx --from vmware-aria==2.4.3 vmware-aria mcp` (no install) and hit
+> If you must use `uvx --from vmware-aria==2.4.4 vmware-aria mcp` (no install) and hit
 > `invalid peer certificate: UnknownIssuer` behind a corporate TLS proxy, set
 > `UV_NATIVE_TLS=true` or use the recommended `vmware-aria mcp` form above.
 
