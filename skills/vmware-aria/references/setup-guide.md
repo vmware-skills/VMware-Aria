@@ -65,16 +65,21 @@ default_target: prod
 
 **Option A — .env file (recommended)**:
 ```bash
-cat > ~/.vmware-aria/.env << 'EOF'
-VMWARE_ARIA_PROD_PASSWORD=your_password_here
+(
+  umask 077
+  set -C  # Refuse existing files; edit an existing .env locally instead
+  cat > ~/.vmware-aria/.env <<'EOF'
+VMWARE_ARIA_PROD_PASSWORD=REPLACE_IN_LOCAL_EDITOR
 EOF
-chmod 600 ~/.vmware-aria/.env
+)
+# Before continuing, edit .env locally; never type live secrets into shell commands.
 ```
 
-**Option B — shell environment**:
-```bash
-export VMWARE_ARIA_PROD_PASSWORD=your_password_here
-```
+This writes placeholders only. Enter passwords or tokens using a local editor after creation; do not paste live credentials into terminal commands, chat or commits. If the file exists, the command refuses to overwrite it; edit the existing file after checking its permissions are `600`.
+
+**Option B — injected environment**: have your secret manager or launcher set
+`VMWARE_ARIA_PROD_PASSWORD` in the process environment. Do not type the secret in
+a terminal command or include it in MCP configuration committed to source control.
 
 Password variable naming convention: `VMWARE_ARIA_<TARGET_UPPER>_PASSWORD`
 - Target `prod` → `VMWARE_ARIA_PROD_PASSWORD`
@@ -307,19 +312,19 @@ decide:
 ### Build and run
 
 ```bash
-docker build -t vmware-aria .
-docker run -i \
+docker build -t vmware-aria:2.4.3 .
+docker run --pull=never -i \
   -v ~/.vmware-aria:/root/.vmware-aria:ro \
   -e VMWARE_ARIA_CONFIG=/root/.vmware-aria/config.yaml \
-  vmware-aria
+  vmware-aria:2.4.3
 ```
+
+These commands run the image built locally above; `--pull=never` prevents a missing local image from falling back to a registry. The version tag identifies this build, not an immutable digest.
 
 ### Using docker-compose
 
 ```bash
-# Set password in your shell first
-export VMWARE_ARIA_PROD_PASSWORD=your_password
-
+# Inject VMWARE_ARIA_PROD_PASSWORD through your secret manager/launcher first.
 docker-compose up
 ```
 
@@ -361,7 +366,7 @@ Aria Operations Manager
 VMs / Hosts / Clusters / Datastores / Alerts / Capacity
 ```
 
-The MCP server uses stdio transport (local only, no network listener). Connections to Aria Ops use HTTPS on port 443 with vRealizeOpsToken authentication (6-hour sliding token validity, auto-refreshed).
+By default the MCP server uses local stdio without a listener; opt-in HTTPS opens a listener and requires TLS plus caller authentication. Connections to Aria Ops use HTTPS on port 443 with vRealizeOpsToken authentication (6-hour sliding token validity, auto-refreshed).
 
 ## Security Notes
 
@@ -371,7 +376,7 @@ The MCP server uses stdio transport (local only, no network listener). Connectio
 - **Never** store passwords in `config.yaml` — use env vars or `.env` file
 - `.env` file must be `chmod 600` (owner read/write only)
 - TLS verification is on by default (`verify_ssl: true`); trust a private CA with `SSL_CERT_FILE` rather than disabling verification (see [TLS Certificate Verification](#tls-certificate-verification))
-- The MCP server uses stdio transport — it runs locally only, no network listener
+- By default the MCP server uses local stdio without a listener. Opt-in HTTPS requires TLS plus caller authentication and opens the configured listener
 - Audit log at `~/.vmware/audit.db` (SQLite WAL, via vmware-policy) records all write operations (alert acknowledge/cancel, alert definition management, report generate/delete)
 - Tokens have a 6-hour sliding validity (extended on each call); the client re-acquires automatically 60 seconds before expiry. Requests carry `Authorization: vRealizeOpsToken <token>`
 

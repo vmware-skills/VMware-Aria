@@ -14,6 +14,10 @@ AI-assisted monitoring and capacity planning for VMware Aria Operations (vRealiz
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+MCP uses local stdio by default. Opt-in HTTPS opens the configured listener and requires TLS plus caller authentication; it is a network service, not a local-only mode. Credential examples create owner-only placeholder files without overwriting existing files; edit secrets locally.
+
+Container examples build a local version-tagged image and run it with `--pull=never`, avoiding registry fallback. A local version tag is not an immutable image digest.
+
 ## Upgrading to 2.0
 
 2.0 renames 4 of its MCP tools so every name starts with a verb (e.g. `findings_list` → `list_findings`, `fleet_certificate_list` → `list_fleet_certificates`, `fleet_domain_list` → `list_fleet_domains`). The full old → new table is in
@@ -47,7 +51,7 @@ against both the old and the new name, so one file serves both.
 
 ```bash
 # Install
-uv tool install vmware-aria
+uv tool install vmware-aria==2.4.3
 
 # Configure
 mkdir -p ~/.vmware-aria
@@ -63,12 +67,20 @@ default_target: prod
 EOF
 
 # Set password (never in config.yaml)
-echo "VMWARE_ARIA_PROD_PASSWORD=your_password" > ~/.vmware-aria/.env
-chmod 600 ~/.vmware-aria/.env
+(
+  umask 077
+  set -C  # Refuse existing files; edit an existing .env locally instead
+  cat > ~/.vmware-aria/.env <<'EOF'
+VMWARE_ARIA_PROD_PASSWORD=REPLACE_IN_LOCAL_EDITOR
+EOF
+)
+# Before continuing, edit .env locally; never type live secrets into shell commands.
 
 # Verify setup
 vmware-aria doctor
 ```
+
+This writes placeholders only. Enter passwords or tokens using a local editor after creation; do not paste live credentials into terminal commands, chat or commits. If the file exists, the command refuses to overwrite it; edit the existing file after checking its permissions are `600`.
 
 On macOS, v2.4.3 honors the system proxy bypass list for Aria targets. If an
 older installation reaches TCP/443 but token acquisition ends with a TLS close,
@@ -146,7 +158,7 @@ vmware-aria alert recommendations <alert-id>
 
 ## MCP Setup (Claude Code)
 
-After `uv tool install vmware-aria`, add to `~/.claude.json`:
+After `uv tool install vmware-aria==2.4.3`, add to `~/.claude.json`:
 
 ```json
 {
@@ -164,7 +176,7 @@ After `uv tool install vmware-aria`, add to `~/.claude.json`:
 
 > **v1.5.15+** uses the single-command form `vmware-aria mcp`. The legacy
 > `vmware-aria-mcp` console script is still kept for backward compatibility.
-> If you must use `uvx --from vmware-aria vmware-aria mcp` (no install) and hit
+> If you must use `uvx --from vmware-aria==2.4.3 vmware-aria mcp` (no install) and hit
 > `invalid peer certificate: UnknownIssuer` behind a corporate TLS proxy, set
 > `UV_NATIVE_TLS=true` or use the recommended `vmware-aria mcp` form above.
 
