@@ -203,3 +203,7 @@ Reading rules for an agent:
 | Suite API v2 paths used | 8.0+ |
 
 Endpoints are checked against the vROps 8.6 and VCF Operations 9.1 API indexes in `vmware_aria/api_spec/`. Live-verified on Aria Operations 8.18.7 (2026-09): resources, metrics, alerts and symptoms, rightsizing, health, doctor, node resources, adapters, alert recommendations, and reads of maintenance schedules and alert notes (none existed).
+
+## Maintenance safety boundary
+
+After a write timeout or gateway error, inspect the target before retrying: the write may already have happened. Automatic transient retries apply only to GET reads; explicit authentication recovery is separate.

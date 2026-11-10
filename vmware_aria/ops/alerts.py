@@ -14,7 +14,7 @@ from vmware_policy import paginated, sanitize
 
 from vmware_aria.ops._collection import iso_utc_or_none
 from vmware_aria.ops._ids import require_uuid
-from vmware_aria.ops._paging import (
+from vmware_aria.ops._paging import (  # noqa: F401 — compatibility/runtime export
     MAX_LIMIT,
     CollectionTotal,
     _MAX_TOTAL,
@@ -28,6 +28,32 @@ if TYPE_CHECKING:
     from vmware_aria.connection import AriaClient
     from vmware_aria.notify.audit import AuditLogger
 
+from vmware_aria.ops._alert_shapes import (
+    _LOOKUP_NOT_NEEDED as _LOOKUP_NOT_NEEDED,
+    _MAX_SYMPTOM_DEPTH as _MAX_SYMPTOM_DEPTH,
+    _SEVERITY_RANK as _SEVERITY_RANK,
+    _SYMPTOM_CONTAINER_KEYS as _SYMPTOM_CONTAINER_KEYS,
+    _SYMPTOM_LEAF_KEYS as _SYMPTOM_LEAF_KEYS,
+    _definition_id as _definition_id,
+    _definition_severity as _definition_severity,
+    _max_state_severity as _max_state_severity,
+    _own_name as _own_name,
+    _own_severity as _own_severity,
+    _summarize_symptom as _summarize_symptom,
+    _walk_symptoms as _walk_symptoms,
+)
+
+from vmware_aria.ops._alert_definitions import (
+    _VALID_CRITICALITIES_DEF as _VALID_CRITICALITIES_DEF,
+    create_alert_definition as create_alert_definition,
+    delete_alert_definition as delete_alert_definition,
+    list_alert_definitions as list_alert_definitions,
+    list_symptom_definitions as list_symptom_definitions,
+    set_alert_definition_state as set_alert_definition_state,
+)
+
+
+
 _log = logging.getLogger("vmware-aria.ops.alerts")
 
 _VALID_CRITICALITIES = {"INFORMATION", "WARNING", "IMMEDIATE", "CRITICAL"}
@@ -38,26 +64,8 @@ _ALERT_ID_HINT = (
 )
 
 # Severity ranking for picking the max across AlertDefinition states[]
-_SEVERITY_RANK = {
-    "NONE": 0,
-    "AUTO": 1,
-    "INFORMATION": 2,
-    "WARNING": 3,
-    "IMMEDIATE": 4,
-    "CRITICAL": 5,
-}
 
 
-def _max_state_severity(states: list[dict]) -> str:
-    """Return the highest severity across AlertDefinition states[].
-
-    Falls back to the first state's severity when values are unranked,
-    and "" when there are no states.
-    """
-    severities = [str(s.get("severity", "")) for s in states if s.get("severity")]
-    if not severities:
-        return ""
-    return max(severities, key=lambda s: _SEVERITY_RANK.get(s.upper(), -1))
 
 
 # ---------------------------------------------------------------------------
@@ -82,7 +90,6 @@ _DEFINITION_ID_CHUNK = 50
 _LOOKUP_RESOLVED = "resolved"
 _LOOKUP_NOT_FOUND = "not_found"
 _LOOKUP_FAILED = "failed"
-_LOOKUP_NOT_NEEDED = "not_needed"
 _LOOKUP_NO_ID = "no_definition_id"
 
 
@@ -443,22 +450,8 @@ def list_alerts(
 # five CRITICAL alerts on a real 9.1 appliance came back with symptoms that
 # said nothing. Recursing instead of hard-coding three hops keeps the flat
 # `{"symptoms": [...]}` body older appliances send working too.
-_SYMPTOM_CONTAINER_KEYS = ("contributingSymptoms", "symptoms", "symptom", "result")
-_SYMPTOM_LEAF_KEYS = (
-    "symptomId",
-    "symptomSetId",
-    "symptomDefinitionsIds",
-    "symptomDefinitionId",
-    "alertConditions",
-    "id",
-    "name",
-    "message",
-    "severity",
-    "symptomCriticality",
-)
 # Guards against a self-referential body walking forever. The real shape is
 # three deep; anything past this is not a shape we claim to understand.
-_MAX_SYMPTOM_DEPTH = 8
 
 #: Attached to get_alert when the symptoms body could not be walked. Without it
 #: an unparsed body and a genuinely quiet alert are the same answer — `[]` —
@@ -480,120 +473,16 @@ _SYMPTOMS_UNAVAILABLE_NOTE = (
 )
 
 
-def _walk_symptoms(node: Any, depth: int = 0) -> tuple[list[dict], bool]:
-    """Return ``(leaf symptom dicts, recognized)`` for one node of the response.
-
-    ``recognized`` is what separates "walked to the bottom and there were none"
-    from "could not follow this body at all". A response we understood but that
-    held nothing is a confirmed none; anything else must not be reported as one.
-    """
-    if depth > _MAX_SYMPTOM_DEPTH:
-        return [], False
-    if isinstance(node, list):
-        rows: list[dict] = []
-        recognized = True
-        for entry in node:
-            sub, ok = _walk_symptoms(entry, depth + 1)
-            rows.extend(sub)
-            recognized = recognized and ok
-        return rows, recognized
-    if not isinstance(node, dict):
-        return [], False
-
-    containers = [k for k in _SYMPTOM_CONTAINER_KEYS if isinstance(node.get(k), (list, dict))]
-    if containers:
-        rows = []
-        recognized = True
-        for key in containers:
-            sub, ok = _walk_symptoms(node[key], depth + 1)
-            rows.extend(sub)
-            recognized = recognized and ok
-        return rows, recognized
-
-    # No nested level below here. Inside a container, a dict carrying any
-    # symptom field is the symptom itself; a per-alert entry with no symptom
-    # container simply had nothing triggered. The top-level body is never a
-    # leaf — a bare dict with no container key there is a shape we do not know.
-    if depth and any(k in node for k in _SYMPTOM_LEAF_KEYS):
-        return [node], True
-    return [], not node or (depth > 0 and "alertId" in node)
 
 
-def _own_name(s: dict) -> str:
-    """The name a symptom instance carries itself, or ``""``."""
-    return str(s.get("name") or s.get("message") or "")
 
 
-def _own_severity(s: dict) -> str:
-    """The severity a symptom instance carries itself, or ``""``."""
-    conditions = [c for c in (s.get("alertConditions") or []) if isinstance(c, dict)]
-    return str(s.get("severity") or s.get("symptomCriticality") or _max_state_severity(conditions))
 
 
-def _definition_id(s: dict) -> str:
-    definition_ids = s.get("symptomDefinitionsIds") or []
-    return str(
-        s.get("symptomDefinitionId")
-        or (definition_ids[0] if isinstance(definition_ids, list) and definition_ids else "")
-    )
 
 
-def _definition_severity(definition: dict) -> str:
-    """Severity of a SymptomDefinition: ``state.severity``, or the max of ``states[]``.
-
-    8.18.7 answers with a single ``state`` object (``{"severity": "IMMEDIATE",
-    "condition": {...}}``) on all eleven definitions its ten alerts reference;
-    ``states[]`` is kept for the plural form other versions use on definitions.
-    """
-    state = definition.get("state")
-    if isinstance(state, dict) and state.get("severity"):
-        return str(state["severity"])
-    states = [x for x in (definition.get("states") or []) if isinstance(x, dict)]
-    return _max_state_severity(states)
 
 
-def _summarize_symptom(
-    s: dict, definition: dict | None = None, lookup: str = _LOOKUP_NOT_NEEDED
-) -> dict:
-    """Project one triggered symptom onto summary fields.
-
-    Reads both wire vocabularies. The 9.1 leaf carries none of severity /
-    message / symptomDefinitionId: the severity sits on ``alertConditions[]``
-    and the definition ids are the plural ``symptomDefinitionsIds``, so mapping
-    only the older names left every field blank even once the nesting was
-    followed. ``condition`` is the actual reason the symptom fired, which is
-    the whole point of asking for symptoms.
-
-    On 8.18.7 even that is not enough: ``alertConditions`` is empty, so the
-    instance carries ids and nothing else, and all eight symptoms on four live
-    alerts came back with blank name and severity. Those two fields then come
-    from the symptom ``definition`` (fetched in one batch by the caller), and
-    ``definition_lookup`` records whether that happened — a blank name next to
-    ``"failed"`` is unknown, not nameless.
-    """
-    conditions = [c for c in (s.get("alertConditions") or []) if isinstance(c, dict)]
-    first_condition = conditions[0].get("condition") if conditions else None
-    if not isinstance(first_condition, dict):
-        first_condition = {}
-    definition = definition or {}
-
-    severity = _own_severity(s) or _definition_severity(definition)
-    name = _own_name(s) or definition.get("name") or first_condition.get("key") or ""
-    definition_id = _definition_id(s)
-    condition = " ".join(
-        str(first_condition.get(k) or "")
-        for k in ("key", "operator", "settingValue")
-    ).strip()
-
-    return {
-        "id": sanitize(str(s.get("id") or s.get("symptomId") or "")),
-        "name": sanitize(str(name), max_len=300),
-        "severity": sanitize(str(severity)),
-        "symptom_definition_id": sanitize(str(definition_id)),
-        "resource_id": sanitize(str(s.get("resourceId") or "")),
-        "condition": sanitize(condition, max_len=300),
-        "definition_lookup": lookup,
-    }
 
 
 def _summarize_with_definitions(client: AriaClient, leaves: list[dict]) -> tuple[list[dict], str]:
@@ -865,186 +754,14 @@ def cancel_alert(
 # ---------------------------------------------------------------------------
 
 
-def list_alert_definitions(
-    client: AriaClient,
-    name_filter: str | None = None,
-    limit: int = 100,
-    offset: int = 0,
-) -> dict:
-    """List alert definitions (templates that generate alerts).
-
-    Args:
-        client: Authenticated Aria Operations API client.
-        name_filter: Optional substring filter on definition name (case-insensitive).
-        limit: Maximum number of definitions to return (1–500). Page size, not a
-            ceiling: out-of-range values are rejected, not clamped.
-        offset: Rows to skip before collecting this page. 0 or more; pass
-            the previous response's ``next_offset`` to walk the collection.
-
-    Returns:
-        Result envelope with alert definition summary dicts under ``items``.
-        ``total`` carries the collection's ``pageInfo.totalCount``, except under
-        a name_filter — that filter is applied client-side, so the server's
-        count describes the unfiltered collection, not this result.
-
-        The envelope carries ``next_offset``: pass it back as ``offset`` for
-        the next page and stop when it is ``None``. Do not loop on
-        ``truncated`` — that says this page is not the whole collection, which
-        stays true on the last page of a walk.
-    """
-    validate_page_args(limit, offset)
-
-    # Walk every page so a name_filter match beyond the first page is not
-    # invisible; stop once `limit` results have been collected.
-    collection_total = CollectionTotal()
-    results = []
-    skipped = 0
-    for d in iter_collection(
-        client, "/alertdefinitions", "alertDefinitions", total_sink=collection_total
-    ):
-        name = sanitize(d.get("name", ""), max_len=300)
-        if name_filter and name_filter.lower() not in name.lower():
-            continue
-        if skipped < offset:
-            skipped += 1
-            continue
-        states = d.get("states") or []
-        # AlertDefinition has no top-level criticality or active fields
-        # (2026-06-08 spec audit): criticality is per-state — report the
-        # max severity across states[].severity.
-        criticality = _max_state_severity(states)
-        # impact location is version-ambiguous: read top-level
-        # impact.impactType first, fall back to states[0].impact.impactType.
-        impact = (d.get("impact") or {}).get("impactType", "")
-        if not impact and states:
-            impact = ((states[0].get("impact") or {}).get("impactType", ""))
-        results.append(
-            {
-                "id": sanitize(d.get("id", "")),
-                "name": name,
-                "description": sanitize(d.get("description", ""), max_len=500),
-                "adapter_kind": sanitize(d.get("adapterKindKey", "")),
-                "resource_kind": sanitize(d.get("resourceKindKey", "")),
-                "criticality": sanitize(criticality),
-                "impact": sanitize(impact),
-                "type": sanitize(d.get("type", "")),
-                "sub_type": sanitize(d.get("subType", "")),
-            }
-        )
-        if len(results) >= limit:
-            break
-    total = None if name_filter else collection_total.value
-    return paginated(
-        results,
-        limit=limit,
-        total=total,
-        next_offset=next_offset(len(results), limit, offset, total),
-    )
 
 
 # ---------------------------------------------------------------------------
 # create_alert_definition
 # ---------------------------------------------------------------------------
 
-_VALID_CRITICALITIES_DEF = {"INFORMATION", "WARNING", "IMMEDIATE", "CRITICAL"}
 
 
-def create_alert_definition(
-    client: AriaClient,
-    name: str,
-    description: str,
-    resource_kind: str,
-    symptom_definition_ids: list[str],
-    criticality: str = "WARNING",
-    adapter_kind: str = "VMWARE",
-    audit_logger: AuditLogger | None = None,
-    target_name: str = "default",
-) -> dict:
-    """Create a new alert definition referencing existing symptom definitions.
-
-    To find symptom_definition_ids, use list_symptom_definitions().
-
-    Args:
-        client: Authenticated Aria Operations API client.
-        name: Alert definition name (must be unique).
-        description: Human-readable description.
-        resource_kind: Resource kind this alert applies to, e.g. VirtualMachine,
-            HostSystem, ClusterComputeResource.
-        symptom_definition_ids: List of symptom definition UUIDs that trigger this
-            alert. Any one symptom firing triggers (OR across symptom ids).
-        criticality: Alert severity: INFORMATION, WARNING, IMMEDIATE, CRITICAL.
-        adapter_kind: Adapter kind key. Default VMWARE (vSphere adapter).
-        audit_logger: Optional audit logger.
-        target_name: Target name for audit log.
-
-    Returns:
-        Dict with new alert definition id and name.
-    """
-    if not name:
-        raise ValueError(
-            "name must be a non-empty alert definition name (e.g. 'High CPU on "
-            "prod cluster'). Specify one; run list_alert_definitions first to see "
-            "existing names and avoid creating a duplicate."
-        )
-    if not symptom_definition_ids:
-        raise ValueError(
-            "symptom_definition_ids must be a non-empty list of symptom "
-            "definition UUIDs — an alert definition fires on symptoms, so at "
-            "least one is required. Run list_symptom_definitions and copy the "
-            "'id' of each symptom to attach."
-        )
-    criticality = criticality.upper()
-    if criticality not in _VALID_CRITICALITIES_DEF:
-        raise ValueError(
-            f"criticality must be one of: "
-            f"{', '.join(sorted(_VALID_CRITICALITIES_DEF))}. "
-            f"Pass one of those values to --criticality (case-insensitive)."
-        )
-
-    payload = {
-        "name": name,
-        "description": description,
-        "adapterKindKey": adapter_kind,
-        "resourceKindKey": resource_kind,
-        # "base-symptom-set" is the correct wire key (the Broadcom portal's
-        # model page calls the property "symptoms", but the live server JSON
-        # uses base-symptom-set — verified against VMware's own client code).
-        # relation must be SELF. aggregation=ALL + symptomSetOperator=OR is
-        # the doc-sample-verified combination: any one symptom firing
-        # triggers (OR across symptom ids).
-        "states": [
-            {
-                "severity": criticality,
-                "base-symptom-set": {
-                    "type": "SYMPTOM_SET",
-                    "relation": "SELF",
-                    "aggregation": "ALL",
-                    "symptomSetOperator": "OR",
-                    "symptomDefinitionIds": symptom_definition_ids,
-                },
-            }
-        ],
-    }
-
-    data = client.post("/alertdefinitions", json_data=payload)
-    # AlertDefinition has no top-level active field — no enabled in response.
-    result = {
-        "id": sanitize(data.get("id", "")),
-        "name": sanitize(data.get("name", ""), max_len=300),
-        "action": "created",
-    }
-
-    if audit_logger:
-        audit_logger.log(
-            target=target_name,
-            operation="create_alert_definition",
-            resource=f"alertdefinition/{result['id']}",
-            skill="aria",
-            parameters={"name": name, "criticality": criticality, "resource_kind": resource_kind},
-            result="ok",
-        )
-
-    return result
 
 
 # ---------------------------------------------------------------------------
@@ -1052,55 +769,6 @@ def create_alert_definition(
 # ---------------------------------------------------------------------------
 
 
-def set_alert_definition_state(
-    client: AriaClient,
-    definition_id: str,
-    enabled: bool,
-    audit_logger: AuditLogger | None = None,
-    target_name: str = "default",
-) -> dict:
-    """Enable or disable an alert definition.
-
-    Args:
-        client: Authenticated Aria Operations API client.
-        definition_id: Alert definition UUID.
-        enabled: True to enable, False to disable.
-        audit_logger: Optional audit logger.
-        target_name: Target name for audit log.
-
-    Returns:
-        Dict with definition_id, enabled, action.
-    """
-    if not definition_id:
-        raise ValueError(
-            "definition_id must be a non-empty alert definition UUID. Run "
-            "list_alert_definitions and copy an exact 'id' value."
-        )
-
-    # PUT, not POST (2026-06-08 user report; endpoints exist in 8.6+).
-    if enabled:
-        client.put(f"/alertdefinitions/{definition_id}/enable")
-    else:
-        client.put(f"/alertdefinitions/{definition_id}/disable")
-    action_path = "enable" if enabled else "disable"
-
-    result = {
-        "definition_id": definition_id,
-        "enabled": enabled,
-        "action": action_path,
-    }
-
-    if audit_logger:
-        audit_logger.log(
-            target=target_name,
-            operation="set_alert_definition_state",
-            resource=f"alertdefinition/{definition_id}",
-            skill="aria",
-            parameters={"definition_id": definition_id, "enabled": enabled},
-            result="ok",
-        )
-
-    return result
 
 
 # ---------------------------------------------------------------------------
@@ -1108,121 +776,8 @@ def set_alert_definition_state(
 # ---------------------------------------------------------------------------
 
 
-def delete_alert_definition(
-    client: AriaClient,
-    definition_id: str,
-    audit_logger: AuditLogger | None = None,
-    target_name: str = "default",
-) -> dict:
-    """Delete an alert definition permanently.
-
-    Args:
-        client: Authenticated Aria Operations API client.
-        definition_id: Alert definition UUID to delete.
-        audit_logger: Optional audit logger.
-        target_name: Target name for audit log.
-
-    Returns:
-        Dict confirming deletion.
-    """
-    if not definition_id:
-        raise ValueError(
-            "definition_id must be a non-empty alert definition UUID. Run "
-            "list_alert_definitions and copy an exact 'id' value."
-        )
-
-    client.delete(f"/alertdefinitions/{definition_id}")
-
-    result = {"definition_id": definition_id, "action": "deleted"}
-
-    if audit_logger:
-        audit_logger.log(
-            target=target_name,
-            operation="delete_alert_definition",
-            resource=f"alertdefinition/{definition_id}",
-            skill="aria",
-            parameters={"definition_id": definition_id},
-            result="ok",
-        )
-
-    return result
 
 
 # ---------------------------------------------------------------------------
 # list_symptom_definitions  (helper for create_alert_definition)
 # ---------------------------------------------------------------------------
-
-
-def list_symptom_definitions(
-    client: AriaClient,
-    name_filter: str | None = None,
-    resource_kind: str | None = None,
-    limit: int = 100,
-    offset: int = 0,
-) -> dict:
-    """List symptom definitions — use these IDs when creating alert definitions.
-
-    Args:
-        client: Authenticated Aria Operations API client.
-        name_filter: Optional substring filter on symptom name (case-insensitive).
-        resource_kind: Optional resource kind to filter (e.g. VirtualMachine).
-        limit: Maximum number of symptom definitions to return (1–500). Page size, not a
-            ceiling: out-of-range values are rejected, not clamped.
-        offset: Rows to skip before collecting this page. 0 or more; pass
-            the previous response's ``next_offset`` to walk the collection.
-
-    Returns:
-        Result envelope with symptom definition dicts under ``items``, each with
-        id, name, resource_kind, metric_key, threshold_type, and criticality.
-        ``total`` carries ``pageInfo.totalCount`` (which already reflects the
-        server-side resource_kind filter), except under a client-side
-        name_filter.
-
-        The envelope carries ``next_offset``: pass it back as ``offset`` for
-        the next page and stop when it is ``None``. Do not loop on
-        ``truncated`` — that says this page is not the whole collection, which
-        stays true on the last page of a walk.
-    """
-    validate_page_args(limit, offset)
-    extra_params: dict = {}
-    if resource_kind:
-        # Query param is `resourceKind`, NOT `resourceKindKey` (spec audit).
-        extra_params["resourceKind"] = resource_kind
-
-    # Walk every page so a name_filter match beyond the first page is not
-    # invisible; stop once `limit` results have been collected.
-    collection_total = CollectionTotal()
-    results = []
-    skipped = 0
-    for s in iter_collection(
-        client,
-        "/symptomdefinitions",
-        "symptomDefinitions",
-        extra_params=extra_params,
-        total_sink=collection_total,
-    ):
-        name = sanitize(s.get("name", ""), max_len=300)
-        if name_filter and name_filter.lower() not in name.lower():
-            continue
-        if skipped < offset:
-            skipped += 1
-            continue
-        condition = s.get("state", {}).get("condition", {})
-        results.append({
-            "id": sanitize(s.get("id", "")),
-            "name": name,
-            "resource_kind": sanitize(s.get("resourceKindKey", "")),
-            "adapter_kind": sanitize(s.get("adapterKindKey", "")),
-            "metric_key": sanitize(condition.get("key", ""), max_len=200),
-            "threshold_type": sanitize(condition.get("thresholdType", ""), max_len=100),
-            "criticality": sanitize(s.get("state", {}).get("severity", ""), max_len=50),
-        })
-        if len(results) >= limit:
-            break
-    total = None if name_filter else collection_total.value
-    return paginated(
-        results,
-        limit=limit,
-        total=total,
-        next_offset=next_offset(len(results), limit, offset, total),
-    )

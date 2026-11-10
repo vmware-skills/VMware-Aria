@@ -425,7 +425,7 @@ class AriaClient:
         retries: int = 1,
         requires: Requires | None = None,
     ) -> httpx.Response:
-        """Send one request, recovering from auth and transient failures.
+        """Send one request; transient recovery is GET-only, auth recovery bounded.
 
         Layered per the error-recovery contract: (1) transport/timeout and
         transient gateway statuses (502/503/504) are retried once after a short
@@ -434,6 +434,14 @@ class AriaClient:
         teaching message, so callers never surface a raw httpx traceback. 4xx
         client errors (e.g. 404 for a bad id) are NOT retried.
         """
+        # A lost write response is not evidence that the mutation failed.
+        # Never replay a write on a transient error, even with an explicit budget.
+        if method != "GET":
+            retries = 0
+        uncertain_write = (
+            "The write may already have taken effect; inspect the target before retrying. "
+            if method != "GET" else ""
+        )
         attempt = 0
         reauthed = False
         while True:
@@ -444,7 +452,7 @@ class AriaClient:
                     attempt += 1
                     time.sleep(_RETRY_DELAY_SEC)
                     continue
-                head = f"Aria Operations request could not connect. {_transport_hint(exc)}"
+                head = f"{uncertain_write}Aria Operations request could not connect. {_transport_hint(exc)}"
                 tail = f"Configured host: {self._target.host}. Failing call: {method} {path}"
                 raise AriaApiError(
                     f"{head} {_DOCTOR_THEN} {tail}",
@@ -479,7 +487,7 @@ class AriaClient:
                     explained = version_remedy(requires, self.product_version())
                     if explained:
                         hint = explained
-                head = f"Aria Operations returned HTTP {resp.status_code}. {hint}"
+                head = f"{uncertain_write if resp.status_code in _TRANSIENT_STATUS else ''}Aria Operations returned HTTP {resp.status_code}. {hint}"
                 tail = f"Failing call: {method} {path}"
                 raise AriaApiError(
                     f"{head} {_DOCTOR_POINTER} {tail}",

@@ -6,6 +6,8 @@ anomaly detection, and platform health checks.
 
 from __future__ import annotations
 
+import sys as _sys
+import sys as _sys
 import functools
 import json
 from pathlib import Path
@@ -155,8 +157,7 @@ def mcp_cmd(
 
 # ─── Type aliases ────────────────────────────────────────────────────────────
 
-TargetOption = Annotated[str | None, typer.Option("--target", "-t", help="Target name from config")]
-ConfigOption = Annotated[Path | None, typer.Option("--config", "-c", help="Config file path")]
+from vmware_aria.cli_options import TargetOption as TargetOption, ConfigOption as ConfigOption
 
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -279,166 +280,24 @@ def doctor(
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
-@resource_app.command("list")
-@_friendly_errors
-@audited("list_resources")
-def resource_list(
-    kind: Annotated[str, typer.Option("--kind", "-k", help="Resource kind, or 'all' for every kind")] = "VirtualMachine",
-    limit: Annotated[int, typer.Option("--limit", "-n", help="Max results (paginated)")] = 50,
-    name_filter: Annotated[str | None, typer.Option("--name", help="Filter by name substring")] = None,
-    collection_status: Annotated[
-        str | None,
-        typer.Option(
-            "--collection-status",
-            help="Keep objects with this data-collection status, e.g. NO_DATA_RECEIVING",
-        ),
-    ] = None,
-    target: TargetOption = None,
-    config: ConfigOption = None,
-) -> None:
-    """List resources by kind (VM, HostSystem, ClusterComputeResource, etc.)."""
-    from vmware_aria.ops.resources import list_resources
-
-    client, _ = _get_connection(target, config)
-    all_kinds = kind.strip().lower() == "all"
-    result = list_resources(
-        client,
-        resource_kind=None if all_kinds else kind,
-        limit=limit,
-        name_filter=name_filter,
-        collection_status=collection_status,
-    )
-
-    table = Table(title=f"Resources ({kind})", show_lines=False)
-    table.add_column("Name", style="bold")
-    if all_kinds:
-        table.add_column("Kind")
-    table.add_column("ID")
-    table.add_column("Health")
-    # "Aria state" is Aria's lifecycle state (STARTED for a powered-off VM too);
-    # "Collection" is whether data is arriving — the column an "Objects are not
-    # receiving data" alert is about.
-    table.add_column("Aria state")
-    table.add_column("Collection")
-
-    for r in result["items"]:
-        health = (
-            f"{r['health_color']} ({r['health_score']})" if r.get("health_score") is not None else r["health_color"]
-        )
-        cells = [r["name"], *([r["kind"]] if all_kinds else []), r["id"][:36], health]
-        table.add_row(*cells, r["aria_state"], r["collection_status"] or "—")
-
-    console.print(table)
-    if result.get("note"):
-        console.print(f"[yellow]{result['note']}[/]")
 
 
-@resource_app.command("get")
-@_friendly_errors
-@audited("get_resource")
-def resource_get(
-    resource_id: str,
-    target: TargetOption = None,
-    config: ConfigOption = None,
-) -> None:
-    """Get full details for a specific resource by ID."""
-    from vmware_aria.ops.resources import get_resource
-
-    client, _ = _get_connection(target, config)
-    _json_output(get_resource(client, resource_id))
 
 
-@resource_app.command("metrics")
-@_friendly_errors
-@audited("get_resource_metrics")
-def resource_metrics(
-    resource_id: str,
-    metrics: Annotated[
-        str, typer.Option("--metrics", "-m", help="Comma-separated metric keys")
-    ] = "cpu|usage_average,mem|usage_average",
-    hours: Annotated[int, typer.Option("--hours", help="History window in hours")] = 1,
-    summary: Annotated[
-        bool,
-        typer.Option(
-            "--summary",
-            help="Per metric n/min/max/avg/p95/latest and the times the value changed, instead of every point",
-        ),
-    ] = False,
-    interval_type: Annotated[
-        str,
-        typer.Option("--interval-type", help="Span each point covers: MINUTES, HOURS, DAYS, WEEKS, MONTHS"),
-    ] = "MINUTES",
-    interval_quantity: Annotated[
-        int, typer.Option("--interval-quantity", help="Units of --interval-type per point (DAYS + 1 = daily)")
-    ] = 5,
-    rollup: Annotated[
-        str, typer.Option("--rollup", help="Value per point: AVG, MAX, MIN, SUM, COUNT, LATEST")
-    ] = "AVG",
-    target: TargetOption = None,
-    config: ConfigOption = None,
-) -> None:
-    """Fetch time-series metrics for a resource (raw points, or --summary)."""
-    import time as _time
-
-    from vmware_aria.ops.resources import get_resource_metrics, normalize_interval
-
-    interval_type, interval_quantity, rollup = normalize_interval(interval_type, interval_quantity, rollup)
-    client, _ = _get_connection(target, config)
-    metric_keys = [k.strip() for k in metrics.split(",") if k.strip()]
-    end_ms = int(_time.time() * 1000)
-    begin_ms = end_ms - (hours * 3_600_000)
-    result = get_resource_metrics(
-        client, resource_id, metric_keys, begin_time_ms=begin_ms, end_time_ms=end_ms,
-        rollup_type=rollup, interval_type=interval_type, interval_quantity=interval_quantity,
-        summary=summary,
-    )
-    _json_output(result)
 
 
-@resource_app.command("health")
-@_friendly_errors
-@audited("get_resource_health")
-def resource_health(
-    resource_id: str,
-    target: TargetOption = None,
-    config: ConfigOption = None,
-) -> None:
-    """Get health badge scores for a resource."""
-    from vmware_aria.ops.resources import get_resource_health
-
-    client, _ = _get_connection(target, config)
-    _json_output(get_resource_health(client, resource_id))
 
 
-@resource_app.command("top")
-@_friendly_errors
-@audited("get_top_consumers")
-def resource_top(
-    metric: Annotated[str, typer.Option("--metric", help="Metric key to rank by")] = "cpu|usage_average",
-    kind: Annotated[str, typer.Option("--kind", "-k", help="Resource kind")] = "VirtualMachine",
-    top_n: Annotated[int, typer.Option("--top", "-n", help="Number of top consumers")] = 10,
-    target: TargetOption = None,
-    config: ConfigOption = None,
-) -> None:
-    """List top resource consumers by a specific metric."""
-    from vmware_aria.ops.resources import get_top_consumers
 
-    client, _ = _get_connection(target, config)
-    result = get_top_consumers(client, metric_key=metric, resource_kind=kind, top_n=top_n)
-    items = result["items"]
+from vmware_aria._cli_resources import register_callbacks as _register_cli_resources
 
-    table = Table(title=f"Top {top_n} by {metric}", show_lines=False)
-    table.add_column("Rank", justify="right")
-    table.add_column("Name", style="bold")
-    table.add_column("Value")
-    table.add_column("Unit")
-
-    for i, r in enumerate(items, 1):
-        table.add_row(str(i), r["name"], str(r.get("value", "")), r.get("unit", ""))
-
-    console.print(table)
-    if result["hint"]:
-        console.print(f"[yellow]{result['hint']}[/yellow]")
+(
+    resource_list,
+    resource_get,
+    resource_metrics,
+    resource_health,
+    resource_top,
+) = _register_cli_resources(_sys.modules[__name__])
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -450,178 +309,41 @@ def resource_top(
 _ALERT_TABLE_MIN_WIDTH = 160
 
 
-def _alert_started(alert: dict) -> str:
-    iso = alert.get("start_time_utc")
-    return f"{iso[:10]} {iso[11:16]}" if iso else "—"
 
 
-def _alert_resource(alert: dict) -> str:
-    # Alert model has no resourceName; list_alerts resolves it in one batched
-    # lookup. An unresolved name prints as "?" — unknown, not "no resource".
-    return alert.get("resource_name") or ("?" if alert["resource_id"] else "")
 
 
-def _print_alert_table(items: list[dict]) -> None:
-    table = Table(title="Aria Operations Alerts", show_lines=False)
-    table.add_column("ID", no_wrap=True, min_width=36)
-    table.add_column("Name", style="bold")
-    table.add_column("Criticality")
-    table.add_column("Status")
-    table.add_column("Started (UTC)", no_wrap=True)
-    table.add_column("Resource")
-    table.add_column("Resource ID", no_wrap=True, min_width=36)
-    for a in items:
-        table.add_row(
-            a["id"], a["name"][:60], a["criticality"], a["status"], _alert_started(a),
-            _alert_resource(a)[:40], a["resource_id"],
-        )
-    console.print(table)
 
 
-def _print_alert_records(items: list[dict]) -> None:
-    """One block per alert; each UUID is a single word, so wrapping never splits it."""
-    from rich.markup import escape
 
-    console.print("[bold]Aria Operations Alerts[/bold]")
-    for a in items:
-        console.print(
-            f"{a['id']}  {escape(a['criticality'])}  {escape(a['status'])}  Started {_alert_started(a)} UTC",
-            highlight=False,
-        )
-        console.print(f"  {escape(a['name'])}", highlight=False)
-        if a["resource_id"]:
-            console.print(f"  on {escape(_alert_resource(a))} ({a['resource_id']})", highlight=False)
+from vmware_aria._cli_alert_display import register_callbacks as _register_cli_alert_display
+
+(
+    _alert_started,
+    _alert_resource,
+    _print_alert_table,
+    _print_alert_records,
+) = _register_cli_alert_display(_sys.modules[__name__])
 
 
-@alert_app.command("list")
-@_friendly_errors
-@audited("list_alerts")
-def alert_list(
-    active_only: Annotated[bool, typer.Option("--active/--all", help="Active alerts only")] = True,
-    criticality: Annotated[str | None, typer.Option("--criticality", help="Filter by criticality")] = None,
-    limit: Annotated[int, typer.Option("--limit", "-n", help="Page size, 1-500")] = 50,
-    offset: Annotated[int, typer.Option("--offset", help="Rows to skip; the next-page offset is printed below the table")] = 0,
-    as_json: Annotated[bool, typer.Option("--json", help="Print the result envelope as JSON instead of a table")] = False,
-    target: TargetOption = None,
-    config: ConfigOption = None,
-) -> None:
-    """List alerts, optionally filtered by criticality. IDs are printed whole."""
-    from vmware_aria.ops.alerts import list_alerts
-
-    client, _ = _get_connection(target, config)
-    _result = list_alerts(
-        client, active_only=active_only, criticality=criticality, limit=limit, offset=offset
-    )
-    if as_json:
-        _json_output(_result)
-        return
-
-    # A table narrower than this cannot hold two 36-character IDs: rich shrinks
-    # every column, IDs included, to "ba793832-5…", which cannot be pasted into
-    # `alert get` (2026-09-15). Narrower terminals get one record per alert.
-    if console.width >= _ALERT_TABLE_MIN_WIDTH:
-        _print_alert_table(_result["items"])
-    else:
-        _print_alert_records(_result["items"])
-    if _result.get("resource_names_note"):
-        console.print(f"[yellow]{_result['resource_names_note']}[/yellow]")
-    _print_next_page(_result)
 
 
-@alert_app.command("get")
-@_friendly_errors
-@audited("get_alert")
-def alert_get(
-    alert_id: str,
-    target: TargetOption = None,
-    config: ConfigOption = None,
-) -> None:
-    """Get full details for a specific alert."""
-    from vmware_aria.ops.alerts import get_alert
-
-    client, _ = _get_connection(target, config)
-    _json_output(get_alert(client, alert_id))
 
 
-@alert_app.command("acknowledge")
-@_friendly_errors
-@guarded("acknowledge_alert", risk_level="medium")
-def alert_acknowledge(
-    alert_id: str,
-    target: TargetOption = None,
-    config: ConfigOption = None,
-    yes: Annotated[bool, typer.Option("--yes", "-y", help="Skip confirmation prompt")] = False,
-) -> None:
-    """Acknowledge an active alert."""
-    from vmware_aria.ops.alerts import acknowledge_alert
-
-    if not yes:
-        typer.confirm(f"Acknowledge alert {alert_id}?", abort=True)
-
-    client, cfg = _get_connection(target, config)
-    target_name = target or cfg.default_target or "default"
-    result = acknowledge_alert(client, alert_id, audit_logger=_audit, target_name=target_name)
-    _json_output(result)
 
 
-@alert_app.command("cancel")
-@_friendly_errors
-@guarded("cancel_alert", risk_level="medium")
-def alert_cancel(
-    alert_id: str,
-    target: TargetOption = None,
-    config: ConfigOption = None,
-    yes: Annotated[bool, typer.Option("--yes", "-y", help="Skip confirmation prompts")] = False,
-) -> None:
-    """Cancel (dismiss) an active alert."""
-    from vmware_aria.ops.alerts import cancel_alert
-
-    # Two prompts when a human is driving; `--yes` for a caller who has already
-    # decided. The prompts defend the mistyped id, not a determined caller —
-    # this repo's own docs say so, since `yes |` satisfies them anyway. Removing
-    # the flag would have bought no safety and broken every script using it.
-    if not yes and not _confirm_destructive("alert", alert_id, verb="cancel"):
-        console.print("[yellow]Aborted.[/yellow]")
-        raise typer.Exit(1)
-
-    client, cfg = _get_connection(target, config)
-    target_name = target or cfg.default_target or "default"
-    result = cancel_alert(client, alert_id, audit_logger=_audit, target_name=target_name)
-    _json_output(result)
 
 
-@alert_app.command("definitions")
-@_friendly_errors
-@audited("list_alert_definitions")
-def alert_definitions(
-    name_filter: Annotated[str | None, typer.Option("--name", help="Filter by name substring")] = None,
-    limit: Annotated[int, typer.Option("--limit", "-n", help="Page size, 1-500")] = 50,
-    offset: Annotated[int, typer.Option("--offset", help="Rows to skip; the next-page offset is printed below the table")] = 0,
-    target: TargetOption = None,
-    config: ConfigOption = None,
-) -> None:
-    """List alert definitions (templates that generate alerts)."""
-    from vmware_aria.ops.alerts import list_alert_definitions
 
-    client, _ = _get_connection(target, config)
-    _result = list_alert_definitions(
-        client, name_filter=name_filter, limit=limit, offset=offset
-    )
-    items = _result["items"]
+from vmware_aria._cli_alerts import register_callbacks as _register_cli_alerts
 
-    table = Table(title="Alert Definitions", show_lines=False)
-    table.add_column("Name", style="bold")
-    table.add_column("Criticality")
-    table.add_column("Resource Kind")
-    table.add_column("Impact")
-
-    # AlertDefinition has no top-level active field; criticality is the max
-    # severity across the definition's states[].
-    for d in items:
-        table.add_row(d["name"][:60], d["criticality"], d["resource_kind"], d["impact"])
-
-    console.print(table)
-    _print_next_page(_result)
+(
+    alert_list,
+    alert_get,
+    alert_acknowledge,
+    alert_cancel,
+    alert_definitions,
+) = _register_cli_alerts(_sys.modules[__name__])
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -629,133 +351,21 @@ def alert_definitions(
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
-@capacity_app.command("overview")
-@_friendly_errors
-@audited("get_capacity_overview")
-def capacity_overview(
-    cluster_id: str,
-    target: TargetOption = None,
-    config: ConfigOption = None,
-) -> None:
-    """Get capacity recommendations for a cluster."""
-    from vmware_aria.ops.capacity import get_capacity_overview
-
-    client, _ = _get_connection(target, config)
-    _json_output(get_capacity_overview(client, cluster_id))
 
 
-@capacity_app.command("remaining")
-@_friendly_errors
-@audited("get_remaining_capacity")
-def capacity_remaining(
-    resource_id: str,
-    target: TargetOption = None,
-    config: ConfigOption = None,
-) -> None:
-    """Get remaining capacity metrics for a cluster or host."""
-    from vmware_aria.ops.capacity import get_remaining_capacity
-
-    client, _ = _get_connection(target, config)
-    _json_output(get_remaining_capacity(client, resource_id))
 
 
-@capacity_app.command("time-remaining")
-@_friendly_errors
-@audited("get_time_remaining")
-def capacity_time_remaining(
-    resource_id: str,
-    target: TargetOption = None,
-    config: ConfigOption = None,
-) -> None:
-    """Predict when a cluster will exhaust its capacity dimensions."""
-    from vmware_aria.ops.capacity import get_time_remaining
-
-    client, _ = _get_connection(target, config)
-    _json_output(get_time_remaining(client, resource_id))
 
 
-@capacity_app.command("rightsizing")
-@_friendly_errors
-@audited("list_rightsizing_recommendations")
-def capacity_rightsizing(
-    resource_id: Annotated[str | None, typer.Option("--resource-id", help="Scope to a specific VM")] = None,
-    limit: Annotated[int, typer.Option("--limit", "-n")] = 20,
-    target: TargetOption = None,
-    config: ConfigOption = None,
-) -> None:
-    """List VM rightsizing recommendations."""
-    from vmware_aria.ops.capacity import list_rightsizing_recommendations
 
-    client, _ = _get_connection(target, config)
-    result = list_rightsizing_recommendations(client, resource_id=resource_id, limit=limit)
-    items = result["items"]
+from vmware_aria._cli_capacity import register_callbacks as _register_cli_capacity
 
-    table = Table(title="Rightsizing (OnlineCapacityAnalytics recommendedSize)", show_lines=False)
-    table.add_column("VM Name", style="bold")
-    table.add_column("Power")
-    # min_width: on a narrow terminal Rich shrinks columns with an ellipsis, and
-    # a clipped "reclaima…" is the state this column exists to show.
-    table.add_column("Status", min_width=len("none published"))
-    table.add_column("vCPU now→rec")
-    table.add_column("Mem GiB now→rec")
-    table.add_column("Disk GB")
-    table.add_column("Act.")
-
-    # Three states, three renderings — a reclaimable VM and one with nothing
-    # published must not both come out as an empty pair of cells, because
-    # "no data" is exactly the misreading the sizing_status field exists to
-    # prevent. A zero from the engine means reclaimable (KB 379521), never a
-    # recommendation of zero.
-    _status_style = {
-        "recommendation": "[green]recommendation[/]",
-        "reclaimable": "[yellow]reclaimable[/]",
-        "none_published": "[dim]none published[/]",
-    }
-
-    def _cell(value: object) -> str:
-        return "—" if value is None else str(value)
-
-    def _gib(kb: object) -> str:
-        return "—" if kb is None else f"{float(kb) / 1_048_576:.1f}"
-
-    _arrow = {"oversized": "↓", "undersized": "↑", "right_sized": "="}
-
-    def _change(now: str, rec: str, direction: object) -> str:
-        # The raw recommendation is MHz/KB; these cells are converted so the
-        # comparison against the current size is readable, and the direction is
-        # marked rather than left for the reader to infer (legend under the table;
-        # an arrow survives an 80-column terminal where a word gets clipped).
-        return f"{now}→{rec} {_arrow.get(str(direction), '?')}" if direction else f"{now}→{rec}"
-
-    def _disk(gb: object) -> str:
-        return "—" if gb is None else f"{float(gb):.1f}"
-
-    for r in items:
-        status = r.get("sizing_status", "")
-        power = "template" if r.get("is_template") else _cell(r.get("power_state")).replace("Powered ", "")
-        table.add_row(
-            (r["name"] or r["id"])[:40],
-            power,
-            _status_style.get(status, status),
-            _change(_cell(r.get("current_vcpus")), _cell(r.get("recommended_vcpus")), r.get("cpu_direction")),
-            _change(_gib(r.get("current_memory_kb")), _gib(r.get("recommended_memory")), r.get("memory_direction")),
-            _disk(r.get("recommended_diskspace")),
-            "[green]yes[/]" if r.get("actionable") else "[dim]no[/]",
-        )
-
-    console.print(table)
-    console.print(
-        "[dim]↓ oversized  ↑ undersized  = right-sized  (vs current config; GiB rounded). "
-        "Act. = powered on, not a template, and off its recommendation.[/]"
-    )
-    for r in items:
-        for caveat in r.get("caveats") or []:
-            console.print(f"[dim]• {(r['name'] or r['id'])[:40]}: {caveat}[/]")
-    if result.get("properties_note"):
-        # Without it a failed property read shows only per-row caveats, never why.
-        console.print(f"[yellow]{result['properties_note']}[/]")
-    if result.get("history_note"):
-        console.print(f"[yellow]{result['history_note']}[/]")
+(
+    capacity_overview,
+    capacity_remaining,
+    capacity_time_remaining,
+    capacity_rightsizing,
+) = _register_cli_capacity(_sys.modules[__name__])
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
