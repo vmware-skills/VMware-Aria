@@ -29,7 +29,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 OPS_DIR = REPO_ROOT / "vmware_aria" / "ops"
 # The CLI is cli.py plus cli_workflow.py (maintenance and alert-workflow
 # commands registered onto the same app); a command may live in either.
-CLI_PATHS = [REPO_ROOT / "vmware_aria" / "cli.py", REPO_ROOT / "vmware_aria" / "cli_workflow.py"]
+CLI_PATHS = sorted((REPO_ROOT / "vmware_aria").glob("*cli*.py"))
 # Confirmed-gate tools live in server.py and in tools/*.py (the maintenance
 # pair), so the whole server tree is searched.
 MCP_DIR = REPO_ROOT / "vmware_aria" / "mcp_server"
@@ -38,9 +38,9 @@ MCP_DIR = REPO_ROOT / "vmware_aria" / "mcp_server"
 OPS_WRITE_FUNCTIONS: list[tuple[str, str]] = [
     ("alerts.py", "acknowledge_alert"),
     ("alerts.py", "cancel_alert"),
-    ("alerts.py", "create_alert_definition"),
-    ("alerts.py", "set_alert_definition_state"),
-    ("alerts.py", "delete_alert_definition"),
+    ("_alert_definitions.py", "create_alert_definition"),
+    ("_alert_definitions.py", "set_alert_definition_state"),
+    ("_alert_definitions.py", "delete_alert_definition"),
     ("reports.py", "generate_report"),
     ("reports.py", "delete_report"),
     ("maintenance.py", "start_resource_maintenance"),

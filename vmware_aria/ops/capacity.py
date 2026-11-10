@@ -13,7 +13,7 @@ All API responses pass through sanitize() to strip control characters.
 from __future__ import annotations
 
 import logging
-import math
+import math  # noqa: F401 — compatibility/runtime export
 from typing import TYPE_CHECKING
 
 from vmware_policy import paginated, sanitize
@@ -23,6 +23,23 @@ from vmware_aria.ops.resources import latest_stats_bulk
 
 if TYPE_CHECKING:
     from vmware_aria.connection import AriaClient
+
+from vmware_aria.ops._rightsizing import (
+    CPU_VCPU_ROUNDING_EPSILON as CPU_VCPU_ROUNDING_EPSILON,
+    _POWERED_OFF as _POWERED_OFF,
+    _POWERED_ON as _POWERED_ON,
+    _PROP_CPU_SPEED_HZ as _PROP_CPU_SPEED_HZ,
+    _PROP_NUM_CPU as _PROP_NUM_CPU,
+    _VERDICT_KEYS as _VERDICT_KEYS,
+    _aria_verdict as _aria_verdict,
+    _as_bool as _as_bool,
+    _as_float as _as_float,
+    _cpu_sizing as _cpu_sizing,
+    _direction as _direction,
+    _engine_direction as _engine_direction,
+    _rightsizing_caveats as _rightsizing_caveats,
+)
+
 
 _log = logging.getLogger("vmware-aria.ops.capacity")
 
@@ -381,21 +398,11 @@ _RECOMMENDED_KEYS = {dim: f"OnlineCapacityAnalytics|{dim}|recommendedSize" for d
 _RECOMMENDED_UNITS = {"cpu": "MHz", "memory": "KB", "diskspace": "GB"}
 
 #: The engine's own verdict (8.18.7 catalogue; memory amounts in KB).
-_VERDICT_KEYS = {
-    "oversized": "summary|oversized",
-    "oversized_vcpus": "summary|oversized|vcpus",
-    "oversized_memory_kb": "summary|oversized|memory",
-    "undersized": "summary|undersized",
-    "undersized_vcpus": "summary|undersized|vcpus",
-    "undersized_memory_kb": "summary|undersized|memory",
-}
 
 _RIGHTSIZING_STAT_KEYS = list(_RECOMMENDED_KEYS.values()) + list(_VERDICT_KEYS.values())
 
 # Property keys, each seen answered on a live 8.18.7 before use (踩坑 #36).
-_PROP_NUM_CPU = "config|hardware|numCpu"
 _PROP_MEMORY_KB = "config|hardware|memoryKB"
-_PROP_CPU_SPEED_HZ = "cpu|speed"  # total Hz across the VM's vCPUs (== vCenter host hz x numCpu)
 _PROP_POWER_STATE = "summary|runtime|powerState"  # "Powered On" / "Powered Off"
 _PROP_IS_TEMPLATE = "summary|config|isTemplate"  # "true" / "false"
 _PROP_PRODUCT_NAME = "summary|config|productName"  # only OVF deployments with a vApp product
@@ -416,7 +423,6 @@ _RIGHTSIZING_PROPERTY_KEYS = [
 #: that noise, and a real fractional demand still rounds UP (1.5 cores -> 2).
 #: Without it, a ratio of 1.0000036 would ceil to 2 and read an oversized VM as
 #: right-sized.
-CPU_VCPU_ROUNDING_EPSILON = 0.01
 
 #: A memory recommendation within this fraction of the configured size is
 #: ``right_sized``. Live 8.18.7: the Aria appliance's recommendation moved
@@ -570,8 +576,6 @@ def _history_caveat(row: dict, unstable: list[tuple[str, list[float]]]) -> str:
     )
 
 
-_POWERED_ON = "Powered On"
-_POWERED_OFF = "Powered Off"
 
 _PROPERTIES_QUERY_PATH = "/resources/properties/latest/query"
 
@@ -634,120 +638,18 @@ def _latest_properties_bulk(
     return result
 
 
-def _as_float(value: object) -> float | None:
-    try:
-        return None if value is None else float(value)  # type: ignore[arg-type]
-    except (TypeError, ValueError):
-        return None
 
 
-def _as_bool(value: object) -> bool | None:
-    text = str(value).strip().lower() if value is not None else ""
-    return {"true": True, "false": False}.get(text)
 
 
-def _direction(
-    current: float | None, recommended: float | None, tolerance: float = 0.0
-) -> str | None:
-    """oversized / undersized / right_sized; within ``tolerance`` (relative) is right_sized."""
-    if current is None or recommended is None:
-        return None
-    if current > 0 and abs(recommended - current) <= tolerance * current:
-        return "right_sized"
-    if recommended < current:
-        return "oversized"
-    if recommended > current:
-        return "undersized"
-    return "right_sized"
 
 
-def _cpu_sizing(props: dict, recommended_mhz: float | None) -> dict:
-    """Current vCPUs, MHz per vCPU and the MHz recommendation in vCPUs."""
-    num_cpu = _as_float(props.get(_PROP_NUM_CPU))
-    speed_hz = _as_float(props.get(_PROP_CPU_SPEED_HZ))
-    mhz_per_vcpu = speed_hz / num_cpu / 1_000_000 if num_cpu and speed_hz else None
-    recommended_vcpus = None
-    if recommended_mhz is not None and mhz_per_vcpu:
-        # Round up — a real fraction of a core is demand — but first absorb the
-        # float noise between the engine's MHz and cpu|speed (see the constant).
-        recommended_vcpus = max(
-            1, math.ceil(recommended_mhz / mhz_per_vcpu - CPU_VCPU_ROUNDING_EPSILON)
-        )
-    current_vcpus = int(num_cpu) if num_cpu is not None else None
-    return {
-        "current_vcpus": current_vcpus,
-        "cpu_mhz_per_vcpu": round(mhz_per_vcpu, 2) if mhz_per_vcpu else None,
-        "recommended_vcpus": recommended_vcpus,
-        "cpu_direction": _direction(current_vcpus, recommended_vcpus),
-    }
 
 
-def _aria_verdict(stats: dict) -> dict | None:
-    raw = {field: _as_float(stats.get(key)) for field, key in _VERDICT_KEYS.items()}
-    if all(v is None for v in raw.values()):
-        return None
-    return {
-        field: (None if v is None else v > 0) if field in ("oversized", "undersized") else v
-        for field, v in raw.items()
-    }
 
 
-def _engine_direction(verdict: dict | None, unit: str) -> str | None:
-    if verdict is None:
-        return None
-    over, under = verdict.get(f"oversized_{unit}"), verdict.get(f"undersized_{unit}")
-    if over is None or under is None:
-        return None
-    return "oversized" if over > 0 else "undersized" if under > 0 else "right_sized"
 
 
-def _rightsizing_caveats(row: dict, props_published: bool, props_failed: bool = False) -> list[str]:
-    if props_failed:
-        # Every property-derived field is None, so none of the checks below has
-        # anything to say — and their "not published" wording would be false.
-        return [
-            "VM properties could not be read (the bulk property query failed — see "
-            "properties_note): power state, template flag and current size are "
-            "unknown, so this row is not actionable"
-        ]
-    caveats: list[str] = []
-    power, template = row["power_state"], row["is_template"]
-    if power is None or template is None:
-        caveats.append(
-            "power state / template flag not published for this VM — cannot tell "
-            "whether it is a running workload"
-        )
-    elif template:
-        caveats.append("template: not a running workload — size the VMs deployed from it instead")
-    elif power == _POWERED_OFF:
-        caveats.append(
-            "powered off: the recommendation reflects past (or no) demand, not a "
-            "running workload — decide whether the VM is needed before sizing it"
-        )
-    elif power != _POWERED_ON:
-        caveats.append(f"power state is '{power}', not {_POWERED_ON}")
-    if row["current_vcpus"] is None or row["current_memory_kb"] is None:
-        if props_published or row["sizing_status"] == "recommendation":
-            caveats.append(
-                "current configuration (config|hardware|numCpu / memoryKB / cpu|speed) "
-                "not published — direction cannot be stated"
-            )
-    for dim, unit, key in (("cpu", "vcpus", "vcpus"), ("memory", "memory_kb", "memory")):
-        ours, engine = row[f"{dim}_direction"], _engine_direction(row["aria_verdict"], unit)
-        if ours and engine and ours != engine:
-            caveats.append(
-                f"recommendedSize reads {dim} as {ours} but the engine's own "
-                f"summary|oversized|{key} / summary|undersized|{key} read {engine} — "
-                "confirm in the Aria UI before acting"
-            )
-    if "oversized" in (row["cpu_direction"], row["memory_direction"]):
-        product = f" Aria reports product '{row['product_name']}'." if row["product_name"] else ""
-        caveats.append(
-            "before reducing, check the vendor minimum size for this guest — vendor "
-            "appliances publish floors, and appliances cannot be reliably identified "
-            f"from the API.{product}"
-        )
-    return caveats
 
 
 def _rightsizing_row(
