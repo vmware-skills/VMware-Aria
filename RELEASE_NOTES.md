@@ -1,3 +1,9 @@
+## v2.4.6 (2026-11-11) — Preserve compatibility exports without redundant self-alias imports
+
+Replace 65 redundant self-alias imports with private module bindings, preserving the exported objects and wildcard surface. Remove one duplicate import. No CLI/MCP behavior change.
+
+Validation: focused before-fix reproductions and repository regression suites; synthetic API contracts do not establish a positive 9.1/PAIS/Horizon appliance result.
+
 ## v2.4.4 — Security documentation and Gemini extension packaging
 
 Released 2026-11-09.

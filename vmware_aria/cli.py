@@ -7,7 +7,6 @@ anomaly detection, and platform health checks.
 from __future__ import annotations
 
 import sys as _sys
-import sys as _sys
 import functools
 import json
 from pathlib import Path
@@ -157,7 +156,9 @@ def mcp_cmd(
 
 # ─── Type aliases ────────────────────────────────────────────────────────────
 
-from vmware_aria.cli_options import TargetOption as TargetOption, ConfigOption as ConfigOption
+import vmware_aria.cli_options as _compat_exports_0
+TargetOption = _compat_exports_0.TargetOption
+ConfigOption = _compat_exports_0.ConfigOption
 
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────

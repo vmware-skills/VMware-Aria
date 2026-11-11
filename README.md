@@ -56,7 +56,7 @@ Full agent instructions: [`skills/vmware-aria/SKILL.md`](skills/vmware-aria/SKIL
 Requires Python `>=3.10` and `uv`.
 
 ```bash
-uv tool install vmware-aria==2.4.5
+uv tool install vmware-aria==2.4.6
 vmware-aria --help
 ```
 
@@ -69,7 +69,7 @@ Target, credential and local data setup: [setup guide](skills/vmware-aria/refere
 
 ```bash
 # Install
-uv tool install vmware-aria==2.4.5
+uv tool install vmware-aria==2.4.6
 
 # Configure
 mkdir -p ~/.vmware-aria
@@ -161,7 +161,7 @@ Copy this configuration into your MCP client's local stdio settings. The client 
   "mcpServers": {
     "vmware-aria": {
       "command": "uvx",
-      "args": ["--from", "vmware-aria==2.4.5", "vmware-aria-mcp"],
+      "args": ["--from", "vmware-aria==2.4.6", "vmware-aria-mcp"],
       "env": {
         "VMWARE_ARIA_CONFIG": "~/.vmware-aria/config.yaml"
       }
@@ -177,7 +177,7 @@ The following sections retain preinstalled CLI alternatives and product-specific
 
 ### MCP Setup (Claude Code)
 
-After `uv tool install vmware-aria==2.4.5`, add to `~/.claude.json`:
+After `uv tool install vmware-aria==2.4.6`, add to `~/.claude.json`:
 
 ```json
 {
@@ -195,7 +195,7 @@ After `uv tool install vmware-aria==2.4.5`, add to `~/.claude.json`:
 
 > **v1.5.15+** uses the single-command form `vmware-aria mcp`. The legacy
 > `vmware-aria-mcp` console script is still kept for backward compatibility.
-> If you must use `uvx --from vmware-aria==2.4.5 vmware-aria mcp` (no install) and hit
+> If you must use `uvx --from vmware-aria==2.4.6 vmware-aria mcp` (no install) and hit
 > `invalid peer certificate: UnknownIssuer` behind a corporate TLS proxy, set
 > `UV_NATIVE_TLS=true` or use the recommended `vmware-aria mcp` form above.
 
