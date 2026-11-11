@@ -53,7 +53,7 @@ Uncertain writes: inspect; GET-only retries.
 ## Quick Install
 
 ```bash
-uv tool install vmware-aria==2.4.5
+uv tool install vmware-aria==2.4.6
 vmware-aria init      # guided setup: writes config + .env (chmod 600, password grep-safe), then verifies
 vmware-aria doctor
 ```
@@ -310,7 +310,7 @@ Set `VMWARE_ARIA_<TARGET_NAME_UPPER>_PASSWORD` (hyphens become underscores; targ
 
 ### `invalid peer certificate: UnknownIssuer` when running uvx (corporate TLS proxy)
 
-`uvx` re-resolves from PyPI on every launch, and a TLS-intercepting proxy breaks that. Run `vmware-aria mcp` after `uv tool install vmware-aria==2.4.5` (no network on launch), or set `UV_NATIVE_TLS=true` to use the system cert store.
+`uvx` re-resolves from PyPI on every launch, and a TLS-intercepting proxy breaks that. Run `vmware-aria mcp` after `uv tool install vmware-aria==2.4.6` (no network on launch), or set `UV_NATIVE_TLS=true` to use the system cert store.
 
 ## Audit & Safety
 

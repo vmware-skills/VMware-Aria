@@ -8,7 +8,9 @@ from typing import Annotated
 import typer
 
 
-from vmware_aria.cli_options import TargetOption as TargetOption, ConfigOption as ConfigOption
+import vmware_aria.cli_options as _compat_exports_0
+TargetOption = _compat_exports_0.TargetOption
+ConfigOption = _compat_exports_0.ConfigOption
 
 
 def register_callbacks(runtime):

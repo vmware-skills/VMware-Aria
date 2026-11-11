@@ -52,7 +52,7 @@ MCP 默认使用本地 stdio。启用可选 HTTPS 后会打开配置的监听端
 需要 Python `>=3.10` 和 `uv`。
 
 ```bash
-uv tool install vmware-aria==2.4.5
+uv tool install vmware-aria==2.4.6
 vmware-aria --help
 ```
 
@@ -65,7 +65,7 @@ vmware-aria --help
 
 ```bash
 # 安装
-uv tool install vmware-aria==2.4.5
+uv tool install vmware-aria==2.4.6
 
 # 配置
 mkdir -p ~/.vmware-aria
@@ -179,7 +179,7 @@ Token 为 6 小时滑动有效期（每次调用自动延长，官方规范行�
   "mcpServers": {
     "vmware-aria": {
       "command": "uvx",
-      "args": ["--from", "vmware-aria==2.4.5", "vmware-aria-mcp"],
+      "args": ["--from", "vmware-aria==2.4.6", "vmware-aria-mcp"],
       "env": {
         "VMWARE_ARIA_CONFIG": "~/.vmware-aria/config.yaml"
       }
@@ -195,7 +195,7 @@ Token 为 6 小时滑动有效期（每次调用自动延长，官方规范行�
 
 ### MCP 配置（Claude Code）
 
-完成 `uv tool install vmware-aria==2.4.5` 后，在 `~/.claude.json` 中添加：
+完成 `uv tool install vmware-aria==2.4.6` 后，在 `~/.claude.json` 中添加：
 
 ```json
 {
@@ -212,7 +212,7 @@ Token 为 6 小时滑动有效期（每次调用自动延长，官方规范行�
 ```
 
 > **v1.5.15+** 推荐使用单命令 `vmware-aria mcp`。旧的 `vmware-aria-mcp` 入口仍然
-> 保留以向后兼容。如必须使用 `uvx --from vmware-aria==2.4.5 vmware-aria mcp`（不安装）
+> 保留以向后兼容。如必须使用 `uvx --from vmware-aria==2.4.6 vmware-aria mcp`（不安装）
 > 且公司 TLS 代理报 `invalid peer certificate: UnknownIssuer`，请设置
 > `UV_NATIVE_TLS=true`，或直接使用上面的 `vmware-aria mcp` 形式。
 

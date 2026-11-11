@@ -24,21 +24,20 @@ from vmware_aria.ops.resources import latest_stats_bulk
 if TYPE_CHECKING:
     from vmware_aria.connection import AriaClient
 
-from vmware_aria.ops._rightsizing import (
-    CPU_VCPU_ROUNDING_EPSILON as CPU_VCPU_ROUNDING_EPSILON,
-    _POWERED_OFF as _POWERED_OFF,
-    _POWERED_ON as _POWERED_ON,
-    _PROP_CPU_SPEED_HZ as _PROP_CPU_SPEED_HZ,
-    _PROP_NUM_CPU as _PROP_NUM_CPU,
-    _VERDICT_KEYS as _VERDICT_KEYS,
-    _aria_verdict as _aria_verdict,
-    _as_bool as _as_bool,
-    _as_float as _as_float,
-    _cpu_sizing as _cpu_sizing,
-    _direction as _direction,
-    _engine_direction as _engine_direction,
-    _rightsizing_caveats as _rightsizing_caveats,
-)
+import vmware_aria.ops._rightsizing as _compat_exports_0
+CPU_VCPU_ROUNDING_EPSILON = _compat_exports_0.CPU_VCPU_ROUNDING_EPSILON
+_POWERED_OFF = _compat_exports_0._POWERED_OFF
+_POWERED_ON = _compat_exports_0._POWERED_ON
+_PROP_CPU_SPEED_HZ = _compat_exports_0._PROP_CPU_SPEED_HZ
+_PROP_NUM_CPU = _compat_exports_0._PROP_NUM_CPU
+_VERDICT_KEYS = _compat_exports_0._VERDICT_KEYS
+_aria_verdict = _compat_exports_0._aria_verdict
+_as_bool = _compat_exports_0._as_bool
+_as_float = _compat_exports_0._as_float
+_cpu_sizing = _compat_exports_0._cpu_sizing
+_direction = _compat_exports_0._direction
+_engine_direction = _compat_exports_0._engine_direction
+_rightsizing_caveats = _compat_exports_0._rightsizing_caveats
 
 
 _log = logging.getLogger("vmware-aria.ops.capacity")

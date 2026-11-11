@@ -11,14 +11,13 @@ from vmware_policy import sanitize
 if TYPE_CHECKING:
     pass
 
-from vmware_aria.ops._metric_shapes import (
-    VALID_INTERVAL_TYPES as VALID_INTERVAL_TYPES,
-    VALID_ROLLUP_TYPES as VALID_ROLLUP_TYPES,
-    _echoed_resolution as _echoed_resolution,
-    _interval_report as _interval_report,
-    _parse_stat_series as _parse_stat_series,
-    normalize_interval as normalize_interval,
-)
+import vmware_aria.ops._metric_shapes as _compat_exports_0
+VALID_INTERVAL_TYPES = _compat_exports_0.VALID_INTERVAL_TYPES
+VALID_ROLLUP_TYPES = _compat_exports_0.VALID_ROLLUP_TYPES
+_echoed_resolution = _compat_exports_0._echoed_resolution
+_interval_report = _compat_exports_0._interval_report
+_parse_stat_series = _compat_exports_0._parse_stat_series
+normalize_interval = _compat_exports_0.normalize_interval
 
 
 def _badges_by_type(dto: dict) -> dict[str, dict]:

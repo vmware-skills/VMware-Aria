@@ -19,20 +19,19 @@ if TYPE_CHECKING:
     from vmware_aria.connection import AriaClient
     from vmware_aria.notify.audit import AuditLogger
 
-from vmware_aria.ops._alert_shapes import (
-    _LOOKUP_NOT_NEEDED as _LOOKUP_NOT_NEEDED,
-    _MAX_SYMPTOM_DEPTH as _MAX_SYMPTOM_DEPTH,
-    _SEVERITY_RANK as _SEVERITY_RANK,
-    _SYMPTOM_CONTAINER_KEYS as _SYMPTOM_CONTAINER_KEYS,
-    _SYMPTOM_LEAF_KEYS as _SYMPTOM_LEAF_KEYS,
-    _definition_id as _definition_id,
-    _definition_severity as _definition_severity,
-    _max_state_severity as _max_state_severity,
-    _own_name as _own_name,
-    _own_severity as _own_severity,
-    _summarize_symptom as _summarize_symptom,
-    _walk_symptoms as _walk_symptoms,
-)
+import vmware_aria.ops._alert_shapes as _compat_exports_0
+_LOOKUP_NOT_NEEDED = _compat_exports_0._LOOKUP_NOT_NEEDED
+_MAX_SYMPTOM_DEPTH = _compat_exports_0._MAX_SYMPTOM_DEPTH
+_SEVERITY_RANK = _compat_exports_0._SEVERITY_RANK
+_SYMPTOM_CONTAINER_KEYS = _compat_exports_0._SYMPTOM_CONTAINER_KEYS
+_SYMPTOM_LEAF_KEYS = _compat_exports_0._SYMPTOM_LEAF_KEYS
+_definition_id = _compat_exports_0._definition_id
+_definition_severity = _compat_exports_0._definition_severity
+_max_state_severity = _compat_exports_0._max_state_severity
+_own_name = _compat_exports_0._own_name
+_own_severity = _compat_exports_0._own_severity
+_summarize_symptom = _compat_exports_0._summarize_symptom
+_walk_symptoms = _compat_exports_0._walk_symptoms
 
 
 def list_alert_definitions(

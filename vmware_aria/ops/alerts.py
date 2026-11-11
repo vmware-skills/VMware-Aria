@@ -28,29 +28,27 @@ if TYPE_CHECKING:
     from vmware_aria.connection import AriaClient
     from vmware_aria.notify.audit import AuditLogger
 
-from vmware_aria.ops._alert_shapes import (
-    _LOOKUP_NOT_NEEDED as _LOOKUP_NOT_NEEDED,
-    _MAX_SYMPTOM_DEPTH as _MAX_SYMPTOM_DEPTH,
-    _SEVERITY_RANK as _SEVERITY_RANK,
-    _SYMPTOM_CONTAINER_KEYS as _SYMPTOM_CONTAINER_KEYS,
-    _SYMPTOM_LEAF_KEYS as _SYMPTOM_LEAF_KEYS,
-    _definition_id as _definition_id,
-    _definition_severity as _definition_severity,
-    _max_state_severity as _max_state_severity,
-    _own_name as _own_name,
-    _own_severity as _own_severity,
-    _summarize_symptom as _summarize_symptom,
-    _walk_symptoms as _walk_symptoms,
-)
+import vmware_aria.ops._alert_shapes as _compat_exports_0
+import vmware_aria.ops._alert_definitions as _compat_exports_1
+_LOOKUP_NOT_NEEDED = _compat_exports_0._LOOKUP_NOT_NEEDED
+_MAX_SYMPTOM_DEPTH = _compat_exports_0._MAX_SYMPTOM_DEPTH
+_SEVERITY_RANK = _compat_exports_0._SEVERITY_RANK
+_SYMPTOM_CONTAINER_KEYS = _compat_exports_0._SYMPTOM_CONTAINER_KEYS
+_SYMPTOM_LEAF_KEYS = _compat_exports_0._SYMPTOM_LEAF_KEYS
+_definition_id = _compat_exports_0._definition_id
+_definition_severity = _compat_exports_0._definition_severity
+_max_state_severity = _compat_exports_0._max_state_severity
+_own_name = _compat_exports_0._own_name
+_own_severity = _compat_exports_0._own_severity
+_summarize_symptom = _compat_exports_0._summarize_symptom
+_walk_symptoms = _compat_exports_0._walk_symptoms
 
-from vmware_aria.ops._alert_definitions import (
-    _VALID_CRITICALITIES_DEF as _VALID_CRITICALITIES_DEF,
-    create_alert_definition as create_alert_definition,
-    delete_alert_definition as delete_alert_definition,
-    list_alert_definitions as list_alert_definitions,
-    list_symptom_definitions as list_symptom_definitions,
-    set_alert_definition_state as set_alert_definition_state,
-)
+_VALID_CRITICALITIES_DEF = _compat_exports_1._VALID_CRITICALITIES_DEF
+create_alert_definition = _compat_exports_1.create_alert_definition
+delete_alert_definition = _compat_exports_1.delete_alert_definition
+list_alert_definitions = _compat_exports_1.list_alert_definitions
+list_symptom_definitions = _compat_exports_1.list_symptom_definitions
+set_alert_definition_state = _compat_exports_1.set_alert_definition_state
 
 
 
