@@ -402,7 +402,7 @@ VMs / Hosts / Clusters / Alerts / Capacity
 
 ## License
 
-MIT — see [LICENSE](../../../LICENSE)
+MIT — see [LICENSE](https://opensource.org/license/mit/)
 
 ### Transient request recovery
 
