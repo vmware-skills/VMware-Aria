@@ -25,6 +25,14 @@ MCP 默认使用本地 stdio。启用可选 HTTPS 后会打开配置的监听端
 
 容器示例先在本地构建带版本标签的镜像，再用 `--pull=never` 运行，避免回退到镜像仓库拉取。本地版本标签不等于不可变的镜像摘要。
 
+### 产品版本与功能证据
+
+支持识别 Aria Operations / vRealize Operations 8.x 与更名后的 VCF Operations 9.x。
+9.1.1.0 属于 9.x；文档示例未逐个列出补丁号，不代表不支持。先用 `get_aria_health` / CLI
+`health status` 读取产品版本，再按具体接口响应判断。查询成功只证明该次查询范围可用，不代表全部
+功能已验证；401/403 是认证/权限问题，404 或原始路径未入索引也不能直接概括为整个产品不兼容。
+原有最低版本限制、Policy 与索引路径白名单继续生效；本文不宣称已完成 9.1.1.0 全功能真机验证。
+
 ### 概述
 
 `vmware-aria` 提供 46 个 MCP 工具，支持通过自然语言 AI Agent（Claude Code、Cursor、Goose 等）与 Aria Operations 交互：
@@ -53,7 +61,7 @@ MCP 默认使用本地 stdio。启用可选 HTTPS 后会打开配置的监听端
 需要 Python `>=3.10` 和 `uv`。
 
 ```bash
-uv tool install vmware-aria==2.4.6
+uv tool install vmware-aria==2.4.7
 vmware-aria --help
 ```
 
@@ -66,7 +74,7 @@ vmware-aria --help
 
 ```bash
 # 安装
-uv tool install vmware-aria==2.4.6
+uv tool install vmware-aria==2.4.7
 
 # 配置
 mkdir -p ~/.vmware-aria
@@ -180,7 +188,7 @@ Token 为 6 小时滑动有效期（每次调用自动延长，官方规范行�
   "mcpServers": {
     "vmware-aria": {
       "command": "uvx",
-      "args": ["--from", "vmware-aria==2.4.6", "vmware-aria-mcp"],
+      "args": ["--from", "vmware-aria==2.4.7", "vmware-aria-mcp"],
       "env": {
         "VMWARE_ARIA_CONFIG": "~/.vmware-aria/config.yaml"
       }
@@ -196,7 +204,7 @@ Token 为 6 小时滑动有效期（每次调用自动延长，官方规范行�
 
 ### MCP 配置（Claude Code）
 
-完成 `uv tool install vmware-aria==2.4.6` 后，在 `~/.claude.json` 中添加：
+完成 `uv tool install vmware-aria==2.4.7` 后，在 `~/.claude.json` 中添加：
 
 ```json
 {
@@ -213,7 +221,7 @@ Token 为 6 小时滑动有效期（每次调用自动延长，官方规范行�
 ```
 
 > **v1.5.15+** 推荐使用单命令 `vmware-aria mcp`。旧的 `vmware-aria-mcp` 入口仍然
-> 保留以向后兼容。如必须使用 `uvx --from vmware-aria==2.4.6 vmware-aria mcp`（不安装）
+> 保留以向后兼容。如必须使用 `uvx --from vmware-aria==2.4.7 vmware-aria mcp`（不安装）
 > 且公司 TLS 代理报 `invalid peer certificate: UnknownIssuer`，请设置
 > `UV_NATIVE_TLS=true`，或直接使用上面的 `vmware-aria mcp` 形式。
 

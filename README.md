@@ -29,7 +29,7 @@ Synthetic-data GIF; video includes redacted historical screenshots. [Download th
 Install the published CLI and inspect its commands:
 
 ```sh
-uv tool install vmware-aria==2.4.6
+uv tool install vmware-aria==2.4.7
 vmware-aria --help
 ```
 
@@ -38,6 +38,8 @@ Requires uv and Python >=3.10. Configure targets and credentials locally before 
 For agent-host installation, use the [setup guide](https://github.com/vmware-skills/VMware-Aria/blob/main/skills/vmware-aria/references/setup-guide.md) and [Cursor, Codex, Gemini CLI, Cline and local-model examples](https://github.com/vmware-skills/marketplace/blob/main/docs/agent-hosts.md).
 
 Choose a model with the [shared model-fit workflow](https://github.com/vmware-skills/marketplace/blob/main/model-fit/RUNNER.md): compare the same tasks, review quality and safety, then select the smallest tested passing configuration per task group; this is not a production guarantee.
+
+VCF Operations 9.x, including 9.1.1.0, is the renamed product family; judge each operation by its API evidence rather than treating version examples as a whitelist. Recognition is not full live-compatibility certification.
 
 <a id="readme-safety-and-audit"></a>
 

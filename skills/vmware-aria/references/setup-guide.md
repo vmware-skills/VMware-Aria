@@ -5,30 +5,42 @@ Complete setup and security guide for `vmware-aria`.
 ## Prerequisites
 
 - Python 3.10+
-- VMware Aria Operations 8.x (or vRealize Operations 8.x)
+- VMware Aria Operations / vRealize Operations 8.x, or VCF Operations 9.x. VCF Operations 9.1.1.0 is a 9.x product version; feature availability is assessed per endpoint, not by an exact-release whitelist.
 - Network access to Aria Ops on port 443 (HTTPS)
 - Aria Operations credentials:
   - Read operations: `ReadOnly` role minimum
   - Alert acknowledge/cancel: `PowerUser` role or higher
+
+## Product version versus feature evidence
+
+The product was renamed VCF Operations in the 9.x line. Do not infer "unsupported"
+from an example that names only 8.x/9.1 or from the version of the bundled API index.
+Use `vmware-aria health status` / MCP `get_aria_health` to read the product version,
+then judge the requested operation from its response. A successful inventory query
+is evidence for that query, not certification of every tool. A 401/403 indicates an
+authentication/permission problem; a 404 or an unindexed raw path concerns that
+operation and does not by itself establish whole-product incompatibility. Existing
+minimum-version declarations, Policy checks and the indexed-path allowlist still apply.
+No full live-compatibility result for 9.1.1.0 is claimed by this guidance.
 
 ## Installation
 
 ### Via uv (recommended)
 
 ```bash
-uv tool install vmware-aria==2.4.6
+uv tool install vmware-aria==2.4.7
 ```
 
 ### Via pip
 
 ```bash
-pip install vmware-aria==2.4.6
+pip install vmware-aria==2.4.7
 ```
 
 ### From source
 
 ```bash
-git clone --branch v2.4.6 https://github.com/vmware-skills/VMware-Aria.git
+git clone --branch v2.4.7 https://github.com/vmware-skills/VMware-Aria.git
 cd VMware-Aria
 pip install -e .
 ```
@@ -199,7 +211,7 @@ Add to `~/.claude.json` (or use `claude mcp add`):
 
 > v1.5.15+ recommends `vmware-aria mcp`. Pre-1.5.15 used the legacy
 > `vmware-aria-mcp` console script (still kept for backward compatibility).
-> If using `uvx --from vmware-aria==2.4.6 vmware-aria mcp` and you hit
+> If using `uvx --from vmware-aria==2.4.7 vmware-aria mcp` and you hit
 > `invalid peer certificate: UnknownIssuer` behind a corporate TLS proxy,
 > set `UV_NATIVE_TLS=true` or use the recommended form above.
 
@@ -312,11 +324,11 @@ decide:
 ### Build and run
 
 ```bash
-docker build -t vmware-aria:2.4.6 .
+docker build -t vmware-aria:2.4.7 .
 docker run --pull=never -i \
   -v ~/.vmware-aria:/root/.vmware-aria:ro \
   -e VMWARE_ARIA_CONFIG=/root/.vmware-aria/config.yaml \
-  vmware-aria:2.4.6
+  vmware-aria:2.4.7
 ```
 
 These commands run the image built locally above; `--pull=never` prevents a missing local image from falling back to a registry. The version tag identifies this build, not an immutable digest.
