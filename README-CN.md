@@ -29,7 +29,7 @@ GIF 使用合成数据；视频包含脱敏的历史截图。[下载家族 AI �
 安装已发布 CLI，并查看可用命令：
 
 ```sh
-uv tool install vmware-aria==2.4.6
+uv tool install vmware-aria==2.4.7
 vmware-aria --help
 ```
 
@@ -38,6 +38,8 @@ vmware-aria --help
 Agent 宿主安装见本模块的[配置指南](https://github.com/vmware-skills/VMware-Aria/blob/main/skills/vmware-aria/references/setup-guide.md)，以及 [Cursor、Codex、Gemini CLI、Cline 与本地模型示例](https://github.com/vmware-skills/marketplace/blob/main/docs/agent-hosts-CN.md)。
 
 选模型可用[共享模型自测流程](https://github.com/vmware-skills/marketplace/blob/main/model-fit/RUNNER-CN.md)：统一任务、复核质量与安全，再按任务组选择最小已测通过配置；不代表生产质量保证。
+
+VCF Operations 9.x（包括 9.1.1.0）是更名后的产品系列；应按各接口的实际响应判断能力，不把版本示例当成白名单。识别版本不等于完成全部功能的真机兼容认证。
 
 <a id="readme-safety-and-audit"></a>
 

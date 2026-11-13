@@ -105,6 +105,12 @@ _BASE_INSTRUCTIONS = (
     "VMware Aria Operations (vRealize Operations) monitoring, alerting, and capacity planning. "
     "Query VM/host/cluster metrics, manage alerts, check capacity and rightsizing recommendations, "
     "detect anomalies, and monitor Aria platform health. "
+    "VCF Operations 9.x is the current product family name, including 9.1.1.0; "
+    "a release omitted from an example or the bundled 9.1 API index is not an unsupported-version verdict. "
+    "Use get_aria_health for the reported product version and base each requested capability on its own API evidence. "
+    "A successful call establishes that operation worked in the observed scope, not that every tool is verified. "
+    "Keep authentication/permission errors, individual missing endpoints and unverified features separate from "
+    "whole-product compatibility. Preserve declared minimum versions and the indexed-path allowlist. "
     "For VM lifecycle operations use vmware-aiops. "
     "For NSX networking use vmware-nsx."
 )

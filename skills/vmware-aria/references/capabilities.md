@@ -193,7 +193,8 @@ Reading rules for an agent:
 
 | Feature | Minimum Version |
 |---------|----------------|
-| VCF Operations 9.1 (VCF 9.1) | ✅ All tools; PromQL uses the 9.1 VODAP service (base path inferred, not yet verified on real hardware). Aria Operations was rebranded VCF Operations in VCF 9. |
+| VCF Operations 9.1.1.0 | Recognized as the 9.x product family; no exact-release rejection. Judge each operation by its response and declared requirements; full live-tool coverage on this patch is not established. |
+| VCF Operations 9.1 (VCF 9.1) | Dedicated tools use the bundled 9.1 API contracts where applicable; this is not proof of full live-tool coverage. PromQL uses the 9.1 VODAP service (base path inferred, not yet verified on real hardware). Aria Operations was rebranded VCF Operations in VCF 9. |
 | VCF Operations 9.0 (VCF 9.0) | ✅ suite-api tools plus fleet certificates / passwords / domains and diagnostic findings |
 | Aria Operations 8.x | ✅ suite-api tools. Fleet, findings and PromQL are 9.0+: on 8.x they return a "requires VCF Operations 9.0 or newer" error naming the version the appliance reports |
 | Token authentication | 6.6+ |

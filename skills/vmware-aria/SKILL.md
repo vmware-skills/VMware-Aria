@@ -28,7 +28,8 @@ compatibility: >
 
 VMware Aria Operations (vRealize Operations 8.x, VCF Operations 9.x) AI-assisted monitoring — 46 MCP tools, by category below.
 
-> **Know the version first**: `vmware-aria health status` (MCP `get_aria_health`) names the product line. Fleet, findings and PromQL exist only on VCF Operations 9.0+ (PromQL uses the 9.1 VODAP service); on 8.x they return a "requires 9.0 or newer" error, not data.
+> **Version first**: `get_aria_health` reports product identity. Fleet/findings need 9.0+; PromQL uses 9.1 VODAP; unavailable on 8.x.
+> **Versions are not a whitelist**: 9.1.1.0 is VCF Operations 9.x. Judge each API response; retain version floors and indexed-path restrictions. [Compatibility evidence](references/setup-guide.md#product-version-versus-feature-evidence).
 > **Companion skills**: vmware-monitor (real-time vSphere), vmware-aiops (VM lifecycle), vmware-nsx (networking), vmware-avi (AVI/ALB/AKO), vmware-harden (compliance), vmware-pilot (approval workflows), vmware-policy (audit/policy).
 
 ## What This Skill Does
@@ -53,7 +54,7 @@ Uncertain writes: inspect; GET-only retries.
 ## Quick Install
 
 ```bash
-uv tool install vmware-aria==2.4.6
+uv tool install vmware-aria==2.4.7
 vmware-aria init      # guided setup: writes config + .env (chmod 600, password grep-safe), then verifies
 vmware-aria doctor
 ```
@@ -310,7 +311,7 @@ Set `VMWARE_ARIA_<TARGET_NAME_UPPER>_PASSWORD` (hyphens become underscores; targ
 
 ### `invalid peer certificate: UnknownIssuer` when running uvx (corporate TLS proxy)
 
-`uvx` re-resolves from PyPI on every launch, and a TLS-intercepting proxy breaks that. Run `vmware-aria mcp` after `uv tool install vmware-aria==2.4.6` (no network on launch), or set `UV_NATIVE_TLS=true` to use the system cert store.
+`uvx` re-resolves from PyPI on every launch, and a TLS-intercepting proxy breaks that. Run `vmware-aria mcp` after `uv tool install vmware-aria==2.4.7` (no network on launch), or set `UV_NATIVE_TLS=true` to use the system cert store.
 
 ## Audit & Safety
 

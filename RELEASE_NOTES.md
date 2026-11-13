@@ -1,3 +1,9 @@
+## v2.4.7 — VCF Operations patch-version guidance (2026-11-13)
+
+- Clarify MCP startup instructions and canonical skill guidance so agents do not treat version examples or the bundled 9.1 API snapshot as an exact-release whitelist. VCF Operations 9.1.1.0 is recognized as part of the 9.x product family.
+- Correct the setup prerequisite that mentioned only 8.x, and distinguish successful per-operation evidence from full live compatibility. Authentication/permission errors and individual missing/unindexed paths do not establish whole-product incompatibility.
+- No endpoint, version floor, indexed-path allowlist, authorization or write behavior changed. This release does not claim full live-tool coverage on a 9.1.1.0 appliance.
+
 ## v2.4.6 (2026-11-11) — Preserve compatibility exports without redundant self-alias imports
 
 Replace 65 redundant self-alias imports with private module bindings, preserving the exported objects and wildcard surface. Remove one duplicate import. No CLI/MCP behavior change.
