@@ -422,3 +422,23 @@ a missing response may mean the change already took effect. Inspect the target
 before retrying a write. A single authentication recovery after an explicit
 rejection is handled separately. This boundary has synthetic HTTP contract
 coverage; it does not establish positive appliance compatibility.
+
+## Keep resource queries focused
+
+Start with `list_resources` using a name/kind filter and a small `limit`, then
+use `get_resource` for the selected UUID. Use dedicated tools before
+`get_api_path`; the latter returns additional API fields and is intended for
+reads the dedicated tools do not cover.
+
+For configuration questions, request only matching properties. For example,
+`get_resource_properties(resource_id="<uuid>", name_filter="summary|", limit=10)`
+returns a first page of summary properties; choose a narrower property-name
+substring when the question permits it. For relationships, request the needed
+`relationship_type` and a small `limit`. Inspect `total`, `truncated` and
+`next_offset`, and continue when the answer requires more rows. A partial page
+is not proof that no other properties or related resources exist.
+
+These choices reduce the data placed in the model context for a focused
+question. Fetching every page can cost as much as, or more than, a larger
+response; this is selective retrieval, not lossless compression. Response
+bytes are not an exact model-token count.
