@@ -436,7 +436,9 @@ returns a first page of summary properties; choose a narrower property-name
 substring when the question permits it. For relationships, request the needed
 `relationship_type` and a small `limit`. Inspect `total`, `truncated` and
 `next_offset`, and continue when the answer requires more rows. A partial page
-is not proof that no other properties or related resources exist.
+is not proof that no other properties or related resources exist. Stop paging
+when `next_offset` is null. `truncated` means this page is not the whole
+collection; it can remain true on the last page and is not a loop condition.
 
 These choices reduce the data placed in the model context for a focused
 question. Fetching every page can cost as much as, or more than, a larger
