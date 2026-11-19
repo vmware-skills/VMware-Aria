@@ -70,4 +70,4 @@ VCF Operations 9.x（包括 9.1.1.0）是更名后的产品系列；应按各接
 
 ## MCP 结果契约
 
-支持 offset 的列表提供 `next_offset`，值为 null 时停止翻页，不要用 `truncated` 循环。失败调用由 Policy 1.26.0 提供 `structuredContent.vmware_error`。保留原有文本、旧标记、成功值与确认机制。详见[契约说明](skills/vmware-aria/references/mcp-result-contract-CN.md)。
+支持 offset 的列表提供 `next_offset`，值为 null 时停止翻页，不要用 `truncated` 循环。失败调用由 Policy 1.26.0 提供 `structuredContent.vmware_error`。保留原有文本、旧标记、成功值与确认机制。详见[契约说明](https://github.com/vmware-skills/VMware-Aria/blob/main/skills/vmware-aria/references/mcp-result-contract-CN.md)。
