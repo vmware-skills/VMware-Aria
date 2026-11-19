@@ -1,3 +1,9 @@
+## Unreleased — shared MCP result contract
+
+Use shared offset continuation calculations and offset-aware envelopes where applicable. Requires Policy 1.26.0; release it first and refresh this repository’s lock before merging or publishing. Tool names, arguments, defaults and confirmation checks are unchanged.
+
+中文：复用公共续页计算，并在适用处使用带 offset 的分页 envelope。 依赖 Policy 1.26.0，须先发布共享库再刷新本仓锁文件后合并/发布。工具名、参数、默认值和确认机制不变。
+
 ## v2.4.7 — VCF Operations patch-version guidance (2026-11-13)
 
 - Clarify MCP startup instructions and canonical skill guidance so agents do not treat version examples or the bundled 9.1 API snapshot as an exact-release whitelist. VCF Operations 9.1.1.0 is recognized as part of the 9.x product family.

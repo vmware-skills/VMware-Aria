@@ -327,3 +327,5 @@ Every tool call goes through vmware-policy (`@vmware_tool`): audited to `~/.vmwa
 ## License
 
 MIT — [github.com/vmware-skills/VMware-Aria](https://github.com/vmware-skills/VMware-Aria)
+
+[Contracts](references/mcp-result-contract.md).

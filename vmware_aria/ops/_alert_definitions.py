@@ -5,13 +5,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from vmware_policy import paginated, sanitize
+from vmware_policy import page_envelope, paginated as paginated, sanitize
 
 
 from vmware_aria.ops._paging import (
     CollectionTotal,
     iter_collection,
-    next_offset,
+    next_offset as next_offset,
     validate_page_args,
 )
 
@@ -101,11 +101,11 @@ def list_alert_definitions(
         if len(results) >= limit:
             break
     total = None if name_filter else collection_total.value
-    return paginated(
+    return page_envelope(
         results,
         limit=limit,
         total=total,
-        next_offset=next_offset(len(results), limit, offset, total),
+        offset=offset,
     )
 
 
@@ -370,9 +370,9 @@ def list_symptom_definitions(
         if len(results) >= limit:
             break
     total = None if name_filter else collection_total.value
-    return paginated(
+    return page_envelope(
         results,
         limit=limit,
         total=total,
-        next_offset=next_offset(len(results), limit, offset, total),
+        offset=offset,
     )

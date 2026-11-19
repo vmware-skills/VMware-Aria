@@ -86,14 +86,10 @@ def _require_id(resource_id: str | None) -> str:
 
 
 def _envelope(rows: list[dict], limit: int, offset: int, total: int | None, **extra: Any) -> dict:
+    from vmware_policy import page_envelope
+
     page = paginate(rows, limit, offset)
-    return paginated(
-        page,
-        limit=limit,
-        total=total,
-        next_offset=next_offset(len(page), limit, offset, total),
-        **extra,
-    )
+    return page_envelope(page, limit=limit, offset=offset, total=total, **extra)
 
 
 def _matches(needle: str | None, *fields: str | None) -> bool:
