@@ -16,11 +16,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from vmware_policy import paginated
+from vmware_policy import page_envelope, paginated
 
 from vmware_aria.ops._collection import int_or_none, read_window, text_or_none
 from vmware_aria.ops._ids import require_uuid
-from vmware_aria.ops._paging import next_offset, validate_page_args
+from vmware_aria.ops._paging import next_offset as next_offset, validate_page_args
 
 if TYPE_CHECKING:
     from vmware_aria.connection import AriaClient
@@ -91,11 +91,11 @@ def list_alert_notes(client: AriaClient, alert_id: str, limit: int = 100, offset
                 "unknown — this is not 'no notes'. Retry, or run 'vmware-aria doctor'."
             ),
         )
-    return paginated(
+    return page_envelope(
         rows,
         limit=limit,
         total=window.total,
-        next_offset=next_offset(len(rows), limit, offset, window.total),
+        offset=offset,
         notes_note=None,
     )
 

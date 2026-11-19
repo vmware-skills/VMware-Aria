@@ -14,13 +14,13 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
-from vmware_policy import paginated, sanitize
+from vmware_policy import page_envelope, paginated, sanitize
 
 from vmware_aria.ops._paging import (
     MAX_LIMIT,
     CollectionTotal,
     iter_collection,
-    next_offset,
+    next_offset as next_offset,
     validate_page_args,
 )
 
@@ -92,11 +92,11 @@ def list_report_definitions(
         if len(results) >= limit:
             break
     total = None if name_filter else collection_total.value
-    return paginated(
+    return page_envelope(
         results,
         limit=limit,
         total=total,
-        next_offset=next_offset(len(results), limit, offset, total),
+        offset=offset,
     )
 
 

@@ -29,13 +29,13 @@ GIF 使用合成数据；视频包含脱敏的历史截图。[下载家族 AI �
 安装已发布 CLI，并查看可用命令：
 
 ```sh
-uv tool install vmware-aria==2.4.7
+uv tool install vmware-aria==2.4.8
 vmware-aria --help
 ```
 
 需要 uv 与 Python >=3.10。远程查询前，在本地配置目标与凭据。[配置指南](https://github.com/vmware-skills/VMware-Aria/blob/main/skills/vmware-aria/references/setup-guide.md)。
 
-完成本地配置后可一键安装：[Claude Desktop 扩展（.mcpb）](https://github.com/vmware-skills/VMware-Aria/releases/download/v2.4.7/vmware-aria-2.4.7.mcpb) · [在 VS Code 中安装](https://insiders.vscode.dev/redirect/mcp/install?name=vmware-aria&config=%7B%22type%22%3A%22stdio%22%2C%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22--from%22%2C%22vmware-aria%3D%3D2.4.7%22%2C%22vmware-aria-mcp%22%5D%7D)。两者运行同一个固定的 2.4.7 版本。桌面扩展默认只提供只读工具，需要写操作时把“Tools to offer”改为 `all`。
+完成本地配置后可一键安装：[Claude Desktop 扩展（.mcpb）](https://github.com/vmware-skills/VMware-Aria/releases/download/v2.4.8/vmware-aria-2.4.8.mcpb) · [在 VS Code 中安装](https://insiders.vscode.dev/redirect/mcp/install?name=vmware-aria&config=%7B%22type%22%3A%22stdio%22%2C%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22--from%22%2C%22vmware-aria%3D%3D2.4.8%22%2C%22vmware-aria-mcp%22%5D%7D)。两者运行同一个固定的 2.4.8 版本。桌面扩展默认只提供只读工具，需要写操作时把“Tools to offer”改为 `all`。
 
 Agent 宿主安装见本模块的[配置指南](https://github.com/vmware-skills/VMware-Aria/blob/main/skills/vmware-aria/references/setup-guide.md)，以及 [Cursor、Codex、Gemini CLI、Cline 与本地模型示例](https://github.com/vmware-skills/marketplace/blob/main/docs/agent-hosts-CN.md)。WorkBuddy 用户可在 [SkillHub](https://skillhub.cn) 搜索 `vmware-aria` 安装技能，并按 [WorkBuddy 说明](https://github.com/vmware-skills/marketplace/blob/main/docs/agent-hosts-CN.md#workbuddy) 注册 MCP。
 
@@ -67,3 +67,7 @@ VCF Operations 9.x（包括 9.1.1.0）是更名后的产品系列；应按各接
 <a id="readme-license"></a>
 
 [问题与反馈](https://github.com/vmware-skills/VMware-Aria/issues) · [MIT](https://opensource.org/license/mit/)
+
+## MCP 结果契约
+
+支持 offset 的列表提供 `next_offset`，值为 null 时停止翻页，不要用 `truncated` 循环。失败调用由 Policy 1.26.0 提供 `structuredContent.vmware_error`。保留原有文本、旧标记、成功值与确认机制。详见[契约说明](https://github.com/vmware-skills/VMware-Aria/blob/main/skills/vmware-aria/references/mcp-result-contract-CN.md)。

@@ -10,7 +10,7 @@ import logging
 from collections.abc import Callable, Iterable
 from typing import TYPE_CHECKING, Any
 
-from vmware_policy import paginated, sanitize
+from vmware_policy import page_envelope, paginated as paginated, sanitize
 
 from vmware_aria.ops._collection import iso_utc_or_none
 from vmware_aria.ops._ids import require_uuid
@@ -19,7 +19,7 @@ from vmware_aria.ops._paging import (  # noqa: F401 — compatibility/runtime ex
     CollectionTotal,
     _MAX_TOTAL,
     iter_collection,
-    next_offset,
+    next_offset as next_offset,
     paginate,
     validate_page_args,
 )
@@ -425,11 +425,11 @@ def list_alerts(
         }
         for a in items
     ]
-    return paginated(
+    return page_envelope(
         rows,
         limit=limit,
         total=total_count,
-        next_offset=next_offset(len(rows), limit, offset, total_count),
+        offset=offset,
         resource_names_note=resource_names_note,
     )
 

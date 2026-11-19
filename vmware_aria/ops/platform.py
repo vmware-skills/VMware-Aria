@@ -20,10 +20,10 @@ import math
 import time
 from typing import TYPE_CHECKING, Any
 
-from vmware_policy import paginated, sanitize
+from vmware_policy import page_envelope, paginated as paginated, sanitize
 
 from vmware_aria.connection import AriaApiError, NonJsonBodyError
-from vmware_aria.ops._paging import next_offset, paginate, validate_page_args
+from vmware_aria.ops._paging import next_offset as next_offset, paginate, validate_page_args
 
 if TYPE_CHECKING:
     from vmware_aria.connection import AriaClient
@@ -665,11 +665,11 @@ def list_adapters(
     wanted = adapter_kind.strip().upper() if adapter_kind else None
     selected = [r for r in all_rows if wanted is None or r["adapter_kind"].upper() == wanted]
     page = paginate(selected, limit, offset)
-    return paginated(
+    return page_envelope(
         page,
         limit=limit,
         total=len(selected),
-        next_offset=next_offset(len(page), limit, offset, len(selected)),
+        offset=offset,
         adapter_kind_filter=sanitize(adapter_kind.strip()) if adapter_kind else None,
         adapter_kinds_present=sorted({r["adapter_kind"] for r in all_rows if r["adapter_kind"]}),
         reference_time_ms=reference_ms,

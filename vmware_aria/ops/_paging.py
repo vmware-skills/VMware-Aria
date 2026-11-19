@@ -95,12 +95,9 @@ def next_offset(returned: int, limit: int, offset: int, total: int | None) -> in
     Returns:
         The next offset, or ``None`` if this page ends the collection.
     """
-    if returned <= 0:
-        return None
-    consumed = offset + returned
-    if total is not None:
-        return consumed if consumed < total else None
-    return consumed if returned >= limit else None
+    from vmware_policy.envelope import next_offset as shared_next_offset
+
+    return shared_next_offset(returned, limit, offset, total)
 
 
 class CollectionTotal:

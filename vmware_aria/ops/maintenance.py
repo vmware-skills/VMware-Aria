@@ -21,7 +21,7 @@ import logging
 import time
 from typing import TYPE_CHECKING, Any
 
-from vmware_policy import paginated, sanitize
+from vmware_policy import page_envelope, paginated, sanitize
 
 from vmware_aria.ops._collection import (
     describe_read_failure,
@@ -31,7 +31,7 @@ from vmware_aria.ops._collection import (
     text_or_none,
 )
 from vmware_aria.ops._ids import require_uuid
-from vmware_aria.ops._paging import next_offset, validate_page_args
+from vmware_aria.ops._paging import next_offset as next_offset, validate_page_args
 
 if TYPE_CHECKING:
     from vmware_aria.connection import AriaClient
@@ -447,10 +447,10 @@ def list_maintenance_schedules(
                 "exist is unknown — this is not 'no schedules'. Retry, or run 'vmware-aria doctor'."
             ),
         )
-    return paginated(
+    return page_envelope(
         rows,
         limit=limit,
         total=window.total,
-        next_offset=next_offset(len(rows), limit, offset, window.total),
+        offset=offset,
         schedules_note=None,
     )
