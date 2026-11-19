@@ -29,13 +29,13 @@ Synthetic-data GIF; video includes redacted historical screenshots. [Download th
 Install the published CLI and inspect its commands:
 
 ```sh
-uv tool install vmware-aria==2.4.7
+uv tool install vmware-aria==2.4.8
 vmware-aria --help
 ```
 
 Requires uv and Python >=3.10. Configure targets and credentials locally before remote queries. [Setup guide](https://github.com/vmware-skills/VMware-Aria/blob/main/skills/vmware-aria/references/setup-guide.md).
 
-One-click installs, after local setup: [Claude Desktop extension (.mcpb)](https://github.com/vmware-skills/VMware-Aria/releases/download/v2.4.7/vmware-aria-2.4.7.mcpb) · [Install in VS Code](https://insiders.vscode.dev/redirect/mcp/install?name=vmware-aria&config=%7B%22type%22%3A%22stdio%22%2C%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22--from%22%2C%22vmware-aria%3D%3D2.4.7%22%2C%22vmware-aria-mcp%22%5D%7D). Both run the same pinned 2.4.7 server. The desktop extension starts with read-only tools; change *Tools to offer* to `all` for writes.
+One-click installs, after local setup: [Claude Desktop extension (.mcpb)](https://github.com/vmware-skills/VMware-Aria/releases/download/v2.4.8/vmware-aria-2.4.8.mcpb) · [Install in VS Code](https://insiders.vscode.dev/redirect/mcp/install?name=vmware-aria&config=%7B%22type%22%3A%22stdio%22%2C%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22--from%22%2C%22vmware-aria%3D%3D2.4.8%22%2C%22vmware-aria-mcp%22%5D%7D). Both run the same pinned 2.4.8 server. The desktop extension starts with read-only tools; change *Tools to offer* to `all` for writes.
 
 For agent-host installation, use the [setup guide](https://github.com/vmware-skills/VMware-Aria/blob/main/skills/vmware-aria/references/setup-guide.md) and [Cursor, Codex, Gemini CLI, Cline and local-model examples](https://github.com/vmware-skills/marketplace/blob/main/docs/agent-hosts.md).
 
@@ -67,3 +67,7 @@ Part of [VMware Skills](https://github.com/vmware-skills/marketplace): 15 skills
 <a id="readme-license"></a>
 
 [Issues and feedback](https://github.com/vmware-skills/VMware-Aria/issues) · [MIT](https://opensource.org/license/mit/)
+
+## MCP result contract
+
+Offset-capable listings expose `next_offset`; stop when it is null rather than looping on `truncated`. Failed calls provide `structuredContent.vmware_error` through Policy 1.26.0. Existing text, legacy flags, success values and confirmation checks remain unchanged. See the [contract](skills/vmware-aria/references/mcp-result-contract.md).

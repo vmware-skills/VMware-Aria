@@ -1,6 +1,6 @@
 [project]
 name = "vmware-aria-mcpb"
-version = "2.4.7"
+version = "2.4.8"
 description = "Claude Desktop extension shim that runs the published vmware-aria MCP server"
 requires-python = ">=3.10"
-dependencies = ["vmware-aria==2.4.7"]
+dependencies = ["vmware-aria==2.4.8"]

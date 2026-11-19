@@ -5,7 +5,7 @@
       "command": "uvx",
       "args": [
         "--from",
-        "vmware-aria==2.4.7",
+        "vmware-aria==2.4.8",
         "vmware-aria-mcp"
       ]
     }
